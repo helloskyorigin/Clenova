@@ -1,7 +1,7 @@
 # Localization
 
-The Settings language menu uses native names, search, a check mark, and immediate application. Android 13+ uses LocaleManager and Android system app language settings. API 26–32 stores a local preference and recreates the activity with localized resources. Device language clears the override. RTL uses Android configuration and auto-mirrored directional controls.
+Native app language selection: Android 13+ LocaleManager, API 26–32 stored local preference and recreated activity. Device language clears the override. Native-language names, searchable dropdown, selection check, Android RTL configuration. English default plus 14 translated locale resource sets.
 
-English is the default resource set. Additional languages are listed in res/xml/locales_config.xml. Missing translations fall back to English; localization coverage and native-speaker review must be checked before public release. Do not claim complete translation until every visible string, including debug fixtures, and every newly added screen is audited.
+Coverage: 149 resource keys per added language out of 262 default strings. Primary settings, navigation and many feature labels are translated. Remaining descriptive text, errors, and some preview strings fall back to English. Native-speaker and real-device validation remain required; this is not complete localization. No remote translation API or account is needed.
 
-No network translation service or user account is required.
+The Android locale config lists all implemented language selections. Audit every new string and all debug fixtures before public release.
