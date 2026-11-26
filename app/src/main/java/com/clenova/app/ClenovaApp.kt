@@ -56,7 +56,7 @@ fun ClenovaApp(
         DisposableEffect(currentRoute, view) {
             val window = (view.context as? Activity)?.window
             val controller = window?.let { WindowCompat.getInsetsController(it, view) }
-            if (currentRoute == null || currentRoute == ClenovaRoute.Home || currentRoute == ClenovaRoute.StorageDetails || currentRoute == ClenovaRoute.AutopilotSetup || currentRoute == ClenovaRoute.CleanupReview || currentRoute == ClenovaRoute.SmartScan || currentRoute == ClenovaRoute.Duplicates || currentRoute == ClenovaRoute.VideoCompress || currentRoute == ClenovaRoute.Guard || currentRoute == ClenovaRoute.Settings) {
+            if (currentRoute == null || currentRoute == ClenovaRoute.Home || currentRoute == ClenovaRoute.StorageDetails || currentRoute == ClenovaRoute.AutopilotSetup || currentRoute == ClenovaRoute.CleanupReview || currentRoute == ClenovaRoute.SmartScan || currentRoute == ClenovaRoute.Duplicates || currentRoute == ClenovaRoute.SimilarPhotos || currentRoute == ClenovaRoute.VideoCompress || currentRoute == ClenovaRoute.Guard || currentRoute == ClenovaRoute.Settings) {
                 controller?.systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
                 controller?.hide(WindowInsetsCompat.Type.statusBars())
             } else {
@@ -64,7 +64,7 @@ fun ClenovaApp(
             }
             onDispose { controller?.show(WindowInsetsCompat.Type.statusBars()) }
         }
-        val showFloatingNav = currentRoute != ClenovaRoute.Settings && currentRoute != ClenovaRoute.StorageDetails && currentRoute != ClenovaRoute.AutopilotSetup && currentRoute != ClenovaRoute.CleanupReview && currentRoute != ClenovaRoute.SmartScan && currentRoute != ClenovaRoute.Duplicates && currentRoute != ClenovaRoute.VideoCompress
+        val showFloatingNav = currentRoute != ClenovaRoute.Settings && currentRoute != ClenovaRoute.StorageDetails && currentRoute != ClenovaRoute.AutopilotSetup && currentRoute != ClenovaRoute.CleanupReview && currentRoute != ClenovaRoute.SmartScan && currentRoute != ClenovaRoute.Duplicates && currentRoute != ClenovaRoute.SimilarPhotos && currentRoute != ClenovaRoute.VideoCompress
 
         Box(
             modifier = modifier

@@ -276,7 +276,7 @@
     <string name="privacy_local_title">Preferensi lokal</string>
     <string name="privacy_local_body">Tema, haptik, preferensi Autopilot, dan bahasa disimpan di perangkat. Tidak perlu akun.</string>
     <string name="privacy_files_title">File pribadi</string>
-    <string name="privacy_files_body">Clenova memindai foto dan video di perangkat dengan izin Anda. Duplikat dapat dipindah ke sampah Android dengan persetujuan Anda. Memory Guard belum terhubung. Media pribadi tidak diunggah.</string>
+    <string name="privacy_files_body">Clenova memindai foto dan video di perangkat dengan izin Anda. Duplikat dapat dipindah ke sampah Android dengan persetujuan Anda. Memory Guard belum terhubung. Media pribadi tidak diunggah. Foto serupa juga dapat dipindahkan ke sampah dengan persetujuan Anda.</string>
     <string name="privacy_support_title">Pesan dukungan</string>
     <string name="privacy_support_body">Kontak dan laporan masalah membuka aplikasi email. Anda memutuskan apakah akan mengirim dan dapat mengedit atau menghapus detail diagnostik sebelum mengirim.</string>
     <string name="support_faq_storage">Bagaimana penyimpanan diukur?</string>
@@ -329,4 +329,7 @@
     <string name="duplicates_trash_unsupported">Sampah memerlukan Android 11 atau lebih baru. Duplikat tetap bisa ditinjau.</string>
     <string name="duplicates_guard_note">Aturan khusus Memory Guard belum terhubung. Periksa setiap salinan.</string>
     <string name="duplicates_verify_limit">Kurangi pilihan agar sesuai batas verifikasi 1 GB.</string>
+    <string name="similar_no_matches">Tidak ada foto serupa dalam pemindaian ini</string>
+    <string name="similar_manual_rule">Foto serupa tidak selalu identik. Pilih setiap foto secara manual. Satu foto per grup dan foto favorit dilindungi.</string>
+    <string name="similar_confirm">Tinjau setiap foto terpilih. Clenova memastikan file tidak berubah dan meminta persetujuan Android. Sampah dapat menyimpan file sementara.</string>
 </resources>

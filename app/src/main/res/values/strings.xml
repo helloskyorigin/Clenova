@@ -309,7 +309,7 @@
     <string name="privacy_local_title">Local preferences</string>
     <string name="privacy_local_body">Theme, haptics, Autopilot preferences and language are stored on your device. No account is required.</string>
     <string name="privacy_files_title">Personal files</string>
-    <string name="privacy_files_body">Clenova scans accessible photos and videos on your device with your permission. Duplicate copies can be moved to Android Trash with your approval. Memory Guard rules are not yet connected. No personal media is uploaded by Clenova.</string>
+    <string name="privacy_files_body">Clenova scans accessible photos and videos on your device with your permission. Duplicate copies can be moved to Android Trash with your approval. Memory Guard rules are not yet connected. No personal media is uploaded by Clenova. Similar photos can also be reviewed and moved to Trash with your approval.</string>
     <string name="privacy_support_title">Support messages</string>
     <string name="privacy_support_body">Contact and problem reports open your email app. You decide whether to send the message and can edit or remove diagnostic details before sending.</string>
     <string name="support_faq_storage">How is storage measured?</string>
@@ -362,4 +362,7 @@
     <string name="duplicates_trash_unsupported">Trash requests require Android 11 or later. You can still review duplicate files.</string>
     <string name="duplicates_guard_note">Custom Memory Guard rules are not connected yet. Check each selected copy before continuing.</string>
     <string name="duplicates_verify_limit">Reduce your selection to stay within the 1 GB verification limit.</string>
+    <string name="similar_no_matches">No similar photos found in this scan</string>
+    <string name="similar_manual_rule">Similar does not mean identical. Choose each photo manually. One photo per group and favorites are protected.</string>
+    <string name="similar_confirm">Review each selected photo. Clenova checks that files have not changed and asks Android for approval. Trash may retain files temporarily.</string>
 </resources>

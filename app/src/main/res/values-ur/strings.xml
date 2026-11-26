@@ -276,7 +276,7 @@
     <string name="privacy_local_title">مقامی ترجیحات</string>
     <string name="privacy_local_body">تھیم، لمسی ردعمل، آٹو پائلٹ ترجیحات اور زبان ڈیوائس پر محفوظ ہیں۔ اکاؤنٹ ضروری نہیں۔</string>
     <string name="privacy_files_title">ذاتی فائلیں</string>
-    <string name="privacy_files_body">Clenova اجازت سے ڈیوائس پر تصاویر اور ویڈیوز اسکین کرتا ہے۔ منظوری سے نقول Android کوڑے دان میں جا سکتی ہیں۔ Memory Guard قواعد ابھی منسلک نہیں۔ ذاتی میڈیا اپ لوڈ نہیں ہوتا۔</string>
+    <string name="privacy_files_body">Clenova اجازت سے ڈیوائس پر تصاویر اور ویڈیوز اسکین کرتا ہے۔ منظوری سے نقول Android کوڑے دان میں جا سکتی ہیں۔ Memory Guard قواعد ابھی منسلک نہیں۔ ذاتی میڈیا اپ لوڈ نہیں ہوتا۔ آپ کی منظوری سے ملتی جلتی تصاویر بھی ٹریش میں بھیجی جا سکتی ہیں۔</string>
     <string name="privacy_support_title">معاونت کے پیغامات</string>
     <string name="privacy_support_body">رابطہ اور مسئلے کی رپورٹ آپ کی ای میل ایپ کھولتے ہیں۔ بھیجنا آپ کا فیصلہ ہے اور بھیجنے سے پہلے تشخیصی تفصیلات بدل یا ہٹا سکتے ہیں۔</string>
     <string name="support_faq_storage">اسٹوریج کیسے ناپا جاتا ہے؟</string>
@@ -329,4 +329,7 @@
     <string name="duplicates_trash_unsupported">کوڑے دان کے لیے Android 11 یا جدید درکار ہے۔ نقول دیکھ سکتے ہیں۔</string>
     <string name="duplicates_guard_note">حسب ضرورت Memory Guard قواعد ابھی منسلک نہیں۔ ہر نقل دیکھیں۔</string>
     <string name="duplicates_verify_limit">1 GB تصدیقی حد کے لیے انتخاب کم کریں۔</string>
+    <string name="similar_no_matches">اس اسکین میں ملتی جلتی تصاویر نہیں ملیں</string>
+    <string name="similar_manual_rule">ملتی جلتی تصاویر بالکل یکساں نہیں ہوتیں۔ ہر تصویر خود منتخب کریں۔ ہر گروپ کی ایک تصویر اور پسندیدہ تصاویر محفوظ ہیں۔</string>
+    <string name="similar_confirm">ہر منتخب تصویر دیکھیں۔ Clenova فائلوں میں تبدیلی کی جانچ کرتا ہے اور Android سے منظوری مانگتا ہے۔ ٹریش میں فائلیں عارضی طور پر رہ سکتی ہیں۔</string>
 </resources>

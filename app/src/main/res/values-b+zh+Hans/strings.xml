@@ -276,7 +276,7 @@
     <string name="privacy_local_title">本地偏好设置</string>
     <string name="privacy_local_body">主题、触感反馈、自动管理偏好和语言保存在设备上。无需账户。</string>
     <string name="privacy_files_title">个人文件</string>
-    <string name="privacy_files_body">Clenova 经你授权在设备上扫描照片和视频。经批准可将重复副本移至 Android 回收站。Memory Guard 规则尚未连接。不上传个人媒体。</string>
+    <string name="privacy_files_body">Clenova 经你授权在设备上扫描照片和视频。经批准可将重复副本移至 Android 回收站。Memory Guard 规则尚未连接。不上传个人媒体。 相似照片也可以在您批准后移入回收站。</string>
     <string name="privacy_support_title">支持消息</string>
     <string name="privacy_support_body">联系和问题报告会打开电子邮件应用。是否发送由你决定，发送前可编辑或删除诊断详情。</string>
     <string name="support_faq_storage">如何测量存储空间？</string>
@@ -329,4 +329,7 @@
     <string name="duplicates_trash_unsupported">回收站请求需要 Android 11 或更高版本。仍可查看重复文件。</string>
     <string name="duplicates_guard_note">自定义 Memory Guard 规则尚未连接。继续前请检查每份副本。</string>
     <string name="duplicates_verify_limit">减少选择以符合 1 GB 验证限制。</string>
+    <string name="similar_no_matches">本次扫描未找到相似照片</string>
+    <string name="similar_manual_rule">相似不代表完全相同。请手动选择每张照片。每组保留一张照片，并保护收藏照片。</string>
+    <string name="similar_confirm">请检查每张选中的照片。Clenova 会验证文件是否已更改并请求 Android 批准。回收站可能暂时保留文件。</string>
 </resources>

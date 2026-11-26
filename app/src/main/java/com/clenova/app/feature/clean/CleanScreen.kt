@@ -50,6 +50,7 @@ internal fun CleanScreen(
     onSmartScan: () -> Unit,
     onDuplicates: () -> Unit,
     onCompress: () -> Unit,
+    onSimilar: () -> Unit = {},
 ) {
     val colors = ClenovaThemeTokens.colors
     val preview = BuildConfig.DEBUG && sample
@@ -97,9 +98,10 @@ internal fun CleanScreen(
                 style = MaterialTheme.typography.bodySmall, color = colors.textSecondary)
             PhotoStrip(
                 title = R.string.clean_tool_similar_title,
-                count = if (preview) stringResource(R.string.scan_similar_count) else null,
+                count = result?.let { stringResource(R.string.guard_item_count, it.similarGroups.sumOf { group -> group.size }) } ?: if (preview) stringResource(R.string.scan_similar_count) else null,
                 preview = preview, similar = true, tag = "clean_similar",
-                onClick = { dialog = R.string.clean_tool_similar_title },
+                thumbnails = result?.similarGroups?.firstOrNull()?.take(3)?.map { it.uri }.orEmpty(),
+                onClick = onSimilar,
             )
             HorizontalDivider(color = colors.border)
             Column {

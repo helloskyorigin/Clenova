@@ -276,7 +276,7 @@
     <string name="privacy_local_title">स्थानीय प्राथमिकताएँ</string>
     <string name="privacy_local_body">थीम, हैप्टिक्स, ऑटोपायलट प्राथमिकताएँ और भाषा डिवाइस पर सेव हैं। अकाउंट ज़रूरी नहीं है।</string>
     <string name="privacy_files_title">निजी फ़ाइलें</string>
-    <string name="privacy_files_body">Clenova अनुमति से डिवाइस पर फ़ोटो और वीडियो स्कैन करता है। आपकी मंज़ूरी से डुप्लिकेट Android ट्रैश में जा सकते हैं। Memory Guard नियम अभी जुड़े नहीं हैं। निजी मीडिया अपलोड नहीं होता।</string>
+    <string name="privacy_files_body">Clenova अनुमति से डिवाइस पर फ़ोटो और वीडियो स्कैन करता है। आपकी मंज़ूरी से डुप्लिकेट Android ट्रैश में जा सकते हैं। Memory Guard नियम अभी जुड़े नहीं हैं। निजी मीडिया अपलोड नहीं होता। आपकी अनुमति से समान तस्वीरें भी ट्रैश में भेजी जा सकती हैं।</string>
     <string name="privacy_support_title">सहायता संदेश</string>
     <string name="privacy_support_body">संपर्क और समस्या रिपोर्ट आपका ईमेल ऐप खोलते हैं। संदेश भेजना आपका निर्णय है और भेजने से पहले डायग्नोस्टिक जानकारी बदल या हटा सकते हैं।</string>
     <string name="support_faq_storage">स्टोरेज कैसे मापा जाता है?</string>
@@ -329,4 +329,7 @@
     <string name="duplicates_trash_unsupported">ट्रैश अनुरोध के लिए Android 11 या नया चाहिए। कॉपी देख सकते हैं।</string>
     <string name="duplicates_guard_note">कस्टम Memory Guard नियम अभी जुड़े नहीं हैं। आगे बढ़ने से पहले हर कॉपी देखें।</string>
     <string name="duplicates_verify_limit">1 GB सत्यापन सीमा के लिए चयन कम करें।</string>
+    <string name="similar_no_matches">इस स्कैन में समान तस्वीरें नहीं मिलीं</string>
+    <string name="similar_manual_rule">समान तस्वीरें बिल्कुल एक जैसी नहीं होतीं। हर तस्वीर खुद चुनें। हर समूह की एक तस्वीर और पसंदीदा तस्वीरें सुरक्षित हैं।</string>
+    <string name="similar_confirm">चुनी गई हर तस्वीर की समीक्षा करें। Clenova जाँचता है कि फ़ाइलें बदली नहीं हैं और Android की अनुमति माँगता है। ट्रैश में फ़ाइलें कुछ समय रह सकती हैं।</string>
 </resources>

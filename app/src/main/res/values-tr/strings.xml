@@ -276,7 +276,7 @@
     <string name="privacy_local_title">Yerel tercihler</string>
     <string name="privacy_local_body">Tema, dokunsal geri bildirim, Otopilot tercihleri ve dil cihazda saklanır. Hesap gerekmez.</string>
     <string name="privacy_files_title">Kişisel dosyalar</string>
-    <string name="privacy_files_body">Clenova izninizle cihazda fotoğraf ve videoları tarar. Onayınızla kopyalar Android çöpüne taşınabilir. Memory Guard kuralları henüz bağlı değildir. Kişisel medya yüklenmez.</string>
+    <string name="privacy_files_body">Clenova izninizle cihazda fotoğraf ve videoları tarar. Onayınızla kopyalar Android çöpüne taşınabilir. Memory Guard kuralları henüz bağlı değildir. Kişisel medya yüklenmez. Benzer fotoğraflar da onayınızla çöp kutusuna taşınabilir.</string>
     <string name="privacy_support_title">Destek mesajları</string>
     <string name="privacy_support_body">İletişim ve sorun bildirimleri e-posta uygulamanızı açar. Gönderip göndermemeye siz karar verir, tanılama bilgilerini göndermeden önce düzenleyebilir veya kaldırabilirsiniz.</string>
     <string name="support_faq_storage">Depolama nasıl ölçülür?</string>
@@ -329,4 +329,7 @@
     <string name="duplicates_trash_unsupported">Çöp için Android 11 veya üstü gerekir. Kopyaları inceleyebilirsiniz.</string>
     <string name="duplicates_guard_note">Özel Memory Guard kuralları henüz bağlı değil. Her kopyayı kontrol edin.</string>
     <string name="duplicates_verify_limit">1 GB doğrulama sınırı için seçimi azaltın.</string>
+    <string name="similar_no_matches">Bu taramada benzer fotoğraf bulunamadı</string>
+    <string name="similar_manual_rule">Benzer fotoğraflar aynı değildir. Her fotoğrafı elle seçin. Her grupta bir fotoğraf ve favoriler korunur.</string>
+    <string name="similar_confirm">Seçilen her fotoğrafı inceleyin. Clenova dosyaların değişmediğini kontrol eder ve Android onayı ister. Çöp kutusu dosyaları geçici olarak saklayabilir.</string>
 </resources>

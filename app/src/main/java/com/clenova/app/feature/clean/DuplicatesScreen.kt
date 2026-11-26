@@ -57,15 +57,16 @@ internal fun DuplicatesScreen(
     onInvalidate: () -> Unit,
     onSelectionHaptic: () -> Unit,
     modifier: Modifier = Modifier,
+    similar: Boolean = false,
 ) {
     val context = LocalContext.current
     val colors = ClenovaThemeTokens.colors
     val scope = rememberCoroutineScope()
-    val groups = result?.duplicateGroups.orEmpty()
+    val groups = (if (similar) result?.similarGroups else result?.duplicateGroups).orEmpty()
     val allowed = remember(result) { DuplicateTrash.allowed(groups) }
     var selected by remember(result) { mutableStateOf(emptySet<Uri>()) }
     val actualSelection = selected.intersect(allowed)
-    val selectedBytes = result?.extras.orEmpty().filter { it.uri in actualSelection }.sumOf { it.bytes }
+    val selectedBytes = groups.flatten().filter { it.uri in actualSelection }.sumOf { it.bytes }
     var confirming by remember { mutableStateOf(false) }
     var checking by remember { mutableStateOf(false) }
     var pending by rememberSaveable { mutableStateOf(false) }
@@ -99,7 +100,7 @@ internal fun DuplicatesScreen(
                 IconButton(onClick = onBack, enabled = !busy, modifier = Modifier.testTag("duplicates_back")) {
                     Icon(Icons.AutoMirrored.Rounded.ArrowBack, stringResource(R.string.cd_back_button), tint = colors.textPrimary)
                 }
-                Text(stringResource(R.string.clean_tool_duplicates_title), Modifier.weight(1f), style = MaterialTheme.typography.titleLarge, color = colors.textPrimary)
+                Text(stringResource(if (similar) R.string.clean_tool_similar_title else R.string.clean_tool_duplicates_title), Modifier.weight(1f), style = MaterialTheme.typography.titleLarge, color = colors.textPrimary)
                 if (result != null) TextButton(onClick = onScan, enabled = !busy) { Text(stringResource(R.string.scan_rescan)) }
             }
             HorizontalDivider(color = colors.border)
@@ -108,7 +109,7 @@ internal fun DuplicatesScreen(
                     if (busy) CircularProgressIndicator(color = colors.primary)
                     else {
                         Icon(Icons.Outlined.ContentCopy, null, Modifier.size(38.dp), tint = colors.primary)
-                        Text(stringResource(if (result == null) R.string.review_empty_title else R.string.duplicates_no_matches), style = MaterialTheme.typography.headlineSmall, color = colors.textPrimary)
+                        Text(stringResource(if (result == null) R.string.review_empty_title else if (similar) R.string.similar_no_matches else R.string.duplicates_no_matches), style = MaterialTheme.typography.headlineSmall, color = colors.textPrimary)
                         Text(stringResource(if (result == null) R.string.review_empty_body else R.string.scan_read_only), color = colors.textSecondary)
                         if (result != null && (!result.access.full || result.incomplete)) Text(stringResource(R.string.scan_partial), color = colors.textSecondary)
                     }
@@ -119,16 +120,16 @@ internal fun DuplicatesScreen(
                     item {
                         Text(ByteFormatter.format(selectedBytes), Modifier.testTag("duplicates_total"), style = MaterialTheme.typography.displaySmall.copy(fontSize = 48.sp, lineHeight = 54.sp, fontWeight = FontWeight.SemiBold), color = colors.textPrimary)
                         Text(stringResource(R.string.scan_review_space), color = colors.textSecondary)
-                        Text(stringResource(R.string.duplicates_summary, actualSelection.size, groups.size), color = colors.primary, style = MaterialTheme.typography.bodySmall)
+                        Text(if (similar) stringResource(R.string.guard_item_count, actualSelection.size) else stringResource(R.string.duplicates_summary, actualSelection.size, groups.size), color = colors.primary, style = MaterialTheme.typography.bodySmall)
                         if (!result.access.full || result.incomplete) Text(stringResource(R.string.scan_partial), color = colors.textSecondary, style = MaterialTheme.typography.bodySmall)
                     }
                     item {
-                        Text(stringResource(R.string.duplicates_keep_rule), color = colors.textPrimary, style = MaterialTheme.typography.bodyMedium)
-                        Text(stringResource(R.string.duplicates_batch_note), color = colors.textSecondary, style = MaterialTheme.typography.bodySmall)
+                        Text(stringResource(if (similar) R.string.similar_manual_rule else R.string.duplicates_keep_rule), color = colors.textPrimary, style = MaterialTheme.typography.bodyMedium)
+                        if (!similar) Text(stringResource(R.string.duplicates_batch_note), color = colors.textSecondary, style = MaterialTheme.typography.bodySmall)
                         Text(stringResource(R.string.duplicates_guard_note), color = colors.textSecondary, style = MaterialTheme.typography.bodySmall)
                         Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                            Text(stringResource(R.string.duplicates_groups), Modifier.weight(1f), style = MaterialTheme.typography.titleMedium)
-                            TextButton(enabled = !busy && supported && allowed.isNotEmpty(), onClick = {
+                            Text(stringResource(if (similar) R.string.clean_tool_similar_title else R.string.duplicates_groups), Modifier.weight(1f), style = MaterialTheme.typography.titleMedium)
+                            if (!similar) TextButton(enabled = !busy && supported && allowed.isNotEmpty(), onClick = {
                                 selected = if (actualSelection.isNotEmpty()) emptySet() else DuplicateTrash.batch(groups)
                                 onSelectionHaptic()
                             }, modifier = Modifier.testTag("duplicates_select_all")) {
@@ -139,7 +140,7 @@ internal fun DuplicatesScreen(
                     itemsIndexed(groups, key = { _, group -> group.first().uri.toString() }) { index, group ->
                         Column(verticalArrangement = Arrangement.spacedBy(9.dp)) {
                             Text(stringResource(R.string.duplicates_group_title, index + 1), style = MaterialTheme.typography.titleMedium, color = colors.textPrimary)
-                            Text(stringResource(R.string.guard_item_count, group.size) + " · " + ByteFormatter.format(group.first().bytes), style = MaterialTheme.typography.bodySmall, color = colors.textSecondary)
+                            Text(stringResource(R.string.guard_item_count, group.size) + (if (similar) "" else " · " + ByteFormatter.format(group.first().bytes)), style = MaterialTheme.typography.bodySmall, color = colors.textSecondary)
                             LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                                 itemsIndexed(group, key = { _, media -> media.uri.toString() }) { i, media ->
                                     val keep = i == 0 || media.favorite
@@ -162,7 +163,7 @@ internal fun DuplicatesScreen(
                                             }
                                         }
                                         Text(media.name, maxLines = 1, overflow = TextOverflow.Ellipsis, color = colors.textPrimary, style = MaterialTheme.typography.bodySmall)
-                                        Text(stringResource(if (keep) R.string.duplicates_keep else R.string.duplicates_copy, i + 1), color = colors.textSecondary, style = MaterialTheme.typography.labelSmall)
+                                        Text(if (keep) stringResource(R.string.duplicates_keep) else if (similar) ByteFormatter.format(media.bytes) else stringResource(R.string.duplicates_copy, i + 1), color = colors.textSecondary, style = MaterialTheme.typography.labelSmall)
                                     }
                                 }
                             }
@@ -182,7 +183,7 @@ internal fun DuplicatesScreen(
     }
     if (confirming && result != null) AlertDialog(onDismissRequest = { confirming = false },
         title = { Text(stringResource(R.string.duplicates_move_trash, actualSelection.size)) },
-        text = { Text(stringResource(R.string.duplicates_trash_confirm)) },
+        text = { Text(stringResource(if (similar) R.string.similar_confirm else R.string.duplicates_trash_confirm)) },
         confirmButton = { TextButton(onClick = {
             confirming = false
             val snapshot = result
@@ -190,7 +191,7 @@ internal fun DuplicatesScreen(
             checking = true
             job = scope.launch {
                 try {
-                    val request = DuplicateTrash.request(context, snapshot, chosen)
+                    val request = DuplicateTrash.request(context, snapshot, chosen, similar)
                     if (!activityLifecycleOwner.lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED)) return@launch
                     pending = true
                     launcher.launch(IntentSenderRequest.Builder(request.intentSender).build())

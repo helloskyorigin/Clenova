@@ -49,11 +49,11 @@ internal object DuplicateTrash {
     }
 
     /** Never modifies media directly. Recheck both keeper and selected files before OS consent. */
-    suspend fun request(context: Context, snapshot: MediaScanResult, selection: Set<Uri>): PendingIntent =
+    suspend fun request(context: Context, snapshot: MediaScanResult, selection: Set<Uri>, similar: Boolean = false): PendingIntent =
         withContext(Dispatchers.IO) {
             check(Build.VERSION.SDK_INT >= 30)
             check(mediaAccess(context) == snapshot.access)
-            val plan = plan(snapshot.duplicateGroups, selection)
+            val plan = plan(if (similar) snapshot.similarGroups else snapshot.duplicateGroups, selection)
             val scanner = MediaScanner(context.applicationContext)
             val resolver = context.contentResolver
             suspend fun verify(media: ScannedMedia, isKeeper: Boolean) {
@@ -68,7 +68,7 @@ internal object DuplicateTrash {
             for ((keeper, copies) in plan) {
                 verify(keeper, true)
                 for (copy in copies) {
-                    if (copy.verifiedHash != keeper.verifiedHash) throw IOException("Duplicate mismatch")
+                    if (!similar && copy.verifiedHash != keeper.verifiedHash) throw IOException("Duplicate mismatch")
                     verify(copy, false)
                 }
             }

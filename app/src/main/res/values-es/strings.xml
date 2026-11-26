@@ -276,7 +276,7 @@
     <string name="privacy_local_title">Preferencias locales</string>
     <string name="privacy_local_body">El tema, la respuesta háptica, las preferencias de Autopilot y el idioma se guardan en tu dispositivo. No necesitas cuenta.</string>
     <string name="privacy_files_title">Archivos personales</string>
-    <string name="privacy_files_body">Clenova escanea fotos y vídeos accesibles con tu permiso. Las copias duplicadas pueden ir a la papelera de Android con tu aprobación. Memory Guard aún no está conectado. No sube medios personales.</string>
+    <string name="privacy_files_body">Clenova escanea fotos y vídeos accesibles con tu permiso. Las copias duplicadas pueden ir a la papelera de Android con tu aprobación. Memory Guard aún no está conectado. No sube medios personales. También puedes revisar y enviar fotos similares a la papelera con tu aprobación.</string>
     <string name="privacy_support_title">Mensajes de soporte</string>
     <string name="privacy_support_body">El contacto y los informes abren tu aplicación de correo. Tú decides si envías el mensaje y puedes editar o eliminar datos de diagnóstico antes de enviarlo.</string>
     <string name="support_faq_storage">¿Cómo se mide el almacenamiento?</string>
@@ -329,4 +329,7 @@
     <string name="duplicates_trash_unsupported">La papelera requiere Android 11 o posterior. Puedes revisar duplicados.</string>
     <string name="duplicates_guard_note">Las reglas de Memory Guard aún no están conectadas. Revisa cada copia.</string>
     <string name="duplicates_verify_limit">Reduce la selección para respetar el límite de 1 GB.</string>
+    <string name="similar_no_matches">No se encontraron fotos similares en este análisis</string>
+    <string name="similar_manual_rule">Las fotos similares no son idénticas. Selecciona cada foto manualmente. Se protege una foto por grupo y las favoritas.</string>
+    <string name="similar_confirm">Revisa cada foto seleccionada. Clenova comprueba que los archivos no hayan cambiado y solicita autorización a Android. La papelera puede conservarlos temporalmente.</string>
 </resources>

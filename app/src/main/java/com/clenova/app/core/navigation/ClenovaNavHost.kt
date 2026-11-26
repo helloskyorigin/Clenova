@@ -53,6 +53,7 @@ fun NavDestination?.toClenovaRoute(): ClenovaRoute? = when {
     hasRoute<ClenovaRoute.CleanupReview>() -> ClenovaRoute.CleanupReview
     hasRoute<ClenovaRoute.SmartScan>() -> ClenovaRoute.SmartScan
     hasRoute<ClenovaRoute.Duplicates>() -> ClenovaRoute.Duplicates
+    hasRoute<ClenovaRoute.SimilarPhotos>() -> ClenovaRoute.SimilarPhotos
     hasRoute<ClenovaRoute.VideoCompress>() -> ClenovaRoute.VideoCompress
     else -> null
 }
@@ -148,6 +149,7 @@ fun ClenovaNavHost(
                 onSmartScan = { onSelectionHaptic(); navController.navigate(ClenovaRoute.SmartScan) { launchSingleTop = true } },
                 onDuplicates = { onSelectionHaptic(); navController.navigate(ClenovaRoute.Duplicates) { launchSingleTop = true } },
                 onCompress = { onSelectionHaptic(); navController.navigate(ClenovaRoute.VideoCompress) { launchSingleTop = true } },
+                onSimilar = { onSelectionHaptic(); navController.navigate(ClenovaRoute.SimilarPhotos) { launchSingleTop = true } },
             )
         }
 
@@ -166,6 +168,17 @@ fun ClenovaNavHost(
             )
         }
 
+        composable<ClenovaRoute.SimilarPhotos> {
+            DuplicatesScreen(
+                result = scanResult,
+                activityLifecycleOwner = lifecycleOwner,
+                onBack = { onSelectionHaptic(); navController.popBackStack() },
+                onScan = { onSelectionHaptic(); navController.navigate(ClenovaRoute.SmartScan) { launchSingleTop = true } },
+                onInvalidate = { scanResult = null },
+                onSelectionHaptic = onSelectionHaptic,
+                similar = true,
+            )
+        }
         composable<ClenovaRoute.SmartScan> {
             SmartScanScreen(
                 onBack = { onSelectionHaptic(); navController.popBackStack() },
@@ -173,6 +186,7 @@ fun ClenovaNavHost(
                 onResult = { scanResult = it },
                 activityLifecycleOwner = lifecycleOwner,
                 onDuplicates = { onSelectionHaptic(); navController.navigate(ClenovaRoute.Duplicates) { popUpTo<ClenovaRoute.SmartScan> { inclusive = true }; launchSingleTop = true } },
+                onSimilar = { onSelectionHaptic(); navController.navigate(ClenovaRoute.SimilarPhotos) { popUpTo<ClenovaRoute.SmartScan> { inclusive = true }; launchSingleTop = true } },
             )
         }
 
