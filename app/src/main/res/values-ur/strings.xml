@@ -307,7 +307,7 @@
     <string name="legal_dependency_notices">لائبریری نوٹس</string>
     <string name="legal_read_license">لائسنس پڑھیں</string>
     <string name="clean_history">صفائی کی تاریخ</string>
-    <string name="clean_history_empty">صفائی کی تاریخ ابھی دستیاب نہیں۔</string>
+    <string name="clean_history_empty">ابھی صفائی کی کوئی تاریخ نہیں ہے۔</string>
     <string name="clean_preview">ڈیزائن پیش نظارہ</string>
     <string name="clean_review_all">سب کا جائزہ لیں</string>
     <string name="scan_access_title">میڈیا اسکین کریں</string>
@@ -357,4 +357,9 @@
     <string name="compress_real_open">ویڈیو کھولیں</string>
     <string name="compress_real_start">ویڈیو کمپریس کریں</string>
     <string name="compress_real_save">کمپریس کاپی محفوظ کریں</string>
+    <string name="history_trashed">ٹریش میں منتقل ہو گیا</string>
+    <string name="history_clear">تاریخ صاف کریں</string>
+    <string name="history_note">یہاں صرف تصدیق شدہ کارروائیاں دکھائی جاتی ہیں۔ ٹریش میں فائلیں عارضی طور پر رہ سکتی ہیں۔ کمپریس کاپی محفوظ کرنے سے خود بخود جگہ خالی نہیں ہوتی۔</string>
+    <string name="history_clear_note">مقامی تاریخ صاف کریں؟ میڈیا فائلیں تبدیل نہیں ہوں گی۔</string>
+    <string name="history_write_failed">تاریخ اپ ڈیٹ نہیں ہو سکی۔</string>
 </resources>

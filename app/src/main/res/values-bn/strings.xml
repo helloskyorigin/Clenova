@@ -307,7 +307,7 @@
     <string name="legal_dependency_notices">লাইব্রেরির বিজ্ঞপ্তি</string>
     <string name="legal_read_license">লাইসেন্স পড়ুন</string>
     <string name="clean_history">পরিষ্কারের ইতিহাস</string>
-    <string name="clean_history_empty">পরিষ্কারের ইতিহাস এখনও উপলব্ধ নয়।</string>
+    <string name="clean_history_empty">এখনও কোনো ক্লিনআপ ইতিহাস নেই।</string>
     <string name="clean_preview">ডিজাইন প্রিভিউ</string>
     <string name="clean_review_all">সব পর্যালোচনা করুন</string>
     <string name="scan_access_title">মিডিয়া স্ক্যান করুন</string>
@@ -357,4 +357,9 @@
     <string name="compress_real_open">ভিডিও খুলুন</string>
     <string name="compress_real_start">ভিডিও সংকুচিত করুন</string>
     <string name="compress_real_save">সংকুচিত কপি সংরক্ষণ করুন</string>
+    <string name="history_trashed">ট্র্যাশে পাঠানো হয়েছে</string>
+    <string name="history_clear">ইতিহাস মুছুন</string>
+    <string name="history_note">শুধু নিশ্চিত করা কাজ এখানে দেখানো হয়। ট্র্যাশে ফাইল সাময়িকভাবে থাকতে পারে। সংকুচিত কপি সংরক্ষণ করলেই জায়গা খালি হয় না।</string>
+    <string name="history_clear_note">স্থানীয় ইতিহাস মুছবেন? মিডিয়া ফাইল বদলাবে না।</string>
+    <string name="history_write_failed">ইতিহাস আপডেট করা যায়নি।</string>
 </resources>

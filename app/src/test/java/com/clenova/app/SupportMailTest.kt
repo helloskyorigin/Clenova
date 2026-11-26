@@ -8,6 +8,7 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
+@org.robolectric.annotation.Config(sdk = [32])
 class SupportMailTest {
     @Test fun mailUsesOnlyOfficialAddressAndEncodesInput() {
         val intent = SupportMail.intent("A & B", "line 1\n? & line 2")

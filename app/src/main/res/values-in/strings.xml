@@ -307,7 +307,7 @@
     <string name="legal_dependency_notices">Pemberitahuan pustaka</string>
     <string name="legal_read_license">Baca lisensi</string>
     <string name="clean_history">Riwayat pembersihan</string>
-    <string name="clean_history_empty">Riwayat belum tersedia.</string>
+    <string name="clean_history_empty">Belum ada riwayat pembersihan.</string>
     <string name="clean_preview">Pratinjau desain</string>
     <string name="clean_review_all">Tinjau semua</string>
     <string name="scan_access_title">Pindai media</string>
@@ -357,4 +357,9 @@
     <string name="compress_real_open">Buka video</string>
     <string name="compress_real_start">Kompres video</string>
     <string name="compress_real_save">Simpan salinan terkompresi</string>
+    <string name="history_trashed">Dipindahkan ke sampah</string>
+    <string name="history_clear">Hapus riwayat</string>
+    <string name="history_note">Hanya tindakan terkonfirmasi yang ditampilkan. Sampah dapat menyimpan file sementara. Menyimpan salinan terkompresi tidak langsung membebaskan ruang.</string>
+    <string name="history_clear_note">Hapus riwayat lokal? File media tidak akan berubah.</string>
+    <string name="history_write_failed">Tidak dapat memperbarui riwayat.</string>
 </resources>

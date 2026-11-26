@@ -307,7 +307,7 @@
     <string name="legal_dependency_notices">Bibliothekshinweise</string>
     <string name="legal_read_license">Lizenz lesen</string>
     <string name="clean_history">Bereinigungsverlauf</string>
-    <string name="clean_history_empty">Verlauf noch nicht verfügbar.</string>
+    <string name="clean_history_empty">Noch kein Bereinigungsverlauf.</string>
     <string name="clean_preview">Designvorschau</string>
     <string name="clean_review_all">Alles prüfen</string>
     <string name="scan_access_title">Medien scannen</string>
@@ -357,4 +357,9 @@
     <string name="compress_real_open">Video öffnen</string>
     <string name="compress_real_start">Video komprimieren</string>
     <string name="compress_real_save">Komprimierte Kopie speichern</string>
+    <string name="history_trashed">In den Papierkorb verschoben</string>
+    <string name="history_clear">Verlauf löschen</string>
+    <string name="history_note">Hier erscheinen nur bestätigte Aktionen. Der Papierkorb kann Dateien vorübergehend behalten. Komprimierte Kopien allein schaffen keinen freien Speicher.</string>
+    <string name="history_clear_note">Lokalen Verlauf löschen? Mediendateien bleiben unverändert.</string>
+    <string name="history_write_failed">Verlauf konnte nicht aktualisiert werden.</string>
 </resources>

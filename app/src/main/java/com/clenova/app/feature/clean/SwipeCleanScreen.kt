@@ -64,6 +64,8 @@ internal fun SwipeCleanScreen(result: MediaScanResult?, owner: LifecycleOwner, o
     val supported = Build.VERSION.SDK_INT >= 30
     var checking by remember { mutableStateOf(false) }
     var pending by rememberSaveable { mutableStateOf(false) }
+    var pendingCount by rememberSaveable { mutableIntStateOf(0) }
+    var pendingBytes by rememberSaveable { mutableLongStateOf(0L) }
     var confirming by remember { mutableStateOf(false) }
     var outcome by rememberSaveable { mutableStateOf<Int?>(null) }
     var job by remember { mutableStateOf<Job?>(null) }
@@ -95,7 +97,8 @@ internal fun SwipeCleanScreen(result: MediaScanResult?, owner: LifecycleOwner, o
         onHaptic()
     }
     val launcher = rememberLauncherForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) {
-        pending = false
+        if (pending && it.resultCode == Activity.RESULT_OK) CleanupHistory(context).record(CleanupKind.SWIPE, pendingCount, pendingBytes)
+        pending = false; pendingCount = 0; pendingBytes = 0L
         session = SwipeSession()
         reviewing = false
         onInvalidate()
@@ -213,7 +216,7 @@ internal fun SwipeCleanScreen(result: MediaScanResult?, owner: LifecycleOwner, o
                 try {
                     val request = SwipeTrash.request(context, result, chosen)
                     if (!owner.lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED)) return@launch
-                    pending = true
+                    pendingCount = chosen.size; pendingBytes = selectedItems.sumOf { it.bytes }; pending = true
                     launcher.launch(IntentSenderRequest.Builder(request.intentSender).build())
                     onInvalidate()
                 } catch (e: CancellationException) { throw e }

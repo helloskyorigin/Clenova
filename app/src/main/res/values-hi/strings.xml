@@ -307,7 +307,7 @@
     <string name="legal_dependency_notices">लाइब्रेरी नोटिस</string>
     <string name="legal_read_license">लाइसेंस पढ़ें</string>
     <string name="clean_history">सफ़ाई का इतिहास</string>
-    <string name="clean_history_empty">सफ़ाई का इतिहास अभी उपलब्ध नहीं है।</string>
+    <string name="clean_history_empty">अभी कोई क्लीनअप इतिहास नहीं है।</string>
     <string name="clean_preview">डिज़ाइन प्रीव्यू</string>
     <string name="clean_review_all">सभी की समीक्षा करें</string>
     <string name="scan_access_title">मीडिया स्कैन करें</string>
@@ -357,4 +357,9 @@
     <string name="compress_real_open">वीडियो खोलें</string>
     <string name="compress_real_start">वीडियो कंप्रेस करें</string>
     <string name="compress_real_save">कंप्रेस कॉपी सहेजें</string>
+    <string name="history_trashed">ट्रैश में भेजा गया</string>
+    <string name="history_clear">इतिहास साफ़ करें</string>
+    <string name="history_note">यहाँ केवल पुष्टि किए गए काम दिखते हैं। ट्रैश में फ़ाइलें कुछ समय रह सकती हैं। कंप्रेस कॉपी सहेजने से अपने आप जगह खाली नहीं होती।</string>
+    <string name="history_clear_note">स्थानीय इतिहास साफ़ करें? मीडिया फ़ाइलें नहीं बदलेंगी।</string>
+    <string name="history_write_failed">इतिहास अपडेट नहीं हो सका।</string>
 </resources>

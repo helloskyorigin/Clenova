@@ -307,7 +307,7 @@
     <string name="legal_dependency_notices">إشعارات المكتبات</string>
     <string name="legal_read_license">قراءة الترخيص</string>
     <string name="clean_history">سجل التنظيف</string>
-    <string name="clean_history_empty">سجل التنظيف غير متاح بعد.</string>
+    <string name="clean_history_empty">لا يوجد سجل تنظيف بعد.</string>
     <string name="clean_preview">معاينة التصميم</string>
     <string name="clean_review_all">مراجعة الكل</string>
     <string name="scan_access_title">فحص الوسائط</string>
@@ -357,4 +357,9 @@
     <string name="compress_real_open">فتح الفيديو</string>
     <string name="compress_real_start">ضغط الفيديو</string>
     <string name="compress_real_save">حفظ النسخة المضغوطة</string>
+    <string name="history_trashed">تم النقل إلى سلة المهملات</string>
+    <string name="history_clear">مسح السجل</string>
+    <string name="history_note">تظهر هنا الإجراءات المؤكدة فقط. قد تحتفظ سلة المهملات بالملفات مؤقتاً. حفظ نسخ مضغوطة لا يحرر المساحة بحد ذاته.</string>
+    <string name="history_clear_note">مسح السجل المحلي؟ لن تتغير ملفات الوسائط.</string>
+    <string name="history_write_failed">تعذر تحديث السجل.</string>
 </resources>

@@ -340,7 +340,7 @@
     <string name="legal_dependency_notices">Library notices</string>
     <string name="legal_read_license">Read license</string>
     <string name="clean_history">Cleanup history</string>
-    <string name="clean_history_empty">Cleanup history is not available yet.</string>
+    <string name="clean_history_empty">No cleanup history yet.</string>
     <string name="clean_preview">Design preview</string>
     <string name="clean_review_all">Review all</string>
     <string name="scan_access_title">Scan your media</string>
@@ -390,4 +390,9 @@
     <string name="compress_real_open">Open video</string>
     <string name="compress_real_start">Compress video</string>
     <string name="compress_real_save">Save compressed copy</string>
+    <string name="history_trashed">Moved to Trash</string>
+    <string name="history_clear">Clear history</string>
+    <string name="history_note">Only confirmed actions appear here. Trash may retain files temporarily. Saved compressed copies do not free storage by themselves.</string>
+    <string name="history_clear_note">Clear the local history? Your media files will not be changed.</string>
+    <string name="history_write_failed">Could not update history.</string>
 </resources>

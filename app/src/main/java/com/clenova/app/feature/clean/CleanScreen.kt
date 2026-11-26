@@ -54,6 +54,7 @@ internal fun CleanScreen(
     onLargeFiles: () -> Unit = {},
     onLargeVideos: () -> Unit = {},
     onSwipe: () -> Unit = {},
+    onHistory: () -> Unit = {},
 ) {
     val colors = ClenovaThemeTokens.colors
     val preview = BuildConfig.DEBUG && sample
@@ -67,7 +68,7 @@ internal fun CleanScreen(
                 Text(stringResource(R.string.clean_title), Modifier.weight(1f),
                     style = MaterialTheme.typography.headlineMedium.copy(fontSize = 32.sp, fontWeight = FontWeight.SemiBold, letterSpacing = (-.8).sp),
                     color = colors.textPrimary)
-                IconButton(onClick = { dialog = R.string.clean_history }, modifier = Modifier.testTag("clean_history")) {
+                IconButton(onClick = onHistory, modifier = Modifier.testTag("clean_history")) {
                     Icon(Icons.Outlined.History, stringResource(R.string.clean_history), tint = colors.textPrimary)
                 }
             }

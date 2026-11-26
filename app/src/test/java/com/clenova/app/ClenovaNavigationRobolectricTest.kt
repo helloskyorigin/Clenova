@@ -24,7 +24,7 @@ import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 
 @RunWith(RobolectricTestRunner::class)
-@Config(sdk = [36], qualifiers = "w411dp-h891dp-xxhdpi")
+@Config(sdk = [32], qualifiers = "w411dp-h891dp-xxhdpi")
 class ClenovaNavigationRobolectricTest {
 
     @get:Rule
@@ -227,7 +227,7 @@ class ClenovaNavigationRobolectricTest {
         composeTestRule.waitForIdle()
         composeTestRule.onNodeWithTag("home_compress").performScrollTo().performClick()
         composeTestRule.waitForIdle()
-        composeTestRule.onNodeWithText("Video compression is not available yet").assertIsDisplayed()
+        composeTestRule.onNodeWithTag("compress_pick").assertIsDisplayed()
         composeTestRule.onNodeWithTag("compress_back").performClick()
         composeTestRule.waitForIdle()
         composeTestRule.onNodeWithTag("nav_tab_home").assertIsDisplayed()

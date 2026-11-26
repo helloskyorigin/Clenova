@@ -184,7 +184,7 @@ internal fun RealVideoCompressScreen(onBack: () -> Unit, onHaptic: () -> Unit, m
                             val encoded = output ?: return@Button
                             failed = false; busy = true
                             job = scope.launch {
-                                try { saved = VideoCompression.save(context, encoded); onHaptic() }
+                                try { saved = VideoCompression.save(context, encoded); CleanupHistory(context).record(CleanupKind.COMPRESS, 1, encoded.bytes, source?.bytes ?: 0L); onHaptic() }
                                 catch (e: CancellationException) { throw e }
                                 catch (_: Exception) { failed = true }
                                 finally { busy = false }

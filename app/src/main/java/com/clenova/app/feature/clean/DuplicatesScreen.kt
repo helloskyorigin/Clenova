@@ -70,13 +70,16 @@ internal fun DuplicatesScreen(
     var confirming by remember { mutableStateOf(false) }
     var checking by remember { mutableStateOf(false) }
     var pending by rememberSaveable { mutableStateOf(false) }
+    var pendingCount by rememberSaveable { mutableIntStateOf(0) }
+    var pendingBytes by rememberSaveable { mutableLongStateOf(0L) }
     var outcome by rememberSaveable { mutableStateOf<Int?>(null) }
     var job by remember { mutableStateOf<Job?>(null) }
     val selectionValid = actualSelection.isNotEmpty() && runCatching { DuplicateTrash.plan(groups, actualSelection) }.isSuccess
     val supported = Build.VERSION.SDK_INT >= 30
     val busy = checking || pending
     val launcher = rememberLauncherForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) { response ->
-        pending = false
+        if (pending && response.resultCode == Activity.RESULT_OK) CleanupHistory(context).record(if (similar) CleanupKind.SIMILAR else CleanupKind.DUPLICATES, pendingCount, pendingBytes)
+        pending = false; pendingCount = 0; pendingBytes = 0L
         selected = emptySet()
         onInvalidate()
         outcome = if (response.resultCode == Activity.RESULT_OK) R.string.duplicates_trash_success else R.string.duplicates_trash_cancelled
@@ -193,7 +196,7 @@ internal fun DuplicatesScreen(
                 try {
                     val request = DuplicateTrash.request(context, snapshot, chosen, similar)
                     if (!activityLifecycleOwner.lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED)) return@launch
-                    pending = true
+                    pendingCount = chosen.size; pendingBytes = selectedBytes; pending = true
                     launcher.launch(IntentSenderRequest.Builder(request.intentSender).build())
                     onInvalidate()
                 } catch (e: CancellationException) { throw e }

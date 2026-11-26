@@ -307,7 +307,7 @@
     <string name="legal_dependency_notices">库声明</string>
     <string name="legal_read_license">阅读许可证</string>
     <string name="clean_history">清理记录</string>
-    <string name="clean_history_empty">清理记录尚不可用。</string>
+    <string name="clean_history_empty">暂无清理记录。</string>
     <string name="clean_preview">设计预览</string>
     <string name="clean_review_all">查看全部</string>
     <string name="scan_access_title">扫描媒体</string>
@@ -357,4 +357,9 @@
     <string name="compress_real_open">打开视频</string>
     <string name="compress_real_start">压缩视频</string>
     <string name="compress_real_save">保存压缩副本</string>
+    <string name="history_trashed">已移入回收站</string>
+    <string name="history_clear">清除记录</string>
+    <string name="history_note">这里只显示已确认的操作。回收站可能暂时保留文件。保存压缩副本本身不会释放空间。</string>
+    <string name="history_clear_note">清除本地记录？媒体文件不会更改。</string>
+    <string name="history_write_failed">无法更新记录。</string>
 </resources>

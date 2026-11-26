@@ -307,7 +307,7 @@
     <string name="legal_dependency_notices">Notices des bibliothèques</string>
     <string name="legal_read_license">Lire la licence</string>
     <string name="clean_history">Historique de nettoyage</string>
-    <string name="clean_history_empty">L’historique n’est pas encore disponible.</string>
+    <string name="clean_history_empty">Aucun historique de nettoyage.</string>
     <string name="clean_preview">Aperçu de conception</string>
     <string name="clean_review_all">Tout examiner</string>
     <string name="scan_access_title">Analyser vos médias</string>
@@ -357,4 +357,9 @@
     <string name="compress_real_open">Ouvrir la vidéo</string>
     <string name="compress_real_start">Compresser la vidéo</string>
     <string name="compress_real_save">Enregistrer la copie compressée</string>
+    <string name="history_trashed">Mis à la corbeille</string>
+    <string name="history_clear">Effacer l’historique</string>
+    <string name="history_note">Seules les actions confirmées apparaissent ici. La corbeille peut conserver les fichiers temporairement. Enregistrer des copies compressées ne libère pas de place à lui seul.</string>
+    <string name="history_clear_note">Effacer l’historique local ? Vos médias resteront inchangés.</string>
+    <string name="history_write_failed">Impossible de mettre à jour l’historique.</string>
 </resources>

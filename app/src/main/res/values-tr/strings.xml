@@ -307,7 +307,7 @@
     <string name="legal_dependency_notices">Kitaplık bildirimleri</string>
     <string name="legal_read_license">Lisansı oku</string>
     <string name="clean_history">Temizlik geçmişi</string>
-    <string name="clean_history_empty">Temizlik geçmişi henüz kullanılamıyor.</string>
+    <string name="clean_history_empty">Henüz temizlik geçmişi yok.</string>
     <string name="clean_preview">Tasarım önizlemesi</string>
     <string name="clean_review_all">Tümünü incele</string>
     <string name="scan_access_title">Medyayı tara</string>
@@ -357,4 +357,9 @@
     <string name="compress_real_open">Videoyu aç</string>
     <string name="compress_real_start">Videoyu sıkıştır</string>
     <string name="compress_real_save">Sıkıştırılmış kopyayı kaydet</string>
+    <string name="history_trashed">Çöp kutusuna taşındı</string>
+    <string name="history_clear">Geçmişi temizle</string>
+    <string name="history_note">Burada yalnızca onaylanmış işlemler görünür. Çöp kutusu dosyaları geçici olarak saklayabilir. Sıkıştırılmış kopyaları kaydetmek tek başına yer açmaz.</string>
+    <string name="history_clear_note">Yerel geçmiş temizlensin mi? Medya dosyaları değişmeyecek.</string>
+    <string name="history_write_failed">Geçmiş güncellenemedi.</string>
 </resources>

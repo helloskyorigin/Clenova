@@ -307,7 +307,7 @@
     <string name="legal_dependency_notices">ライブラリ通知</string>
     <string name="legal_read_license">ライセンスを読む</string>
     <string name="clean_history">クリーンアップ履歴</string>
-    <string name="clean_history_empty">クリーンアップ履歴はまだ利用できません。</string>
+    <string name="clean_history_empty">クリーンアップ履歴はまだありません。</string>
     <string name="clean_preview">デザインプレビュー</string>
     <string name="clean_review_all">すべて確認</string>
     <string name="scan_access_title">メディアをスキャン</string>
@@ -357,4 +357,9 @@
     <string name="compress_real_open">動画を開く</string>
     <string name="compress_real_start">動画を圧縮</string>
     <string name="compress_real_save">圧縮コピーを保存</string>
+    <string name="history_trashed">ゴミ箱に移動済み</string>
+    <string name="history_clear">履歴を消去</string>
+    <string name="history_note">確認済みの操作のみ表示します。ゴミ箱にファイルが一時的に残る場合があります。圧縮コピーの保存だけでは空き容量は増えません。</string>
+    <string name="history_clear_note">端末内の履歴を消去しますか？メディアファイルは変更されません。</string>
+    <string name="history_write_failed">履歴を更新できませんでした。</string>
 </resources>

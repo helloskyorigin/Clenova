@@ -307,7 +307,7 @@
     <string name="legal_dependency_notices">Уведомления библиотек</string>
     <string name="legal_read_license">Читать лицензию</string>
     <string name="clean_history">История очистки</string>
-    <string name="clean_history_empty">История очистки пока недоступна.</string>
+    <string name="clean_history_empty">Истории очистки пока нет.</string>
     <string name="clean_preview">Предпросмотр дизайна</string>
     <string name="clean_review_all">Проверить всё</string>
     <string name="scan_access_title">Сканирование медиа</string>
@@ -357,4 +357,9 @@
     <string name="compress_real_open">Открыть видео</string>
     <string name="compress_real_start">Сжать видео</string>
     <string name="compress_real_save">Сохранить сжатую копию</string>
+    <string name="history_trashed">Перемещено в корзину</string>
+    <string name="history_clear">Очистить историю</string>
+    <string name="history_note">Здесь показаны только подтверждённые действия. Корзина может временно хранить файлы. Сохранение сжатой копии само по себе не освобождает место.</string>
+    <string name="history_clear_note">Очистить локальную историю? Медиафайлы не изменятся.</string>
+    <string name="history_write_failed">Не удалось обновить историю.</string>
 </resources>

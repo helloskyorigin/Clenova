@@ -62,6 +62,9 @@ sealed interface ClenovaRoute {
     data object SwipeClean : ClenovaRoute
 
     @Serializable
+    data object CleanupHistory : ClenovaRoute
+
+    @Serializable
     data object VideoCompress : ClenovaRoute
 }
 

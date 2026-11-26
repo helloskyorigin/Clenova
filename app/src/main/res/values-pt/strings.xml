@@ -307,7 +307,7 @@
     <string name="legal_dependency_notices">Avisos de bibliotecas</string>
     <string name="legal_read_license">Ler licença</string>
     <string name="clean_history">Histórico de limpeza</string>
-    <string name="clean_history_empty">O histórico ainda não está disponível.</string>
+    <string name="clean_history_empty">Ainda não há histórico de limpeza.</string>
     <string name="clean_preview">Prévia do design</string>
     <string name="clean_review_all">Revisar tudo</string>
     <string name="scan_access_title">Analisar mídias</string>
@@ -357,4 +357,9 @@
     <string name="compress_real_open">Abrir vídeo</string>
     <string name="compress_real_start">Compactar vídeo</string>
     <string name="compress_real_save">Salvar cópia compactada</string>
+    <string name="history_trashed">Movido para a lixeira</string>
+    <string name="history_clear">Limpar histórico</string>
+    <string name="history_note">Somente ações confirmadas aparecem aqui. A lixeira pode manter arquivos temporariamente. Salvar cópias compactadas não libera espaço por si só.</string>
+    <string name="history_clear_note">Limpar o histórico local? Seus arquivos de mídia não serão alterados.</string>
+    <string name="history_write_failed">Não foi possível atualizar o histórico.</string>
 </resources>
