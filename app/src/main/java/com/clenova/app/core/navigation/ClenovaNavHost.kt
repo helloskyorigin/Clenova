@@ -55,6 +55,7 @@ fun ClenovaNavHost(
     preferencesRepository: PreferencesRepository,
     onSelectionHaptic: () -> Unit,
     modifier: Modifier = Modifier,
+    showSampleHome: Boolean = false,
 ) {
     NavHost(
         navController = navController,
@@ -75,6 +76,7 @@ fun ClenovaNavHost(
             val uiState = viewModel.uiState.collectAsStateWithLifecycle().value
             HomeScreen(
                 uiState = uiState,
+                showSampleHome = showSampleHome,
                 onRefreshStorage = {
                     onSelectionHaptic()
                     viewModel.refreshStorage()

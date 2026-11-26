@@ -41,6 +41,7 @@ fun ClenovaApp(
     preferencesRepository: PreferencesRepository,
     modifier: Modifier = Modifier,
     navController: NavHostController = rememberNavController(),
+    showSampleHome: Boolean = false,
 ) {
     val preferences by preferencesRepository.userPreferences
         .collectAsStateWithLifecycle(initialValue = UserPreferences())
@@ -75,6 +76,7 @@ fun ClenovaApp(
                 storageRepository = storageRepository,
                 preferencesRepository = preferencesRepository,
                 onSelectionHaptic = { haptics.performSelection() },
+                showSampleHome = showSampleHome,
             )
 
             AnimatedVisibility(

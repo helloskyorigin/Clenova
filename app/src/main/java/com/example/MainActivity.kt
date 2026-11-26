@@ -44,6 +44,7 @@ class MainActivity : ComponentActivity() {
                     ClenovaApp(
                         storageRepository = dependencies.storageRepository,
                         preferencesRepository = dependencies.preferencesRepository,
+                        showSampleHome = BuildConfig.DEBUG,
                     )
                 }
             }

@@ -50,6 +50,11 @@
     <string name="home_tool_unavailable">This tool is not available yet.</string>
     <string name="home_guard_status">Protection not configured</string>
 
+    <string name="home_sample_monitoring">Monitoring enabled</string>
+    <string name="home_sample_cleanup">Ready for cleanup</string>
+    <string name="home_sample_activate">Activate Autopilot</string>
+    <string name="home_sample_protected">%1$d items protected</string>
+
     <!-- Clean -->
     <string name="clean_title">Clean</string>
     <string name="clean_subtitle">Manual cleaning tools with explicit approval before any change.</string>

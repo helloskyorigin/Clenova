@@ -43,6 +43,8 @@ import com.clenova.app.core.designsystem.ClenovaThemeTokens
 import com.clenova.app.core.utilities.ByteFormatter
 import com.clenova.app.domain.model.AutopilotStatus
 import com.clenova.app.domain.model.StorageState
+import com.clenova.app.domain.model.StorageOverview
+import com.example.BuildConfig
 import com.example.R
 import kotlin.math.roundToInt
 
@@ -55,9 +57,16 @@ fun HomeScreen(
     onOpenClean: () -> Unit,
     onOpenGuard: () -> Unit,
     modifier: Modifier = Modifier,
+    showSampleHome: Boolean = false,
 ) {
     val colors = ClenovaThemeTokens.colors
     var dialogTitle by rememberSaveable { mutableStateOf<Int?>(null) }
+    // Local design review only. Never feed these values into storage, protection or deletion logic.
+    val sample = BuildConfig.DEBUG && showSampleHome
+    var sampleAutoOn by rememberSaveable { mutableStateOf(true) }
+    val shownStorage = if (sample) StorageState.Ready(
+        StorageOverview(128_000_000_000L, 24_600_000_000L, 103_400_000_000L)
+    ) else uiState.storageState
 
     Box(
         modifier = modifier.fillMaxSize().background(colors.background)
@@ -76,8 +85,8 @@ fun HomeScreen(
                 BrandHeader(onOpenSettings = onOpenSettings, onOpenPro = { dialogTitle = R.string.home_pro })
                 HorizontalDivider(color = colors.border.copy(alpha = .65f))
             }
-            StorageOverviewSection(uiState.storageState, onRefreshStorage)
-            AutopilotPanel(uiState.autopilotStatus, onOpenAgent)
+            StorageOverviewSection(shownStorage, onRefreshStorage, sample)
+            AutopilotPanel(uiState.autopilotStatus, onOpenAgent, sample, sampleAutoOn) { sampleAutoOn = it }
             Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
                 Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                     Text(stringResource(R.string.home_quick_actions), Modifier.weight(1f),
@@ -105,7 +114,7 @@ fun HomeScreen(
                     Icon(Icons.Outlined.VerifiedUser, null, Modifier.size(29.dp), tint = colors.success)
                     Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(3.dp)) {
                         Text(stringResource(R.string.guard_title), style = MaterialTheme.typography.titleMedium, color = colors.textPrimary)
-                        Text(stringResource(R.string.home_guard_status), style = MaterialTheme.typography.bodySmall, color = colors.textSecondary)
+                        Text(if (sample) stringResource(R.string.home_sample_protected, 248) else stringResource(R.string.home_guard_status), style = MaterialTheme.typography.bodySmall, color = colors.textSecondary)
                     }
                     Icon(Icons.AutoMirrored.Rounded.ArrowForward, null, Modifier.size(18.dp), tint = colors.textSecondary)
                 }
@@ -154,7 +163,7 @@ private fun BrandHeader(onOpenSettings: () -> Unit, onOpenPro: () -> Unit) {
 }
 
 @Composable
-private fun StorageOverviewSection(state: StorageState, onRefresh: () -> Unit) {
+private fun StorageOverviewSection(state: StorageState, onRefresh: () -> Unit, sample: Boolean) {
     val colors = ClenovaThemeTokens.colors
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
         Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
@@ -197,7 +206,7 @@ private fun StorageOverviewSection(state: StorageState, onRefresh: () -> Unit) {
                         .clip(ClenovaShapes.pill).background(colors.primary))
                 }
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                    Text(stringResource(R.string.home_used_value, ByteFormatter.format(overview.usedBytes)), style = MaterialTheme.typography.bodySmall, color = colors.textSecondary)
+                    Text(stringResource(R.string.home_used_value, if (sample) "103.4 GB" else ByteFormatter.format(overview.usedBytes)), style = MaterialTheme.typography.bodySmall, color = colors.textSecondary)
                     Text(stringResource(R.string.home_available_percent, ((1f - overview.usedFraction) * 100).roundToInt()), style = MaterialTheme.typography.bodySmall, color = colors.textSecondary)
                 }
             }
@@ -206,10 +215,10 @@ private fun StorageOverviewSection(state: StorageState, onRefresh: () -> Unit) {
 }
 
 @Composable
-private fun AutopilotPanel(status: AutopilotStatus, onOpenAgent: () -> Unit) {
+private fun AutopilotPanel(status: AutopilotStatus, onOpenAgent: () -> Unit, sample: Boolean, sampleAutoOn: Boolean, onSampleToggle: (Boolean) -> Unit) {
     val colors = ClenovaThemeTokens.colors
-    val awaiting = status == AutopilotStatus.AwaitingApproval
-    val statusLabel = when (status) {
+    val awaiting = if (sample) sampleAutoOn else status == AutopilotStatus.AwaitingApproval
+    val statusLabel = if (sample && sampleAutoOn) R.string.home_sample_monitoring else if (sample) R.string.home_auto_off else when (status) {
         AutopilotStatus.NotConfigured -> R.string.home_auto_off
         AutopilotStatus.Paused -> R.string.home_auto_paused
         AutopilotStatus.AwaitingApproval -> R.string.home_auto_pending
@@ -220,23 +229,32 @@ private fun AutopilotPanel(status: AutopilotStatus, onOpenAgent: () -> Unit) {
                 Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
                     Text(stringResource(R.string.home_autopilot), style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.SemiBold), color = colors.textPrimary)
                     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                        Box(Modifier.size(7.dp).clip(ClenovaShapes.pill).background(if (awaiting) colors.primary else colors.textSecondary))
-                        Text(stringResource(statusLabel), style = MaterialTheme.typography.labelMedium, color = colors.textSecondary)
+                        Box(Modifier.size(7.dp).clip(ClenovaShapes.pill).background(if (sample && sampleAutoOn) colors.success else if (awaiting) colors.primary else colors.textSecondary))
+                        Text(stringResource(statusLabel), style = MaterialTheme.typography.labelMedium, color = if (sample && sampleAutoOn) colors.success else colors.textSecondary)
                     }
                 }
                 // The workspace owns activation; a tap must not claim monitoring has started.
-                Switch(checked = awaiting, onCheckedChange = { onOpenAgent() },
+                Switch(checked = awaiting, onCheckedChange = { if (sample) onSampleToggle(it) else onOpenAgent() },
                     modifier = Modifier.testTag("home_autopilot_switch"))
             }
             HorizontalDivider(color = colors.border)
-            Text(stringResource(if (awaiting) R.string.home_auto_review_title else R.string.home_auto_title),
-                style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.SemiBold, letterSpacing = (-.6).sp),
-                color = colors.textPrimary)
-            Text(stringResource(if (awaiting) R.string.home_auto_review_body else R.string.home_auto_body),
-                style = MaterialTheme.typography.bodySmall, color = colors.textSecondary)
-            Button(onClick = onOpenAgent, modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp).testTag("open_agent_workspace_button"),
+            if (sample && sampleAutoOn) {
+                Column(verticalArrangement = Arrangement.spacedBy(3.dp)) {
+                    Text("4.8 GB", style = MaterialTheme.typography.displaySmall.copy(
+                        fontSize = 40.sp, lineHeight = 45.sp, fontWeight = FontWeight.SemiBold, letterSpacing = (-1.5).sp),
+                        color = colors.textPrimary)
+                    Text(stringResource(R.string.home_sample_cleanup), style = MaterialTheme.typography.bodyMedium, color = colors.textSecondary)
+                }
+            } else {
+                Text(stringResource(if (awaiting) R.string.home_auto_review_title else R.string.home_auto_title),
+                    style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.SemiBold, letterSpacing = (-.6).sp),
+                    color = colors.textPrimary)
+                Text(stringResource(if (awaiting) R.string.home_auto_review_body else R.string.home_auto_body),
+                    style = MaterialTheme.typography.bodySmall, color = colors.textSecondary)
+            }
+            Button(onClick = { if (sample && !sampleAutoOn) onSampleToggle(true) else onOpenAgent() }, modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp).testTag("open_agent_workspace_button"),
                 shape = ClenovaShapes.pill, colors = ButtonDefaults.buttonColors(containerColor = colors.primary, contentColor = colors.onPrimary)) {
-                Text(stringResource(if (awaiting) R.string.home_auto_review else R.string.home_auto_setup), Modifier.weight(1f),
+                Text(stringResource(if (awaiting) R.string.home_auto_review else if (sample) R.string.home_sample_activate else R.string.home_auto_setup), Modifier.weight(1f),
                     style = MaterialTheme.typography.labelLarge, textAlign = androidx.compose.ui.text.style.TextAlign.Center)
                 Icon(Icons.AutoMirrored.Rounded.ArrowForward, null, Modifier.size(18.dp))
             }

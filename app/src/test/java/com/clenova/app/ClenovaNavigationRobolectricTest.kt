@@ -102,6 +102,26 @@ class ClenovaNavigationRobolectricTest {
     }
 
     @Test
+    fun `debug design state is isolated from device storage`() {
+        composeTestRule.setContent {
+            ClenovaApp(
+                storageRepository = FakeStorageRepository(StorageState.Unavailable),
+                preferencesRepository = FakePreferencesRepository(),
+                showSampleHome = true,
+            )
+        }
+        composeTestRule.waitForIdle()
+        if (com.example.BuildConfig.DEBUG) {
+            composeTestRule.onNodeWithText("24.6 GB").assertIsDisplayed()
+            composeTestRule.onNodeWithText("4.8 GB").performScrollTo().assertIsDisplayed()
+            composeTestRule.onNodeWithTag("home_autopilot_switch").performScrollTo().performClick()
+            composeTestRule.onNodeWithText("Activate Autopilot").performScrollTo().assertIsDisplayed()
+        } else {
+            composeTestRule.onNodeWithText("Storage details unavailable").assertIsDisplayed()
+        }
+    }
+
+    @Test
     fun `home displays honest unavailable state when storage cannot be read`() {
         composeTestRule.setContent {
             ClenovaApp(
