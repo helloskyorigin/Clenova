@@ -70,6 +70,15 @@ class ClenovaNavigationRobolectricTest {
         composeTestRule.onNodeWithText("42.5 GB").assertIsDisplayed()
         composeTestRule.onNodeWithText("Not activated").performScrollTo().assertIsDisplayed()
 
+        // Storage opens a secondary screen without the floating navigation.
+        composeTestRule.onNodeWithTag("home_storage_details").performClick()
+        composeTestRule.waitForIdle()
+        composeTestRule.onNodeWithTag("storage_available_value").assertIsDisplayed()
+        composeTestRule.onNodeWithTag("nav_tab_home").assertDoesNotExist()
+        composeTestRule.onNodeWithTag("storage_back_button").performClick()
+        composeTestRule.waitForIdle()
+        composeTestRule.onNodeWithTag("nav_tab_home").assertIsDisplayed()
+
         // Home shortcut opens the full manual-tool workspace
         composeTestRule.onNodeWithTag("home_view_all").performScrollTo().performClick()
         composeTestRule.waitForIdle()

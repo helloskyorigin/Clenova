@@ -43,7 +43,7 @@ import com.clenova.app.core.designsystem.ClenovaThemeTokens
 import com.clenova.app.core.utilities.ByteFormatter
 import com.clenova.app.domain.model.AutopilotStatus
 import com.clenova.app.domain.model.StorageState
-import com.clenova.app.domain.model.StorageOverview
+import com.clenova.app.feature.storage.StorageDesignData
 import com.example.BuildConfig
 import com.example.R
 import kotlin.math.roundToInt
@@ -56,6 +56,7 @@ fun HomeScreen(
     onOpenSettings: () -> Unit,
     onOpenClean: () -> Unit,
     onOpenGuard: () -> Unit,
+    onOpenStorage: () -> Unit,
     modifier: Modifier = Modifier,
     showSampleHome: Boolean = false,
 ) {
@@ -64,9 +65,7 @@ fun HomeScreen(
     // Local design review only. Never feed these values into storage, protection or deletion logic.
     val sample = BuildConfig.DEBUG && showSampleHome
     var sampleAutoOn by rememberSaveable { mutableStateOf(true) }
-    val shownStorage = if (sample) StorageState.Ready(
-        StorageOverview(128_000_000_000L, 24_600_000_000L, 103_400_000_000L)
-    ) else uiState.storageState
+    val shownStorage = if (sample) StorageDesignData.state else uiState.storageState
 
     Box(
         modifier = modifier.fillMaxSize().background(colors.background)
@@ -85,7 +84,7 @@ fun HomeScreen(
                 BrandHeader(onOpenSettings = onOpenSettings, onOpenPro = { dialogTitle = R.string.home_pro })
                 HorizontalDivider(color = colors.border.copy(alpha = .65f))
             }
-            StorageOverviewSection(shownStorage, onRefreshStorage, sample)
+            StorageOverviewSection(shownStorage, onRefreshStorage, sample, onOpenStorage)
             AutopilotPanel(uiState.autopilotStatus, onOpenAgent, sample, sampleAutoOn) { sampleAutoOn = it }
             Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
                 Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
@@ -163,12 +162,17 @@ private fun BrandHeader(onOpenSettings: () -> Unit, onOpenPro: () -> Unit) {
 }
 
 @Composable
-private fun StorageOverviewSection(state: StorageState, onRefresh: () -> Unit, sample: Boolean) {
+private fun StorageOverviewSection(state: StorageState, onRefresh: () -> Unit, sample: Boolean, onOpenStorage: () -> Unit) {
     val colors = ClenovaThemeTokens.colors
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
         Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-            Text(stringResource(R.string.home_available_storage), Modifier.weight(1f),
-                style = MaterialTheme.typography.bodyMedium, color = colors.textSecondary)
+            Row(Modifier.weight(1f).clip(ClenovaShapes.tile).clickable(onClick = onOpenStorage)
+                .testTag("home_storage_details").heightIn(min = 48.dp),
+                verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                Text(stringResource(R.string.home_available_storage),
+                    style = MaterialTheme.typography.bodyMedium, color = colors.textSecondary)
+                Icon(Icons.AutoMirrored.Rounded.ArrowForward, null, Modifier.size(14.dp), tint = colors.textSecondary)
+            }
             IconButton(onClick = onRefresh, modifier = Modifier.size(48.dp).testTag("refresh_storage_button")) {
                 Icon(Icons.Outlined.Refresh, stringResource(R.string.cd_refresh_storage), Modifier.size(21.dp), tint = colors.textSecondary)
             }
@@ -186,6 +190,8 @@ private fun StorageOverviewSection(state: StorageState, onRefresh: () -> Unit, s
                 val overview = state.overview
                 val formatted = ByteFormatter.format(overview.availableBytes)
                 val usedFraction by animateFloatAsState(overview.usedFraction, ClenovaMotion.gentleSpring(), label = "storage_fraction")
+                Column(Modifier.fillMaxWidth().clip(ClenovaShapes.tile).clickable(onClick = onOpenStorage),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.Bottom, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                     Text(buildAnnotatedString {
                         append(formatted.substringBeforeLast(" "))
@@ -206,8 +212,9 @@ private fun StorageOverviewSection(state: StorageState, onRefresh: () -> Unit, s
                         .clip(ClenovaShapes.pill).background(colors.primary))
                 }
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                    Text(stringResource(R.string.home_used_value, if (sample) "103.4 GB" else ByteFormatter.format(overview.usedBytes)), style = MaterialTheme.typography.bodySmall, color = colors.textSecondary)
+                    Text(stringResource(R.string.home_used_value, if (sample) StorageDesignData.usedLabel else ByteFormatter.format(overview.usedBytes)), style = MaterialTheme.typography.bodySmall, color = colors.textSecondary)
                     Text(stringResource(R.string.home_available_percent, ((1f - overview.usedFraction) * 100).roundToInt()), style = MaterialTheme.typography.bodySmall, color = colors.textSecondary)
+                }
                 }
             }
         }

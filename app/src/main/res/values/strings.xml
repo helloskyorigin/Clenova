@@ -55,6 +55,24 @@
     <string name="home_sample_activate">Activate Autopilot</string>
     <string name="home_sample_protected">%1$d items protected</string>
 
+    <!-- Storage details -->
+    <string name="storage_details_title">Storage</string>
+    <string name="storage_breakdown_title">Storage breakdown</string>
+    <string name="storage_total_value">%1$s total</string>
+    <string name="storage_apps">Apps</string>
+    <string name="storage_photos">Photos</string>
+    <string name="storage_videos">Videos</string>
+    <string name="storage_audio">Audio</string>
+    <string name="storage_documents">Documents</string>
+    <string name="storage_other">Other</string>
+    <string name="storage_used">Used storage</string>
+    <string name="storage_free">Available</string>
+    <string name="storage_breakdown_unavailable">Detailed categories are not available yet. See Android storage settings for more information.</string>
+    <string name="storage_cleanup_title">Free up space</string>
+    <string name="storage_cleanup_body">Explore your cleaning tools.</string>
+    <string name="storage_system_settings">Open Android storage settings</string>
+    <string name="storage_system_unavailable">Storage settings are unavailable on this device.</string>
+
     <!-- Clean -->
     <string name="clean_title">Clean</string>
     <string name="clean_subtitle">Manual cleaning tools with explicit approval before any change.</string>

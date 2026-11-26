@@ -22,6 +22,7 @@ import com.clenova.app.feature.clean.CleanScreen
 import com.clenova.app.feature.guard.GuardScreen
 import com.clenova.app.feature.home.HomeScreen
 import com.clenova.app.feature.home.HomeViewModel
+import com.clenova.app.feature.storage.StorageDetailsScreen
 import com.clenova.app.feature.settings.SettingsScreen
 import com.clenova.app.feature.settings.SettingsViewModel
 
@@ -32,6 +33,7 @@ fun NavDestination?.toClenovaRoute(): ClenovaRoute? = when {
     hasRoute<ClenovaRoute.Guard>() -> ClenovaRoute.Guard
     hasRoute<ClenovaRoute.Agent>() -> ClenovaRoute.Agent
     hasRoute<ClenovaRoute.Settings>() -> ClenovaRoute.Settings
+    hasRoute<ClenovaRoute.StorageDetails>() -> ClenovaRoute.StorageDetails
     else -> null
 }
 
@@ -85,6 +87,10 @@ fun ClenovaNavHost(
                     onSelectionHaptic()
                     navController.navigateTopLevel(ClenovaRoute.Agent)
                 },
+                onOpenStorage = {
+                    onSelectionHaptic()
+                    navController.navigate(ClenovaRoute.StorageDetails) { launchSingleTop = true }
+                },
                 onOpenClean = { onSelectionHaptic(); navController.navigateTopLevel(ClenovaRoute.Clean) },
                 onOpenGuard = { onSelectionHaptic(); navController.navigateTopLevel(ClenovaRoute.Guard) },
                 onOpenSettings = {
@@ -106,6 +112,29 @@ fun ClenovaNavHost(
 
         composable<ClenovaRoute.Agent> {
             AgentScreen()
+        }
+
+        composable<ClenovaRoute.StorageDetails>(
+            enterTransition = {
+                slideInHorizontally(initialOffsetX = { it / 4 }, animationSpec = ClenovaMotion.gentleSpring()) +
+                    fadeIn(animationSpec = ClenovaMotion.quickTween())
+            },
+            popExitTransition = {
+                slideOutHorizontally(targetOffsetX = { it / 4 }, animationSpec = ClenovaMotion.gentleSpring()) +
+                    fadeOut(animationSpec = ClenovaMotion.quickTween())
+            },
+        ) {
+            val model: HomeViewModel = viewModel(
+                factory = HomeViewModel.Factory(storageRepository, preferencesRepository),
+            )
+            val state = model.uiState.collectAsStateWithLifecycle().value
+            StorageDetailsScreen(
+                storageState = state.storageState,
+                showSampleHome = showSampleHome,
+                onBack = { onSelectionHaptic(); navController.popBackStack() },
+                onRefresh = { onSelectionHaptic(); model.refreshStorage() },
+                onOpenClean = { onSelectionHaptic(); navController.navigateTopLevel(ClenovaRoute.Clean) },
+            )
         }
 
         composable<ClenovaRoute.Settings>(
