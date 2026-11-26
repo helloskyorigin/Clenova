@@ -8,6 +8,7 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import com.clenova.app.domain.model.UserPreferences
 import com.clenova.app.feature.agent.AutopilotSetupScreen
+import com.clenova.app.feature.agent.CleanupReviewScreen
 import com.example.BuildConfig
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.CancellationException
@@ -41,6 +42,7 @@ fun NavDestination?.toClenovaRoute(): ClenovaRoute? = when {
     hasRoute<ClenovaRoute.Settings>() -> ClenovaRoute.Settings
     hasRoute<ClenovaRoute.StorageDetails>() -> ClenovaRoute.StorageDetails
     hasRoute<ClenovaRoute.AutopilotSetup>() -> ClenovaRoute.AutopilotSetup
+    hasRoute<ClenovaRoute.CleanupReview>() -> ClenovaRoute.CleanupReview
     else -> null
 }
 
@@ -67,6 +69,7 @@ fun ClenovaNavHost(
     showSampleHome: Boolean = false,
 ) {
     var sampleAutoOn by rememberSaveable { mutableStateOf(true) }
+    var sampleApprovedMask by rememberSaveable { mutableStateOf(0) }
     val sample = BuildConfig.DEBUG && showSampleHome
     NavHost(
         navController = navController,
@@ -89,6 +92,7 @@ fun ClenovaNavHost(
                 uiState = uiState,
                 showSampleHome = showSampleHome,
                 sampleAutoOn = sampleAutoOn,
+                sampleApprovedMask = sampleApprovedMask,
                 onSampleAutoChange = { sampleAutoOn = it; onSelectionHaptic() },
                 onOpenAutopilot = { onSelectionHaptic(); navController.navigate(ClenovaRoute.AutopilotSetup) { launchSingleTop = true } },
                 onRefreshStorage = {
@@ -97,7 +101,7 @@ fun ClenovaNavHost(
                 },
                 onOpenAgent = {
                     onSelectionHaptic()
-                    navController.navigateTopLevel(ClenovaRoute.Agent)
+                    navController.navigate(ClenovaRoute.CleanupReview) { launchSingleTop = true }
                 },
                 onOpenStorage = {
                     onSelectionHaptic()
@@ -124,6 +128,21 @@ fun ClenovaNavHost(
 
         composable<ClenovaRoute.Agent> {
             AgentScreen(onConfigure = { onSelectionHaptic(); navController.navigate(ClenovaRoute.AutopilotSetup) { launchSingleTop = true } })
+        }
+
+        composable<ClenovaRoute.CleanupReview> {
+            CleanupReviewScreen(
+                sample = sample && sampleAutoOn,
+                approvedMask = if (sample) sampleApprovedMask else 0,
+                onBack = { onSelectionHaptic(); navController.popBackStack() },
+                onApprove = { selected ->
+                    if (sample && sampleAutoOn && selected in 1..7 && sampleApprovedMask == 0) {
+                        sampleApprovedMask = selected
+                        onSelectionHaptic()
+                    }
+                },
+                onRevise = { if (sample) { sampleApprovedMask = 0; onSelectionHaptic() } },
+            )
         }
 
         composable<ClenovaRoute.AutopilotSetup> {

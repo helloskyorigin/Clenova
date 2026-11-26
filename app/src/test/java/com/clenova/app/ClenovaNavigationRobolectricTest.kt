@@ -141,6 +141,31 @@ class ClenovaNavigationRobolectricTest {
     }
 
     @Test
+    fun `debug cleanup review changes estimated space without deleting files`() {
+        composeTestRule.setContent {
+            ClenovaApp(
+                storageRepository = FakeStorageRepository(),
+                preferencesRepository = FakePreferencesRepository(),
+                showSampleHome = true,
+            )
+        }
+        composeTestRule.waitForIdle()
+        if (com.example.BuildConfig.DEBUG) {
+            composeTestRule.onNodeWithTag("open_agent_workspace_button").performScrollTo().performClick()
+            composeTestRule.waitForIdle()
+            composeTestRule.onNodeWithText("4.8 GB").assertIsDisplayed()
+            composeTestRule.onNodeWithTag("review_group_4").performScrollTo().performClick()
+            composeTestRule.onNodeWithText("4.3 GB").performScrollTo().assertIsDisplayed()
+            composeTestRule.onNodeWithTag("review_approve").performClick()
+            composeTestRule.onNodeWithTag("review_confirm").performClick()
+            composeTestRule.onNodeWithText("Plan approved").performScrollTo().assertIsDisplayed()
+            composeTestRule.onNodeWithTag("review_approve").performClick()
+            composeTestRule.waitForIdle()
+            composeTestRule.onNodeWithText("Plan approved").performScrollTo().assertIsDisplayed()
+        }
+    }
+
+    @Test
     fun `home displays honest unavailable state when storage cannot be read`() {
         composeTestRule.setContent {
             ClenovaApp(

@@ -44,6 +44,7 @@ import com.clenova.app.core.utilities.ByteFormatter
 import com.clenova.app.domain.model.AutopilotStatus
 import com.clenova.app.domain.model.StorageState
 import com.clenova.app.feature.storage.StorageDesignData
+import com.clenova.app.feature.agent.CleanupDesignPlan
 import com.example.BuildConfig
 import com.example.R
 import kotlin.math.roundToInt
@@ -59,6 +60,7 @@ fun HomeScreen(
     onOpenStorage: () -> Unit,
     onOpenAutopilot: () -> Unit,
     sampleAutoOn: Boolean = true,
+    sampleApprovedMask: Int = 0,
     onSampleAutoChange: (Boolean) -> Unit = {},
     modifier: Modifier = Modifier,
     showSampleHome: Boolean = false,
@@ -87,7 +89,7 @@ fun HomeScreen(
                 HorizontalDivider(color = colors.border.copy(alpha = .65f))
             }
             StorageOverviewSection(shownStorage, onRefreshStorage, sample, onOpenStorage)
-            AutopilotPanel(uiState.autopilotStatus, onOpenAgent, onOpenAutopilot, sample, sampleAutoOn, onSampleAutoChange)
+            AutopilotPanel(uiState.autopilotStatus, onOpenAgent, onOpenAutopilot, sample, sampleAutoOn, sampleApprovedMask, onSampleAutoChange)
             Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
                 Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                     Text(stringResource(R.string.home_quick_actions), Modifier.weight(1f),
@@ -224,7 +226,7 @@ private fun StorageOverviewSection(state: StorageState, onRefresh: () -> Unit, s
 }
 
 @Composable
-private fun AutopilotPanel(status: AutopilotStatus, onOpenAgent: () -> Unit, onOpenAutopilot: () -> Unit, sample: Boolean, sampleAutoOn: Boolean, onSampleToggle: (Boolean) -> Unit) {
+private fun AutopilotPanel(status: AutopilotStatus, onOpenAgent: () -> Unit, onOpenAutopilot: () -> Unit, sample: Boolean, sampleAutoOn: Boolean, sampleApprovedMask: Int, onSampleToggle: (Boolean) -> Unit) {
     val colors = ClenovaThemeTokens.colors
     val awaiting = if (sample) sampleAutoOn else status == AutopilotStatus.AwaitingApproval
     val statusLabel = if (sample && sampleAutoOn) R.string.home_sample_monitoring else if (sample) R.string.home_auto_off else when (status) {
@@ -249,10 +251,10 @@ private fun AutopilotPanel(status: AutopilotStatus, onOpenAgent: () -> Unit, onO
             HorizontalDivider(color = colors.border)
             if (sample && sampleAutoOn) {
                 Column(verticalArrangement = Arrangement.spacedBy(3.dp)) {
-                    Text("4.8 GB", style = MaterialTheme.typography.displaySmall.copy(
+                    Text(CleanupDesignPlan.spaceLabel(if (sampleApprovedMask != 0) sampleApprovedMask else CleanupDesignPlan.ALL), style = MaterialTheme.typography.displaySmall.copy(
                         fontSize = 40.sp, lineHeight = 45.sp, fontWeight = FontWeight.SemiBold, letterSpacing = (-1.5).sp),
                         color = colors.textPrimary)
-                    Text(stringResource(R.string.home_sample_cleanup), style = MaterialTheme.typography.bodyMedium, color = colors.textSecondary)
+                    Text(stringResource(if (sampleApprovedMask != 0) R.string.review_approved else R.string.home_sample_cleanup), style = MaterialTheme.typography.bodyMedium, color = colors.textSecondary)
                 }
             } else {
                 Text(stringResource(if (awaiting) R.string.home_auto_review_title else R.string.home_auto_title),
@@ -263,7 +265,7 @@ private fun AutopilotPanel(status: AutopilotStatus, onOpenAgent: () -> Unit, onO
             }
             Button(onClick = { if (awaiting) onOpenAgent() else onOpenAutopilot() }, modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp).testTag("open_agent_workspace_button"),
                 shape = ClenovaShapes.pill, colors = ButtonDefaults.buttonColors(containerColor = colors.primary, contentColor = colors.onPrimary)) {
-                Text(stringResource(if (awaiting) R.string.home_auto_review else if (sample) R.string.home_sample_activate else R.string.home_auto_setup), Modifier.weight(1f),
+                Text(stringResource(if (awaiting && sample && sampleApprovedMask != 0) R.string.review_view_plan else if (awaiting) R.string.home_auto_review else if (sample) R.string.home_sample_activate else R.string.home_auto_setup), Modifier.weight(1f),
                     style = MaterialTheme.typography.labelLarge, textAlign = androidx.compose.ui.text.style.TextAlign.Center)
                 Icon(Icons.AutoMirrored.Rounded.ArrowForward, null, Modifier.size(18.dp))
             }

@@ -134,6 +134,35 @@
     <string name="auto_monitoring_unavailable">Background monitoring is not available yet.</string>
     <string name="auto_save_failed">Could not save preferences. Please try again.</string>
 
+    <!-- Cleanup review -->
+    <string name="review_title">Review cleanup</string>
+    <string name="review_prepared">Plan prepared by Autopilot</string>
+    <string name="review_estimated_space">Potential space to recover</string>
+    <string name="review_recommendations">Recommended actions</string>
+    <string name="review_select_all">Select all</string>
+    <string name="review_deselect_all">Deselect all</string>
+    <string name="review_duplicates">Duplicate photos</string>
+    <string name="review_duplicates_detail">Keep one copy of each photo</string>
+    <string name="review_videos">Large videos</string>
+    <string name="review_videos_detail">Review videos before removing</string>
+    <string name="review_screenshots">Old screenshots</string>
+    <string name="review_screenshots_detail">Review older captures</string>
+    <string name="review_protected">248 items excluded</string>
+    <string name="review_safety">Protected memories are outside this plan.</string>
+    <string name="review_approve_space">Approve %1$s</string>
+    <string name="review_not_now">Not now</string>
+    <string name="review_confirm_title">Approve this plan?</string>
+    <string name="review_confirm_body">You selected %1$s of potential cleanup. No files will be removed by this approval.</string>
+    <string name="review_confirm_action">Approve plan</string>
+    <string name="review_approved">Plan approved</string>
+    <string name="review_approved_estimate">Estimated space in approved plan</string>
+    <string name="review_approval_only">Approval recorded. Cleanup has not been performed.</string>
+    <string name="review_done">Done</string>
+    <string name="review_revise">Edit selection</string>
+    <string name="review_view_plan">View plan</string>
+    <string name="review_empty_title">No cleanup plan yet</string>
+    <string name="review_empty_body">A cleanup plan will appear here when a supported scan has prepared one.</string>
+
     <!-- Settings -->
     <string name="settings_title">Settings</string>
     <string name="settings_section_preferences">PREFERENCES</string>
