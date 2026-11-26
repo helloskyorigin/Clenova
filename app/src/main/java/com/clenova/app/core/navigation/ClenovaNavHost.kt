@@ -33,6 +33,7 @@ import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.clenova.app.feature.clean.DuplicatesScreen
 import com.clenova.app.feature.clean.ScreenshotsScreen
+import com.clenova.app.feature.clean.SwipeCleanScreen
 import com.clenova.app.feature.clean.VideoCompressScreen
 import com.clenova.app.feature.guard.GuardScreen
 import com.clenova.app.feature.guard.GuardDesignData
@@ -58,6 +59,7 @@ fun NavDestination?.toClenovaRoute(): ClenovaRoute? = when {
     hasRoute<ClenovaRoute.Screenshots>() -> ClenovaRoute.Screenshots
     hasRoute<ClenovaRoute.LargeFiles>() -> ClenovaRoute.LargeFiles
     hasRoute<ClenovaRoute.LargeVideos>() -> ClenovaRoute.LargeVideos
+    hasRoute<ClenovaRoute.SwipeClean>() -> ClenovaRoute.SwipeClean
     hasRoute<ClenovaRoute.VideoCompress>() -> ClenovaRoute.VideoCompress
     else -> null
 }
@@ -157,6 +159,7 @@ fun ClenovaNavHost(
                 onScreenshots = { onSelectionHaptic(); navController.navigate(ClenovaRoute.Screenshots) { launchSingleTop = true } },
                 onLargeFiles = { onSelectionHaptic(); navController.navigate(ClenovaRoute.LargeFiles) { launchSingleTop = true } },
                 onLargeVideos = { onSelectionHaptic(); navController.navigate(ClenovaRoute.LargeVideos) { launchSingleTop = true } },
+                onSwipe = { onSelectionHaptic(); navController.navigate(ClenovaRoute.SwipeClean) { launchSingleTop = true } },
             )
         }
 
@@ -203,6 +206,12 @@ fun ClenovaNavHost(
                 onBack = { onSelectionHaptic(); navController.popBackStack() },
                 onScan = { onSelectionHaptic(); navController.navigate(ClenovaRoute.SmartScan) { launchSingleTop = true } },
                 onInvalidate = { scanResult = null }, onHaptic = onSelectionHaptic, largeMedia = true, videosOnly = true)
+        }
+        composable<ClenovaRoute.SwipeClean> {
+            SwipeCleanScreen(result = scanResult, owner = lifecycleOwner,
+                onBack = { onSelectionHaptic(); navController.popBackStack() },
+                onScan = { onSelectionHaptic(); navController.navigate(ClenovaRoute.SmartScan) { launchSingleTop = true } },
+                onInvalidate = { scanResult = null }, onHaptic = onSelectionHaptic)
         }
         composable<ClenovaRoute.SmartScan> {
             SmartScanScreen(

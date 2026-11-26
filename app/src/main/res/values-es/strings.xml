@@ -276,7 +276,7 @@
     <string name="privacy_local_title">Preferencias locales</string>
     <string name="privacy_local_body">El tema, la respuesta háptica, las preferencias de Autopilot y el idioma se guardan en tu dispositivo. No necesitas cuenta.</string>
     <string name="privacy_files_title">Archivos personales</string>
-    <string name="privacy_files_body">Clenova escanea fotos y vídeos accesibles con tu permiso. Las copias duplicadas pueden ir a la papelera de Android con tu aprobación. Memory Guard aún no está conectado. No sube medios personales. También puedes revisar y enviar fotos similares a la papelera con tu aprobación. Las capturas también pueden revisarse y enviarse a la papelera de Android con tu aprobación. Las fotos y vídeos grandes pueden enviarse a la papelera de Android con tu aprobación.</string>
+    <string name="privacy_files_body">Clenova escanea fotos y vídeos accesibles con tu permiso. Las copias duplicadas pueden ir a la papelera de Android con tu aprobación. Memory Guard aún no está conectado. No sube medios personales. También puedes revisar y enviar fotos similares a la papelera con tu aprobación. Las capturas también pueden revisarse y enviarse a la papelera de Android con tu aprobación. Las fotos y vídeos grandes pueden enviarse a la papelera de Android con tu aprobación. También puedes revisar fotos deslizando y enviarlas a la papelera de Android con tu aprobación.</string>
     <string name="privacy_support_title">Mensajes de soporte</string>
     <string name="privacy_support_body">El contacto y los informes abren tu aplicación de correo. Tú decides si envías el mensaje y puedes editar o eliminar datos de diagnóstico antes de enviarlo.</string>
     <string name="support_faq_storage">¿Cómo se mide el almacenamiento?</string>
@@ -337,4 +337,11 @@
     <string name="large_media_empty">No se encontraron archivos multimedia grandes</string>
     <string name="large_media_rule">Revisa fotos y vídeos accesibles de 100 MB o más. No se escanean otros archivos. Las favoritas y copias protegidas no se pueden seleccionar.</string>
     <string name="large_media_confirm">Revisa tu selección. Clenova vuelve a comprobar los metadatos y solicita autorización a Android. La papelera puede conservar los archivos temporalmente.</string>
+    <string name="swipe_empty">No se encontraron fotos accesibles</string>
+    <string name="swipe_rule">Desliza a la izquierda para revisar y a la derecha para conservar. No se elimina nada hasta que lo apruebes en Android.</string>
+    <string name="swipe_mark">Marcar para revisar</string>
+    <string name="swipe_review">Revisar selección</string>
+    <string name="swipe_undo">Deshacer</string>
+    <string name="swipe_finished">Todas las fotos accesibles revisadas</string>
+    <string name="swipe_preview_unavailable">Vista previa no disponible o cargando</string>
 </resources>

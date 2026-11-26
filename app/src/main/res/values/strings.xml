@@ -309,7 +309,7 @@
     <string name="privacy_local_title">Local preferences</string>
     <string name="privacy_local_body">Theme, haptics, Autopilot preferences and language are stored on your device. No account is required.</string>
     <string name="privacy_files_title">Personal files</string>
-    <string name="privacy_files_body">Clenova scans accessible photos and videos on your device with your permission. Duplicate copies can be moved to Android Trash with your approval. Memory Guard rules are not yet connected. No personal media is uploaded by Clenova. Similar photos can also be reviewed and moved to Trash with your approval. Screenshots can also be reviewed and moved to Android Trash with your approval. Large photos and videos can be moved to Android Trash with your approval.</string>
+    <string name="privacy_files_body">Clenova scans accessible photos and videos on your device with your permission. Duplicate copies can be moved to Android Trash with your approval. Memory Guard rules are not yet connected. No personal media is uploaded by Clenova. Similar photos can also be reviewed and moved to Trash with your approval. Screenshots can also be reviewed and moved to Android Trash with your approval. Large photos and videos can be moved to Android Trash with your approval. Photos can also be reviewed with Swipe Clean and moved to Android Trash with your approval.</string>
     <string name="privacy_support_title">Support messages</string>
     <string name="privacy_support_body">Contact and problem reports open your email app. You decide whether to send the message and can edit or remove diagnostic details before sending.</string>
     <string name="support_faq_storage">How is storage measured?</string>
@@ -370,4 +370,11 @@
     <string name="large_media_empty">No large media found in this scan</string>
     <string name="large_media_rule">Review accessible photos and videos of 100 MB or more. Other files are not scanned. Favorites and protected copies cannot be selected.</string>
     <string name="large_media_confirm">Review your selection. Clenova checks media metadata again and asks Android for approval. Trash may retain files temporarily.</string>
+    <string name="swipe_empty">No accessible photos found</string>
+    <string name="swipe_rule">Swipe left to mark for review, right to keep. Nothing is removed until you approve in Android.</string>
+    <string name="swipe_mark">Mark for review</string>
+    <string name="swipe_review">Review selected</string>
+    <string name="swipe_undo">Undo</string>
+    <string name="swipe_finished">All accessible photos reviewed</string>
+    <string name="swipe_preview_unavailable">Photo preview unavailable or loading</string>
 </resources>

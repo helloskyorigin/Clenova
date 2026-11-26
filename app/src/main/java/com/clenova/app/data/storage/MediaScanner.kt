@@ -50,6 +50,7 @@ internal data class MediaScanResult(
     val incomplete: Boolean,
     val similarGroups: List<List<ScannedMedia>> = emptyList(),
     val largeFiles: List<ScannedMedia> = largeVideos,
+    val photos: List<ScannedMedia> = emptyList(),
 ) {
     val extras = duplicateGroups.flatMap { it.drop(1).filterNot { media -> media.favorite } }
     // A file may appear in multiple categories; count it only once.
@@ -148,7 +149,7 @@ internal class MediaScanner(private val context: Context) {
         incomplete = incomplete || similar.incomplete
         currentCoroutineContext().ensureActive()
         if (mediaAccess(context) != access) throw SecurityException("Media access changed")
-        MediaScanResult(access, items.size, groups, screenshots, largeVideos, incomplete, similar.groups, largeFiles)
+        MediaScanResult(access, items.size, groups, screenshots, largeVideos, incomplete, similar.groups, largeFiles, items.filterNot { it.video }.sortedByDescending { it.modified ?: 0L })
     }
 
     internal suspend fun hash(resolver: ContentResolver, media: ScannedMedia): String {

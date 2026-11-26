@@ -33,10 +33,15 @@ internal object LargeMediaTrash {
     }
 
     suspend fun request(context: Context, result: MediaScanResult, selected: Set<Uri>, videosOnly: Boolean): PendingIntent =
+        requestVerified(context, result, plan(result, selected, videosOnly))
+
+    /** Shared metadata revalidation for explicitly reviewed, policy-filtered MediaStore items. */
+    internal suspend fun requestVerified(context: Context, result: MediaScanResult, items: List<ScannedMedia>): PendingIntent =
         withContext(Dispatchers.IO) {
             check(Build.VERSION.SDK_INT >= 30)
             check(mediaAccess(context) == result.access)
-            val items = plan(result, selected, videosOnly)
+            require(items.isNotEmpty() && items.size <= MAX_BATCH && items.distinctBy { it.uri }.size == items.size)
+            val selected = items.map { it.uri }
             val resolver = context.contentResolver
             val fields = arrayOf(MediaStore.MediaColumns.SIZE, MediaStore.MediaColumns.IS_FAVORITE,
                 MediaStore.MediaColumns.IS_TRASHED, MediaStore.MediaColumns.IS_PENDING,

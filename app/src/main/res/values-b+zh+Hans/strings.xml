@@ -276,7 +276,7 @@
     <string name="privacy_local_title">本地偏好设置</string>
     <string name="privacy_local_body">主题、触感反馈、自动管理偏好和语言保存在设备上。无需账户。</string>
     <string name="privacy_files_title">个人文件</string>
-    <string name="privacy_files_body">Clenova 经你授权在设备上扫描照片和视频。经批准可将重复副本移至 Android 回收站。Memory Guard 规则尚未连接。不上传个人媒体。 相似照片也可以在您批准后移入回收站。 截图也可以在您批准后移入 Android 回收站。 经您批准，大型照片和视频也可移入 Android 回收站。</string>
+    <string name="privacy_files_body">Clenova 经你授权在设备上扫描照片和视频。经批准可将重复副本移至 Android 回收站。Memory Guard 规则尚未连接。不上传个人媒体。 相似照片也可以在您批准后移入回收站。 截图也可以在您批准后移入 Android 回收站。 经您批准，大型照片和视频也可移入 Android 回收站。 您也可以通过滑动清理检查照片，并在批准后移入 Android 回收站。</string>
     <string name="privacy_support_title">支持消息</string>
     <string name="privacy_support_body">联系和问题报告会打开电子邮件应用。是否发送由你决定，发送前可编辑或删除诊断详情。</string>
     <string name="support_faq_storage">如何测量存储空间？</string>
@@ -337,4 +337,11 @@
     <string name="large_media_empty">本次扫描未找到大型媒体文件</string>
     <string name="large_media_rule">检查可访问的 100 MB 或更大的照片和视频。不会扫描其他文件。收藏和受保护的副本无法选择。</string>
     <string name="large_media_confirm">请检查所选文件。Clenova 会重新检查媒体元数据并请求 Android 批准。回收站可能暂时保留文件。</string>
+    <string name="swipe_empty">未找到可访问的照片</string>
+    <string name="swipe_rule">向左滑动标记待检查，向右滑动保留。只有在 Android 中批准后才会移除。</string>
+    <string name="swipe_mark">标记待检查</string>
+    <string name="swipe_review">检查选中照片</string>
+    <string name="swipe_undo">撤销</string>
+    <string name="swipe_finished">已检查所有可访问照片</string>
+    <string name="swipe_preview_unavailable">照片预览不可用或正在加载</string>
 </resources>

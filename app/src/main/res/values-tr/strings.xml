@@ -276,7 +276,7 @@
     <string name="privacy_local_title">Yerel tercihler</string>
     <string name="privacy_local_body">Tema, dokunsal geri bildirim, Otopilot tercihleri ve dil cihazda saklanır. Hesap gerekmez.</string>
     <string name="privacy_files_title">Kişisel dosyalar</string>
-    <string name="privacy_files_body">Clenova izninizle cihazda fotoğraf ve videoları tarar. Onayınızla kopyalar Android çöpüne taşınabilir. Memory Guard kuralları henüz bağlı değildir. Kişisel medya yüklenmez. Benzer fotoğraflar da onayınızla çöp kutusuna taşınabilir. Ekran görüntüleri de onayınızla Android çöp kutusuna taşınabilir. Büyük fotoğraf ve videolar onayınızla Android çöp kutusuna taşınabilir.</string>
+    <string name="privacy_files_body">Clenova izninizle cihazda fotoğraf ve videoları tarar. Onayınızla kopyalar Android çöpüne taşınabilir. Memory Guard kuralları henüz bağlı değildir. Kişisel medya yüklenmez. Benzer fotoğraflar da onayınızla çöp kutusuna taşınabilir. Ekran görüntüleri de onayınızla Android çöp kutusuna taşınabilir. Büyük fotoğraf ve videolar onayınızla Android çöp kutusuna taşınabilir. Fotoğraflar kaydırılarak incelenebilir ve onayınızla Android çöp kutusuna taşınabilir.</string>
     <string name="privacy_support_title">Destek mesajları</string>
     <string name="privacy_support_body">İletişim ve sorun bildirimleri e-posta uygulamanızı açar. Gönderip göndermemeye siz karar verir, tanılama bilgilerini göndermeden önce düzenleyebilir veya kaldırabilirsiniz.</string>
     <string name="support_faq_storage">Depolama nasıl ölçülür?</string>
@@ -337,4 +337,11 @@
     <string name="large_media_empty">Bu taramada büyük medya bulunamadı</string>
     <string name="large_media_rule">Erişilebilir 100 MB veya daha büyük fotoğraf ve videoları inceleyin. Diğer dosyalar taranmaz. Favoriler ve korunan kopyalar seçilemez.</string>
     <string name="large_media_confirm">Seçiminizi inceleyin. Clenova medya üst verilerini yeniden kontrol eder ve Android onayı ister. Çöp kutusu dosyaları geçici olarak saklayabilir.</string>
+    <string name="swipe_empty">Erişilebilir fotoğraf bulunamadı</string>
+    <string name="swipe_rule">İncelemek için sola, tutmak için sağa kaydırın. Android onayı olmadan hiçbir şey kaldırılmaz.</string>
+    <string name="swipe_mark">İnceleme için işaretle</string>
+    <string name="swipe_review">Seçilenleri incele</string>
+    <string name="swipe_undo">Geri al</string>
+    <string name="swipe_finished">Erişilebilir tüm fotoğraflar incelendi</string>
+    <string name="swipe_preview_unavailable">Önizleme kullanılamıyor veya yükleniyor</string>
 </resources>

@@ -276,7 +276,7 @@
     <string name="privacy_local_title">स्थानीय प्राथमिकताएँ</string>
     <string name="privacy_local_body">थीम, हैप्टिक्स, ऑटोपायलट प्राथमिकताएँ और भाषा डिवाइस पर सेव हैं। अकाउंट ज़रूरी नहीं है।</string>
     <string name="privacy_files_title">निजी फ़ाइलें</string>
-    <string name="privacy_files_body">Clenova अनुमति से डिवाइस पर फ़ोटो और वीडियो स्कैन करता है। आपकी मंज़ूरी से डुप्लिकेट Android ट्रैश में जा सकते हैं। Memory Guard नियम अभी जुड़े नहीं हैं। निजी मीडिया अपलोड नहीं होता। आपकी अनुमति से समान तस्वीरें भी ट्रैश में भेजी जा सकती हैं। आपकी अनुमति से स्क्रीनशॉट भी Android ट्रैश में भेजे जा सकते हैं। आपकी अनुमति से बड़ी तस्वीरें और वीडियो Android ट्रैश में भेजे जा सकते हैं।</string>
+    <string name="privacy_files_body">Clenova अनुमति से डिवाइस पर फ़ोटो और वीडियो स्कैन करता है। आपकी मंज़ूरी से डुप्लिकेट Android ट्रैश में जा सकते हैं। Memory Guard नियम अभी जुड़े नहीं हैं। निजी मीडिया अपलोड नहीं होता। आपकी अनुमति से समान तस्वीरें भी ट्रैश में भेजी जा सकती हैं। आपकी अनुमति से स्क्रीनशॉट भी Android ट्रैश में भेजे जा सकते हैं। आपकी अनुमति से बड़ी तस्वीरें और वीडियो Android ट्रैश में भेजे जा सकते हैं। स्वाइप क्लीन से भी तस्वीरें देख सकते हैं और आपकी अनुमति से Android ट्रैश में भेज सकते हैं।</string>
     <string name="privacy_support_title">सहायता संदेश</string>
     <string name="privacy_support_body">संपर्क और समस्या रिपोर्ट आपका ईमेल ऐप खोलते हैं। संदेश भेजना आपका निर्णय है और भेजने से पहले डायग्नोस्टिक जानकारी बदल या हटा सकते हैं।</string>
     <string name="support_faq_storage">स्टोरेज कैसे मापा जाता है?</string>
@@ -337,4 +337,11 @@
     <string name="large_media_empty">इस स्कैन में बड़ी मीडिया फ़ाइलें नहीं मिलीं</string>
     <string name="large_media_rule">100 MB या उससे बड़ी उपलब्ध तस्वीरें और वीडियो देखें। अन्य फ़ाइलें स्कैन नहीं होतीं। पसंदीदा और सुरक्षित प्रतियाँ नहीं चुनी जा सकतीं।</string>
     <string name="large_media_confirm">चुनी गई फ़ाइलें देखें। Clenova मीडिया की जानकारी दोबारा जाँचता है और Android की अनुमति माँगता है। ट्रैश में फ़ाइलें कुछ समय रह सकती हैं।</string>
+    <string name="swipe_empty">कोई उपलब्ध तस्वीर नहीं मिली</string>
+    <string name="swipe_rule">समीक्षा के लिए बाएँ स्वाइप करें, रखने के लिए दाएँ। Android में अनुमति देने तक कुछ नहीं हटेगा।</string>
+    <string name="swipe_mark">समीक्षा के लिए चुनें</string>
+    <string name="swipe_review">चुनी गई तस्वीरें देखें</string>
+    <string name="swipe_undo">पूर्ववत करें</string>
+    <string name="swipe_finished">सभी उपलब्ध तस्वीरों की समीक्षा हुई</string>
+    <string name="swipe_preview_unavailable">तस्वीर का पूर्वावलोकन उपलब्ध नहीं है या लोड हो रहा है</string>
 </resources>

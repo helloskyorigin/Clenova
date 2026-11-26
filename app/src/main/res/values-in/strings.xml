@@ -276,7 +276,7 @@
     <string name="privacy_local_title">Preferensi lokal</string>
     <string name="privacy_local_body">Tema, haptik, preferensi Autopilot, dan bahasa disimpan di perangkat. Tidak perlu akun.</string>
     <string name="privacy_files_title">File pribadi</string>
-    <string name="privacy_files_body">Clenova memindai foto dan video di perangkat dengan izin Anda. Duplikat dapat dipindah ke sampah Android dengan persetujuan Anda. Memory Guard belum terhubung. Media pribadi tidak diunggah. Foto serupa juga dapat dipindahkan ke sampah dengan persetujuan Anda. Tangkapan layar juga dapat dipindahkan ke sampah Android dengan persetujuan Anda. Foto dan video besar dapat dipindahkan ke sampah Android dengan persetujuan Anda.</string>
+    <string name="privacy_files_body">Clenova memindai foto dan video di perangkat dengan izin Anda. Duplikat dapat dipindah ke sampah Android dengan persetujuan Anda. Memory Guard belum terhubung. Media pribadi tidak diunggah. Foto serupa juga dapat dipindahkan ke sampah dengan persetujuan Anda. Tangkapan layar juga dapat dipindahkan ke sampah Android dengan persetujuan Anda. Foto dan video besar dapat dipindahkan ke sampah Android dengan persetujuan Anda. Foto juga dapat ditinjau dengan geser dan dipindahkan ke sampah Android dengan persetujuan Anda.</string>
     <string name="privacy_support_title">Pesan dukungan</string>
     <string name="privacy_support_body">Kontak dan laporan masalah membuka aplikasi email. Anda memutuskan apakah akan mengirim dan dapat mengedit atau menghapus detail diagnostik sebelum mengirim.</string>
     <string name="support_faq_storage">Bagaimana penyimpanan diukur?</string>
@@ -337,4 +337,11 @@
     <string name="large_media_empty">Tidak ada media besar dalam pemindaian ini</string>
     <string name="large_media_rule">Tinjau foto dan video yang dapat diakses berukuran 100 MB atau lebih. File lain tidak dipindai. Favorit dan salinan terlindungi tidak dapat dipilih.</string>
     <string name="large_media_confirm">Tinjau pilihan Anda. Clenova memeriksa kembali metadata media dan meminta persetujuan Android. Sampah dapat menyimpan file sementara.</string>
+    <string name="swipe_empty">Tidak ada foto yang dapat diakses</string>
+    <string name="swipe_rule">Geser ke kiri untuk menandai dan ke kanan untuk menyimpan. Tidak ada yang dihapus hingga Anda menyetujui di Android.</string>
+    <string name="swipe_mark">Tandai untuk ditinjau</string>
+    <string name="swipe_review">Tinjau pilihan</string>
+    <string name="swipe_undo">Urungkan</string>
+    <string name="swipe_finished">Semua foto yang dapat diakses telah ditinjau</string>
+    <string name="swipe_preview_unavailable">Pratinjau tidak tersedia atau sedang dimuat</string>
 </resources>

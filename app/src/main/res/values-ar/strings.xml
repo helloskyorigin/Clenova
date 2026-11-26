@@ -276,7 +276,7 @@
     <string name="privacy_local_title">التفضيلات المحلية</string>
     <string name="privacy_local_body">يُحفظ المظهر والاستجابة اللمسية وتفضيلات Autopilot واللغة على جهازك. لا يلزم حساب.</string>
     <string name="privacy_files_title">الملفات الشخصية</string>
-    <string name="privacy_files_body">يفحص Clenova الصور والفيديوهات المتاحة بإذنك على الجهاز. يمكن نقل النسخ إلى مهملات Android بموافقتك. قواعد Memory Guard غير متصلة بعد. لا تُرفع الوسائط الشخصية. يمكن أيضاً مراجعة الصور المتشابهة ونقلها إلى سلة المهملات بموافقتك. يمكن نقل لقطات الشاشة إلى سلة مهملات Android بموافقتك. يمكن نقل الصور والفيديوهات الكبيرة إلى سلة مهملات Android بموافقتك.</string>
+    <string name="privacy_files_body">يفحص Clenova الصور والفيديوهات المتاحة بإذنك على الجهاز. يمكن نقل النسخ إلى مهملات Android بموافقتك. قواعد Memory Guard غير متصلة بعد. لا تُرفع الوسائط الشخصية. يمكن أيضاً مراجعة الصور المتشابهة ونقلها إلى سلة المهملات بموافقتك. يمكن نقل لقطات الشاشة إلى سلة مهملات Android بموافقتك. يمكن نقل الصور والفيديوهات الكبيرة إلى سلة مهملات Android بموافقتك. يمكن أيضاً مراجعة الصور بالسحب ونقلها إلى سلة مهملات Android بموافقتك.</string>
     <string name="privacy_support_title">رسائل الدعم</string>
     <string name="privacy_support_body">يفتح التواصل وتقارير المشكلات تطبيق البريد. تقرر أنت إرسال الرسالة ويمكنك تعديل تفاصيل التشخيص أو حذفها قبل الإرسال.</string>
     <string name="support_faq_storage">كيف تُقاس مساحة التخزين؟</string>
@@ -337,4 +337,11 @@
     <string name="large_media_empty">لم يتم العثور على وسائط كبيرة في هذا الفحص</string>
     <string name="large_media_rule">راجع الصور والفيديوهات المتاحة بحجم 100 MB أو أكثر. لا يتم فحص الملفات الأخرى. لا يمكن تحديد المفضلة والنسخ المحمية.</string>
     <string name="large_media_confirm">راجع اختيارك. يعيد Clenova فحص بيانات الوسائط ويطلب موافقة Android. قد تحتفظ سلة المهملات بالملفات مؤقتاً.</string>
+    <string name="swipe_empty">لم يتم العثور على صور متاحة</string>
+    <string name="swipe_rule">اسحب لليسار للتحديد والمراجعة، ولليمين للاحتفاظ. لن يُحذف شيء حتى توافق في Android.</string>
+    <string name="swipe_mark">تحديد للمراجعة</string>
+    <string name="swipe_review">مراجعة المحدد</string>
+    <string name="swipe_undo">تراجع</string>
+    <string name="swipe_finished">تمت مراجعة جميع الصور المتاحة</string>
+    <string name="swipe_preview_unavailable">معاينة الصورة غير متاحة أو قيد التحميل</string>
 </resources>

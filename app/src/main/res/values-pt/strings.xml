@@ -276,7 +276,7 @@
     <string name="privacy_local_title">Preferências locais</string>
     <string name="privacy_local_body">Tema, resposta tátil, preferências do Autopilot e idioma ficam no dispositivo. Não é preciso criar conta.</string>
     <string name="privacy_files_title">Arquivos pessoais</string>
-    <string name="privacy_files_body">Clenova analisa fotos e vídeos acessíveis no dispositivo com sua permissão. Duplicatas podem ir à lixeira Android com sua aprovação. Memory Guard ainda não está conectado. Nenhuma mídia pessoal é enviada. Fotos semelhantes também podem ser revisadas e enviadas à lixeira com sua aprovação. Capturas de tela também podem ser revisadas e enviadas à lixeira do Android com sua aprovação. Fotos e vídeos grandes podem ser enviados à lixeira do Android com sua aprovação.</string>
+    <string name="privacy_files_body">Clenova analisa fotos e vídeos acessíveis no dispositivo com sua permissão. Duplicatas podem ir à lixeira Android com sua aprovação. Memory Guard ainda não está conectado. Nenhuma mídia pessoal é enviada. Fotos semelhantes também podem ser revisadas e enviadas à lixeira com sua aprovação. Capturas de tela também podem ser revisadas e enviadas à lixeira do Android com sua aprovação. Fotos e vídeos grandes podem ser enviados à lixeira do Android com sua aprovação. Fotos também podem ser revisadas deslizando e enviadas à lixeira do Android com sua aprovação.</string>
     <string name="privacy_support_title">Mensagens de suporte</string>
     <string name="privacy_support_body">O contato e os relatórios abrem seu app de e-mail. Você decide se envia e pode editar ou remover detalhes de diagnóstico antes do envio.</string>
     <string name="support_faq_storage">Como o armazenamento é medido?</string>
@@ -337,4 +337,11 @@
     <string name="large_media_empty">Nenhum arquivo de mídia grande encontrado</string>
     <string name="large_media_rule">Revise fotos e vídeos acessíveis de 100 MB ou mais. Outros arquivos não são analisados. Favoritos e cópias protegidas não podem ser selecionados.</string>
     <string name="large_media_confirm">Revise sua seleção. Clenova verifica novamente os metadados e pede aprovação ao Android. A lixeira pode manter os arquivos temporariamente.</string>
+    <string name="swipe_empty">Nenhuma foto acessível encontrada</string>
+    <string name="swipe_rule">Deslize à esquerda para revisar e à direita para manter. Nada é removido até sua aprovação no Android.</string>
+    <string name="swipe_mark">Marcar para revisão</string>
+    <string name="swipe_review">Revisar seleção</string>
+    <string name="swipe_undo">Desfazer</string>
+    <string name="swipe_finished">Todas as fotos acessíveis revisadas</string>
+    <string name="swipe_preview_unavailable">Prévia indisponível ou carregando</string>
 </resources>

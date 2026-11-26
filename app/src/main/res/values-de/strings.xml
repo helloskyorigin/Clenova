@@ -276,7 +276,7 @@
     <string name="privacy_local_title">Lokale Einstellungen</string>
     <string name="privacy_local_body">Design, Haptik, Autopilot-Einstellungen und Sprache werden auf dem Gerät gespeichert. Kein Konto erforderlich.</string>
     <string name="privacy_files_title">Persönliche Dateien</string>
-    <string name="privacy_files_body">Clenova scannt zugängliche Fotos und Videos mit deiner Erlaubnis auf dem Gerät. Duplikate können mit Zustimmung in den Android-Papierkorb. Memory Guard ist noch nicht verbunden. Keine privaten Medien werden hochgeladen. Ähnliche Fotos können mit deiner Zustimmung ebenfalls in den Papierkorb verschoben werden. Screenshots können mit deiner Zustimmung ebenfalls in den Android-Papierkorb verschoben werden. Große Fotos und Videos können mit deiner Zustimmung in den Android-Papierkorb verschoben werden.</string>
+    <string name="privacy_files_body">Clenova scannt zugängliche Fotos und Videos mit deiner Erlaubnis auf dem Gerät. Duplikate können mit Zustimmung in den Android-Papierkorb. Memory Guard ist noch nicht verbunden. Keine privaten Medien werden hochgeladen. Ähnliche Fotos können mit deiner Zustimmung ebenfalls in den Papierkorb verschoben werden. Screenshots können mit deiner Zustimmung ebenfalls in den Android-Papierkorb verschoben werden. Große Fotos und Videos können mit deiner Zustimmung in den Android-Papierkorb verschoben werden. Fotos können auch per Wischen geprüft und mit deiner Zustimmung in den Android-Papierkorb verschoben werden.</string>
     <string name="privacy_support_title">Support-Nachrichten</string>
     <string name="privacy_support_body">Kontakt und Problemberichte öffnen deine E-Mail-App. Du entscheidest über den Versand und kannst Diagnosedaten vorher bearbeiten oder entfernen.</string>
     <string name="support_faq_storage">Wie wird der Speicher gemessen?</string>
@@ -337,4 +337,11 @@
     <string name="large_media_empty">Bei diesem Scan wurden keine großen Mediendateien gefunden</string>
     <string name="large_media_rule">Prüfe zugängliche Fotos und Videos ab 100 MB. Andere Dateien werden nicht gescannt. Favoriten und geschützte Kopien sind nicht auswählbar.</string>
     <string name="large_media_confirm">Prüfe deine Auswahl. Clenova prüft die Metadaten erneut und bittet Android um Zustimmung. Der Papierkorb kann Dateien vorübergehend behalten.</string>
+    <string name="swipe_empty">Keine zugänglichen Fotos gefunden</string>
+    <string name="swipe_rule">Wische nach links zum Prüfen und nach rechts zum Behalten. Ohne deine Zustimmung in Android wird nichts entfernt.</string>
+    <string name="swipe_mark">Zur Prüfung markieren</string>
+    <string name="swipe_review">Auswahl prüfen</string>
+    <string name="swipe_undo">Rückgängig</string>
+    <string name="swipe_finished">Alle zugänglichen Fotos geprüft</string>
+    <string name="swipe_preview_unavailable">Vorschau nicht verfügbar oder wird geladen</string>
 </resources>

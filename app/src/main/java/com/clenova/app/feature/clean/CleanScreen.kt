@@ -54,6 +54,7 @@ internal fun CleanScreen(
     onScreenshots: () -> Unit = {},
     onLargeFiles: () -> Unit = {},
     onLargeVideos: () -> Unit = {},
+    onSwipe: () -> Unit = {},
 ) {
     val colors = ClenovaThemeTokens.colors
     val preview = BuildConfig.DEBUG && sample
@@ -119,7 +120,7 @@ internal fun CleanScreen(
                 HorizontalDivider(color = colors.border)
             }
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                CleanQuickTool(Icons.Outlined.Swipe, R.string.clean_tool_swipe_clean_title, "clean_swipe", Modifier.weight(1f)) { dialog = R.string.clean_tool_swipe_clean_title }
+                CleanQuickTool(Icons.Outlined.Swipe, R.string.clean_tool_swipe_clean_title, "clean_swipe", Modifier.weight(1f), onSwipe)
                 CleanQuickTool(Icons.Outlined.VideoSettings, R.string.clean_tool_video_compress_title, "clean_compress", Modifier.weight(1f), onCompress)
             }
         }
