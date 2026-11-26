@@ -262,4 +262,21 @@
     <string name="settings_report_intro">여기에 문제를 설명하세요:</string>
     <string name="settings_report_android">Android: %1$s</string>
     <string name="settings_report_device">기기: %1$s</string>
+    <string name="settings_reset_confirm_title">환경설정을 초기화할까요?</string>
+    <string name="settings_reset_confirm_body">화면 테마, 햅틱, 여유 공간 목표 및 점검 주기를 기본값으로 되돌립니다. 언어, 권한, 개인 파일은 변경되지 않습니다.</string>
+    <string name="settings_reset_success">환경설정이 초기화되었습니다</string>
+    <string name="settings_reset_failure">환경설정을 초기화하지 못했습니다. 다시 시도하세요.</string>
+    <string name="permissions_intro">설치된 앱이 요청한 런타임 권한을 확인하고 Android 설정에서 관리하세요.</string>
+    <string name="permissions_none">이 빌드는 런타임 권한을 선언하지 않습니다.</string>
+    <string name="permissions_read_failed">이 기기의 권한을 읽을 수 없습니다.</string>
+    <string name="permissions_granted">허용됨</string>
+    <string name="permissions_denied">허용되지 않음</string>
+    <string name="permissions_manage">Android 앱 설정 열기</string>
+    <string name="privacy_current_build">이 빌드의 개인정보 보호</string>
+    <string name="privacy_local_title">로컬 환경설정</string>
+    <string name="privacy_local_body">테마, 햅틱, 자동 관리 설정 및 언어는 기기에 저장됩니다. 계정이 필요하지 않습니다.</string>
+    <string name="privacy_files_title">개인 파일</string>
+    <string name="privacy_files_body">이 빌드는 기기의 전체 저장공간 정보를 읽습니다. 미디어 스캔, 파일 보호, 삭제 엔진은 아직 연결되지 않았습니다. Clenova는 개인 미디어를 업로드하지 않습니다.</string>
+    <string name="privacy_support_title">지원 메시지</string>
+    <string name="privacy_support_body">문의 및 문제 신고는 이메일 앱을 엽니다. 전송 여부를 직접 결정하며 전송 전에 진단 정보를 수정하거나 삭제할 수 있습니다.</string>
 </resources>

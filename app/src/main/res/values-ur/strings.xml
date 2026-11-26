@@ -262,4 +262,21 @@
     <string name="settings_report_intro">یہاں مسئلے کی وضاحت کریں:</string>
     <string name="settings_report_android">Android: %1$s</string>
     <string name="settings_report_device">ڈیوائس: %1$s</string>
+    <string name="settings_reset_confirm_title">ترجیحات ری سیٹ کریں؟</string>
+    <string name="settings_reset_confirm_body">ظاہری شکل، لمسی ردعمل، خالی جگہ کا ہدف اور جانچ کی مدت ڈیفالٹ پر واپس آئیں گے۔ زبان، اجازتیں اور ذاتی فائلیں تبدیل نہیں ہوں گی۔</string>
+    <string name="settings_reset_success">ترجیحات ری سیٹ ہو گئیں</string>
+    <string name="settings_reset_failure">ترجیحات ری سیٹ نہیں ہو سکیں۔ دوبارہ کوشش کریں۔</string>
+    <string name="permissions_intro">انسٹال شدہ ایپ کی رن ٹائم اجازتیں دیکھیں۔ Android ترتیبات میں رسائی کا انتظام کریں۔</string>
+    <string name="permissions_none">اس بلڈ میں کوئی رن ٹائم اجازت درج نہیں۔</string>
+    <string name="permissions_read_failed">اس ڈیوائس کی اجازتیں نہیں پڑھی جا سکیں۔</string>
+    <string name="permissions_granted">اجازت ہے</string>
+    <string name="permissions_denied">اجازت نہیں</string>
+    <string name="permissions_manage">Android ایپ ترتیبات کھولیں</string>
+    <string name="privacy_current_build">اس بلڈ میں رازداری</string>
+    <string name="privacy_local_title">مقامی ترجیحات</string>
+    <string name="privacy_local_body">تھیم، لمسی ردعمل، آٹو پائلٹ ترجیحات اور زبان ڈیوائس پر محفوظ ہیں۔ اکاؤنٹ ضروری نہیں۔</string>
+    <string name="privacy_files_title">ذاتی فائلیں</string>
+    <string name="privacy_files_body">یہ بلڈ اسٹوریج کی مجموعی معلومات پڑھتا ہے۔ میڈیا اسکین، تحفظ اور حذف کے انجن ابھی منسلک نہیں۔ Clenova ذاتی میڈیا اپ لوڈ نہیں کرتا۔</string>
+    <string name="privacy_support_title">معاونت کے پیغامات</string>
+    <string name="privacy_support_body">رابطہ اور مسئلے کی رپورٹ آپ کی ای میل ایپ کھولتے ہیں۔ بھیجنا آپ کا فیصلہ ہے اور بھیجنے سے پہلے تشخیصی تفصیلات بدل یا ہٹا سکتے ہیں۔</string>
 </resources>

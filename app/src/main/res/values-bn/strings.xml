@@ -262,4 +262,21 @@
     <string name="settings_report_intro">এখানে সমস্যার বর্ণনা দিন:</string>
     <string name="settings_report_android">Android: %1$s</string>
     <string name="settings_report_device">ডিভাইস: %1$s</string>
+    <string name="settings_reset_confirm_title">পছন্দ রিসেট করবেন?</string>
+    <string name="settings_reset_confirm_body">চেহারা, স্পর্শ প্রতিক্রিয়া, খালি জায়গার লক্ষ্য ও পরীক্ষার সময়সূচি ডিফল্টে ফিরবে। ভাষা, অনুমতি ও ব্যক্তিগত ফাইল অপরিবর্তিত থাকবে।</string>
+    <string name="settings_reset_success">পছন্দ রিসেট হয়েছে</string>
+    <string name="settings_reset_failure">পছন্দ রিসেট করা যায়নি। আবার চেষ্টা করুন।</string>
+    <string name="permissions_intro">এই ইনস্টল করা অ্যাপের রানটাইম অনুমতি দেখুন। Android সেটিংসে অ্যাক্সেস নিয়ন্ত্রণ করুন।</string>
+    <string name="permissions_none">এই বিল্ড কোনো রানটাইম অনুমতি ঘোষণা করে না।</string>
+    <string name="permissions_read_failed">এই ডিভাইসের অনুমতি পড়া যায়নি।</string>
+    <string name="permissions_granted">অনুমোদিত</string>
+    <string name="permissions_denied">অনুমতি নেই</string>
+    <string name="permissions_manage">Android অ্যাপ সেটিংস খুলুন</string>
+    <string name="privacy_current_build">এই বিল্ডে গোপনীয়তা</string>
+    <string name="privacy_local_title">স্থানীয় পছন্দ</string>
+    <string name="privacy_local_body">থিম, স্পর্শ প্রতিক্রিয়া, অটোপাইলট পছন্দ ও ভাষা ডিভাইসে সংরক্ষিত। অ্যাকাউন্ট দরকার নেই।</string>
+    <string name="privacy_files_title">ব্যক্তিগত ফাইল</string>
+    <string name="privacy_files_body">এই বিল্ড স্টোরেজের মোট তথ্য পড়ে। মিডিয়া স্ক্যান, ফাইল সুরক্ষা ও মুছার ইঞ্জিন এখনও যুক্ত নয়। Clenova ব্যক্তিগত মিডিয়া আপলোড করে না।</string>
+    <string name="privacy_support_title">সহায়তা বার্তা</string>
+    <string name="privacy_support_body">যোগাযোগ ও সমস্যা রিপোর্ট ইমেল অ্যাপ খুলে। পাঠাবেন কি না আপনি ঠিক করেন এবং পাঠানোর আগে ডায়াগনস্টিক তথ্য বদলাতে বা সরাতে পারেন।</string>
 </resources>

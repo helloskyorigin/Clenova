@@ -262,4 +262,21 @@
     <string name="settings_report_intro">Décrivez le problème ici :</string>
     <string name="settings_report_android">Android : %1$s</string>
     <string name="settings_report_device">Appareil : %1$s</string>
+    <string name="settings_reset_confirm_title">Réinitialiser les préférences ?</string>
+    <string name="settings_reset_confirm_body">Rétablit l’apparence, le retour haptique, l’objectif d’espace libre et la fréquence par défaut. La langue, les autorisations et les fichiers personnels restent inchangés.</string>
+    <string name="settings_reset_success">Préférences réinitialisées</string>
+    <string name="settings_reset_failure">Impossible de réinitialiser les préférences. Réessayez.</string>
+    <string name="permissions_intro">Consultez les autorisations d’exécution demandées par cette application. Gérez l’accès dans Android.</string>
+    <string name="permissions_none">Cette version ne déclare aucune autorisation d’exécution.</string>
+    <string name="permissions_read_failed">Impossible de lire les autorisations de cet appareil.</string>
+    <string name="permissions_granted">Autorisé</string>
+    <string name="permissions_denied">Non autorisé</string>
+    <string name="permissions_manage">Ouvrir les paramètres Android de l’application</string>
+    <string name="privacy_current_build">Confidentialité de cette version</string>
+    <string name="privacy_local_title">Préférences locales</string>
+    <string name="privacy_local_body">Le thème, le retour haptique, les préférences Autopilot et la langue sont enregistrés sur votre appareil. Aucun compte requis.</string>
+    <string name="privacy_files_title">Fichiers personnels</string>
+    <string name="privacy_files_body">Cette version lit les totaux de stockage. Les moteurs d’analyse, de protection et de suppression ne sont pas encore connectés. Clenova ne téléverse aucun média personnel.</string>
+    <string name="privacy_support_title">Messages d’assistance</string>
+    <string name="privacy_support_body">Le contact et les rapports ouvrent votre application de messagerie. Vous choisissez d’envoyer ou non le message et pouvez modifier ou retirer les données de diagnostic avant l’envoi.</string>
 </resources>

@@ -262,4 +262,21 @@
     <string name="settings_report_intro">请在此描述问题：</string>
     <string name="settings_report_android">Android：%1$s</string>
     <string name="settings_report_device">设备：%1$s</string>
+    <string name="settings_reset_confirm_title">重置偏好设置？</string>
+    <string name="settings_reset_confirm_body">将外观、触感反馈、空闲空间目标和检查频率恢复为默认值。语言、权限和个人文件保持不变。</string>
+    <string name="settings_reset_success">偏好设置已重置</string>
+    <string name="settings_reset_failure">无法重置偏好设置，请重试。</string>
+    <string name="permissions_intro">查看此已安装应用请求的运行时权限。在 Android 设置中管理访问权限。</string>
+    <string name="permissions_none">此版本未声明任何运行时权限。</string>
+    <string name="permissions_read_failed">无法读取此设备的权限。</string>
+    <string name="permissions_granted">已允许</string>
+    <string name="permissions_denied">未允许</string>
+    <string name="permissions_manage">打开 Android 应用设置</string>
+    <string name="privacy_current_build">此版本的隐私</string>
+    <string name="privacy_local_title">本地偏好设置</string>
+    <string name="privacy_local_body">主题、触感反馈、自动管理偏好和语言保存在设备上。无需账户。</string>
+    <string name="privacy_files_title">个人文件</string>
+    <string name="privacy_files_body">此版本读取设备存储总量。媒体扫描、文件保护和删除功能尚未连接。Clenova 不上传个人媒体。</string>
+    <string name="privacy_support_title">支持消息</string>
+    <string name="privacy_support_body">联系和问题报告会打开电子邮件应用。是否发送由你决定，发送前可编辑或删除诊断详情。</string>
 </resources>

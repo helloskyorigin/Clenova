@@ -262,4 +262,21 @@
     <string name="settings_report_intro">Describe el problema aquí:</string>
     <string name="settings_report_android">Android: %1$s</string>
     <string name="settings_report_device">Dispositivo: %1$s</string>
+    <string name="settings_reset_confirm_title">¿Restablecer preferencias?</string>
+    <string name="settings_reset_confirm_body">Restaura la apariencia, respuesta háptica, objetivo de espacio libre y frecuencia. El idioma, los permisos y los archivos personales no cambian.</string>
+    <string name="settings_reset_success">Preferencias restablecidas</string>
+    <string name="settings_reset_failure">No se pudieron restablecer las preferencias. Inténtalo de nuevo.</string>
+    <string name="permissions_intro">Revisa los permisos en tiempo de ejecución solicitados por esta app. Gestiona el acceso en Android.</string>
+    <string name="permissions_none">Esta versión no declara permisos en tiempo de ejecución.</string>
+    <string name="permissions_read_failed">No se pudieron leer los permisos de este dispositivo.</string>
+    <string name="permissions_granted">Permitido</string>
+    <string name="permissions_denied">No permitido</string>
+    <string name="permissions_manage">Abrir ajustes de la app en Android</string>
+    <string name="privacy_current_build">Privacidad en esta versión</string>
+    <string name="privacy_local_title">Preferencias locales</string>
+    <string name="privacy_local_body">El tema, la respuesta háptica, las preferencias de Autopilot y el idioma se guardan en tu dispositivo. No necesitas cuenta.</string>
+    <string name="privacy_files_title">Archivos personales</string>
+    <string name="privacy_files_body">Esta versión lee los totales de almacenamiento. Los motores de escaneo, protección y eliminación aún no están conectados. Clenova no sube medios personales.</string>
+    <string name="privacy_support_title">Mensajes de soporte</string>
+    <string name="privacy_support_body">El contacto y los informes abren tu aplicación de correo. Tú decides si envías el mensaje y puedes editar o eliminar datos de diagnóstico antes de enviarlo.</string>
 </resources>

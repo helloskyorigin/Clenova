@@ -262,4 +262,21 @@
     <string name="settings_report_intro">Beschreibe das Problem hier:</string>
     <string name="settings_report_android">Android: %1$s</string>
     <string name="settings_report_device">Gerät: %1$s</string>
+    <string name="settings_reset_confirm_title">Einstellungen zurücksetzen?</string>
+    <string name="settings_reset_confirm_body">Setzt Darstellung, haptisches Feedback, Speicherziel und Prüfintervall zurück. Sprache, Berechtigungen und persönliche Dateien bleiben unverändert.</string>
+    <string name="settings_reset_success">Einstellungen zurückgesetzt</string>
+    <string name="settings_reset_failure">Einstellungen konnten nicht zurückgesetzt werden. Versuche es erneut.</string>
+    <string name="permissions_intro">Prüfe die Laufzeitberechtigungen dieser installierten App. Verwalte den Zugriff in Android.</string>
+    <string name="permissions_none">Dieser Build deklariert keine Laufzeitberechtigungen.</string>
+    <string name="permissions_read_failed">Berechtigungen konnten nicht gelesen werden.</string>
+    <string name="permissions_granted">Erlaubt</string>
+    <string name="permissions_denied">Nicht erlaubt</string>
+    <string name="permissions_manage">Android-App-Einstellungen öffnen</string>
+    <string name="privacy_current_build">Datenschutz in diesem Build</string>
+    <string name="privacy_local_title">Lokale Einstellungen</string>
+    <string name="privacy_local_body">Design, Haptik, Autopilot-Einstellungen und Sprache werden auf dem Gerät gespeichert. Kein Konto erforderlich.</string>
+    <string name="privacy_files_title">Persönliche Dateien</string>
+    <string name="privacy_files_body">Dieser Build liest Gesamtspeicherwerte. Medienscan, Dateischutz und Löschfunktionen sind noch nicht verbunden. Clenova lädt keine persönlichen Medien hoch.</string>
+    <string name="privacy_support_title">Support-Nachrichten</string>
+    <string name="privacy_support_body">Kontakt und Problemberichte öffnen deine E-Mail-App. Du entscheidest über den Versand und kannst Diagnosedaten vorher bearbeiten oder entfernen.</string>
 </resources>

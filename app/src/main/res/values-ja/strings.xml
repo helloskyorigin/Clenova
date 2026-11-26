@@ -262,4 +262,21 @@
     <string name="settings_report_intro">ここに問題を記入してください：</string>
     <string name="settings_report_android">Android：%1$s</string>
     <string name="settings_report_device">端末：%1$s</string>
+    <string name="settings_reset_confirm_title">設定をリセットしますか？</string>
+    <string name="settings_reset_confirm_body">外観、触覚フィードバック、空き容量目標、チェック頻度を初期設定に戻します。言語、権限、個人ファイルは変更しません。</string>
+    <string name="settings_reset_success">設定をリセットしました</string>
+    <string name="settings_reset_failure">設定をリセットできませんでした。再試行してください。</string>
+    <string name="permissions_intro">インストール済みアプリの実行時権限を確認し、Android 設定で管理します。</string>
+    <string name="permissions_none">このビルドは実行時権限を宣言していません。</string>
+    <string name="permissions_read_failed">この端末の権限を読み取れませんでした。</string>
+    <string name="permissions_granted">許可済み</string>
+    <string name="permissions_denied">未許可</string>
+    <string name="permissions_manage">Android のアプリ設定を開く</string>
+    <string name="privacy_current_build">このビルドのプライバシー</string>
+    <string name="privacy_local_title">端末内の設定</string>
+    <string name="privacy_local_body">テーマ、触覚、Autopilot の設定、言語は端末に保存されます。アカウントは不要です。</string>
+    <string name="privacy_files_title">個人ファイル</string>
+    <string name="privacy_files_body">このビルドは端末の総ストレージ情報を読み取ります。メディアスキャン、保護、削除機能は未接続です。Clenova は個人メディアをアップロードしません。</string>
+    <string name="privacy_support_title">サポートメッセージ</string>
+    <string name="privacy_support_body">お問い合わせや問題報告ではメールアプリを開きます。送信するかどうかはあなたが決め、送信前に診断情報を編集・削除できます。</string>
 </resources>

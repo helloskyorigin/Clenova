@@ -262,4 +262,21 @@
     <string name="settings_report_intro">Jelaskan masalah di sini:</string>
     <string name="settings_report_android">Android: %1$s</string>
     <string name="settings_report_device">Perangkat: %1$s</string>
+    <string name="settings_reset_confirm_title">Atur ulang preferensi?</string>
+    <string name="settings_reset_confirm_body">Mengembalikan tampilan, haptik, target ruang kosong, dan frekuensi pemeriksaan ke bawaan. Bahasa, izin, dan file pribadi tidak berubah.</string>
+    <string name="settings_reset_success">Preferensi diatur ulang</string>
+    <string name="settings_reset_failure">Preferensi tidak dapat diatur ulang. Coba lagi.</string>
+    <string name="permissions_intro">Tinjau izin runtime yang diminta aplikasi ini. Kelola akses di pengaturan Android.</string>
+    <string name="permissions_none">Versi ini tidak mendeklarasikan izin runtime.</string>
+    <string name="permissions_read_failed">Izin perangkat tidak dapat dibaca.</string>
+    <string name="permissions_granted">Diizinkan</string>
+    <string name="permissions_denied">Tidak diizinkan</string>
+    <string name="permissions_manage">Buka pengaturan aplikasi Android</string>
+    <string name="privacy_current_build">Privasi pada versi ini</string>
+    <string name="privacy_local_title">Preferensi lokal</string>
+    <string name="privacy_local_body">Tema, haptik, preferensi Autopilot, dan bahasa disimpan di perangkat. Tidak perlu akun.</string>
+    <string name="privacy_files_title">File pribadi</string>
+    <string name="privacy_files_body">Versi ini membaca total penyimpanan. Mesin pemindaian, perlindungan file, dan penghapusan belum terhubung. Clenova tidak mengunggah media pribadi.</string>
+    <string name="privacy_support_title">Pesan dukungan</string>
+    <string name="privacy_support_body">Kontak dan laporan masalah membuka aplikasi email. Anda memutuskan apakah akan mengirim dan dapat mengedit atau menghapus detail diagnostik sebelum mengirim.</string>
 </resources>

@@ -262,4 +262,21 @@
     <string name="settings_report_intro">Sorunu burada açıklayın:</string>
     <string name="settings_report_android">Android: %1$s</string>
     <string name="settings_report_device">Cihaz: %1$s</string>
+    <string name="settings_reset_confirm_title">Tercihler sıfırlansın mı?</string>
+    <string name="settings_reset_confirm_body">Görünüm, dokunsal geri bildirim, boş alan hedefi ve kontrol sıklığı varsayılana döner. Dil, izinler ve kişisel dosyalar değişmez.</string>
+    <string name="settings_reset_success">Tercihler sıfırlandı</string>
+    <string name="settings_reset_failure">Tercihler sıfırlanamadı. Tekrar deneyin.</string>
+    <string name="permissions_intro">Yüklü uygulamanın çalışma zamanı izinlerini inceleyin. Erişimi Android ayarlarından yönetin.</string>
+    <string name="permissions_none">Bu sürüm çalışma zamanı izni bildirmiyor.</string>
+    <string name="permissions_read_failed">Cihaz izinleri okunamadı.</string>
+    <string name="permissions_granted">İzin verildi</string>
+    <string name="permissions_denied">İzin verilmedi</string>
+    <string name="permissions_manage">Android uygulama ayarlarını aç</string>
+    <string name="privacy_current_build">Bu sürümde gizlilik</string>
+    <string name="privacy_local_title">Yerel tercihler</string>
+    <string name="privacy_local_body">Tema, dokunsal geri bildirim, Otopilot tercihleri ve dil cihazda saklanır. Hesap gerekmez.</string>
+    <string name="privacy_files_title">Kişisel dosyalar</string>
+    <string name="privacy_files_body">Bu sürüm cihazın toplam depolama bilgilerini okur. Medya tarama, dosya koruma ve silme motorları henüz bağlı değil. Clenova kişisel medya yüklemez.</string>
+    <string name="privacy_support_title">Destek mesajları</string>
+    <string name="privacy_support_body">İletişim ve sorun bildirimleri e-posta uygulamanızı açar. Gönderip göndermemeye siz karar verir, tanılama bilgilerini göndermeden önce düzenleyebilir veya kaldırabilirsiniz.</string>
 </resources>

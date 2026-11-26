@@ -262,4 +262,21 @@
     <string name="settings_report_intro">Опишите проблему здесь:</string>
     <string name="settings_report_android">Android: %1$s</string>
     <string name="settings_report_device">Устройство: %1$s</string>
+    <string name="settings_reset_confirm_title">Сбросить настройки?</string>
+    <string name="settings_reset_confirm_body">Возвращает оформление, тактильный отклик, цель свободного места и частоту проверок к значениям по умолчанию. Язык, разрешения и личные файлы не меняются.</string>
+    <string name="settings_reset_success">Настройки сброшены</string>
+    <string name="settings_reset_failure">Не удалось сбросить настройки. Повторите попытку.</string>
+    <string name="permissions_intro">Проверьте разрешения, запрошенные установленным приложением. Управляйте доступом в настройках Android.</string>
+    <string name="permissions_none">В этой версии не заявлены разрешения времени выполнения.</string>
+    <string name="permissions_read_failed">Не удалось прочитать разрешения устройства.</string>
+    <string name="permissions_granted">Разрешено</string>
+    <string name="permissions_denied">Не разрешено</string>
+    <string name="permissions_manage">Открыть настройки приложения Android</string>
+    <string name="privacy_current_build">Конфиденциальность в этой версии</string>
+    <string name="privacy_local_title">Локальные настройки</string>
+    <string name="privacy_local_body">Тема, тактильный отклик, настройки Autopilot и язык хранятся на устройстве. Аккаунт не нужен.</string>
+    <string name="privacy_files_title">Личные файлы</string>
+    <string name="privacy_files_body">Эта версия читает общие данные хранилища. Механизмы сканирования, защиты и удаления ещё не подключены. Clenova не загружает личные медиа.</string>
+    <string name="privacy_support_title">Сообщения в поддержку</string>
+    <string name="privacy_support_body">Связь и отчёты открывают почтовое приложение. Вы решаете, отправлять ли письмо, и можете изменить или удалить диагностические данные перед отправкой.</string>
 </resources>

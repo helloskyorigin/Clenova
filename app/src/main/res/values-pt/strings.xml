@@ -262,4 +262,21 @@
     <string name="settings_report_intro">Descreva o problema aqui:</string>
     <string name="settings_report_android">Android: %1$s</string>
     <string name="settings_report_device">Dispositivo: %1$s</string>
+    <string name="settings_reset_confirm_title">Redefinir preferências?</string>
+    <string name="settings_reset_confirm_body">Restaura aparência, resposta tátil, meta de espaço livre e frequência aos padrões. Idioma, permissões e arquivos pessoais não mudam.</string>
+    <string name="settings_reset_success">Preferências redefinidas</string>
+    <string name="settings_reset_failure">Não foi possível redefinir as preferências. Tente novamente.</string>
+    <string name="permissions_intro">Revise as permissões solicitadas por este app instalado. Gerencie o acesso nas configurações do Android.</string>
+    <string name="permissions_none">Esta versão não declara permissões de execução.</string>
+    <string name="permissions_read_failed">Não foi possível ler as permissões neste dispositivo.</string>
+    <string name="permissions_granted">Permitido</string>
+    <string name="permissions_denied">Não permitido</string>
+    <string name="permissions_manage">Abrir configurações do app no Android</string>
+    <string name="privacy_current_build">Privacidade nesta versão</string>
+    <string name="privacy_local_title">Preferências locais</string>
+    <string name="privacy_local_body">Tema, resposta tátil, preferências do Autopilot e idioma ficam no dispositivo. Não é preciso criar conta.</string>
+    <string name="privacy_files_title">Arquivos pessoais</string>
+    <string name="privacy_files_body">Esta versão lê os totais de armazenamento. Os mecanismos de análise, proteção e exclusão ainda não estão conectados. Clenova não envia mídias pessoais.</string>
+    <string name="privacy_support_title">Mensagens de suporte</string>
+    <string name="privacy_support_body">O contato e os relatórios abrem seu app de e-mail. Você decide se envia e pode editar ou remover detalhes de diagnóstico antes do envio.</string>
 </resources>

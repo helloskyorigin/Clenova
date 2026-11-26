@@ -262,4 +262,21 @@
     <string name="settings_report_intro">صف المشكلة هنا:</string>
     <string name="settings_report_android">Android: %1$s</string>
     <string name="settings_report_device">الجهاز: %1$s</string>
+    <string name="settings_reset_confirm_title">إعادة ضبط التفضيلات؟</string>
+    <string name="settings_reset_confirm_body">يعيد المظهر والاستجابة اللمسية وهدف المساحة وتكرار الفحص إلى الإعدادات الافتراضية. لا تتغير اللغة أو الأذونات أو الملفات الشخصية.</string>
+    <string name="settings_reset_success">تمت إعادة ضبط التفضيلات</string>
+    <string name="settings_reset_failure">تعذر إعادة ضبط التفضيلات. حاول مجددًا.</string>
+    <string name="permissions_intro">راجع أذونات وقت التشغيل التي يطلبها التطبيق المثبت. أدر الوصول في إعدادات Android.</string>
+    <string name="permissions_none">لا يعلن هذا الإصدار أي أذونات وقت تشغيل.</string>
+    <string name="permissions_read_failed">تعذرت قراءة الأذونات على هذا الجهاز.</string>
+    <string name="permissions_granted">مسموح</string>
+    <string name="permissions_denied">غير مسموح</string>
+    <string name="permissions_manage">فتح إعدادات تطبيق Android</string>
+    <string name="privacy_current_build">الخصوصية في هذا الإصدار</string>
+    <string name="privacy_local_title">التفضيلات المحلية</string>
+    <string name="privacy_local_body">يُحفظ المظهر والاستجابة اللمسية وتفضيلات Autopilot واللغة على جهازك. لا يلزم حساب.</string>
+    <string name="privacy_files_title">الملفات الشخصية</string>
+    <string name="privacy_files_body">يقرأ هذا الإصدار إجمالي تخزين الجهاز. لم تُربط محركات فحص الوسائط وحماية الملفات والحذف بعد. لا يرفع Clenova الوسائط الشخصية.</string>
+    <string name="privacy_support_title">رسائل الدعم</string>
+    <string name="privacy_support_body">يفتح التواصل وتقارير المشكلات تطبيق البريد. تقرر أنت إرسال الرسالة ويمكنك تعديل تفاصيل التشخيص أو حذفها قبل الإرسال.</string>
 </resources>
