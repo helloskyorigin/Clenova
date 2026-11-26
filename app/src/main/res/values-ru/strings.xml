@@ -56,7 +56,7 @@
     <string name="home_view_all">Все инструменты</string>
     <string name="home_smart_scan">Умное сканирование</string>
     <string name="home_compress">Сжать</string>
-    <string name="home_guard_status">Защита не настроена</string>
+    <string name="home_guard_status">Сохранённые правила защиты</string>
     <string name="home_sample_monitoring">Мониторинг включён</string>
     <string name="home_sample_cleanup">Готово к очистке</string>
     <string name="home_sample_activate">Активировать Autopilot</string>
@@ -276,7 +276,7 @@
     <string name="privacy_local_title">Локальные настройки</string>
     <string name="privacy_local_body">Тема, тактильный отклик, настройки Autopilot и язык хранятся на устройстве. Аккаунт не нужен.</string>
     <string name="privacy_files_title">Личные файлы</string>
-    <string name="privacy_files_body">Clenova с разрешения сканирует доступные фото и видео на устройстве. Дубликаты можно перенести в корзину Android с вашего согласия. Memory Guard пока не подключён. Личные медиа не загружаются. Похожие фото также можно переместить в корзину с вашего согласия. Снимки экрана также можно переместить в корзину Android с вашего согласия. Крупные фото и видео можно переместить в корзину Android с вашего согласия. Фото также можно просматривать свайпами и перемещать в корзину Android с вашего согласия. Видео можно сжимать локально и сохранять отдельными копиями.</string>
+    <string name="privacy_files_body">Clenova с разрешения сканирует доступные фото и видео на устройстве. Дубликаты можно перенести в корзину Android с вашего согласия. Защищайте выбранные фото и видео от очистки CLENOVA. Другие приложения могут их изменять. Личные медиа не загружаются. Похожие фото также можно переместить в корзину с вашего согласия. Снимки экрана также можно переместить в корзину Android с вашего согласия. Крупные фото и видео можно переместить в корзину Android с вашего согласия. Фото также можно просматривать свайпами и перемещать в корзину Android с вашего согласия. Видео можно сжимать локально и сохранять отдельными копиями.</string>
     <string name="privacy_support_title">Сообщения в поддержку</string>
     <string name="privacy_support_body">Связь и отчёты открывают почтовое приложение. Вы решаете, отправлять ли письмо, и можете изменить или удалить диагностические данные перед отправкой.</string>
     <string name="support_faq_storage">Как измеряется объём хранилища?</string>
@@ -327,7 +327,7 @@
     <string name="duplicates_trash_cancelled">Запрос отменён или отклонён. Повторите сканирование.</string>
     <string name="duplicates_trash_failed">Не удалось проверить или переместить копии. Повторите сканирование.</string>
     <string name="duplicates_trash_unsupported">Корзина требует Android 11 или новее. Просмотр доступен.</string>
-    <string name="duplicates_guard_note">Правила Memory Guard ещё не подключены. Проверьте каждую копию.</string>
+    <string name="duplicates_guard_note">Защищайте выбранные фото и видео от очистки CLENOVA. Другие приложения могут их изменять.</string>
     <string name="duplicates_verify_limit">Уменьшите выбор до лимита проверки 1 GB.</string>
     <string name="similar_no_matches">Похожие фотографии при сканировании не найдены</string>
     <string name="similar_manual_rule">Похожие фото не идентичны. Выберите каждое фото вручную. Одно фото в каждой группе и избранные защищены.</string>
@@ -362,4 +362,10 @@
     <string name="history_note">Здесь показаны только подтверждённые действия. Корзина может временно хранить файлы. Сохранение сжатой копии само по себе не освобождает место.</string>
     <string name="history_clear_note">Очистить локальную историю? Медиафайлы не изменятся.</string>
     <string name="history_write_failed">Не удалось обновить историю.</string>
+    <string name="guard_real_count">Сохранённые правила защиты</string>
+    <string name="guard_real_scope">Защищайте выбранные фото и видео от очистки CLENOVA. Другие приложения могут их изменять.</string>
+    <string name="guard_real_pick">Выберите фото или видео для защиты.</string>
+    <string name="guard_real_empty">Защищённых файлов пока нет.</string>
+    <string name="guard_real_error">Не удалось прочитать или обновить правила.</string>
+    <string name="guard_real_remove">Удалить это правило? Файлы не будут удалены.</string>
 </resources>

@@ -56,7 +56,7 @@
     <string name="home_view_all">Ver todo</string>
     <string name="home_smart_scan">Escaneo inteligente</string>
     <string name="home_compress">Comprimir</string>
-    <string name="home_guard_status">Protección sin configurar</string>
+    <string name="home_guard_status">Reglas de protección guardadas</string>
     <string name="home_sample_monitoring">Supervisión activa</string>
     <string name="home_sample_cleanup">Listo para limpiar</string>
     <string name="home_sample_activate">Activar Autopilot</string>
@@ -276,7 +276,7 @@
     <string name="privacy_local_title">Preferencias locales</string>
     <string name="privacy_local_body">El tema, la respuesta háptica, las preferencias de Autopilot y el idioma se guardan en tu dispositivo. No necesitas cuenta.</string>
     <string name="privacy_files_title">Archivos personales</string>
-    <string name="privacy_files_body">Clenova escanea fotos y vídeos accesibles con tu permiso. Las copias duplicadas pueden ir a la papelera de Android con tu aprobación. Memory Guard aún no está conectado. No sube medios personales. También puedes revisar y enviar fotos similares a la papelera con tu aprobación. Las capturas también pueden revisarse y enviarse a la papelera de Android con tu aprobación. Las fotos y vídeos grandes pueden enviarse a la papelera de Android con tu aprobación. También puedes revisar fotos deslizando y enviarlas a la papelera de Android con tu aprobación. Los vídeos pueden comprimirse localmente y guardarse como copias independientes.</string>
+    <string name="privacy_files_body">Clenova escanea fotos y vídeos accesibles con tu permiso. Las copias duplicadas pueden ir a la papelera de Android con tu aprobación. Protege las fotos y vídeos seleccionados de la limpieza de CLENOVA. Otras aplicaciones aún pueden cambiarlos. No sube medios personales. También puedes revisar y enviar fotos similares a la papelera con tu aprobación. Las capturas también pueden revisarse y enviarse a la papelera de Android con tu aprobación. Las fotos y vídeos grandes pueden enviarse a la papelera de Android con tu aprobación. También puedes revisar fotos deslizando y enviarlas a la papelera de Android con tu aprobación. Los vídeos pueden comprimirse localmente y guardarse como copias independientes.</string>
     <string name="privacy_support_title">Mensajes de soporte</string>
     <string name="privacy_support_body">El contacto y los informes abren tu aplicación de correo. Tú decides si envías el mensaje y puedes editar o eliminar datos de diagnóstico antes de enviarlo.</string>
     <string name="support_faq_storage">¿Cómo se mide el almacenamiento?</string>
@@ -327,7 +327,7 @@
     <string name="duplicates_trash_cancelled">Solicitud cancelada o no aprobada. Escanea de nuevo.</string>
     <string name="duplicates_trash_failed">No se pudieron verificar o mover las copias. Escanea y revisa.</string>
     <string name="duplicates_trash_unsupported">La papelera requiere Android 11 o posterior. Puedes revisar duplicados.</string>
-    <string name="duplicates_guard_note">Las reglas de Memory Guard aún no están conectadas. Revisa cada copia.</string>
+    <string name="duplicates_guard_note">Protege las fotos y vídeos seleccionados de la limpieza de CLENOVA. Otras aplicaciones aún pueden cambiarlos.</string>
     <string name="duplicates_verify_limit">Reduce la selección para respetar el límite de 1 GB.</string>
     <string name="similar_no_matches">No se encontraron fotos similares en este análisis</string>
     <string name="similar_manual_rule">Las fotos similares no son idénticas. Selecciona cada foto manualmente. Se protege una foto por grupo y las favoritas.</string>
@@ -362,4 +362,10 @@
     <string name="history_note">Solo aparecen acciones confirmadas. La papelera puede conservar archivos temporalmente. Guardar copias comprimidas no libera espacio por sí solo.</string>
     <string name="history_clear_note">¿Borrar el historial local? Tus archivos multimedia no cambiarán.</string>
     <string name="history_write_failed">No se pudo actualizar el historial.</string>
+    <string name="guard_real_count">Reglas de protección guardadas</string>
+    <string name="guard_real_scope">Protege las fotos y vídeos seleccionados de la limpieza de CLENOVA. Otras aplicaciones aún pueden cambiarlos.</string>
+    <string name="guard_real_pick">Selecciona fotos o vídeos para proteger.</string>
+    <string name="guard_real_empty">Todavía no hay elementos protegidos.</string>
+    <string name="guard_real_error">No se pudieron leer o actualizar las reglas.</string>
+    <string name="guard_real_remove">¿Quitar esta regla? No se eliminará ningún archivo.</string>
 </resources>

@@ -56,7 +56,7 @@
     <string name="home_view_all">سب دیکھیں</string>
     <string name="home_smart_scan">سمارٹ اسکین</string>
     <string name="home_compress">کمپریس</string>
-    <string name="home_guard_status">تحفظ سیٹ نہیں</string>
+    <string name="home_guard_status">محفوظ حفاظتی قواعد</string>
     <string name="home_sample_monitoring">نگرانی فعال</string>
     <string name="home_sample_cleanup">صفائی کے لیے تیار</string>
     <string name="home_sample_activate">آٹو پائلٹ فعال کریں</string>
@@ -276,7 +276,7 @@
     <string name="privacy_local_title">مقامی ترجیحات</string>
     <string name="privacy_local_body">تھیم، لمسی ردعمل، آٹو پائلٹ ترجیحات اور زبان ڈیوائس پر محفوظ ہیں۔ اکاؤنٹ ضروری نہیں۔</string>
     <string name="privacy_files_title">ذاتی فائلیں</string>
-    <string name="privacy_files_body">Clenova اجازت سے ڈیوائس پر تصاویر اور ویڈیوز اسکین کرتا ہے۔ منظوری سے نقول Android کوڑے دان میں جا سکتی ہیں۔ Memory Guard قواعد ابھی منسلک نہیں۔ ذاتی میڈیا اپ لوڈ نہیں ہوتا۔ آپ کی منظوری سے ملتی جلتی تصاویر بھی ٹریش میں بھیجی جا سکتی ہیں۔ آپ کی منظوری سے اسکرین شاٹس بھی Android ٹریش میں بھیجے جا سکتے ہیں۔ آپ کی منظوری سے بڑی تصاویر اور ویڈیوز Android ٹریش میں بھیجی جا سکتی ہیں۔ سوائپ کے ذریعے تصاویر کا جائزہ لے کر آپ کی منظوری سے Android ٹریش میں بھیجا جا سکتا ہے۔ ویڈیوز مقامی طور پر کمپریس کرکے الگ کاپی میں محفوظ کی جا سکتی ہیں۔</string>
+    <string name="privacy_files_body">Clenova اجازت سے ڈیوائس پر تصاویر اور ویڈیوز اسکین کرتا ہے۔ منظوری سے نقول Android کوڑے دان میں جا سکتی ہیں۔ منتخب تصاویر اور ویڈیوز کو CLENOVA کی صفائی سے محفوظ رکھیں۔ دیگر ایپس انہیں تبدیل کر سکتی ہیں۔ ذاتی میڈیا اپ لوڈ نہیں ہوتا۔ آپ کی منظوری سے ملتی جلتی تصاویر بھی ٹریش میں بھیجی جا سکتی ہیں۔ آپ کی منظوری سے اسکرین شاٹس بھی Android ٹریش میں بھیجے جا سکتے ہیں۔ آپ کی منظوری سے بڑی تصاویر اور ویڈیوز Android ٹریش میں بھیجی جا سکتی ہیں۔ سوائپ کے ذریعے تصاویر کا جائزہ لے کر آپ کی منظوری سے Android ٹریش میں بھیجا جا سکتا ہے۔ ویڈیوز مقامی طور پر کمپریس کرکے الگ کاپی میں محفوظ کی جا سکتی ہیں۔</string>
     <string name="privacy_support_title">معاونت کے پیغامات</string>
     <string name="privacy_support_body">رابطہ اور مسئلے کی رپورٹ آپ کی ای میل ایپ کھولتے ہیں۔ بھیجنا آپ کا فیصلہ ہے اور بھیجنے سے پہلے تشخیصی تفصیلات بدل یا ہٹا سکتے ہیں۔</string>
     <string name="support_faq_storage">اسٹوریج کیسے ناپا جاتا ہے؟</string>
@@ -327,7 +327,7 @@
     <string name="duplicates_trash_cancelled">درخواست منسوخ یا نامنظور ہوئی۔ دوبارہ اسکین کریں۔</string>
     <string name="duplicates_trash_failed">نقول کی تصدیق یا منتقلی نہیں ہو سکی۔ دوبارہ اسکین کریں۔</string>
     <string name="duplicates_trash_unsupported">کوڑے دان کے لیے Android 11 یا جدید درکار ہے۔ نقول دیکھ سکتے ہیں۔</string>
-    <string name="duplicates_guard_note">حسب ضرورت Memory Guard قواعد ابھی منسلک نہیں۔ ہر نقل دیکھیں۔</string>
+    <string name="duplicates_guard_note">منتخب تصاویر اور ویڈیوز کو CLENOVA کی صفائی سے محفوظ رکھیں۔ دیگر ایپس انہیں تبدیل کر سکتی ہیں۔</string>
     <string name="duplicates_verify_limit">1 GB تصدیقی حد کے لیے انتخاب کم کریں۔</string>
     <string name="similar_no_matches">اس اسکین میں ملتی جلتی تصاویر نہیں ملیں</string>
     <string name="similar_manual_rule">ملتی جلتی تصاویر بالکل یکساں نہیں ہوتیں۔ ہر تصویر خود منتخب کریں۔ ہر گروپ کی ایک تصویر اور پسندیدہ تصاویر محفوظ ہیں۔</string>
@@ -362,4 +362,10 @@
     <string name="history_note">یہاں صرف تصدیق شدہ کارروائیاں دکھائی جاتی ہیں۔ ٹریش میں فائلیں عارضی طور پر رہ سکتی ہیں۔ کمپریس کاپی محفوظ کرنے سے خود بخود جگہ خالی نہیں ہوتی۔</string>
     <string name="history_clear_note">مقامی تاریخ صاف کریں؟ میڈیا فائلیں تبدیل نہیں ہوں گی۔</string>
     <string name="history_write_failed">تاریخ اپ ڈیٹ نہیں ہو سکی۔</string>
+    <string name="guard_real_count">محفوظ حفاظتی قواعد</string>
+    <string name="guard_real_scope">منتخب تصاویر اور ویڈیوز کو CLENOVA کی صفائی سے محفوظ رکھیں۔ دیگر ایپس انہیں تبدیل کر سکتی ہیں۔</string>
+    <string name="guard_real_pick">حفاظت کے لیے تصاویر یا ویڈیوز منتخب کریں۔</string>
+    <string name="guard_real_empty">ابھی کوئی محفوظ آئٹم نہیں ہے۔</string>
+    <string name="guard_real_error">حفاظتی قواعد پڑھنا یا اپ ڈیٹ کرنا ممکن نہیں ہوا۔</string>
+    <string name="guard_real_remove">یہ قاعدہ ہٹائیں؟ کوئی فائل حذف نہیں ہوگی۔</string>
 </resources>

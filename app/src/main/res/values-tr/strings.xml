@@ -56,7 +56,7 @@
     <string name="home_view_all">Tümünü gör</string>
     <string name="home_smart_scan">Akıllı tarama</string>
     <string name="home_compress">Sıkıştır</string>
-    <string name="home_guard_status">Koruma yapılandırılmadı</string>
+    <string name="home_guard_status">Kayıtlı koruma kuralları</string>
     <string name="home_sample_monitoring">İzleme etkin</string>
     <string name="home_sample_cleanup">Temizliğe hazır</string>
     <string name="home_sample_activate">Otopilotu etkinleştir</string>
@@ -276,7 +276,7 @@
     <string name="privacy_local_title">Yerel tercihler</string>
     <string name="privacy_local_body">Tema, dokunsal geri bildirim, Otopilot tercihleri ve dil cihazda saklanır. Hesap gerekmez.</string>
     <string name="privacy_files_title">Kişisel dosyalar</string>
-    <string name="privacy_files_body">Clenova izninizle cihazda fotoğraf ve videoları tarar. Onayınızla kopyalar Android çöpüne taşınabilir. Memory Guard kuralları henüz bağlı değildir. Kişisel medya yüklenmez. Benzer fotoğraflar da onayınızla çöp kutusuna taşınabilir. Ekran görüntüleri de onayınızla Android çöp kutusuna taşınabilir. Büyük fotoğraf ve videolar onayınızla Android çöp kutusuna taşınabilir. Fotoğraflar kaydırılarak incelenebilir ve onayınızla Android çöp kutusuna taşınabilir. Videolar cihazda sıkıştırılabilir ve ayrı kopyalar olarak kaydedilebilir.</string>
+    <string name="privacy_files_body">Clenova izninizle cihazda fotoğraf ve videoları tarar. Onayınızla kopyalar Android çöpüne taşınabilir. Seçili fotoğraf ve videoları CLENOVA temizliğinden koruyun. Diğer uygulamalar bunları değiştirebilir. Kişisel medya yüklenmez. Benzer fotoğraflar da onayınızla çöp kutusuna taşınabilir. Ekran görüntüleri de onayınızla Android çöp kutusuna taşınabilir. Büyük fotoğraf ve videolar onayınızla Android çöp kutusuna taşınabilir. Fotoğraflar kaydırılarak incelenebilir ve onayınızla Android çöp kutusuna taşınabilir. Videolar cihazda sıkıştırılabilir ve ayrı kopyalar olarak kaydedilebilir.</string>
     <string name="privacy_support_title">Destek mesajları</string>
     <string name="privacy_support_body">İletişim ve sorun bildirimleri e-posta uygulamanızı açar. Gönderip göndermemeye siz karar verir, tanılama bilgilerini göndermeden önce düzenleyebilir veya kaldırabilirsiniz.</string>
     <string name="support_faq_storage">Depolama nasıl ölçülür?</string>
@@ -327,7 +327,7 @@
     <string name="duplicates_trash_cancelled">İstek iptal edildi veya onaylanmadı. Yeniden tarayın.</string>
     <string name="duplicates_trash_failed">Kopyalar doğrulanamadı veya taşınamadı. Yeniden tarayın.</string>
     <string name="duplicates_trash_unsupported">Çöp için Android 11 veya üstü gerekir. Kopyaları inceleyebilirsiniz.</string>
-    <string name="duplicates_guard_note">Özel Memory Guard kuralları henüz bağlı değil. Her kopyayı kontrol edin.</string>
+    <string name="duplicates_guard_note">Seçili fotoğraf ve videoları CLENOVA temizliğinden koruyun. Diğer uygulamalar bunları değiştirebilir.</string>
     <string name="duplicates_verify_limit">1 GB doğrulama sınırı için seçimi azaltın.</string>
     <string name="similar_no_matches">Bu taramada benzer fotoğraf bulunamadı</string>
     <string name="similar_manual_rule">Benzer fotoğraflar aynı değildir. Her fotoğrafı elle seçin. Her grupta bir fotoğraf ve favoriler korunur.</string>
@@ -362,4 +362,10 @@
     <string name="history_note">Burada yalnızca onaylanmış işlemler görünür. Çöp kutusu dosyaları geçici olarak saklayabilir. Sıkıştırılmış kopyaları kaydetmek tek başına yer açmaz.</string>
     <string name="history_clear_note">Yerel geçmiş temizlensin mi? Medya dosyaları değişmeyecek.</string>
     <string name="history_write_failed">Geçmiş güncellenemedi.</string>
+    <string name="guard_real_count">Kayıtlı koruma kuralları</string>
+    <string name="guard_real_scope">Seçili fotoğraf ve videoları CLENOVA temizliğinden koruyun. Diğer uygulamalar bunları değiştirebilir.</string>
+    <string name="guard_real_pick">Korunacak fotoğraf veya videoları seçin.</string>
+    <string name="guard_real_empty">Henüz korunan öğe yok.</string>
+    <string name="guard_real_error">Koruma kuralları okunamadı veya güncellenemedi.</string>
+    <string name="guard_real_remove">Bu kural kaldırılsın mı? Hiçbir dosya silinmeyecek.</string>
 </resources>

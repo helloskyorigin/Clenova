@@ -10,7 +10,7 @@ internal object SwipeTrash {
     fun eligible(result: MediaScanResult): Set<Uri> {
         val keepers = (result.duplicateGroups + result.similarGroups).mapNotNull { it.firstOrNull()?.uri }.toSet()
         return result.photos.filter {
-            !it.video && it.bytes > 0 && !it.favorite && it.uri !in keepers &&
+            !it.video && it.bytes > 0 && !it.favorite && it.uri !in keepers && it.uri !in result.protectedUris &&
                 it.generation != null && it.generation > 0L && it.modified != null && it.uri.authority == MediaStore.AUTHORITY
         }.map { it.uri }.toSet()
     }

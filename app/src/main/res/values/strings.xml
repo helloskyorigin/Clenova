@@ -48,7 +48,7 @@
     <string name="home_smart_scan">Smart Scan</string>
     <string name="home_compress">Compress</string>
     <string name="home_tool_unavailable">This tool is not available yet.</string>
-    <string name="home_guard_status">Protection not configured</string>
+    <string name="home_guard_status">Saved protection rules</string>
 
     <string name="home_sample_monitoring">Monitoring enabled</string>
     <string name="home_sample_cleanup">Ready for cleanup</string>
@@ -309,7 +309,7 @@
     <string name="privacy_local_title">Local preferences</string>
     <string name="privacy_local_body">Theme, haptics, Autopilot preferences and language are stored on your device. No account is required.</string>
     <string name="privacy_files_title">Personal files</string>
-    <string name="privacy_files_body">Clenova scans accessible photos and videos on your device with your permission. Duplicate copies can be moved to Android Trash with your approval. Memory Guard rules are not yet connected. No personal media is uploaded by Clenova. Similar photos can also be reviewed and moved to Trash with your approval. Screenshots can also be reviewed and moved to Android Trash with your approval. Large photos and videos can be moved to Android Trash with your approval. Photos can also be reviewed with Swipe Clean and moved to Android Trash with your approval. Videos can be compressed locally and saved as separate copies.</string>
+    <string name="privacy_files_body">Clenova scans accessible photos and videos on your device with your permission. Duplicate copies can be moved to Android Trash with your approval. Protect selected photos and videos from CLENOVA cleanup. Other apps can still change them. No personal media is uploaded by Clenova. Similar photos can also be reviewed and moved to Trash with your approval. Screenshots can also be reviewed and moved to Android Trash with your approval. Large photos and videos can be moved to Android Trash with your approval. Photos can also be reviewed with Swipe Clean and moved to Android Trash with your approval. Videos can be compressed locally and saved as separate copies.</string>
     <string name="privacy_support_title">Support messages</string>
     <string name="privacy_support_body">Contact and problem reports open your email app. You decide whether to send the message and can edit or remove diagnostic details before sending.</string>
     <string name="support_faq_storage">How is storage measured?</string>
@@ -360,7 +360,7 @@
     <string name="duplicates_trash_cancelled">Trash request cancelled or not approved. Scan again to refresh results.</string>
     <string name="duplicates_trash_failed">Could not verify or move the selected copies. Scan again and review.</string>
     <string name="duplicates_trash_unsupported">Trash requests require Android 11 or later. You can still review duplicate files.</string>
-    <string name="duplicates_guard_note">Custom Memory Guard rules are not connected yet. Check each selected copy before continuing.</string>
+    <string name="duplicates_guard_note">Protect selected photos and videos from CLENOVA cleanup. Other apps can still change them.</string>
     <string name="duplicates_verify_limit">Reduce your selection to stay within the 1 GB verification limit.</string>
     <string name="similar_no_matches">No similar photos found in this scan</string>
     <string name="similar_manual_rule">Similar does not mean identical. Choose each photo manually. One photo per group and favorites are protected.</string>
@@ -395,4 +395,10 @@
     <string name="history_note">Only confirmed actions appear here. Trash may retain files temporarily. Saved compressed copies do not free storage by themselves.</string>
     <string name="history_clear_note">Clear the local history? Your media files will not be changed.</string>
     <string name="history_write_failed">Could not update history.</string>
+    <string name="guard_real_count">Saved protection rules</string>
+    <string name="guard_real_scope">Protect selected photos and videos from CLENOVA cleanup. Other apps can still change them.</string>
+    <string name="guard_real_pick">Select photos or videos to protect.</string>
+    <string name="guard_real_empty">No protected items yet.</string>
+    <string name="guard_real_error">Could not read or update protection rules.</string>
+    <string name="guard_real_remove">Remove this rule? No file will be deleted.</string>
 </resources>

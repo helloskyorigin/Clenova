@@ -56,7 +56,7 @@
     <string name="home_view_all">Alle anzeigen</string>
     <string name="home_smart_scan">Smart-Scan</string>
     <string name="home_compress">Komprimieren</string>
-    <string name="home_guard_status">Schutz nicht eingerichtet</string>
+    <string name="home_guard_status">Gespeicherte Schutzregeln</string>
     <string name="home_sample_monitoring">Überwachung aktiv</string>
     <string name="home_sample_cleanup">Bereit zur Bereinigung</string>
     <string name="home_sample_activate">Autopilot aktivieren</string>
@@ -276,7 +276,7 @@
     <string name="privacy_local_title">Lokale Einstellungen</string>
     <string name="privacy_local_body">Design, Haptik, Autopilot-Einstellungen und Sprache werden auf dem Gerät gespeichert. Kein Konto erforderlich.</string>
     <string name="privacy_files_title">Persönliche Dateien</string>
-    <string name="privacy_files_body">Clenova scannt zugängliche Fotos und Videos mit deiner Erlaubnis auf dem Gerät. Duplikate können mit Zustimmung in den Android-Papierkorb. Memory Guard ist noch nicht verbunden. Keine privaten Medien werden hochgeladen. Ähnliche Fotos können mit deiner Zustimmung ebenfalls in den Papierkorb verschoben werden. Screenshots können mit deiner Zustimmung ebenfalls in den Android-Papierkorb verschoben werden. Große Fotos und Videos können mit deiner Zustimmung in den Android-Papierkorb verschoben werden. Fotos können auch per Wischen geprüft und mit deiner Zustimmung in den Android-Papierkorb verschoben werden. Videos können lokal komprimiert und als separate Kopien gespeichert werden.</string>
+    <string name="privacy_files_body">Clenova scannt zugängliche Fotos und Videos mit deiner Erlaubnis auf dem Gerät. Duplikate können mit Zustimmung in den Android-Papierkorb. Schütze ausgewählte Fotos und Videos vor der CLENOVA-Bereinigung. Andere Apps können sie weiterhin ändern. Keine privaten Medien werden hochgeladen. Ähnliche Fotos können mit deiner Zustimmung ebenfalls in den Papierkorb verschoben werden. Screenshots können mit deiner Zustimmung ebenfalls in den Android-Papierkorb verschoben werden. Große Fotos und Videos können mit deiner Zustimmung in den Android-Papierkorb verschoben werden. Fotos können auch per Wischen geprüft und mit deiner Zustimmung in den Android-Papierkorb verschoben werden. Videos können lokal komprimiert und als separate Kopien gespeichert werden.</string>
     <string name="privacy_support_title">Support-Nachrichten</string>
     <string name="privacy_support_body">Kontakt und Problemberichte öffnen deine E-Mail-App. Du entscheidest über den Versand und kannst Diagnosedaten vorher bearbeiten oder entfernen.</string>
     <string name="support_faq_storage">Wie wird der Speicher gemessen?</string>
@@ -327,7 +327,7 @@
     <string name="duplicates_trash_cancelled">Anfrage abgebrochen oder abgelehnt. Erneut scannen.</string>
     <string name="duplicates_trash_failed">Kopien konnten nicht geprüft oder verschoben werden. Erneut scannen.</string>
     <string name="duplicates_trash_unsupported">Papierkorb erfordert Android 11 oder neuer. Duplikate bleiben einsehbar.</string>
-    <string name="duplicates_guard_note">Eigene Memory-Guard-Regeln sind noch nicht verbunden. Prüfe jede Kopie.</string>
+    <string name="duplicates_guard_note">Schütze ausgewählte Fotos und Videos vor der CLENOVA-Bereinigung. Andere Apps können sie weiterhin ändern.</string>
     <string name="duplicates_verify_limit">Reduziere die Auswahl auf das Prüflimit von 1 GB.</string>
     <string name="similar_no_matches">Bei diesem Scan wurden keine ähnlichen Fotos gefunden</string>
     <string name="similar_manual_rule">Ähnliche Fotos sind nicht identisch. Wähle jedes Foto manuell aus. Ein Foto pro Gruppe und Favoriten bleiben geschützt.</string>
@@ -362,4 +362,10 @@
     <string name="history_note">Hier erscheinen nur bestätigte Aktionen. Der Papierkorb kann Dateien vorübergehend behalten. Komprimierte Kopien allein schaffen keinen freien Speicher.</string>
     <string name="history_clear_note">Lokalen Verlauf löschen? Mediendateien bleiben unverändert.</string>
     <string name="history_write_failed">Verlauf konnte nicht aktualisiert werden.</string>
+    <string name="guard_real_count">Gespeicherte Schutzregeln</string>
+    <string name="guard_real_scope">Schütze ausgewählte Fotos und Videos vor der CLENOVA-Bereinigung. Andere Apps können sie weiterhin ändern.</string>
+    <string name="guard_real_pick">Wähle Fotos oder Videos zum Schützen aus.</string>
+    <string name="guard_real_empty">Noch keine geschützten Elemente.</string>
+    <string name="guard_real_error">Schutzregeln konnten nicht gelesen oder aktualisiert werden.</string>
+    <string name="guard_real_remove">Diese Regel entfernen? Keine Datei wird gelöscht.</string>
 </resources>

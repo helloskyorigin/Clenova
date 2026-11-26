@@ -24,7 +24,9 @@ jobs:
           java-version: '17'
       - name: Prepare SDK and synthetic video fixture
         run: |
-          sdkmanager 'platforms;android-36.1' 'platforms;android-36' 'build-tools;36.0.0'
+          SDKMANAGER="$(command -v sdkmanager || true)"
+          if [ -z "$SDKMANAGER" ]; then SDKMANAGER="${ANDROID_HOME:?}/cmdline-tools/latest/bin/sdkmanager"; fi
+          "$SDKMANAGER" 'platforms;android-36.1' 'platforms;android-36' 'build-tools;36.0.0'
           command -v ffmpeg || (sudo apt-get update && sudo apt-get install -y ffmpeg)
           mkdir -p app/src/androidTest/assets
           ffmpeg -hide_banner -loglevel error -y -f lavfi -i testsrc2=size=1280x720:rate=30 -t 3 -c:v libx264 -pix_fmt yuv420p -preset fast -crf 10 app/src/androidTest/assets/clean-qa-source.mp4

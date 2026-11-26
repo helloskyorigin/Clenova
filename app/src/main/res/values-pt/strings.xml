@@ -56,7 +56,7 @@
     <string name="home_view_all">Ver tudo</string>
     <string name="home_smart_scan">Análise inteligente</string>
     <string name="home_compress">Comprimir</string>
-    <string name="home_guard_status">Proteção não configurada</string>
+    <string name="home_guard_status">Regras de proteção salvas</string>
     <string name="home_sample_monitoring">Monitoramento ativo</string>
     <string name="home_sample_cleanup">Pronto para limpar</string>
     <string name="home_sample_activate">Ativar Autopilot</string>
@@ -276,7 +276,7 @@
     <string name="privacy_local_title">Preferências locais</string>
     <string name="privacy_local_body">Tema, resposta tátil, preferências do Autopilot e idioma ficam no dispositivo. Não é preciso criar conta.</string>
     <string name="privacy_files_title">Arquivos pessoais</string>
-    <string name="privacy_files_body">Clenova analisa fotos e vídeos acessíveis no dispositivo com sua permissão. Duplicatas podem ir à lixeira Android com sua aprovação. Memory Guard ainda não está conectado. Nenhuma mídia pessoal é enviada. Fotos semelhantes também podem ser revisadas e enviadas à lixeira com sua aprovação. Capturas de tela também podem ser revisadas e enviadas à lixeira do Android com sua aprovação. Fotos e vídeos grandes podem ser enviados à lixeira do Android com sua aprovação. Fotos também podem ser revisadas deslizando e enviadas à lixeira do Android com sua aprovação. Vídeos podem ser compactados localmente e salvos como cópias separadas.</string>
+    <string name="privacy_files_body">Clenova analisa fotos e vídeos acessíveis no dispositivo com sua permissão. Duplicatas podem ir à lixeira Android com sua aprovação. Proteja fotos e vídeos selecionados da limpeza do CLENOVA. Outros aplicativos ainda podem alterá-los. Nenhuma mídia pessoal é enviada. Fotos semelhantes também podem ser revisadas e enviadas à lixeira com sua aprovação. Capturas de tela também podem ser revisadas e enviadas à lixeira do Android com sua aprovação. Fotos e vídeos grandes podem ser enviados à lixeira do Android com sua aprovação. Fotos também podem ser revisadas deslizando e enviadas à lixeira do Android com sua aprovação. Vídeos podem ser compactados localmente e salvos como cópias separadas.</string>
     <string name="privacy_support_title">Mensagens de suporte</string>
     <string name="privacy_support_body">O contato e os relatórios abrem seu app de e-mail. Você decide se envia e pode editar ou remover detalhes de diagnóstico antes do envio.</string>
     <string name="support_faq_storage">Como o armazenamento é medido?</string>
@@ -327,7 +327,7 @@
     <string name="duplicates_trash_cancelled">Solicitação cancelada ou não aprovada. Analise novamente.</string>
     <string name="duplicates_trash_failed">Não foi possível verificar ou mover as cópias. Analise novamente.</string>
     <string name="duplicates_trash_unsupported">A lixeira requer Android 11 ou posterior. Você pode revisar duplicatas.</string>
-    <string name="duplicates_guard_note">Regras personalizadas do Memory Guard ainda não estão conectadas. Revise cada cópia.</string>
+    <string name="duplicates_guard_note">Proteja fotos e vídeos selecionados da limpeza do CLENOVA. Outros aplicativos ainda podem alterá-los.</string>
     <string name="duplicates_verify_limit">Reduza a seleção para o limite de verificação de 1 GB.</string>
     <string name="similar_no_matches">Nenhuma foto semelhante encontrada nesta análise</string>
     <string name="similar_manual_rule">Fotos semelhantes não são idênticas. Selecione cada foto manualmente. Uma foto por grupo e as favoritas são protegidas.</string>
@@ -362,4 +362,10 @@
     <string name="history_note">Somente ações confirmadas aparecem aqui. A lixeira pode manter arquivos temporariamente. Salvar cópias compactadas não libera espaço por si só.</string>
     <string name="history_clear_note">Limpar o histórico local? Seus arquivos de mídia não serão alterados.</string>
     <string name="history_write_failed">Não foi possível atualizar o histórico.</string>
+    <string name="guard_real_count">Regras de proteção salvas</string>
+    <string name="guard_real_scope">Proteja fotos e vídeos selecionados da limpeza do CLENOVA. Outros aplicativos ainda podem alterá-los.</string>
+    <string name="guard_real_pick">Selecione fotos ou vídeos para proteger.</string>
+    <string name="guard_real_empty">Ainda não há itens protegidos.</string>
+    <string name="guard_real_error">Não foi possível ler ou atualizar as regras.</string>
+    <string name="guard_real_remove">Remover esta regra? Nenhum arquivo será excluído.</string>
 </resources>

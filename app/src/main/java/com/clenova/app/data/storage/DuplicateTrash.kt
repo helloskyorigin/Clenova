@@ -15,16 +15,16 @@ internal object DuplicateTrash {
     const val MAX_BATCH = 100
     private const val MAX_VERIFY_BYTES = 1_000_000_000L
 
-    fun allowed(groups: List<List<ScannedMedia>>): Set<Uri> =
-        groups.flatMap { it.drop(1).filterNot { media -> media.favorite } }.map { it.uri }.toSet()
+    fun allowed(groups: List<List<ScannedMedia>>, protectedUris: Set<Uri> = emptySet()): Set<Uri> =
+        groups.flatMap { it.drop(1).filterNot { media -> media.favorite || media.uri in protectedUris } }.map { it.uri }.toSet()
 
-    fun batch(groups: List<List<ScannedMedia>>): Set<Uri> {
+    fun batch(groups: List<List<ScannedMedia>>, protectedUris: Set<Uri> = emptySet()): Set<Uri> {
         val selected = linkedSetOf<Uri>()
         var remaining = MAX_VERIFY_BYTES
         for (group in groups) {
             val keeper = group.firstOrNull() ?: continue
             var keeperCounted = false
-            for (copy in group.drop(1).filterNot { it.favorite }) {
+            for (copy in group.drop(1).filterNot { it.favorite || it.uri in protectedUris }) {
                 if (selected.size >= MAX_BATCH) return selected
                 val cost = copy.bytes + if (keeperCounted) 0L else keeper.bytes
                 if (cost > remaining) continue
@@ -36,9 +36,9 @@ internal object DuplicateTrash {
         return selected
     }
 
-    fun plan(groups: List<List<ScannedMedia>>, selection: Set<Uri>): List<Pair<ScannedMedia, List<ScannedMedia>>> {
+    fun plan(groups: List<List<ScannedMedia>>, selection: Set<Uri>, protectedUris: Set<Uri> = emptySet()): List<Pair<ScannedMedia, List<ScannedMedia>>> {
         require(selection.isNotEmpty() && selection.size <= MAX_BATCH)
-        require(allowed(groups).containsAll(selection))
+        require(allowed(groups, protectedUris).containsAll(selection))
         val plan = groups.mapNotNull { group ->
             val selected = group.drop(1).filter { it.uri in selection }
             if (selected.isEmpty()) null else group.first() to selected
@@ -53,7 +53,8 @@ internal object DuplicateTrash {
         withContext(Dispatchers.IO) {
             if (Build.VERSION.SDK_INT < 30) throw UnsupportedOperationException("Android 11 required")
             check(mediaAccess(context) == snapshot.access)
-            val plan = plan(if (similar) snapshot.similarGroups else snapshot.duplicateGroups, selection)
+            val guard = MemoryGuardStore(context)
+            val plan = plan(if (similar) snapshot.similarGroups else snapshot.duplicateGroups, selection, snapshot.protectedUris + guard.records().keys)
             val scanner = MediaScanner(context.applicationContext)
             val resolver = context.contentResolver
             suspend fun verify(media: ScannedMedia, isKeeper: Boolean) {
@@ -74,6 +75,7 @@ internal object DuplicateTrash {
             }
             check(mediaAccess(context) == snapshot.access)
             currentCoroutineContext().ensureActive()
+            guard.ensureUnprotected(selection)
             MediaStore.createTrashRequest(resolver, selection.toMutableList(), true)
         }
 }

@@ -51,10 +51,12 @@ internal data class MediaScanResult(
     val similarGroups: List<List<ScannedMedia>> = emptyList(),
     val largeFiles: List<ScannedMedia> = largeVideos,
     val photos: List<ScannedMedia> = emptyList(),
+    val allMedia: List<ScannedMedia> = emptyList(),
+    val protectedUris: Set<Uri> = emptySet(),
 ) {
-    val extras = duplicateGroups.flatMap { it.drop(1).filterNot { media -> media.favorite } }
+    val extras = duplicateGroups.flatMap { it.drop(1).filterNot { media -> media.favorite || media.uri in protectedUris } }
     // A file may appear in multiple categories; count it only once.
-    val reviewBytes = (extras + screenshots + largeFiles + largeVideos).distinctBy { it.uri }.sumOf { it.bytes }
+    val reviewBytes = (extras + screenshots + largeFiles + largeVideos).filterNot { it.favorite || it.uri in protectedUris }.distinctBy { it.uri }.sumOf { it.bytes }
     val duplicateBytes = extras.sumOf { it.bytes }
 }
 
@@ -152,7 +154,7 @@ internal class MediaScanner(private val context: Context) {
         incomplete = incomplete || similar.incomplete
         currentCoroutineContext().ensureActive()
         if (mediaAccess(context) != access) throw SecurityException("Media access changed")
-        MediaScanResult(access, items.size, groups, screenshots, largeVideos, incomplete, similar.groups, largeFiles, items.filterNot { it.video }.sortedByDescending { it.modified ?: 0L })
+        MediaScanResult(access, items.size, groups, screenshots, largeVideos, incomplete, similar.groups, largeFiles, items.filterNot { it.video }.sortedByDescending { it.modified ?: 0L }, items, MemoryGuardStore(context).records().keys)
     }
 
     internal suspend fun hash(resolver: ContentResolver, media: ScannedMedia): String {

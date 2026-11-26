@@ -56,7 +56,7 @@
     <string name="home_view_all">查看全部</string>
     <string name="home_smart_scan">智能扫描</string>
     <string name="home_compress">压缩</string>
-    <string name="home_guard_status">未设置保护</string>
+    <string name="home_guard_status">已保存的保护规则</string>
     <string name="home_sample_monitoring">监控已启用</string>
     <string name="home_sample_cleanup">可以清理</string>
     <string name="home_sample_activate">启用自动管理</string>
@@ -276,7 +276,7 @@
     <string name="privacy_local_title">本地偏好设置</string>
     <string name="privacy_local_body">主题、触感反馈、自动管理偏好和语言保存在设备上。无需账户。</string>
     <string name="privacy_files_title">个人文件</string>
-    <string name="privacy_files_body">Clenova 经你授权在设备上扫描照片和视频。经批准可将重复副本移至 Android 回收站。Memory Guard 规则尚未连接。不上传个人媒体。 相似照片也可以在您批准后移入回收站。 截图也可以在您批准后移入 Android 回收站。 经您批准，大型照片和视频也可移入 Android 回收站。 您也可以通过滑动清理检查照片，并在批准后移入 Android 回收站。 视频可在本地压缩并另存为副本。</string>
+    <string name="privacy_files_body">Clenova 经你授权在设备上扫描照片和视频。经批准可将重复副本移至 Android 回收站。保护选中的照片和视频免受 CLENOVA 清理。其他应用仍可更改它们。不上传个人媒体。 相似照片也可以在您批准后移入回收站。 截图也可以在您批准后移入 Android 回收站。 经您批准，大型照片和视频也可移入 Android 回收站。 您也可以通过滑动清理检查照片，并在批准后移入 Android 回收站。 视频可在本地压缩并另存为副本。</string>
     <string name="privacy_support_title">支持消息</string>
     <string name="privacy_support_body">联系和问题报告会打开电子邮件应用。是否发送由你决定，发送前可编辑或删除诊断详情。</string>
     <string name="support_faq_storage">如何测量存储空间？</string>
@@ -327,7 +327,7 @@
     <string name="duplicates_trash_cancelled">回收站请求已取消或未获批准。重新扫描。</string>
     <string name="duplicates_trash_failed">无法验证或移动所选副本。重新扫描并检查。</string>
     <string name="duplicates_trash_unsupported">回收站请求需要 Android 11 或更高版本。仍可查看重复文件。</string>
-    <string name="duplicates_guard_note">自定义 Memory Guard 规则尚未连接。继续前请检查每份副本。</string>
+    <string name="duplicates_guard_note">保护选中的照片和视频免受 CLENOVA 清理。其他应用仍可更改它们。</string>
     <string name="duplicates_verify_limit">减少选择以符合 1 GB 验证限制。</string>
     <string name="similar_no_matches">本次扫描未找到相似照片</string>
     <string name="similar_manual_rule">相似不代表完全相同。请手动选择每张照片。每组保留一张照片，并保护收藏照片。</string>
@@ -362,4 +362,10 @@
     <string name="history_note">这里只显示已确认的操作。回收站可能暂时保留文件。保存压缩副本本身不会释放空间。</string>
     <string name="history_clear_note">清除本地记录？媒体文件不会更改。</string>
     <string name="history_write_failed">无法更新记录。</string>
+    <string name="guard_real_count">已保存的保护规则</string>
+    <string name="guard_real_scope">保护选中的照片和视频免受 CLENOVA 清理。其他应用仍可更改它们。</string>
+    <string name="guard_real_pick">选择要保护的照片或视频。</string>
+    <string name="guard_real_empty">暂无受保护项目。</string>
+    <string name="guard_real_error">无法读取或更新保护规则。</string>
+    <string name="guard_real_remove">移除此规则？不会删除文件。</string>
 </resources>

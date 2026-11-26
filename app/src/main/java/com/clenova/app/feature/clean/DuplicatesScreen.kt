@@ -63,7 +63,7 @@ internal fun DuplicatesScreen(
     val colors = ClenovaThemeTokens.colors
     val scope = rememberCoroutineScope()
     val groups = (if (similar) result?.similarGroups else result?.duplicateGroups).orEmpty()
-    val allowed = remember(result) { DuplicateTrash.allowed(groups) }
+    val allowed = remember(result) { DuplicateTrash.allowed(groups, result?.protectedUris.orEmpty()) }
     var selected by remember(result) { mutableStateOf(emptySet<Uri>()) }
     val actualSelection = selected.intersect(allowed)
     val selectedBytes = groups.flatten().filter { it.uri in actualSelection }.sumOf { it.bytes }
@@ -74,7 +74,7 @@ internal fun DuplicatesScreen(
     var pendingBytes by rememberSaveable { mutableLongStateOf(0L) }
     var outcome by rememberSaveable { mutableStateOf<Int?>(null) }
     var job by remember { mutableStateOf<Job?>(null) }
-    val selectionValid = actualSelection.isNotEmpty() && runCatching { DuplicateTrash.plan(groups, actualSelection) }.isSuccess
+    val selectionValid = actualSelection.isNotEmpty() && runCatching { DuplicateTrash.plan(groups, actualSelection, result?.protectedUris.orEmpty()) }.isSuccess
     val supported = Build.VERSION.SDK_INT >= 30
     val busy = checking || pending
     val launcher = rememberLauncherForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) { response ->
@@ -133,7 +133,7 @@ internal fun DuplicatesScreen(
                         Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                             Text(stringResource(if (similar) R.string.clean_tool_similar_title else R.string.duplicates_groups), Modifier.weight(1f), style = MaterialTheme.typography.titleMedium)
                             if (!similar) TextButton(enabled = !busy && supported && allowed.isNotEmpty(), onClick = {
-                                selected = if (actualSelection.isNotEmpty()) emptySet() else DuplicateTrash.batch(groups)
+                                selected = if (actualSelection.isNotEmpty()) emptySet() else DuplicateTrash.batch(groups, result?.protectedUris.orEmpty())
                                 onSelectionHaptic()
                             }, modifier = Modifier.testTag("duplicates_select_all")) {
                                 Text(stringResource(if (actualSelection.isNotEmpty()) R.string.review_deselect_all else R.string.duplicates_select_batch))
@@ -146,7 +146,7 @@ internal fun DuplicatesScreen(
                             Text(stringResource(R.string.guard_item_count, group.size) + (if (similar) "" else " · " + ByteFormatter.format(group.first().bytes)), style = MaterialTheme.typography.bodySmall, color = colors.textSecondary)
                             LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                                 itemsIndexed(group, key = { _, media -> media.uri.toString() }) { i, media ->
-                                    val keep = i == 0 || media.favorite
+                                    val keep = i == 0 || media.favorite || media.uri !in allowed
                                     var previewReady by remember(media.uri) { mutableStateOf(false) }
                                     val checked = media.uri in actualSelection
                                     Column(Modifier.width(112.dp), verticalArrangement = Arrangement.spacedBy(5.dp)) {

@@ -56,7 +56,7 @@
     <string name="home_view_all">عرض الكل</string>
     <string name="home_smart_scan">فحص ذكي</string>
     <string name="home_compress">ضغط</string>
-    <string name="home_guard_status">الحماية غير مهيأة</string>
+    <string name="home_guard_status">قواعد الحماية المحفوظة</string>
     <string name="home_sample_monitoring">المراقبة مفعّلة</string>
     <string name="home_sample_cleanup">جاهز للتنظيف</string>
     <string name="home_sample_activate">تفعيل Autopilot</string>
@@ -276,7 +276,7 @@
     <string name="privacy_local_title">التفضيلات المحلية</string>
     <string name="privacy_local_body">يُحفظ المظهر والاستجابة اللمسية وتفضيلات Autopilot واللغة على جهازك. لا يلزم حساب.</string>
     <string name="privacy_files_title">الملفات الشخصية</string>
-    <string name="privacy_files_body">يفحص Clenova الصور والفيديوهات المتاحة بإذنك على الجهاز. يمكن نقل النسخ إلى مهملات Android بموافقتك. قواعد Memory Guard غير متصلة بعد. لا تُرفع الوسائط الشخصية. يمكن أيضاً مراجعة الصور المتشابهة ونقلها إلى سلة المهملات بموافقتك. يمكن نقل لقطات الشاشة إلى سلة مهملات Android بموافقتك. يمكن نقل الصور والفيديوهات الكبيرة إلى سلة مهملات Android بموافقتك. يمكن أيضاً مراجعة الصور بالسحب ونقلها إلى سلة مهملات Android بموافقتك. يمكن ضغط الفيديوهات محلياً وحفظها كنسخ منفصلة.</string>
+    <string name="privacy_files_body">يفحص Clenova الصور والفيديوهات المتاحة بإذنك على الجهاز. يمكن نقل النسخ إلى مهملات Android بموافقتك. احم الصور والفيديوهات المحددة من تنظيف CLENOVA. يمكن للتطبيقات الأخرى تعديلها. لا تُرفع الوسائط الشخصية. يمكن أيضاً مراجعة الصور المتشابهة ونقلها إلى سلة المهملات بموافقتك. يمكن نقل لقطات الشاشة إلى سلة مهملات Android بموافقتك. يمكن نقل الصور والفيديوهات الكبيرة إلى سلة مهملات Android بموافقتك. يمكن أيضاً مراجعة الصور بالسحب ونقلها إلى سلة مهملات Android بموافقتك. يمكن ضغط الفيديوهات محلياً وحفظها كنسخ منفصلة.</string>
     <string name="privacy_support_title">رسائل الدعم</string>
     <string name="privacy_support_body">يفتح التواصل وتقارير المشكلات تطبيق البريد. تقرر أنت إرسال الرسالة ويمكنك تعديل تفاصيل التشخيص أو حذفها قبل الإرسال.</string>
     <string name="support_faq_storage">كيف تُقاس مساحة التخزين؟</string>
@@ -327,7 +327,7 @@
     <string name="duplicates_trash_cancelled">أُلغي الطلب أو لم يُوافق عليه. أعد الفحص.</string>
     <string name="duplicates_trash_failed">تعذر التحقق من النسخ أو نقلها. أعد الفحص والمراجعة.</string>
     <string name="duplicates_trash_unsupported">تتطلب المهملات Android 11 أو أحدث. يمكنك مراجعة النسخ.</string>
-    <string name="duplicates_guard_note">قواعد Memory Guard المخصصة غير متصلة بعد. راجع كل نسخة.</string>
+    <string name="duplicates_guard_note">احم الصور والفيديوهات المحددة من تنظيف CLENOVA. يمكن للتطبيقات الأخرى تعديلها.</string>
     <string name="duplicates_verify_limit">قلل التحديد لحد التحقق البالغ 1 GB.</string>
     <string name="similar_no_matches">لم يتم العثور على صور متشابهة في هذا الفحص</string>
     <string name="similar_manual_rule">التشابه لا يعني التطابق. اختر كل صورة يدوياً. تُحمى صورة واحدة في كل مجموعة والصور المفضلة.</string>
@@ -362,4 +362,10 @@
     <string name="history_note">تظهر هنا الإجراءات المؤكدة فقط. قد تحتفظ سلة المهملات بالملفات مؤقتاً. حفظ نسخ مضغوطة لا يحرر المساحة بحد ذاته.</string>
     <string name="history_clear_note">مسح السجل المحلي؟ لن تتغير ملفات الوسائط.</string>
     <string name="history_write_failed">تعذر تحديث السجل.</string>
+    <string name="guard_real_count">قواعد الحماية المحفوظة</string>
+    <string name="guard_real_scope">احم الصور والفيديوهات المحددة من تنظيف CLENOVA. يمكن للتطبيقات الأخرى تعديلها.</string>
+    <string name="guard_real_pick">حدد الصور أو الفيديوهات التي تريد حمايتها.</string>
+    <string name="guard_real_empty">لا توجد عناصر محمية بعد.</string>
+    <string name="guard_real_error">تعذرت قراءة قواعد الحماية أو تحديثها.</string>
+    <string name="guard_real_remove">إزالة هذه القاعدة؟ لن يتم حذف أي ملف.</string>
 </resources>

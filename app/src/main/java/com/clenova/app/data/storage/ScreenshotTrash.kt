@@ -18,7 +18,7 @@ internal object ScreenshotTrash {
     fun eligible(result: MediaScanResult): List<ScannedMedia> {
         val keepers = result.duplicateGroups.mapNotNull { it.firstOrNull()?.uri }.toSet()
         return result.screenshots.filter {
-            it.screenshot && !it.favorite && it.verifiedHash != null && it.uri !in keepers &&
+            it.screenshot && !it.favorite && it.verifiedHash != null && it.uri !in keepers && it.uri !in result.protectedUris &&
                 it.uri.authority == MediaStore.AUTHORITY
         }.distinctBy { it.uri }
     }
@@ -52,6 +52,7 @@ internal object ScreenshotTrash {
             }
             check(mediaAccess(context) == result.access)
             currentCoroutineContext().ensureActive()
+            MemoryGuardStore(context).ensureUnprotected(selected)
             MediaStore.createTrashRequest(resolver, selected.toList(), true)
         }
 }

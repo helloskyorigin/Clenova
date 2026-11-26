@@ -56,7 +56,7 @@
     <string name="home_view_all">সব দেখুন</string>
     <string name="home_smart_scan">স্মার্ট স্ক্যান</string>
     <string name="home_compress">কম্প্রেস</string>
-    <string name="home_guard_status">সুরক্ষা সেট করা হয়নি</string>
+    <string name="home_guard_status">সংরক্ষিত সুরক্ষা নিয়ম</string>
     <string name="home_sample_monitoring">নজরদারি চালু</string>
     <string name="home_sample_cleanup">পরিষ্কারের জন্য প্রস্তুত</string>
     <string name="home_sample_activate">অটোপাইলট চালু করুন</string>
@@ -276,7 +276,7 @@
     <string name="privacy_local_title">স্থানীয় পছন্দ</string>
     <string name="privacy_local_body">থিম, স্পর্শ প্রতিক্রিয়া, অটোপাইলট পছন্দ ও ভাষা ডিভাইসে সংরক্ষিত। অ্যাকাউন্ট দরকার নেই।</string>
     <string name="privacy_files_title">ব্যক্তিগত ফাইল</string>
-    <string name="privacy_files_body">Clenova অনুমতি নিয়ে ডিভাইসের ছবি ও ভিডিও স্ক্যান করে। অনুমোদনে কপি Android ট্র্যাশে যায়। Memory Guard নিয়ম এখনও যুক্ত নয়। ব্যক্তিগত মিডিয়া আপলোড হয় না। আপনার অনুমোদনে অনুরূপ ছবিও ট্র্যাশে পাঠানো যায়। আপনার অনুমোদনে স্ক্রিনশটও Android ট্র্যাশে পাঠানো যায়। আপনার অনুমোদনে বড় ছবি ও ভিডিও Android ট্র্যাশে পাঠানো যায়। সোয়াইপ করে ছবিও পর্যালোচনা করা যায় এবং আপনার অনুমোদনে Android ট্র্যাশে পাঠানো যায়। ভিডিও ডিভাইসে সংকুচিত করে আলাদা কপি হিসেবে সংরক্ষণ করা যায়।</string>
+    <string name="privacy_files_body">Clenova অনুমতি নিয়ে ডিভাইসের ছবি ও ভিডিও স্ক্যান করে। অনুমোদনে কপি Android ট্র্যাশে যায়। নির্বাচিত ছবি ও ভিডিও CLENOVA-এর ক্লিনআপ থেকে সুরক্ষিত রাখুন। অন্য অ্যাপ এগুলো বদলাতে পারে। ব্যক্তিগত মিডিয়া আপলোড হয় না। আপনার অনুমোদনে অনুরূপ ছবিও ট্র্যাশে পাঠানো যায়। আপনার অনুমোদনে স্ক্রিনশটও Android ট্র্যাশে পাঠানো যায়। আপনার অনুমোদনে বড় ছবি ও ভিডিও Android ট্র্যাশে পাঠানো যায়। সোয়াইপ করে ছবিও পর্যালোচনা করা যায় এবং আপনার অনুমোদনে Android ট্র্যাশে পাঠানো যায়। ভিডিও ডিভাইসে সংকুচিত করে আলাদা কপি হিসেবে সংরক্ষণ করা যায়।</string>
     <string name="privacy_support_title">সহায়তা বার্তা</string>
     <string name="privacy_support_body">যোগাযোগ ও সমস্যা রিপোর্ট ইমেল অ্যাপ খুলে। পাঠাবেন কি না আপনি ঠিক করেন এবং পাঠানোর আগে ডায়াগনস্টিক তথ্য বদলাতে বা সরাতে পারেন।</string>
     <string name="support_faq_storage">স্টোরেজ কীভাবে মাপা হয়?</string>
@@ -327,7 +327,7 @@
     <string name="duplicates_trash_cancelled">ট্র্যাশ অনুরোধ বাতিল বা অনুমোদিত নয়। আবার স্ক্যান করুন।</string>
     <string name="duplicates_trash_failed">কপি যাচাই বা সরানো যায়নি। আবার স্ক্যান করে দেখুন।</string>
     <string name="duplicates_trash_unsupported">ট্র্যাশের জন্য Android 11 বা নতুন সংস্করণ দরকার। কপি দেখতে পারবেন।</string>
-    <string name="duplicates_guard_note">কাস্টম Memory Guard নিয়ম এখনও যুক্ত নয়। প্রতিটি কপি দেখুন।</string>
+    <string name="duplicates_guard_note">নির্বাচিত ছবি ও ভিডিও CLENOVA-এর ক্লিনআপ থেকে সুরক্ষিত রাখুন। অন্য অ্যাপ এগুলো বদলাতে পারে।</string>
     <string name="duplicates_verify_limit">১ GB যাচাই সীমার জন্য কম নির্বাচন করুন।</string>
     <string name="similar_no_matches">এই স্ক্যানে অনুরূপ ছবি পাওয়া যায়নি</string>
     <string name="similar_manual_rule">অনুরূপ ছবি হুবহু এক নয়। প্রতিটি ছবি নিজে বেছে নিন। প্রতি দলের একটি ছবি ও পছন্দের ছবিগুলি সুরক্ষিত।</string>
@@ -362,4 +362,10 @@
     <string name="history_note">শুধু নিশ্চিত করা কাজ এখানে দেখানো হয়। ট্র্যাশে ফাইল সাময়িকভাবে থাকতে পারে। সংকুচিত কপি সংরক্ষণ করলেই জায়গা খালি হয় না।</string>
     <string name="history_clear_note">স্থানীয় ইতিহাস মুছবেন? মিডিয়া ফাইল বদলাবে না।</string>
     <string name="history_write_failed">ইতিহাস আপডেট করা যায়নি।</string>
+    <string name="guard_real_count">সংরক্ষিত সুরক্ষা নিয়ম</string>
+    <string name="guard_real_scope">নির্বাচিত ছবি ও ভিডিও CLENOVA-এর ক্লিনআপ থেকে সুরক্ষিত রাখুন। অন্য অ্যাপ এগুলো বদলাতে পারে।</string>
+    <string name="guard_real_pick">সুরক্ষার জন্য ছবি বা ভিডিও বেছে নিন।</string>
+    <string name="guard_real_empty">এখনও কোনো সুরক্ষিত আইটেম নেই।</string>
+    <string name="guard_real_error">সুরক্ষা নিয়ম পড়া বা আপডেট করা যায়নি।</string>
+    <string name="guard_real_remove">এই নিয়ম সরাবেন? কোনো ফাইল মোছা হবে না।</string>
 </resources>

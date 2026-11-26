@@ -37,6 +37,7 @@ import com.clenova.app.feature.clean.SwipeCleanScreen
 import com.clenova.app.feature.clean.CleanupHistoryScreen
 import com.clenova.app.feature.clean.VideoCompressScreen
 import com.clenova.app.feature.guard.GuardScreen
+import com.clenova.app.feature.guard.RealGuardScreen
 import com.clenova.app.feature.guard.GuardDesignData
 import com.clenova.app.feature.home.HomeScreen
 import com.clenova.app.feature.home.HomeViewModel
@@ -234,9 +235,13 @@ fun ClenovaNavHost(
         }
 
         composable<ClenovaRoute.Guard> {
-            GuardScreen(sample = sample, collectionMask = sampleGuardMask,
-                onMaskChange = { if (sample) { sampleGuardMask = it and GuardDesignData.ALL_MASK; sampleApprovedMask = 0 } },
+            if (sample) GuardScreen(sample = true, collectionMask = sampleGuardMask,
+                onMaskChange = { sampleGuardMask = it and GuardDesignData.ALL_MASK; sampleApprovedMask = 0 },
                 onSelectionHaptic = onSelectionHaptic)
+            else RealGuardScreen(result = scanResult,
+                onScan = { onSelectionHaptic(); navController.navigate(ClenovaRoute.SmartScan) { launchSingleTop = true } },
+                onChanged = { protected -> scanResult = scanResult?.copy(protectedUris = protected) },
+                onHaptic = onSelectionHaptic)
         }
 
         composable<ClenovaRoute.Agent> {

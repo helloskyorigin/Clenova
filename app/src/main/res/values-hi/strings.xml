@@ -56,7 +56,7 @@
     <string name="home_view_all">सभी देखें</string>
     <string name="home_smart_scan">स्मार्ट स्कैन</string>
     <string name="home_compress">कंप्रेस</string>
-    <string name="home_guard_status">सुरक्षा सेट नहीं है</string>
+    <string name="home_guard_status">सहेजे गए सुरक्षा नियम</string>
     <string name="home_sample_monitoring">निगरानी चालू</string>
     <string name="home_sample_cleanup">सफ़ाई के लिए तैयार</string>
     <string name="home_sample_activate">ऑटोपायलट सक्रिय करें</string>
@@ -276,7 +276,7 @@
     <string name="privacy_local_title">स्थानीय प्राथमिकताएँ</string>
     <string name="privacy_local_body">थीम, हैप्टिक्स, ऑटोपायलट प्राथमिकताएँ और भाषा डिवाइस पर सेव हैं। अकाउंट ज़रूरी नहीं है।</string>
     <string name="privacy_files_title">निजी फ़ाइलें</string>
-    <string name="privacy_files_body">Clenova अनुमति से डिवाइस पर फ़ोटो और वीडियो स्कैन करता है। आपकी मंज़ूरी से डुप्लिकेट Android ट्रैश में जा सकते हैं। Memory Guard नियम अभी जुड़े नहीं हैं। निजी मीडिया अपलोड नहीं होता। आपकी अनुमति से समान तस्वीरें भी ट्रैश में भेजी जा सकती हैं। आपकी अनुमति से स्क्रीनशॉट भी Android ट्रैश में भेजे जा सकते हैं। आपकी अनुमति से बड़ी तस्वीरें और वीडियो Android ट्रैश में भेजे जा सकते हैं। स्वाइप क्लीन से भी तस्वीरें देख सकते हैं और आपकी अनुमति से Android ट्रैश में भेज सकते हैं। वीडियो डिवाइस पर कंप्रेस करके अलग कॉपी के रूप में सहेजे जा सकते हैं।</string>
+    <string name="privacy_files_body">Clenova अनुमति से डिवाइस पर फ़ोटो और वीडियो स्कैन करता है। आपकी मंज़ूरी से डुप्लिकेट Android ट्रैश में जा सकते हैं। चुनी गई तस्वीरें और वीडियो CLENOVA की सफाई से सुरक्षित रखें। अन्य ऐप इन्हें बदल सकते हैं। निजी मीडिया अपलोड नहीं होता। आपकी अनुमति से समान तस्वीरें भी ट्रैश में भेजी जा सकती हैं। आपकी अनुमति से स्क्रीनशॉट भी Android ट्रैश में भेजे जा सकते हैं। आपकी अनुमति से बड़ी तस्वीरें और वीडियो Android ट्रैश में भेजे जा सकते हैं। स्वाइप क्लीन से भी तस्वीरें देख सकते हैं और आपकी अनुमति से Android ट्रैश में भेज सकते हैं। वीडियो डिवाइस पर कंप्रेस करके अलग कॉपी के रूप में सहेजे जा सकते हैं।</string>
     <string name="privacy_support_title">सहायता संदेश</string>
     <string name="privacy_support_body">संपर्क और समस्या रिपोर्ट आपका ईमेल ऐप खोलते हैं। संदेश भेजना आपका निर्णय है और भेजने से पहले डायग्नोस्टिक जानकारी बदल या हटा सकते हैं।</string>
     <string name="support_faq_storage">स्टोरेज कैसे मापा जाता है?</string>
@@ -327,7 +327,7 @@
     <string name="duplicates_trash_cancelled">ट्रैश अनुरोध रद्द हुआ या मंज़ूर नहीं हुआ। दोबारा स्कैन करें।</string>
     <string name="duplicates_trash_failed">चुनी कॉपी की पुष्टि या ट्रैश में भेजना संभव नहीं हुआ। दोबारा स्कैन करें।</string>
     <string name="duplicates_trash_unsupported">ट्रैश अनुरोध के लिए Android 11 या नया चाहिए। कॉपी देख सकते हैं।</string>
-    <string name="duplicates_guard_note">कस्टम Memory Guard नियम अभी जुड़े नहीं हैं। आगे बढ़ने से पहले हर कॉपी देखें।</string>
+    <string name="duplicates_guard_note">चुनी गई तस्वीरें और वीडियो CLENOVA की सफाई से सुरक्षित रखें। अन्य ऐप इन्हें बदल सकते हैं।</string>
     <string name="duplicates_verify_limit">1 GB सत्यापन सीमा के लिए चयन कम करें।</string>
     <string name="similar_no_matches">इस स्कैन में समान तस्वीरें नहीं मिलीं</string>
     <string name="similar_manual_rule">समान तस्वीरें बिल्कुल एक जैसी नहीं होतीं। हर तस्वीर खुद चुनें। हर समूह की एक तस्वीर और पसंदीदा तस्वीरें सुरक्षित हैं।</string>
@@ -362,4 +362,10 @@
     <string name="history_note">यहाँ केवल पुष्टि किए गए काम दिखते हैं। ट्रैश में फ़ाइलें कुछ समय रह सकती हैं। कंप्रेस कॉपी सहेजने से अपने आप जगह खाली नहीं होती।</string>
     <string name="history_clear_note">स्थानीय इतिहास साफ़ करें? मीडिया फ़ाइलें नहीं बदलेंगी।</string>
     <string name="history_write_failed">इतिहास अपडेट नहीं हो सका।</string>
+    <string name="guard_real_count">सहेजे गए सुरक्षा नियम</string>
+    <string name="guard_real_scope">चुनी गई तस्वीरें और वीडियो CLENOVA की सफाई से सुरक्षित रखें। अन्य ऐप इन्हें बदल सकते हैं।</string>
+    <string name="guard_real_pick">सुरक्षित रखने के लिए तस्वीरें या वीडियो चुनें।</string>
+    <string name="guard_real_empty">अभी कोई सुरक्षित फ़ाइल नहीं है।</string>
+    <string name="guard_real_error">सुरक्षा नियम पढ़े या अपडेट नहीं हो सके।</string>
+    <string name="guard_real_remove">यह नियम हटाएँ? कोई फ़ाइल नहीं हटेगी।</string>
 </resources>

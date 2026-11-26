@@ -20,7 +20,7 @@ internal object LargeMediaTrash {
         val items = if (videosOnly) result.largeVideos else result.largeFiles
         return items.filter {
             it.bytes >= MediaScanner.LARGE_VIDEO_BYTES && (!videosOnly || it.video) &&
-                !it.favorite && it.uri !in keepers && it.generation != null && it.generation > 0L &&
+                !it.favorite && it.uri !in keepers && it.uri !in result.protectedUris && it.generation != null && it.generation > 0L &&
                 it.modified != null && it.uri.authority == MediaStore.AUTHORITY
         }.distinctBy { it.uri }
     }
@@ -59,6 +59,7 @@ internal object LargeMediaTrash {
             }
             check(mediaAccess(context) == result.access)
             currentCoroutineContext().ensureActive()
+            MemoryGuardStore(context).ensureUnprotected(selected)
             MediaStore.createTrashRequest(resolver, selected.toList(), true)
         }
 }

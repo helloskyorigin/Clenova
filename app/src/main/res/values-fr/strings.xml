@@ -56,7 +56,7 @@
     <string name="home_view_all">Tout voir</string>
     <string name="home_smart_scan">Analyse intelligente</string>
     <string name="home_compress">Compresser</string>
-    <string name="home_guard_status">Protection non configurée</string>
+    <string name="home_guard_status">Règles de protection enregistrées</string>
     <string name="home_sample_monitoring">Surveillance activée</string>
     <string name="home_sample_cleanup">Prêt à nettoyer</string>
     <string name="home_sample_activate">Activer Autopilot</string>
@@ -276,7 +276,7 @@
     <string name="privacy_local_title">Préférences locales</string>
     <string name="privacy_local_body">Le thème, le retour haptique, les préférences Autopilot et la langue sont enregistrés sur votre appareil. Aucun compte requis.</string>
     <string name="privacy_files_title">Fichiers personnels</string>
-    <string name="privacy_files_body">Clenova analyse les médias accessibles avec votre autorisation sur l’appareil. Les doublons peuvent être placés dans la corbeille Android avec votre accord. Memory Guard n’est pas encore connecté. Aucun média personnel téléversé. Les photos similaires peuvent aussi être vérifiées et mises à la corbeille avec votre accord. Les captures peuvent aussi être vérifiées et mises à la corbeille Android avec votre accord. Les photos et vidéos volumineuses peuvent être mises à la corbeille Android avec votre accord. Les photos peuvent aussi être vérifiées par balayage et mises à la corbeille Android avec votre accord. Les vidéos peuvent être compressées localement et enregistrées comme copies distinctes.</string>
+    <string name="privacy_files_body">Clenova analyse les médias accessibles avec votre autorisation sur l’appareil. Les doublons peuvent être placés dans la corbeille Android avec votre accord. Protégez les photos et vidéos sélectionnées du nettoyage CLENOVA. Les autres applications peuvent toujours les modifier. Aucun média personnel téléversé. Les photos similaires peuvent aussi être vérifiées et mises à la corbeille avec votre accord. Les captures peuvent aussi être vérifiées et mises à la corbeille Android avec votre accord. Les photos et vidéos volumineuses peuvent être mises à la corbeille Android avec votre accord. Les photos peuvent aussi être vérifiées par balayage et mises à la corbeille Android avec votre accord. Les vidéos peuvent être compressées localement et enregistrées comme copies distinctes.</string>
     <string name="privacy_support_title">Messages d’assistance</string>
     <string name="privacy_support_body">Le contact et les rapports ouvrent votre application de messagerie. Vous choisissez d’envoyer ou non le message et pouvez modifier ou retirer les données de diagnostic avant l’envoi.</string>
     <string name="support_faq_storage">Comment le stockage est-il mesuré ?</string>
@@ -327,7 +327,7 @@
     <string name="duplicates_trash_cancelled">Demande annulée ou non approuvée. Relancez l’analyse.</string>
     <string name="duplicates_trash_failed">Impossible de vérifier ou déplacer les copies. Relancez l’analyse.</string>
     <string name="duplicates_trash_unsupported">La corbeille nécessite Android 11 ou ultérieur. Vous pouvez consulter les doublons.</string>
-    <string name="duplicates_guard_note">Les règles Memory Guard personnalisées ne sont pas encore connectées. Vérifiez chaque copie.</string>
+    <string name="duplicates_guard_note">Protégez les photos et vidéos sélectionnées du nettoyage CLENOVA. Les autres applications peuvent toujours les modifier.</string>
     <string name="duplicates_verify_limit">Réduisez la sélection pour respecter la limite de 1 GB.</string>
     <string name="similar_no_matches">Aucune photo similaire trouvée lors de cette analyse</string>
     <string name="similar_manual_rule">Des photos similaires ne sont pas identiques. Sélectionnez chaque photo manuellement. Une photo par groupe et les favoris sont protégés.</string>
@@ -362,4 +362,10 @@
     <string name="history_note">Seules les actions confirmées apparaissent ici. La corbeille peut conserver les fichiers temporairement. Enregistrer des copies compressées ne libère pas de place à lui seul.</string>
     <string name="history_clear_note">Effacer l’historique local ? Vos médias resteront inchangés.</string>
     <string name="history_write_failed">Impossible de mettre à jour l’historique.</string>
+    <string name="guard_real_count">Règles de protection enregistrées</string>
+    <string name="guard_real_scope">Protégez les photos et vidéos sélectionnées du nettoyage CLENOVA. Les autres applications peuvent toujours les modifier.</string>
+    <string name="guard_real_pick">Sélectionnez les photos ou vidéos à protéger.</string>
+    <string name="guard_real_empty">Aucun élément protégé pour le moment.</string>
+    <string name="guard_real_error">Impossible de lire ou de mettre à jour les règles.</string>
+    <string name="guard_real_remove">Retirer cette règle ? Aucun fichier ne sera supprimé.</string>
 </resources>

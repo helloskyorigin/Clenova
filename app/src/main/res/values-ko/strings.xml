@@ -56,7 +56,7 @@
     <string name="home_view_all">모두 보기</string>
     <string name="home_smart_scan">스마트 스캔</string>
     <string name="home_compress">압축</string>
-    <string name="home_guard_status">보호 설정 안 됨</string>
+    <string name="home_guard_status">저장된 보호 규칙</string>
     <string name="home_sample_monitoring">모니터링 활성화</string>
     <string name="home_sample_cleanup">정리 준비 완료</string>
     <string name="home_sample_activate">자동 관리 활성화</string>
@@ -276,7 +276,7 @@
     <string name="privacy_local_title">로컬 환경설정</string>
     <string name="privacy_local_body">테마, 햅틱, 자동 관리 설정 및 언어는 기기에 저장됩니다. 계정이 필요하지 않습니다.</string>
     <string name="privacy_files_title">개인 파일</string>
-    <string name="privacy_files_body">Clenova는 허가를 받아 기기의 사진과 동영상을 스캔합니다. 승인 후 중복 파일을 Android 휴지통으로 옮길 수 있습니다. Memory Guard 규칙은 아직 연결되지 않았습니다. 개인 미디어는 업로드하지 않습니다. 유사한 사진도 사용자의 승인 후 휴지통으로 이동할 수 있습니다. 스크린샷도 승인 후 Android 휴지통으로 이동할 수 있습니다. 대용량 사진과 동영상도 승인 후 Android 휴지통으로 이동할 수 있습니다. 사진을 스와이프로 검토하고 승인 후 Android 휴지통으로 이동할 수도 있습니다. 동영상을 기기에서 압축하여 별도 사본으로 저장할 수 있습니다.</string>
+    <string name="privacy_files_body">Clenova는 허가를 받아 기기의 사진과 동영상을 스캔합니다. 승인 후 중복 파일을 Android 휴지통으로 옮길 수 있습니다. 선택한 사진과 동영상을 CLENOVA 정리에서 보호합니다. 다른 앱은 변경할 수 있습니다. 개인 미디어는 업로드하지 않습니다. 유사한 사진도 사용자의 승인 후 휴지통으로 이동할 수 있습니다. 스크린샷도 승인 후 Android 휴지통으로 이동할 수 있습니다. 대용량 사진과 동영상도 승인 후 Android 휴지통으로 이동할 수 있습니다. 사진을 스와이프로 검토하고 승인 후 Android 휴지통으로 이동할 수도 있습니다. 동영상을 기기에서 압축하여 별도 사본으로 저장할 수 있습니다.</string>
     <string name="privacy_support_title">지원 메시지</string>
     <string name="privacy_support_body">문의 및 문제 신고는 이메일 앱을 엽니다. 전송 여부를 직접 결정하며 전송 전에 진단 정보를 수정하거나 삭제할 수 있습니다.</string>
     <string name="support_faq_storage">저장공간은 어떻게 측정하나요?</string>
@@ -327,7 +327,7 @@
     <string name="duplicates_trash_cancelled">요청이 취소되었거나 승인되지 않았습니다. 다시 스캔하세요.</string>
     <string name="duplicates_trash_failed">사본을 확인하거나 이동하지 못했습니다. 다시 스캔하세요.</string>
     <string name="duplicates_trash_unsupported">휴지통 이동에는 Android 11 이상이 필요합니다. 중복 파일 검토는 가능합니다.</string>
-    <string name="duplicates_guard_note">사용자 지정 Memory Guard 규칙은 아직 연결되지 않았습니다. 각 사본을 확인하세요.</string>
+    <string name="duplicates_guard_note">선택한 사진과 동영상을 CLENOVA 정리에서 보호합니다. 다른 앱은 변경할 수 있습니다.</string>
     <string name="duplicates_verify_limit">1 GB 확인 한도 내로 선택을 줄이세요.</string>
     <string name="similar_no_matches">이번 검사에서 유사한 사진을 찾지 못했습니다</string>
     <string name="similar_manual_rule">유사한 사진은 동일하지 않습니다. 각 사진을 직접 선택하세요. 그룹마다 사진 한 장과 즐겨찾기는 보호됩니다.</string>
@@ -362,4 +362,10 @@
     <string name="history_note">확인된 작업만 표시됩니다. 휴지통에 파일이 일시적으로 남을 수 있습니다. 압축 사본 저장만으로는 공간이 확보되지 않습니다.</string>
     <string name="history_clear_note">로컬 기록을 지울까요? 미디어 파일은 변경되지 않습니다.</string>
     <string name="history_write_failed">기록을 업데이트하지 못했습니다.</string>
+    <string name="guard_real_count">저장된 보호 규칙</string>
+    <string name="guard_real_scope">선택한 사진과 동영상을 CLENOVA 정리에서 보호합니다. 다른 앱은 변경할 수 있습니다.</string>
+    <string name="guard_real_pick">보호할 사진이나 동영상을 선택하세요.</string>
+    <string name="guard_real_empty">아직 보호된 항목이 없습니다.</string>
+    <string name="guard_real_error">보호 규칙을 읽거나 업데이트하지 못했습니다.</string>
+    <string name="guard_real_remove">이 규칙을 제거할까요? 파일은 삭제되지 않습니다.</string>
 </resources>
