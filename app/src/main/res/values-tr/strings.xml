@@ -279,4 +279,16 @@
     <string name="privacy_files_body">Bu sürüm cihazın toplam depolama bilgilerini okur. Medya tarama, dosya koruma ve silme motorları henüz bağlı değil. Clenova kişisel medya yüklemez.</string>
     <string name="privacy_support_title">Destek mesajları</string>
     <string name="privacy_support_body">İletişim ve sorun bildirimleri e-posta uygulamanızı açar. Gönderip göndermemeye siz karar verir, tanılama bilgilerini göndermeden önce düzenleyebilir veya kaldırabilirsiniz.</string>
+    <string name="support_faq_storage">Depolama nasıl ölçülür?</string>
+    <string name="support_faq_storage_body">Clenova cihazın toplam depolama bilgilerini okur. Ayrıntılı medya kategorileri ve temizlik için desteklenen bir tarama motoru gerekir.</string>
+    <string name="support_faq_auto_body">Otopilot tercihlerinde boş alan hedefini ve kontrol sıklığını ayarlayın. Arka plan izleme henüz kullanılamıyor.</string>
+    <string name="support_faq_language_body">Ayarlarda Dil bölümünü açıp dilinizi arayın veya seçin. Android dilini izlemek için Cihaz dili seçeneğini kullanın.</string>
+    <string name="support_search">Yardım ara</string>
+    <string name="support_no_results">Eşleşen makale yok</string>
+    <string name="support_message">Mesajınız</string>
+    <string name="support_include_details">Uygulama sürümü, Android sürümü ve cihaz modelini ekle</string>
+    <string name="support_open_email">E-postayı aç</string>
+    <string name="support_copy">Mesajı kopyala</string>
+    <string name="support_copied">Mesaj kopyalandı</string>
+    <string name="support_email_unavailable">E-posta açılamadı. Mesajınızı kopyalayıp tercih ettiğiniz e-posta hizmetinden gönderin.</string>
 </resources>

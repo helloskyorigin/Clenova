@@ -279,4 +279,16 @@
     <string name="privacy_files_body">يقرأ هذا الإصدار إجمالي تخزين الجهاز. لم تُربط محركات فحص الوسائط وحماية الملفات والحذف بعد. لا يرفع Clenova الوسائط الشخصية.</string>
     <string name="privacy_support_title">رسائل الدعم</string>
     <string name="privacy_support_body">يفتح التواصل وتقارير المشكلات تطبيق البريد. تقرر أنت إرسال الرسالة ويمكنك تعديل تفاصيل التشخيص أو حذفها قبل الإرسال.</string>
+    <string name="support_faq_storage">كيف تُقاس مساحة التخزين؟</string>
+    <string name="support_faq_storage_body">يقرأ Clenova إجمالي مساحة تخزين الجهاز. تتطلب فئات الوسائط التفصيلية والتنظيف محرك فحص مدعومًا.</string>
+    <string name="support_faq_auto_body">اضبط هدف المساحة الحرة وتكرار الفحص في تفضيلات Autopilot. المراقبة في الخلفية غير متاحة بعد.</string>
+    <string name="support_faq_language_body">افتح اللغة في الإعدادات وابحث عن لغتك أو اخترها. اختر لغة الجهاز لمتابعة Android.</string>
+    <string name="support_search">البحث في المساعدة</string>
+    <string name="support_no_results">لا توجد مقالات مطابقة</string>
+    <string name="support_message">رسالتك</string>
+    <string name="support_include_details">تضمين إصدار التطبيق وإصدار Android وطراز الجهاز</string>
+    <string name="support_open_email">فتح البريد</string>
+    <string name="support_copy">نسخ الرسالة</string>
+    <string name="support_copied">تم نسخ الرسالة</string>
+    <string name="support_email_unavailable">تعذر فتح البريد. انسخ رسالتك وأرسلها بخدمة البريد المفضلة لديك.</string>
 </resources>

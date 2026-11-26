@@ -279,4 +279,16 @@
     <string name="privacy_files_body">यह बिल्ड डिवाइस के स्टोरेज की कुल जानकारी पढ़ता है। मीडिया स्कैन, फ़ाइल सुरक्षा और हटाने वाले इंजन अभी जुड़े नहीं हैं। Clenova निजी मीडिया अपलोड नहीं करता।</string>
     <string name="privacy_support_title">सहायता संदेश</string>
     <string name="privacy_support_body">संपर्क और समस्या रिपोर्ट आपका ईमेल ऐप खोलते हैं। संदेश भेजना आपका निर्णय है और भेजने से पहले डायग्नोस्टिक जानकारी बदल या हटा सकते हैं।</string>
+    <string name="support_faq_storage">स्टोरेज कैसे मापा जाता है?</string>
+    <string name="support_faq_storage_body">Clenova डिवाइस के स्टोरेज की कुल जानकारी पढ़ता है। मीडिया की विस्तृत श्रेणियों और सफ़ाई के लिए समर्थित स्कैन इंजन चाहिए।</string>
+    <string name="support_faq_auto_body">ऑटोपायलट प्राथमिकताओं में खाली जगह का लक्ष्य और जाँच की आवृत्ति सेट करें। बैकग्राउंड निगरानी अभी उपलब्ध नहीं है।</string>
+    <string name="support_faq_language_body">सेटिंग्स में भाषा खोलें, अपनी भाषा खोजें या चुनें। Android की भाषा के लिए डिवाइस की भाषा चुनें।</string>
+    <string name="support_search">सहायता खोजें</string>
+    <string name="support_no_results">कोई मेल खाता लेख नहीं</string>
+    <string name="support_message">आपका संदेश</string>
+    <string name="support_include_details">ऐप वर्ज़न, Android वर्ज़न और डिवाइस मॉडल शामिल करें</string>
+    <string name="support_open_email">ईमेल खोलें</string>
+    <string name="support_copy">संदेश कॉपी करें</string>
+    <string name="support_copied">संदेश कॉपी हुआ</string>
+    <string name="support_email_unavailable">ईमेल नहीं खुल सका। संदेश कॉपी करके अपनी पसंद की ईमेल सेवा से भेजें।</string>
 </resources>

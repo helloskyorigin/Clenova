@@ -279,4 +279,16 @@
     <string name="privacy_files_body">Versi ini membaca total penyimpanan. Mesin pemindaian, perlindungan file, dan penghapusan belum terhubung. Clenova tidak mengunggah media pribadi.</string>
     <string name="privacy_support_title">Pesan dukungan</string>
     <string name="privacy_support_body">Kontak dan laporan masalah membuka aplikasi email. Anda memutuskan apakah akan mengirim dan dapat mengedit atau menghapus detail diagnostik sebelum mengirim.</string>
+    <string name="support_faq_storage">Bagaimana penyimpanan diukur?</string>
+    <string name="support_faq_storage_body">Clenova membaca total penyimpanan perangkat. Kategori media terperinci dan pembersihan memerlukan mesin pemindaian yang didukung.</string>
+    <string name="support_faq_auto_body">Atur target ruang kosong dan frekuensi di preferensi Autopilot. Pemantauan latar belakang belum tersedia.</string>
+    <string name="support_faq_language_body">Buka Bahasa di Pengaturan lalu cari atau pilih bahasa. Pilih Bahasa perangkat untuk mengikuti Android.</string>
+    <string name="support_search">Cari bantuan</string>
+    <string name="support_no_results">Tidak ada artikel yang cocok</string>
+    <string name="support_message">Pesan Anda</string>
+    <string name="support_include_details">Sertakan versi aplikasi, versi Android, dan model perangkat</string>
+    <string name="support_open_email">Buka email</string>
+    <string name="support_copy">Salin pesan</string>
+    <string name="support_copied">Pesan disalin</string>
+    <string name="support_email_unavailable">Email tidak dapat dibuka. Salin pesan dan kirim melalui layanan email pilihan Anda.</string>
 </resources>

@@ -279,4 +279,16 @@
     <string name="privacy_files_body">Эта версия читает общие данные хранилища. Механизмы сканирования, защиты и удаления ещё не подключены. Clenova не загружает личные медиа.</string>
     <string name="privacy_support_title">Сообщения в поддержку</string>
     <string name="privacy_support_body">Связь и отчёты открывают почтовое приложение. Вы решаете, отправлять ли письмо, и можете изменить или удалить диагностические данные перед отправкой.</string>
+    <string name="support_faq_storage">Как измеряется объём хранилища?</string>
+    <string name="support_faq_storage_body">Clenova считывает общие данные хранилища устройства. Подробные категории медиа и очистка требуют поддерживаемого механизма сканирования.</string>
+    <string name="support_faq_auto_body">Задайте цель свободного места и частоту проверок в настройках Autopilot. Фоновый мониторинг пока недоступен.</string>
+    <string name="support_faq_language_body">Откройте Язык в настройках и найдите или выберите язык. Для языка Android выберите язык устройства.</string>
+    <string name="support_search">Поиск справки</string>
+    <string name="support_no_results">Подходящих статей нет</string>
+    <string name="support_message">Ваше сообщение</string>
+    <string name="support_include_details">Включить версию приложения, версию Android и модель устройства</string>
+    <string name="support_open_email">Открыть почту</string>
+    <string name="support_copy">Копировать сообщение</string>
+    <string name="support_copied">Сообщение скопировано</string>
+    <string name="support_email_unavailable">Не удалось открыть почту. Скопируйте сообщение и отправьте его через предпочитаемый почтовый сервис.</string>
 </resources>

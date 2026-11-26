@@ -279,4 +279,16 @@
     <string name="privacy_files_body">Dieser Build liest Gesamtspeicherwerte. Medienscan, Dateischutz und Löschfunktionen sind noch nicht verbunden. Clenova lädt keine persönlichen Medien hoch.</string>
     <string name="privacy_support_title">Support-Nachrichten</string>
     <string name="privacy_support_body">Kontakt und Problemberichte öffnen deine E-Mail-App. Du entscheidest über den Versand und kannst Diagnosedaten vorher bearbeiten oder entfernen.</string>
+    <string name="support_faq_storage">Wie wird der Speicher gemessen?</string>
+    <string name="support_faq_storage_body">Clenova liest die Gesamtspeicherwerte des Geräts. Detaillierte Medienkategorien und Bereinigung benötigen eine unterstützte Scan-Engine.</string>
+    <string name="support_faq_auto_body">Lege Speicherziel und Prüfintervall in den Autopilot-Einstellungen fest. Hintergrundüberwachung ist noch nicht verfügbar.</string>
+    <string name="support_faq_language_body">Öffne Sprache in den Einstellungen und suche oder wähle deine Sprache. Wähle Gerätesprache, um Android zu folgen.</string>
+    <string name="support_search">Hilfe suchen</string>
+    <string name="support_no_results">Keine passenden Artikel</string>
+    <string name="support_message">Deine Nachricht</string>
+    <string name="support_include_details">App-Version, Android-Version und Gerätemodell hinzufügen</string>
+    <string name="support_open_email">E-Mail öffnen</string>
+    <string name="support_copy">Nachricht kopieren</string>
+    <string name="support_copied">Nachricht kopiert</string>
+    <string name="support_email_unavailable">E-Mail konnte nicht geöffnet werden. Kopiere deine Nachricht und versende sie über deinen bevorzugten E-Mail-Dienst.</string>
 </resources>

@@ -279,4 +279,16 @@
     <string name="privacy_files_body">このビルドは端末の総ストレージ情報を読み取ります。メディアスキャン、保護、削除機能は未接続です。Clenova は個人メディアをアップロードしません。</string>
     <string name="privacy_support_title">サポートメッセージ</string>
     <string name="privacy_support_body">お問い合わせや問題報告ではメールアプリを開きます。送信するかどうかはあなたが決め、送信前に診断情報を編集・削除できます。</string>
+    <string name="support_faq_storage">ストレージ容量はどう測定されますか？</string>
+    <string name="support_faq_storage_body">Clenova は端末の総ストレージ容量を読み取ります。メディアの詳細分類と整理には対応するスキャン機能が必要です。</string>
+    <string name="support_faq_auto_body">自動管理の設定で空き容量の目標とチェック頻度を設定します。バックグラウンド監視はまだ利用できません。</string>
+    <string name="support_faq_language_body">設定の言語を開き、検索または選択します。端末の言語を選ぶと Android の設定に従います。</string>
+    <string name="support_search">ヘルプを検索</string>
+    <string name="support_no_results">該当する記事がありません</string>
+    <string name="support_message">メッセージ</string>
+    <string name="support_include_details">アプリバージョン、Android バージョン、端末モデルを含める</string>
+    <string name="support_open_email">メールを開く</string>
+    <string name="support_copy">メッセージをコピー</string>
+    <string name="support_copied">コピーしました</string>
+    <string name="support_email_unavailable">メールを開けません。メッセージをコピーしてお好みのメールサービスから送信してください。</string>
 </resources>

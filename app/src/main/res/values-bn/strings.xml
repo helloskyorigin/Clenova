@@ -279,4 +279,16 @@
     <string name="privacy_files_body">এই বিল্ড স্টোরেজের মোট তথ্য পড়ে। মিডিয়া স্ক্যান, ফাইল সুরক্ষা ও মুছার ইঞ্জিন এখনও যুক্ত নয়। Clenova ব্যক্তিগত মিডিয়া আপলোড করে না।</string>
     <string name="privacy_support_title">সহায়তা বার্তা</string>
     <string name="privacy_support_body">যোগাযোগ ও সমস্যা রিপোর্ট ইমেল অ্যাপ খুলে। পাঠাবেন কি না আপনি ঠিক করেন এবং পাঠানোর আগে ডায়াগনস্টিক তথ্য বদলাতে বা সরাতে পারেন।</string>
+    <string name="support_faq_storage">স্টোরেজ কীভাবে মাপা হয়?</string>
+    <string name="support_faq_storage_body">Clenova ডিভাইসের মোট স্টোরেজ পড়ে। বিস্তারিত মিডিয়া বিভাগ ও পরিষ্কারের জন্য সমর্থিত স্ক্যান ইঞ্জিন দরকার।</string>
+    <string name="support_faq_auto_body">অটোপাইলট পছন্দে খালি জায়গার লক্ষ্য ও পরীক্ষার সময়সূচি সেট করুন। ব্যাকগ্রাউন্ড নজরদারি এখনও উপলব্ধ নয়।</string>
+    <string name="support_faq_language_body">সেটিংসে ভাষা খুলে খুঁজুন বা বেছে নিন। Android অনুসরণ করতে ডিভাইসের ভাষা নির্বাচন করুন।</string>
+    <string name="support_search">সহায়তা খুঁজুন</string>
+    <string name="support_no_results">মিলে যাওয়া নিবন্ধ নেই</string>
+    <string name="support_message">আপনার বার্তা</string>
+    <string name="support_include_details">অ্যাপ সংস্করণ, Android সংস্করণ ও ডিভাইস মডেল অন্তর্ভুক্ত করুন</string>
+    <string name="support_open_email">ইমেল খুলুন</string>
+    <string name="support_copy">বার্তা কপি করুন</string>
+    <string name="support_copied">বার্তা কপি হয়েছে</string>
+    <string name="support_email_unavailable">ইমেল খোলা যায়নি। বার্তা কপি করে আপনার পছন্দের ইমেল সেবায় পাঠান।</string>
 </resources>

@@ -279,4 +279,16 @@
     <string name="privacy_files_body">此版本读取设备存储总量。媒体扫描、文件保护和删除功能尚未连接。Clenova 不上传个人媒体。</string>
     <string name="privacy_support_title">支持消息</string>
     <string name="privacy_support_body">联系和问题报告会打开电子邮件应用。是否发送由你决定，发送前可编辑或删除诊断详情。</string>
+    <string name="support_faq_storage">如何测量存储空间？</string>
+    <string name="support_faq_storage_body">Clenova 读取设备存储总量。详细媒体分类和清理需要支持的扫描引擎。</string>
+    <string name="support_faq_auto_body">在自动管理偏好中设置空闲空间目标和检查频率。后台监控尚不可用。</string>
+    <string name="support_faq_language_body">在设置中打开语言，搜索或选择语言。选择设备语言可跟随 Android。</string>
+    <string name="support_search">搜索帮助</string>
+    <string name="support_no_results">没有匹配的文章</string>
+    <string name="support_message">你的消息</string>
+    <string name="support_include_details">包含应用版本、Android 版本和设备型号</string>
+    <string name="support_open_email">打开邮件</string>
+    <string name="support_copy">复制消息</string>
+    <string name="support_copied">消息已复制</string>
+    <string name="support_email_unavailable">无法打开邮件。请复制消息并使用你喜欢的邮件服务发送。</string>
 </resources>

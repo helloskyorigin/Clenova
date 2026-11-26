@@ -279,4 +279,16 @@
     <string name="privacy_files_body">Esta versión lee los totales de almacenamiento. Los motores de escaneo, protección y eliminación aún no están conectados. Clenova no sube medios personales.</string>
     <string name="privacy_support_title">Mensajes de soporte</string>
     <string name="privacy_support_body">El contacto y los informes abren tu aplicación de correo. Tú decides si envías el mensaje y puedes editar o eliminar datos de diagnóstico antes de enviarlo.</string>
+    <string name="support_faq_storage">¿Cómo se mide el almacenamiento?</string>
+    <string name="support_faq_storage_body">Clenova lee los totales de almacenamiento del dispositivo. Las categorías multimedia detalladas y la limpieza requieren un motor de escaneo compatible.</string>
+    <string name="support_faq_auto_body">Configura el objetivo de espacio libre y la frecuencia en las preferencias de Autopilot. La supervisión en segundo plano aún no está disponible.</string>
+    <string name="support_faq_language_body">Abre Idioma en Ajustes y busca o selecciona tu idioma. Elige Idioma del dispositivo para seguir Android.</string>
+    <string name="support_search">Buscar ayuda</string>
+    <string name="support_no_results">No hay artículos coincidentes</string>
+    <string name="support_message">Tu mensaje</string>
+    <string name="support_include_details">Incluir versión de la app, versión de Android y modelo del dispositivo</string>
+    <string name="support_open_email">Abrir correo</string>
+    <string name="support_copy">Copiar mensaje</string>
+    <string name="support_copied">Mensaje copiado</string>
+    <string name="support_email_unavailable">No se puede abrir el correo. Copia tu mensaje y envíalo con tu servicio de correo preferido.</string>
 </resources>

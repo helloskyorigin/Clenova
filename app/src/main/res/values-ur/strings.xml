@@ -279,4 +279,16 @@
     <string name="privacy_files_body">یہ بلڈ اسٹوریج کی مجموعی معلومات پڑھتا ہے۔ میڈیا اسکین، تحفظ اور حذف کے انجن ابھی منسلک نہیں۔ Clenova ذاتی میڈیا اپ لوڈ نہیں کرتا۔</string>
     <string name="privacy_support_title">معاونت کے پیغامات</string>
     <string name="privacy_support_body">رابطہ اور مسئلے کی رپورٹ آپ کی ای میل ایپ کھولتے ہیں۔ بھیجنا آپ کا فیصلہ ہے اور بھیجنے سے پہلے تشخیصی تفصیلات بدل یا ہٹا سکتے ہیں۔</string>
+    <string name="support_faq_storage">اسٹوریج کیسے ناپا جاتا ہے؟</string>
+    <string name="support_faq_storage_body">Clenova ڈیوائس کے اسٹوریج کی مجموعی معلومات پڑھتا ہے۔ تفصیلی میڈیا زمروں اور صفائی کے لیے معاون اسکین انجن ضروری ہے۔</string>
+    <string name="support_faq_auto_body">آٹو پائلٹ ترجیحات میں خالی جگہ کا ہدف اور جانچ کی مدت مقرر کریں۔ پس منظر کی نگرانی ابھی دستیاب نہیں۔</string>
+    <string name="support_faq_language_body">ترتیبات میں زبان کھولیں اور اپنی زبان تلاش یا منتخب کریں۔ Android کی زبان کے لیے ڈیوائس کی زبان منتخب کریں۔</string>
+    <string name="support_search">مدد تلاش کریں</string>
+    <string name="support_no_results">کوئی متعلقہ مضمون نہیں</string>
+    <string name="support_message">آپ کا پیغام</string>
+    <string name="support_include_details">ایپ ورژن، Android ورژن اور ڈیوائس ماڈل شامل کریں</string>
+    <string name="support_open_email">ای میل کھولیں</string>
+    <string name="support_copy">پیغام کاپی کریں</string>
+    <string name="support_copied">پیغام کاپی ہو گیا</string>
+    <string name="support_email_unavailable">ای میل نہیں کھل سکی۔ پیغام کاپی کرکے اپنی پسند کی ای میل سروس سے بھیجیں۔</string>
 </resources>

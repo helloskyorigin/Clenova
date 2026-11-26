@@ -279,4 +279,16 @@
     <string name="privacy_files_body">Cette version lit les totaux de stockage. Les moteurs d’analyse, de protection et de suppression ne sont pas encore connectés. Clenova ne téléverse aucun média personnel.</string>
     <string name="privacy_support_title">Messages d’assistance</string>
     <string name="privacy_support_body">Le contact et les rapports ouvrent votre application de messagerie. Vous choisissez d’envoyer ou non le message et pouvez modifier ou retirer les données de diagnostic avant l’envoi.</string>
+    <string name="support_faq_storage">Comment le stockage est-il mesuré ?</string>
+    <string name="support_faq_storage_body">Clenova lit les totaux de stockage de l’appareil. Les catégories de médias détaillées et le nettoyage nécessitent un moteur d’analyse compatible.</string>
+    <string name="support_faq_auto_body">Définissez un objectif d’espace libre et la fréquence dans les préférences Autopilot. La surveillance en arrière-plan n’est pas encore disponible.</string>
+    <string name="support_faq_language_body">Ouvrez Langue dans les paramètres, recherchez ou sélectionnez votre langue. Choisissez la langue de l’appareil pour suivre Android.</string>
+    <string name="support_search">Rechercher de l’aide</string>
+    <string name="support_no_results">Aucun article correspondant</string>
+    <string name="support_message">Votre message</string>
+    <string name="support_include_details">Inclure la version de l’application, la version Android et le modèle de l’appareil</string>
+    <string name="support_open_email">Ouvrir la messagerie</string>
+    <string name="support_copy">Copier le message</string>
+    <string name="support_copied">Message copié</string>
+    <string name="support_email_unavailable">Impossible d’ouvrir la messagerie. Copiez votre message et envoyez-le avec votre service préféré.</string>
 </resources>
