@@ -18,6 +18,24 @@ internal object DuplicateTrash {
     fun allowed(groups: List<List<ScannedMedia>>): Set<Uri> =
         groups.flatMap { it.drop(1).filterNot { media -> media.favorite } }.map { it.uri }.toSet()
 
+    fun batch(groups: List<List<ScannedMedia>>): Set<Uri> {
+        val selected = linkedSetOf<Uri>()
+        var remaining = MAX_VERIFY_BYTES
+        for (group in groups) {
+            val keeper = group.firstOrNull() ?: continue
+            var keeperCounted = false
+            for (copy in group.drop(1).filterNot { it.favorite }) {
+                if (selected.size >= MAX_BATCH) return selected
+                val cost = copy.bytes + if (keeperCounted) 0L else keeper.bytes
+                if (cost > remaining) continue
+                remaining -= cost
+                keeperCounted = true
+                selected.add(copy.uri)
+            }
+        }
+        return selected
+    }
+
     fun plan(groups: List<List<ScannedMedia>>, selection: Set<Uri>): List<Pair<ScannedMedia, List<ScannedMedia>>> {
         require(selection.isNotEmpty() && selection.size <= MAX_BATCH)
         require(allowed(groups).containsAll(selection))

@@ -360,4 +360,6 @@
     <string name="duplicates_trash_cancelled">Trash request cancelled or not approved. Scan again to refresh results.</string>
     <string name="duplicates_trash_failed">Could not verify or move the selected copies. Scan again and review.</string>
     <string name="duplicates_trash_unsupported">Trash requests require Android 11 or later. You can still review duplicate files.</string>
+    <string name="duplicates_guard_note">Custom Memory Guard rules are not connected yet. Check each selected copy before continuing.</string>
+    <string name="duplicates_verify_limit">Reduce your selection to stay within the 1 GB verification limit.</string>
 </resources>

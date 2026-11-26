@@ -71,6 +71,7 @@ internal fun DuplicatesScreen(
     var pending by rememberSaveable { mutableStateOf(false) }
     var outcome by rememberSaveable { mutableStateOf<Int?>(null) }
     var job by remember { mutableStateOf<Job?>(null) }
+    val selectionValid = actualSelection.isNotEmpty() && runCatching { DuplicateTrash.plan(groups, actualSelection) }.isSuccess
     val supported = Build.VERSION.SDK_INT >= 30
     val busy = checking || pending
     val launcher = rememberLauncherForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) { response ->
@@ -124,11 +125,11 @@ internal fun DuplicatesScreen(
                     item {
                         Text(stringResource(R.string.duplicates_keep_rule), color = colors.textPrimary, style = MaterialTheme.typography.bodyMedium)
                         Text(stringResource(R.string.duplicates_batch_note), color = colors.textSecondary, style = MaterialTheme.typography.bodySmall)
-                        Text(stringResource(R.string.guard_not_ready), color = colors.textSecondary, style = MaterialTheme.typography.bodySmall)
+                        Text(stringResource(R.string.duplicates_guard_note), color = colors.textSecondary, style = MaterialTheme.typography.bodySmall)
                         Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                             Text(stringResource(R.string.duplicates_groups), Modifier.weight(1f), style = MaterialTheme.typography.titleMedium)
                             TextButton(enabled = !busy && supported && allowed.isNotEmpty(), onClick = {
-                                selected = if (actualSelection.isNotEmpty()) emptySet() else allowed.take(DuplicateTrash.MAX_BATCH).toSet()
+                                selected = if (actualSelection.isNotEmpty()) emptySet() else DuplicateTrash.batch(groups)
                                 onSelectionHaptic()
                             }, modifier = Modifier.testTag("duplicates_select_all")) {
                                 Text(stringResource(if (actualSelection.isNotEmpty()) R.string.review_deselect_all else R.string.duplicates_select_batch))
@@ -170,7 +171,8 @@ internal fun DuplicatesScreen(
                     }
                 }
                 if (!supported) Text(stringResource(R.string.duplicates_trash_unsupported), color = colors.textSecondary, style = MaterialTheme.typography.bodySmall)
-                Button(enabled = supported && !busy && actualSelection.isNotEmpty(), onClick = { confirming = true },
+                if (actualSelection.isNotEmpty() && !selectionValid) Text(stringResource(R.string.duplicates_verify_limit), color = colors.error, style = MaterialTheme.typography.bodySmall)
+                Button(enabled = supported && !busy && selectionValid, onClick = { confirming = true },
                     modifier = Modifier.fillMaxWidth().padding(vertical = 12.dp).heightIn(min = 52.dp).testTag("duplicates_approve"), shape = ClenovaShapes.pill) {
                     if (busy) CircularProgressIndicator(Modifier.size(20.dp), strokeWidth = 2.dp)
                     else Text(stringResource(R.string.duplicates_move_trash, actualSelection.size))
