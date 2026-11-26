@@ -27,6 +27,7 @@ internal fun LegalAboutDialog(kind: String, onDismiss: () -> Unit, onContact: ()
     val context = LocalContext.current
     val colorScheme = MaterialTheme.colorScheme
     val typography = MaterialTheme.typography
+    val licenseTitle = stringResource(R.string.settings_licenses)
     var fontExpanded by rememberSaveable(kind) { mutableStateOf(false) }
     var failed by rememberSaveable(kind) { mutableStateOf(false) }
     val title = when (kind) {
@@ -67,7 +68,7 @@ internal fun LegalAboutDialog(kind: String, onDismiss: () -> Unit, onContact: ()
                         OutlinedButton(onClick = {
                             failed = runCatching {
                                 OssLicensesMenuActivity.setTheme(colorScheme, colorScheme, typography)
-                                OssLicensesMenuActivity.setActivityTitle(context.getString(R.string.settings_licenses))
+                                OssLicensesMenuActivity.setActivityTitle(licenseTitle)
                                 context.startActivity(Intent(context, OssLicensesMenuActivity::class.java))
                             }.isFailure
                         }, modifier = Modifier.fillMaxWidth().testTag("licenses_dependencies")) {

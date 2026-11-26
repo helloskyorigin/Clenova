@@ -179,20 +179,21 @@ private fun CleanQuickTool(icon: ImageVector, title: Int, tag: String, modifier:
 }
 
 @Composable
-internal fun MediaThumbnail(uri: Uri?) {
+internal fun MediaThumbnail(uri: Uri?, onReady: ((Boolean) -> Unit)? = null, fit: ContentScale = ContentScale.Crop) {
     val context = LocalContext.current
     val colors = ClenovaThemeTokens.colors
-    val bitmap by produceState<Bitmap?>(null, uri) {
+    val bitmap by produceState<Pair<Uri, Bitmap>?>(null, uri) {
         value = null
         if (uri != null && Build.VERSION.SDK_INT >= 29) {
             value = withContext(Dispatchers.IO) {
-                try { context.contentResolver.loadThumbnail(uri, Size(240, 240), null) }
+                try { uri to context.contentResolver.loadThumbnail(uri, Size(240, 240), null) }
                 catch (e: CancellationException) { throw e }
                 catch (_: Exception) { null }
             }
         }
     }
-    val photo = bitmap
-    if (photo != null) Image(photo.asImageBitmap(), contentDescription = null, modifier = Modifier.fillMaxSize(), contentScale = ContentScale.Crop)
+    val photo = bitmap?.takeIf { it.first == uri }?.second
+    LaunchedEffect(uri, photo != null) { onReady?.invoke(photo != null) }
+    if (photo != null) Image(photo.asImageBitmap(), contentDescription = null, modifier = Modifier.fillMaxSize(), contentScale = fit)
     else Icon(Icons.Outlined.Image, null, Modifier.size(25.dp), tint = colors.textSecondary.copy(alpha = .5f))
 }

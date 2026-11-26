@@ -33,8 +33,14 @@ jobs:
           test -x "$SDKMANAGER"
           "$SDKMANAGER" --version
           "$SDKMANAGER" 'platforms;android-36.1' 'platforms;android-36' 'build-tools;36.0.0'
-      - name: Build debug APK and run tests
-        run: bash gradlew :app:assembleDebug :app:testDebugUnitTest :app:lintDebug --stacktrace
+      - name: Build debug APK
+        run: bash gradlew :app:assembleDebug --stacktrace
+      - name: Run unit tests
+        if: success()
+        run: bash gradlew :app:testDebugUnitTest --no-parallel --stacktrace
+      - name: Run Android lint
+        if: always()
+        run: bash gradlew :app:lintDebug --no-parallel --stacktrace
       - uses: actions/upload-artifact@v4
         if: always()
         with:

@@ -127,16 +127,17 @@ internal fun ScreenshotsScreen(result: MediaScanResult?, owner: LifecycleOwner, 
                     horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                     items(items, key = { it.uri.toString() }) { media ->
                         val locked = media.uri !in eligible
+                        var previewReady by remember(media.uri) { mutableStateOf(false) }
                         val checked = media.uri in chosen
                         Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                             Box(Modifier.fillMaxWidth().aspectRatio(if (largeMedia) 1.25f else .78f).clip(RoundedCornerShape(10.dp)).background(colors.surface)
                                 .then(if (locked) Modifier else Modifier.toggleable(checked,
-                                    enabled = supported && !busy && (checked || chosen.size < (if (largeMedia) LargeMediaTrash.MAX_BATCH else ScreenshotTrash.MAX_BATCH)),
+                                    enabled = supported && !busy && (checked || (previewReady && chosen.size < (if (largeMedia) LargeMediaTrash.MAX_BATCH else ScreenshotTrash.MAX_BATCH))),
                                     role = Role.Checkbox, onValueChange = {
                                         selected = if (it) chosen + media.uri else chosen - media.uri
                                         onHaptic()
                                     })), contentAlignment = Alignment.Center) {
-                                MediaThumbnail(media.uri)
+                                MediaThumbnail(media.uri, onReady = { previewReady = it }, fit = androidx.compose.ui.layout.ContentScale.Fit)
                                 Surface(shape = ClenovaShapes.pill, color = if (checked) colors.primary else colors.background,
                                     modifier = Modifier.align(Alignment.TopEnd).padding(6.dp).size(26.dp)) {
                                     Box(contentAlignment = Alignment.Center) {

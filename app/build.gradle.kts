@@ -75,6 +75,11 @@ configurations.configureEach {
   exclude(group = "androidx.compose.material3.adaptive")
 }
 
+tasks.withType<org.gradle.api.tasks.testing.Test>().configureEach {
+  maxHeapSize = "2g"
+  maxParallelForks = 1
+}
+
 dependencies {
   implementation(platform(libs.androidx.compose.bom))
   implementation("com.google.android.gms:play-services-oss-licenses:17.5.3")

@@ -51,7 +51,7 @@ internal object DuplicateTrash {
     /** Never modifies media directly. Recheck both keeper and selected files before OS consent. */
     suspend fun request(context: Context, snapshot: MediaScanResult, selection: Set<Uri>, similar: Boolean = false): PendingIntent =
         withContext(Dispatchers.IO) {
-            check(Build.VERSION.SDK_INT >= 30)
+            if (Build.VERSION.SDK_INT < 30) throw UnsupportedOperationException("Android 11 required")
             check(mediaAccess(context) == snapshot.access)
             val plan = plan(if (similar) snapshot.similarGroups else snapshot.duplicateGroups, selection)
             val scanner = MediaScanner(context.applicationContext)

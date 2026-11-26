@@ -84,6 +84,15 @@ internal object VideoCompression {
                 currentCoroutineContext().ensureActive()
                 val size = output.length()
                 require(size > 0)
+                withContext(Dispatchers.IO) {
+                    val retriever = MediaMetadataRetriever()
+                    try {
+                        retriever.setDataSource(output.absolutePath)
+                        val duration = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION)?.toLongOrNull() ?: 0L
+                        val width = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_WIDTH)?.toIntOrNull() ?: 0
+                        require(width > 0 && duration > 0 && kotlin.math.abs(duration - source.durationMs) <= maxOf(1000L, source.durationMs / 100)) { "Incomplete video output" }
+                    } finally { retriever.release() }
+                }
                 successful = true
                 progress(100)
                 EncodedVideo(output, size)
@@ -94,9 +103,10 @@ internal object VideoCompression {
         }
 
     /** Publish only an explicitly approved, completed copy. Never open the original for writing. */
-    suspend fun save(context: Context, output: EncodedVideo): Uri = withContext(Dispatchers.IO) {
-        check(Build.VERSION.SDK_INT >= 29)
-        require(output.file.isFile && output.file.length() == output.bytes)
+    suspend fun save(context: Context, output: EncodedVideo, originalBytes: Long): Uri = withContext(Dispatchers.IO) {
+        if (Build.VERSION.SDK_INT < 29) throw UnsupportedOperationException("Android 10 required")
+        require(output.file.isFile && output.file.length() == output.bytes && output.bytes in 1 until originalBytes)
+        require(context.cacheDir.usableSpace >= output.bytes) { "Insufficient temporary storage" }
         val resolver = context.contentResolver
         val values = ContentValues().apply {
             put(MediaStore.MediaColumns.DISPLAY_NAME, "Clenova_${UUID.randomUUID()}.mp4")
@@ -107,6 +117,7 @@ internal object VideoCompression {
         val uri = resolver.insert(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, values) ?: throw IOException("Cannot create output")
         var published = false
         try {
+            var written = 0L
             output.file.inputStream().use { input ->
                 (resolver.openOutputStream(uri, "w") ?: throw IOException("Cannot write output")).use { stream ->
                     val buffer = ByteArray(128 * 1024)
@@ -115,13 +126,16 @@ internal object VideoCompression {
                         val n = input.read(buffer)
                         if (n < 0) break
                         stream.write(buffer, 0, n)
+                        written += n
                     }
                 }
             }
+            require(written == output.bytes) { "Incomplete output copy" }
             currentCoroutineContext().ensureActive()
             if (resolver.update(uri, ContentValues().apply { put(MediaStore.MediaColumns.IS_PENDING, 0) }, null, null) != 1)
                 throw IOException("Cannot publish output")
             published = true
+            CleanupHistory(context).record(CleanupKind.COMPRESS, 1, written, originalBytes)
             uri
         } finally { if (!published) runCatching { resolver.delete(uri, null, null) } }
     }

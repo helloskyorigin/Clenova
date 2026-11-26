@@ -147,16 +147,17 @@ internal fun DuplicatesScreen(
                             LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                                 itemsIndexed(group, key = { _, media -> media.uri.toString() }) { i, media ->
                                     val keep = i == 0 || media.favorite
+                                    var previewReady by remember(media.uri) { mutableStateOf(false) }
                                     val checked = media.uri in actualSelection
                                     Column(Modifier.width(112.dp), verticalArrangement = Arrangement.spacedBy(5.dp)) {
                                         Box(Modifier.fillMaxWidth().aspectRatio(1f).clip(RoundedCornerShape(12.dp)).background(colors.surface)
                                             .then(if (keep) Modifier else Modifier.toggleable(value = checked,
-                                                enabled = supported && !busy && (checked || actualSelection.size < DuplicateTrash.MAX_BATCH),
+                                                enabled = supported && !busy && (checked || ((!similar || previewReady) && actualSelection.size < DuplicateTrash.MAX_BATCH)),
                                                 role = Role.Checkbox, onValueChange = { value ->
                                                     selected = if (value) actualSelection + media.uri else actualSelection - media.uri
                                                     onSelectionHaptic()
                                                 })), contentAlignment = Alignment.Center) {
-                                            MediaThumbnail(media.uri)
+                                            MediaThumbnail(media.uri, onReady = { previewReady = it }, fit = androidx.compose.ui.layout.ContentScale.Fit)
                                             Surface(color = if (checked) colors.primary else colors.background, shape = ClenovaShapes.pill,
                                                 modifier = Modifier.align(Alignment.TopEnd).padding(6.dp).size(26.dp)) {
                                                 Box(contentAlignment = Alignment.Center) {

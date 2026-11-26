@@ -2,8 +2,8 @@ package com.clenova.app.data.storage
 
 import android.content.ContentResolver
 import android.graphics.Bitmap
+import android.graphics.ImageDecoder
 import android.os.Build
-import android.util.Size
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.ensureActive
@@ -35,7 +35,11 @@ internal object SimilarPhotos {
             java.lang.Long.bitCount(a.horizontal xor b.horizontal) <= 6 &&
             java.lang.Long.bitCount(a.vertical xor b.vertical) <= 6
     private fun read(resolver: ContentResolver, media: ScannedMedia): Fingerprint {
-        val bitmap = resolver.loadThumbnail(media.uri, Size(96, 96), null)
+        if (Build.VERSION.SDK_INT < 28) throw UnsupportedOperationException("Android 9 required")
+        val bitmap = ImageDecoder.decodeBitmap(ImageDecoder.createSource(resolver, media.uri)) { decoder, info, _ ->
+            decoder.allocator = ImageDecoder.ALLOCATOR_SOFTWARE
+            decoder.setTargetSampleSize(maxOf(1, (maxOf(info.size.width, info.size.height) + 95) / 96))
+        }
         try {
             val tiny = Bitmap.createScaledBitmap(bitmap, 9, 9, true)
             try {
@@ -47,8 +51,8 @@ internal object SimilarPhotos {
     }
     suspend fun find(resolver: ContentResolver, photos: List<ScannedMedia>,
         progress: suspend (Int, Int, Int) -> Unit, hash: suspend (ScannedMedia) -> String): Result {
-        if (Build.VERSION.SDK_INT < 29) return Result(emptyList(), photos.isNotEmpty())
-        val candidates = photos.takeLast(MAX_PHOTOS)
+        if (Build.VERSION.SDK_INT < 28) return Result(emptyList(), photos.isNotEmpty())
+        val candidates = photos.sortedByDescending { it.modified ?: 0L }.take(MAX_PHOTOS)
         var incomplete = photos.size > candidates.size
         val buckets = mutableListOf<MutableList<Pair<ScannedMedia, Fingerprint>>>()
         progress(3, 0, candidates.size)

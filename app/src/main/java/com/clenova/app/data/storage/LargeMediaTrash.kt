@@ -38,7 +38,7 @@ internal object LargeMediaTrash {
     /** Shared metadata revalidation for explicitly reviewed, policy-filtered MediaStore items. */
     internal suspend fun requestVerified(context: Context, result: MediaScanResult, items: List<ScannedMedia>): PendingIntent =
         withContext(Dispatchers.IO) {
-            check(Build.VERSION.SDK_INT >= 30)
+            if (Build.VERSION.SDK_INT < 30) throw UnsupportedOperationException("Android 11 required")
             check(mediaAccess(context) == result.access)
             require(items.isNotEmpty() && items.size <= MAX_BATCH && items.distinctBy { it.uri }.size == items.size)
             val selected = items.map { it.uri }

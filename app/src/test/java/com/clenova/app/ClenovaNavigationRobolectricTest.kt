@@ -295,10 +295,24 @@ class ClenovaNavigationRobolectricTest {
         composeTestRule.onNodeWithTag("settings_terms").performScrollTo().performClick()
         composeTestRule.onNodeWithTag("legal_done").performClick()
         composeTestRule.onNodeWithTag("settings_licenses").performScrollTo().performClick()
-        composeTestRule.onNodeWithTag("licenses_dependencies").performScrollTo().assertIsDisplayed()
+        composeTestRule.onNodeWithTag("licenses_dependencies").assertIsDisplayed()
         composeTestRule.onNodeWithTag("legal_done").performClick()
         composeTestRule.onNodeWithTag("settings_about").performScrollTo().performClick()
         composeTestRule.onNodeWithTag("legal_done").performClick()
+    }
+
+    @Test
+    fun `clean opens real review routes and history without fake results`() {
+        composeTestRule.setContent { ClenovaApp(storageRepository = FakeStorageRepository(), preferencesRepository = FakePreferencesRepository()) }
+        composeTestRule.waitForIdle()
+        composeTestRule.onNodeWithTag("nav_tab_clean").performClick()
+        composeTestRule.waitForIdle()
+        composeTestRule.onNodeWithTag("clean_history").performClick()
+        composeTestRule.onNodeWithTag("history_empty").assertIsDisplayed()
+        composeTestRule.onNodeWithTag("history_back").performClick()
+        composeTestRule.onNodeWithTag("clean_screenshots").performScrollTo().performClick()
+        composeTestRule.onNodeWithTag("screenshots_scan").assertIsDisplayed()
+        composeTestRule.onNodeWithTag("screenshots_approve").assertDoesNotExist()
     }
 
     @Test

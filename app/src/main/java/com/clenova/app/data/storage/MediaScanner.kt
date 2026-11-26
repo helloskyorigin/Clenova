@@ -80,18 +80,21 @@ internal class MediaScanner(private val context: Context) {
         }
         if (collections.isEmpty()) throw IOException("No accessible media collections")
         onProgress(0, 0, 0)
+        val collectionLimit = MAX_ITEMS / collections.size
         for ((collection, video) in collections) {
+            var collectionCount = 0
             currentCoroutineContext().ensureActive()
             val folderColumn = if (Build.VERSION.SDK_INT >= 29) MediaStore.MediaColumns.RELATIVE_PATH else MediaStore.MediaColumns.DATA
             val projection = arrayOf(MediaStore.MediaColumns._ID, MediaStore.MediaColumns.DISPLAY_NAME, MediaStore.MediaColumns.SIZE, folderColumn) + if (Build.VERSION.SDK_INT >= 30) arrayOf(MediaStore.MediaColumns.IS_FAVORITE, MediaStore.MediaColumns.GENERATION_MODIFIED, MediaStore.MediaColumns.DATE_MODIFIED) else emptyArray<String>()
             val selection = if (Build.VERSION.SDK_INT >= 30) "${MediaStore.MediaColumns.IS_PENDING}=0 AND ${MediaStore.MediaColumns.IS_TRASHED}=0"
                 else if (Build.VERSION.SDK_INT >= 29) "${MediaStore.MediaColumns.IS_PENDING}=0" else null
-            val cursor = resolver.query(collection, projection, selection, null, "${MediaStore.MediaColumns._ID} ASC")
+            val cursor = resolver.query(collection, projection, selection, null, "${MediaStore.MediaColumns._ID} DESC")
                 ?: throw IOException("Media provider unavailable")
             cursor.use {
                 while (it.moveToNext()) {
                     currentCoroutineContext().ensureActive()
-                    if (inventory.size >= MAX_ITEMS) { incomplete = true; break }
+                    if (collectionCount >= collectionLimit) { incomplete = true; break }
+                    collectionCount++
                     val bytes = it.getLong(2)
                     if (bytes <= 0L) { incomplete = true; continue }
                     val uri = ContentUris.withAppendedId(collection, it.getLong(0))
@@ -100,7 +103,6 @@ internal class MediaScanner(private val context: Context) {
                         modified = if (Build.VERSION.SDK_INT >= 30 && !it.isNull(6)) it.getLong(6) else null)
                 }
             }
-            if (inventory.size >= MAX_ITEMS) { incomplete = true; break }
         }
         val items = inventory.values.toList()
         val candidates = items.groupBy { it.bytes }.values.filter { it.size > 1 }.flatten()
@@ -125,19 +127,20 @@ internal class MediaScanner(private val context: Context) {
             onProgress(1, i + 1, candidates.size)
         }
         onProgress(2, 0, 0)
+        val previouslyVerified = hashes.values.flatten().associateBy { it.uri }
         val captures = items.filter { it.screenshot }
         val screenshots = mutableListOf<ScannedMedia>()
         var screenshotBudget = HASH_BUDGET
         onProgress(4, 0, captures.size)
         for ((index, media) in captures.withIndex()) {
             currentCoroutineContext().ensureActive()
-            var verified = media
-            if (!media.favorite && media.bytes <= screenshotBudget) {
+            var verified = previouslyVerified[media.uri] ?: media
+            if (!media.favorite && verified.verifiedHash == null && media.bytes <= screenshotBudget) {
                 screenshotBudget -= media.bytes
                 try { verified = media.copy(verifiedHash = hash(resolver, media)) }
                 catch (_: IOException) { incomplete = true }
                 catch (_: SecurityException) { incomplete = true }
-            } else if (!media.favorite) incomplete = true
+            } else if (!media.favorite && verified.verifiedHash == null) incomplete = true
             screenshots.add(verified)
             onProgress(4, index + 1, captures.size)
         }

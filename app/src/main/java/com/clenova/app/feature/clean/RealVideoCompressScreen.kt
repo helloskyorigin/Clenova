@@ -165,6 +165,9 @@ internal fun RealVideoCompressScreen(onBack: () -> Unit, onHaptic: () -> Unit, m
                             .onFailure { failed = true }
                     }, modifier = Modifier.fillMaxWidth()) { Text(stringResource(R.string.compress_real_open)) }
                     Button(onClick = { clearOutput(); onBack() }, modifier = Modifier.fillMaxWidth(), shape = ClenovaShapes.pill) { Text(stringResource(R.string.review_done)) }
+                } else if (phase == 3 && result != null && selected != null && result.bytes >= selected.bytes) {
+                    Button(onClick = { clearOutput(); failed = false; phase = 1 }, enabled = !busy,
+                        modifier = Modifier.fillMaxWidth(), shape = ClenovaShapes.pill) { Text(stringResource(R.string.compress_quality_title)) }
                 } else Button(onClick = {
                     onHaptic()
                     when (phase) {
@@ -184,7 +187,7 @@ internal fun RealVideoCompressScreen(onBack: () -> Unit, onHaptic: () -> Unit, m
                             val encoded = output ?: return@Button
                             failed = false; busy = true
                             job = scope.launch {
-                                try { saved = VideoCompression.save(context, encoded); CleanupHistory(context).record(CleanupKind.COMPRESS, 1, encoded.bytes, source?.bytes ?: 0L); onHaptic() }
+                                try { saved = VideoCompression.save(context, encoded, selected?.bytes ?: 0L); onHaptic() }
                                 catch (e: CancellationException) { throw e }
                                 catch (_: Exception) { failed = true }
                                 finally { busy = false }

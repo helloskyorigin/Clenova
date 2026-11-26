@@ -33,7 +33,7 @@ internal object ScreenshotTrash {
 
     suspend fun request(context: Context, result: MediaScanResult, selected: Set<Uri>): PendingIntent =
         withContext(Dispatchers.IO) {
-            check(Build.VERSION.SDK_INT >= 30)
+            if (Build.VERSION.SDK_INT < 30) throw UnsupportedOperationException("Android 11 required")
             check(mediaAccess(context) == result.access)
             val items = plan(result, selected)
             val resolver = context.contentResolver
