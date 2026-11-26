@@ -7,7 +7,7 @@ plugins {
 
 android {
   namespace = "com.example"
-  compileSdk { version = release(37) }
+  compileSdk { version = release(36) { minorApiLevel = 1 } }
 
   defaultConfig {
     applicationId = "com.clenova.app"
@@ -67,6 +67,12 @@ android {
     includeInApk = false
     includeInBundle = true
   }
+}
+
+// CLENOVA uses Navigation Compose, not Material adaptive pane/navigation3 APIs.
+// Avoid optional adaptive artifacts whose current releases require an unavailable SDK 37.
+configurations.configureEach {
+  exclude(group = "androidx.compose.material3.adaptive")
 }
 
 dependencies {
