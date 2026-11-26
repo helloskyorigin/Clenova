@@ -173,7 +173,7 @@ private fun CleanQuickTool(icon: ImageVector, title: Int, tag: String, modifier:
 }
 
 @Composable
-private fun MediaThumbnail(uri: Uri?) {
+internal fun MediaThumbnail(uri: Uri?) {
     val context = LocalContext.current
     val colors = ClenovaThemeTokens.colors
     val bitmap by produceState<Bitmap?>(null, uri) {

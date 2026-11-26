@@ -208,7 +208,7 @@ class ClenovaNavigationRobolectricTest {
         composeTestRule.waitForIdle()
         composeTestRule.onNodeWithTag("home_duplicates").performScrollTo().performClick()
         composeTestRule.waitForIdle()
-        composeTestRule.onNodeWithText("Duplicate scanning is not available yet").assertIsDisplayed()
+        composeTestRule.onNodeWithTag("duplicates_scan").assertIsDisplayed()
         composeTestRule.onNodeWithTag("duplicates_total").assertDoesNotExist()
         composeTestRule.onNodeWithTag("duplicates_back").performClick()
         composeTestRule.waitForIdle()

@@ -46,6 +46,7 @@ internal fun SmartScanScreen(
     onSelectionHaptic: () -> Unit,
     onResult: (MediaScanResult?) -> Unit,
     activityLifecycleOwner: LifecycleOwner,
+    onDuplicates: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val context = LocalContext.current
@@ -132,7 +133,7 @@ internal fun SmartScanScreen(
                         Text(stringResource(when(stage) { 0 -> R.string.scan_stage_inventory; 1 -> R.string.scan_stage_duplicates; else -> R.string.scan_stage_plan }), color = colors.textSecondary)
                         if (stage == 1 && total > 0) Text("$done / $total", color = colors.textSecondary)
                     }
-                    snapshot != null -> ActualResults(snapshot)
+                    snapshot != null -> ActualResults(snapshot, onDuplicates)
                     else -> Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(vertical = 32.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
                         Icon(Icons.Outlined.VerifiedUser, null, Modifier.size(40.dp), tint = colors.primary)
                         Text(stringResource(if (failed) R.string.scan_read_error else R.string.scan_access_title), style = MaterialTheme.typography.headlineSmall, color = colors.textPrimary)
@@ -158,7 +159,7 @@ internal fun SmartScanScreen(
 }
 
 @Composable
-private fun ActualResults(result: MediaScanResult) {
+private fun ActualResults(result: MediaScanResult, onDuplicates: () -> Unit) {
     val colors = ClenovaThemeTokens.colors
     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(vertical = 24.dp), verticalArrangement = Arrangement.spacedBy(18.dp)) {
         Text(stringResource(R.string.scan_complete), style = MaterialTheme.typography.labelMedium, color = colors.success)
@@ -181,6 +182,7 @@ private fun ActualResults(result: MediaScanResult) {
             }
             HorizontalDivider(color = colors.border)
         }
+        if (result.duplicateGroups.isNotEmpty()) OutlinedButton(onClick = onDuplicates, modifier = Modifier.fillMaxWidth().testTag("scan_duplicates")) { Text(stringResource(R.string.clean_tool_duplicates_title)) }
         Text(stringResource(R.string.scan_read_only), color = colors.textSecondary, style = MaterialTheme.typography.bodySmall)
     }
 }

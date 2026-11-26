@@ -36,7 +36,7 @@ internal fun mediaPermissions(): Array<String> = when {
     else -> arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE)
 }
 
-internal data class ScannedMedia(val uri: Uri, val name: String, val bytes: Long, val video: Boolean, val folder: String) {
+internal data class ScannedMedia(val uri: Uri, val name: String, val bytes: Long, val video: Boolean, val folder: String, val favorite: Boolean = false, val verifiedHash: String? = null) {
     val screenshot: Boolean get() = !video && (folder.replace('\\', '/').split('/').any { it.equals("screenshots", true) || it.equals("screenshot", true) }
         || name.startsWith("Screenshot", true) || name.startsWith("Screen_Shot", true))
 }
@@ -49,7 +49,7 @@ internal data class MediaScanResult(
     val largeVideos: List<ScannedMedia>,
     val incomplete: Boolean,
 ) {
-    val extras = duplicateGroups.flatMap { it.drop(1) }
+    val extras = duplicateGroups.flatMap { it.drop(1).filterNot { media -> media.favorite } }
     // A file may appear in multiple categories; count it only once.
     val reviewBytes = (extras + screenshots + largeVideos).distinctBy { it.uri }.sumOf { it.bytes }
     val duplicateBytes = extras.sumOf { it.bytes }
@@ -80,7 +80,7 @@ internal class MediaScanner(private val context: Context) {
         for ((collection, video) in collections) {
             currentCoroutineContext().ensureActive()
             val folderColumn = if (Build.VERSION.SDK_INT >= 29) MediaStore.MediaColumns.RELATIVE_PATH else MediaStore.MediaColumns.DATA
-            val projection = arrayOf(MediaStore.MediaColumns._ID, MediaStore.MediaColumns.DISPLAY_NAME, MediaStore.MediaColumns.SIZE, folderColumn)
+            val projection = arrayOf(MediaStore.MediaColumns._ID, MediaStore.MediaColumns.DISPLAY_NAME, MediaStore.MediaColumns.SIZE, folderColumn) + if (Build.VERSION.SDK_INT >= 30) arrayOf(MediaStore.MediaColumns.IS_FAVORITE) else emptyArray<String>()
             val selection = if (Build.VERSION.SDK_INT >= 30) "${MediaStore.MediaColumns.IS_PENDING}=0 AND ${MediaStore.MediaColumns.IS_TRASHED}=0"
                 else if (Build.VERSION.SDK_INT >= 29) "${MediaStore.MediaColumns.IS_PENDING}=0" else null
             val cursor = resolver.query(collection, projection, selection, null, "${MediaStore.MediaColumns._ID} ASC")
@@ -92,7 +92,7 @@ internal class MediaScanner(private val context: Context) {
                     val bytes = it.getLong(2)
                     if (bytes <= 0L) { incomplete = true; continue }
                     val uri = ContentUris.withAppendedId(collection, it.getLong(0))
-                    inventory[uri] = ScannedMedia(uri, it.getString(1).orEmpty(), bytes, video, it.getString(3).orEmpty())
+                    inventory[uri] = ScannedMedia(uri, it.getString(1).orEmpty(), bytes, video, it.getString(3).orEmpty(), favorite = Build.VERSION.SDK_INT >= 30 && it.getInt(4) != 0)
                 }
             }
             if (inventory.size >= MAX_ITEMS) { incomplete = true; break }
@@ -110,7 +110,7 @@ internal class MediaScanner(private val context: Context) {
                 remaining -= media.bytes
                 try {
                     val hash = hash(resolver, media)
-                    hashes.getOrPut(media.bytes to hash) { mutableListOf() }.add(media)
+                    hashes.getOrPut(media.bytes to hash) { mutableListOf() }.add(media.copy(verifiedHash = hash))
                 } catch (_: IOException) {
                     incomplete = true
                 } catch (_: SecurityException) {
@@ -122,13 +122,13 @@ internal class MediaScanner(private val context: Context) {
         onProgress(2, 0, 0)
         val screenshots = items.filter { it.screenshot }
         val largeVideos = items.filter { it.video && it.bytes >= LARGE_VIDEO_BYTES }.sortedByDescending { it.bytes }
-        val groups = hashes.values.filter { it.size > 1 }.map { it.sortedBy { m -> m.uri.toString() } }
+        val groups = hashes.values.filter { it.size > 1 }.map { it.sortedWith(compareByDescending<ScannedMedia> { m -> m.favorite }.thenBy { m -> m.uri.toString() }) }
         currentCoroutineContext().ensureActive()
         if (mediaAccess(context) != access) throw SecurityException("Media access changed")
         MediaScanResult(access, items.size, groups, screenshots, largeVideos, incomplete)
     }
 
-    private suspend fun hash(resolver: ContentResolver, media: ScannedMedia): String {
+    internal suspend fun hash(resolver: ContentResolver, media: ScannedMedia): String {
         val digest = MessageDigest.getInstance("SHA-256")
         val buffer = ByteArray(64 * 1024)
         var bytes = 0L

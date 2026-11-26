@@ -309,11 +309,11 @@
     <string name="privacy_local_title">Local preferences</string>
     <string name="privacy_local_body">Theme, haptics, Autopilot preferences and language are stored on your device. No account is required.</string>
     <string name="privacy_files_title">Personal files</string>
-    <string name="privacy_files_body">Clenova scans accessible photos and videos on your device with your permission. File protection and deletion are not yet connected. No personal media is uploaded by Clenova.</string>
+    <string name="privacy_files_body">Clenova scans accessible photos and videos on your device with your permission. Duplicate copies can be moved to Android Trash with your approval. Memory Guard rules are not yet connected. No personal media is uploaded by Clenova.</string>
     <string name="privacy_support_title">Support messages</string>
     <string name="privacy_support_body">Contact and problem reports open your email app. You decide whether to send the message and can edit or remove diagnostic details before sending.</string>
     <string name="support_faq_storage">How is storage measured?</string>
-    <string name="support_faq_storage_body">Clenova reads device storage totals and scans accessible photos and videos with your permission. Cleaning is not yet available.</string>
+    <string name="support_faq_storage_body">Clenova reads device storage totals and scans accessible photos and videos with your permission. Verified duplicate copies can be moved to Android Trash on Android 11 or later.</string>
     <string name="support_faq_auto_body">Set a free space goal and check frequency in Autopilot preferences. Background monitoring is not yet available.</string>
     <string name="support_faq_language_body">Open Language in Settings, search or select your language. Choose Device language to follow Android.</string>
     <string name="support_search">Search help</string>
@@ -332,7 +332,7 @@
     <string name="legal_terms_intro">These terms describe use of the current CLENOVA Android build by SKYORIGIN. Use the app only if you accept these terms.</string>
     <string name="legal_use_title">Responsible use</string>
     <string name="legal_use_body">Use CLENOVA only on devices and files you are authorized to manage. Do not use it to violate laws or the rights of others.</string>
-    <string name="legal_cleanup_body">Review recommendations and keep backups of important files before approving cleanup. This build does not perform media deletion.</string>
+    <string name="legal_cleanup_body">Review recommendations and keep backups of important files before approving cleanup. This build can move selected duplicate copies to Android Trash after system approval. Trash may be emptied by Android later.</string>
     <string name="legal_availability_title">Availability and changes</string>
     <string name="legal_availability_body">Features may change, be unavailable or depend on Android and device capabilities. Storage estimates are not a guarantee of recovered space. Check the latest notices when updating the app.</string>
     <string name="legal_rights_body">Nothing in these terms limits rights or remedies that cannot be waived under applicable law. Contact SKYORIGIN with questions or concerns.</string>
@@ -340,7 +340,7 @@
     <string name="legal_dependency_notices">Library notices</string>
     <string name="legal_read_license">Read license</string>
     <string name="clean_history">Cleanup history</string>
-    <string name="clean_history_empty">No completed cleanups yet. Your files have not been changed.</string>
+    <string name="clean_history_empty">Cleanup history is not available yet.</string>
     <string name="clean_preview">Design preview</string>
     <string name="clean_review_all">Review all</string>
     <string name="scan_access_title">Scan your media</string>
@@ -351,4 +351,13 @@
     <string name="scan_accessible_count">%1$d accessible media items checked</string>
     <string name="scan_partial">Limited or incomplete scan. Some media was not checked.</string>
     <string name="scan_read_only">Categories may overlap. Total counts each file once. Screenshots are identified by names and folders; large videos are 100 MB or more. Nothing has been deleted.</string>
+    <string name="duplicates_no_matches">No exact duplicates found in this scan</string>
+    <string name="duplicates_batch_note">Favorite items and one copy per group stay unselected. Select up to 100 copies per request.</string>
+    <string name="duplicates_select_batch">Select up to 100</string>
+    <string name="duplicates_move_trash">Move %1$d to Trash</string>
+    <string name="duplicates_trash_confirm">Clenova will verify the selected copies again and ask Android for approval. Trash may retain files temporarily; space is not freed immediately.</string>
+    <string name="duplicates_trash_success">Android confirmed the move to Trash. Scan again to refresh results.</string>
+    <string name="duplicates_trash_cancelled">Trash request cancelled or not approved. Scan again to refresh results.</string>
+    <string name="duplicates_trash_failed">Could not verify or move the selected copies. Scan again and review.</string>
+    <string name="duplicates_trash_unsupported">Trash requests require Android 11 or later. You can still review duplicate files.</string>
 </resources>

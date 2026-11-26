@@ -157,8 +157,11 @@ fun ClenovaNavHost(
 
         composable<ClenovaRoute.Duplicates> {
             DuplicatesScreen(
-                sample = sample,
+                result = scanResult,
+                activityLifecycleOwner = lifecycleOwner,
                 onBack = { onSelectionHaptic(); navController.popBackStack() },
+                onScan = { onSelectionHaptic(); navController.navigate(ClenovaRoute.SmartScan) { launchSingleTop = true } },
+                onInvalidate = { scanResult = null },
                 onSelectionHaptic = onSelectionHaptic,
             )
         }
@@ -169,6 +172,7 @@ fun ClenovaNavHost(
                 onSelectionHaptic = onSelectionHaptic,
                 onResult = { scanResult = it },
                 activityLifecycleOwner = lifecycleOwner,
+                onDuplicates = { onSelectionHaptic(); navController.navigate(ClenovaRoute.Duplicates) { popUpTo<ClenovaRoute.SmartScan> { inclusive = true }; launchSingleTop = true } },
             )
         }
 
