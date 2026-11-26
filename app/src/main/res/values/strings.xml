@@ -324,4 +324,19 @@
     <string name="support_copy">Copy message</string>
     <string name="support_copied">Message copied</string>
     <string name="support_email_unavailable">Unable to open email. Copy your message and send it using your preferred email service.</string>
+    <string name="legal_revision">Version: 26 November 2026</string>
+    <string name="legal_policy_intro">This notice describes the current CLENOVA Android build by SKYORIGIN. It does not describe future features.</string>
+    <string name="legal_support_processing">Support emails are sent only when you choose to send them. Your email provider handles delivery. SKYORIGIN may use the information you send to respond and resolve your request. Do not include passwords or sensitive files.</string>
+    <string name="legal_retention_title">Retention and choices</string>
+    <string name="legal_retention_body">Local preferences remain until reset or app data is removed. Support messages may be retained as needed to resolve requests or meet applicable obligations. Contact us to request access, correction or deletion of support information, subject to applicable law.</string>
+    <string name="legal_terms_intro">These terms describe use of the current CLENOVA Android build by SKYORIGIN. Use the app only if you accept these terms.</string>
+    <string name="legal_use_title">Responsible use</string>
+    <string name="legal_use_body">Use CLENOVA only on devices and files you are authorized to manage. Do not use it to violate laws or the rights of others.</string>
+    <string name="legal_cleanup_body">Review recommendations and keep backups of important files before approving cleanup. This build does not perform media deletion.</string>
+    <string name="legal_availability_title">Availability and changes</string>
+    <string name="legal_availability_body">Features may change, be unavailable or depend on Android and device capabilities. Storage estimates are not a guarantee of recovered space. Check the latest notices when updating the app.</string>
+    <string name="legal_rights_body">Nothing in these terms limits rights or remedies that cannot be waived under applicable law. Contact SKYORIGIN with questions or concerns.</string>
+    <string name="legal_licenses_intro">Dependency notices are generated from build-time library metadata. Bundled assets have separate notices. License texts remain in their original language.</string>
+    <string name="legal_dependency_notices">Library notices</string>
+    <string name="legal_read_license">Read license</string>
 </resources>

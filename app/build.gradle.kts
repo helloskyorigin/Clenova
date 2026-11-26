@@ -1,5 +1,6 @@
 plugins {
   alias(libs.plugins.android.application)
+  id("com.google.android.gms.oss-licenses-plugin")
   alias(libs.plugins.kotlin.compose)
   alias(libs.plugins.kotlin.serialization)
 }
@@ -70,6 +71,7 @@ android {
 
 dependencies {
   implementation(platform(libs.androidx.compose.bom))
+  implementation("com.google.android.gms:play-services-oss-licenses:17.5.3")
 
   implementation(libs.androidx.activity.compose)
 

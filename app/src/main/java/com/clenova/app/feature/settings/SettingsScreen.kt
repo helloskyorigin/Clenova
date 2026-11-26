@@ -60,7 +60,6 @@ fun SettingsScreen(
 ) {
     val colors = ClenovaThemeTokens.colors
     val context = LocalContext.current
-    val showPlanned = BuildConfig.DEBUG && showUnfinishedRows
     var themeMenu by remember { mutableStateOf(false) }
     var languageMenu by remember { mutableStateOf(false) }
     var search by remember { mutableStateOf("") }
@@ -177,11 +176,11 @@ fun SettingsScreen(
                 SettingsRow(Icons.Outlined.BugReport, R.string.settings_report, tag = "settings_report", onClick = { detail = "report" })
                 SettingsRow(Icons.Outlined.ChatBubbleOutline, R.string.settings_suggest, tag = "settings_suggest", onClick = { detail = "suggest" })
             }
-            if (showPlanned) SettingsSection(R.string.settings_about_section) {
-                SettingsRow(Icons.Outlined.Description, R.string.settings_policy)
-                SettingsRow(Icons.Outlined.FactCheck, R.string.settings_terms)
-                SettingsRow(Icons.Outlined.Code, R.string.settings_licenses)
-                SettingsRow(Icons.Outlined.Info, R.string.settings_about_product)
+            SettingsSection(R.string.settings_about_section) {
+                SettingsRow(Icons.Outlined.Description, R.string.settings_policy, tag = "settings_policy", onClick = { detail = "policy" })
+                SettingsRow(Icons.Outlined.FactCheck, R.string.settings_terms, tag = "settings_terms", onClick = { detail = "terms" })
+                SettingsRow(Icons.Outlined.Code, R.string.settings_licenses, tag = "settings_licenses", onClick = { detail = "licenses" })
+                SettingsRow(Icons.Outlined.Info, R.string.settings_about_product, tag = "settings_about", onClick = { detail = "about" })
             }
             HorizontalDivider(color = colors.border)
             Column(Modifier.fillMaxWidth().padding(top = 30.dp, bottom = 8.dp), horizontalAlignment = Alignment.CenterHorizontally,
@@ -194,6 +193,9 @@ fun SettingsScreen(
             }
         }
     }
+    if (detail in listOf("policy", "terms", "licenses", "about")) LegalAboutDialog(
+        kind = detail, onDismiss = { detail = "" }, onContact = { detail = "contact" },
+    )
     if (detail == "help") HelpCenterDialog(onDismiss = { detail = "" }, onContact = { detail = "contact" })
     if (detail in listOf("contact", "report", "suggest")) SupportComposeDialog(kind = detail, onDismiss = { detail = "" })
     if (detail == "permissions") PermissionsDialog(onDismiss = { detail = "" })
