@@ -368,4 +368,10 @@
     <string name="guard_real_empty">এখনও কোনো সুরক্ষিত আইটেম নেই।</string>
     <string name="guard_real_error">সুরক্ষা নিয়ম পড়া বা আপডেট করা যায়নি।</string>
     <string name="guard_real_remove">এই নিয়ম সরাবেন? কোনো ফাইল মোছা হবে না।</string>
+    <string name="guard_real_items">ছবি ও ভিডিও</string>
+    <string name="guard_real_albums">অ্যালবাম</string>
+    <string name="guard_real_browse">মিডিয়া দেখুন</string>
+    <string name="guard_real_search">মিডিয়া বা অ্যালবাম খুঁজুন</string>
+    <string name="guard_real_album_scope">এই ফোল্ডার এবং ভবিষ্যতে এতে যোগ হওয়া মিডিয়াকে CLENOVA-এর ক্লিনআপ থেকে সুরক্ষিত রাখুন।</string>
+    <string name="guard_real_visible_count">অ্যাক্সেসযোগ্য মিডিয়ায় সুরক্ষিত আইটেম</string>
 </resources>

@@ -368,4 +368,10 @@
     <string name="guard_real_empty">Защищённых файлов пока нет.</string>
     <string name="guard_real_error">Не удалось прочитать или обновить правила.</string>
     <string name="guard_real_remove">Удалить это правило? Файлы не будут удалены.</string>
+    <string name="guard_real_items">Фото и видео</string>
+    <string name="guard_real_albums">Альбомы</string>
+    <string name="guard_real_browse">Просмотреть медиа</string>
+    <string name="guard_real_search">Поиск медиа или альбомов</string>
+    <string name="guard_real_album_scope">Защитите эту папку и добавляемые в будущем медиа от очистки CLENOVA.</string>
+    <string name="guard_real_visible_count">Защищённые элементы среди доступных медиа</string>
 </resources>

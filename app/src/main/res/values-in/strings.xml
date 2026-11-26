@@ -368,4 +368,10 @@
     <string name="guard_real_empty">Belum ada item terlindungi.</string>
     <string name="guard_real_error">Tidak dapat membaca atau memperbarui aturan.</string>
     <string name="guard_real_remove">Hapus aturan ini? Tidak ada file yang dihapus.</string>
+    <string name="guard_real_items">Foto dan video</string>
+    <string name="guard_real_albums">Album</string>
+    <string name="guard_real_browse">Jelajahi media</string>
+    <string name="guard_real_search">Cari media atau album</string>
+    <string name="guard_real_album_scope">Lindungi folder ini dan media yang ditambahkan nanti dari pembersihan CLENOVA.</string>
+    <string name="guard_real_visible_count">Item terlindungi dalam media yang dapat diakses</string>
 </resources>

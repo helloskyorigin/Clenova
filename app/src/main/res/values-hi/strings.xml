@@ -368,4 +368,10 @@
     <string name="guard_real_empty">अभी कोई सुरक्षित फ़ाइल नहीं है।</string>
     <string name="guard_real_error">सुरक्षा नियम पढ़े या अपडेट नहीं हो सके।</string>
     <string name="guard_real_remove">यह नियम हटाएँ? कोई फ़ाइल नहीं हटेगी।</string>
+    <string name="guard_real_items">तस्वीरें और वीडियो</string>
+    <string name="guard_real_albums">एल्बम</string>
+    <string name="guard_real_browse">मीडिया देखें</string>
+    <string name="guard_real_search">मीडिया या एल्बम खोजें</string>
+    <string name="guard_real_album_scope">इस फ़ोल्डर और इसमें बाद में जुड़ने वाले मीडिया को CLENOVA की सफाई से सुरक्षित रखें।</string>
+    <string name="guard_real_visible_count">उपलब्ध मीडिया में सुरक्षित आइटम</string>
 </resources>

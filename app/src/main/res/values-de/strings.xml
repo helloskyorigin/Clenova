@@ -368,4 +368,10 @@
     <string name="guard_real_empty">Noch keine geschützten Elemente.</string>
     <string name="guard_real_error">Schutzregeln konnten nicht gelesen oder aktualisiert werden.</string>
     <string name="guard_real_remove">Diese Regel entfernen? Keine Datei wird gelöscht.</string>
+    <string name="guard_real_items">Fotos und Videos</string>
+    <string name="guard_real_albums">Alben</string>
+    <string name="guard_real_browse">Medien durchsuchen</string>
+    <string name="guard_real_search">Medien oder Alben suchen</string>
+    <string name="guard_real_album_scope">Schütze diesen Ordner und künftig hinzugefügte Medien vor der CLENOVA-Bereinigung.</string>
+    <string name="guard_real_visible_count">Geschützte Elemente in zugänglichen Medien</string>
 </resources>

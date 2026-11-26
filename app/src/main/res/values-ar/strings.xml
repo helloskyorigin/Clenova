@@ -368,4 +368,10 @@
     <string name="guard_real_empty">لا توجد عناصر محمية بعد.</string>
     <string name="guard_real_error">تعذرت قراءة قواعد الحماية أو تحديثها.</string>
     <string name="guard_real_remove">إزالة هذه القاعدة؟ لن يتم حذف أي ملف.</string>
+    <string name="guard_real_items">الصور والفيديوهات</string>
+    <string name="guard_real_albums">الألبومات</string>
+    <string name="guard_real_browse">تصفح الوسائط</string>
+    <string name="guard_real_search">ابحث عن الوسائط أو الألبومات</string>
+    <string name="guard_real_album_scope">احم هذا المجلد والوسائط التي تضاف إليه لاحقاً من تنظيف CLENOVA.</string>
+    <string name="guard_real_visible_count">العناصر المحمية في الوسائط المتاحة</string>
 </resources>

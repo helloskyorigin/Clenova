@@ -368,4 +368,10 @@
     <string name="guard_real_empty">Todavía no hay elementos protegidos.</string>
     <string name="guard_real_error">No se pudieron leer o actualizar las reglas.</string>
     <string name="guard_real_remove">¿Quitar esta regla? No se eliminará ningún archivo.</string>
+    <string name="guard_real_items">Fotos y vídeos</string>
+    <string name="guard_real_albums">Álbumes</string>
+    <string name="guard_real_browse">Explorar medios</string>
+    <string name="guard_real_search">Buscar medios o álbumes</string>
+    <string name="guard_real_album_scope">Protege esta carpeta y los medios que se añadan en el futuro de la limpieza de CLENOVA.</string>
+    <string name="guard_real_visible_count">Elementos protegidos en medios accesibles</string>
 </resources>

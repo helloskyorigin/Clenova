@@ -368,4 +368,10 @@
     <string name="guard_real_empty">ابھی کوئی محفوظ آئٹم نہیں ہے۔</string>
     <string name="guard_real_error">حفاظتی قواعد پڑھنا یا اپ ڈیٹ کرنا ممکن نہیں ہوا۔</string>
     <string name="guard_real_remove">یہ قاعدہ ہٹائیں؟ کوئی فائل حذف نہیں ہوگی۔</string>
+    <string name="guard_real_items">تصاویر اور ویڈیوز</string>
+    <string name="guard_real_albums">البمز</string>
+    <string name="guard_real_browse">میڈیا دیکھیں</string>
+    <string name="guard_real_search">میڈیا یا البمز تلاش کریں</string>
+    <string name="guard_real_album_scope">اس فولڈر اور بعد میں شامل ہونے والے میڈیا کو CLENOVA کی صفائی سے محفوظ رکھیں۔</string>
+    <string name="guard_real_visible_count">دستیاب میڈیا میں محفوظ آئٹمز</string>
 </resources>

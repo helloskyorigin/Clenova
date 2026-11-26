@@ -401,4 +401,10 @@
     <string name="guard_real_empty">No protected items yet.</string>
     <string name="guard_real_error">Could not read or update protection rules.</string>
     <string name="guard_real_remove">Remove this rule? No file will be deleted.</string>
+    <string name="guard_real_items">Photos &amp; videos</string>
+    <string name="guard_real_albums">Albums</string>
+    <string name="guard_real_browse">Browse media</string>
+    <string name="guard_real_search">Search media or albums</string>
+    <string name="guard_real_album_scope">Protect this folder, including future media added to it, from CLENOVA cleanup.</string>
+    <string name="guard_real_visible_count">Protected items in accessible media</string>
 </resources>

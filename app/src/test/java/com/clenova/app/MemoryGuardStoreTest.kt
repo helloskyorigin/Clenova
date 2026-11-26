@@ -34,4 +34,17 @@ class MemoryGuardStoreTest {
             store.ensureUnprotected(listOf(protected.uri))
         } finally { store.remove(protected.uri) }
     }
+    @Test fun albumRulesIncludeFutureMediaAndSeparateVolumes() {
+        val store = MemoryGuardStore(ApplicationProvider.getApplicationContext<Context>())
+        val first = ScannedMedia(Uri.parse("content://media/external_primary/images/media/100"), "first.jpg", 100, false, "DCIM/Family/")
+        val later = first.copy(uri = Uri.parse("content://media/external_primary/video/media/101"), video = true)
+        val other = first.copy(uri = Uri.parse("content://media/1234-5678/images/media/102"))
+        val key = requireNotNull(MemoryGuardStore.albumKey(first))
+        try {
+            assertTrue(store.addAlbum(key))
+            assertEquals(setOf(first.uri, later.uri), store.protectedUris(listOf(first, later, other)))
+            assertTrue(store.removeAlbum(key))
+            assertTrue(store.protectedUris(listOf(first, later)).isEmpty())
+        } finally { store.removeAlbum(key) }
+    }
 }

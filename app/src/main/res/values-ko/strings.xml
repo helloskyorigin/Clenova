@@ -368,4 +368,10 @@
     <string name="guard_real_empty">아직 보호된 항목이 없습니다.</string>
     <string name="guard_real_error">보호 규칙을 읽거나 업데이트하지 못했습니다.</string>
     <string name="guard_real_remove">이 규칙을 제거할까요? 파일은 삭제되지 않습니다.</string>
+    <string name="guard_real_items">사진과 동영상</string>
+    <string name="guard_real_albums">앨범</string>
+    <string name="guard_real_browse">미디어 탐색</string>
+    <string name="guard_real_search">미디어 또는 앨범 검색</string>
+    <string name="guard_real_album_scope">이 폴더와 나중에 추가되는 미디어를 CLENOVA 정리에서 보호합니다.</string>
+    <string name="guard_real_visible_count">접근 가능한 미디어의 보호 항목</string>
 </resources>

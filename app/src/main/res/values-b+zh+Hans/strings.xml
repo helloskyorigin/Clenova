@@ -368,4 +368,10 @@
     <string name="guard_real_empty">暂无受保护项目。</string>
     <string name="guard_real_error">无法读取或更新保护规则。</string>
     <string name="guard_real_remove">移除此规则？不会删除文件。</string>
+    <string name="guard_real_items">照片和视频</string>
+    <string name="guard_real_albums">相册</string>
+    <string name="guard_real_browse">浏览媒体</string>
+    <string name="guard_real_search">搜索媒体或相册</string>
+    <string name="guard_real_album_scope">保护此文件夹及以后添加的媒体免受 CLENOVA 清理。</string>
+    <string name="guard_real_visible_count">可访问媒体中的受保护项目</string>
 </resources>

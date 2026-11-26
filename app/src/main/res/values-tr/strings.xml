@@ -368,4 +368,10 @@
     <string name="guard_real_empty">Henüz korunan öğe yok.</string>
     <string name="guard_real_error">Koruma kuralları okunamadı veya güncellenemedi.</string>
     <string name="guard_real_remove">Bu kural kaldırılsın mı? Hiçbir dosya silinmeyecek.</string>
+    <string name="guard_real_items">Fotoğraflar ve videolar</string>
+    <string name="guard_real_albums">Albümler</string>
+    <string name="guard_real_browse">Medyaya göz at</string>
+    <string name="guard_real_search">Medya veya albüm ara</string>
+    <string name="guard_real_album_scope">Bu klasörü ve daha sonra eklenen medyayı CLENOVA temizliğinden koruyun.</string>
+    <string name="guard_real_visible_count">Erişilebilir medyada korunan öğeler</string>
 </resources>

@@ -368,4 +368,10 @@
     <string name="guard_real_empty">保護対象はまだありません。</string>
     <string name="guard_real_error">保護ルールを読み込みまたは更新できませんでした。</string>
     <string name="guard_real_remove">このルールを削除しますか？ファイルは削除されません。</string>
+    <string name="guard_real_items">写真と動画</string>
+    <string name="guard_real_albums">アルバム</string>
+    <string name="guard_real_browse">メディアを閲覧</string>
+    <string name="guard_real_search">メディアやアルバムを検索</string>
+    <string name="guard_real_album_scope">このフォルダと今後追加されるメディアを CLENOVA のクリーンアップから保護します。</string>
+    <string name="guard_real_visible_count">アクセス可能なメディア内の保護対象</string>
 </resources>

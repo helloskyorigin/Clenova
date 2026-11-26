@@ -67,7 +67,9 @@ internal class MediaScanner(private val context: Context) {
         private const val HASH_BUDGET = 1_000_000_000L
     }
 
-    suspend fun scan(onProgress: suspend (stage: Int, done: Int, total: Int) -> Unit): MediaScanResult = withContext(Dispatchers.IO) {
+    internal data class Inventory(val access: MediaAccess, val items: List<ScannedMedia>, val incomplete: Boolean)
+
+    suspend fun inventory(): Inventory = withContext(Dispatchers.IO) {
         val access = mediaAccess(context)
         if (!access.any) throw SecurityException("Media access required")
         val resolver = context.contentResolver
@@ -81,7 +83,6 @@ internal class MediaScanner(private val context: Context) {
             }
         }
         if (collections.isEmpty()) throw IOException("No accessible media collections")
-        onProgress(0, 0, 0)
         val collectionLimit = MAX_ITEMS / collections.size
         for ((collection, video) in collections) {
             var collectionCount = 0
@@ -106,7 +107,17 @@ internal class MediaScanner(private val context: Context) {
                 }
             }
         }
-        val items = inventory.values.toList()
+        if (mediaAccess(context) != access) throw SecurityException("Media access changed")
+        Inventory(access, inventory.values.toList(), incomplete)
+    }
+
+    suspend fun scan(onProgress: suspend (stage: Int, done: Int, total: Int) -> Unit): MediaScanResult = withContext(Dispatchers.IO) {
+        onProgress(0, 0, 0)
+        val snapshot = inventory()
+        val access = snapshot.access
+        val items = snapshot.items
+        var incomplete = snapshot.incomplete
+        val resolver = context.contentResolver
         val candidates = items.groupBy { it.bytes }.values.filter { it.size > 1 }.flatten()
         val hashes = linkedMapOf<Pair<Long, String>, MutableList<ScannedMedia>>()
         var remaining = HASH_BUDGET
@@ -154,7 +165,7 @@ internal class MediaScanner(private val context: Context) {
         incomplete = incomplete || similar.incomplete
         currentCoroutineContext().ensureActive()
         if (mediaAccess(context) != access) throw SecurityException("Media access changed")
-        MediaScanResult(access, items.size, groups, screenshots, largeVideos, incomplete, similar.groups, largeFiles, items.filterNot { it.video }.sortedByDescending { it.modified ?: 0L }, items, MemoryGuardStore(context).records().keys)
+        MediaScanResult(access, items.size, groups, screenshots, largeVideos, incomplete, similar.groups, largeFiles, items.filterNot { it.video }.sortedByDescending { it.modified ?: 0L }, items, MemoryGuardStore(context).protectedUris(items))
     }
 
     internal suspend fun hash(resolver: ContentResolver, media: ScannedMedia): String {
