@@ -276,11 +276,11 @@
     <string name="privacy_local_title">स्थानीय प्राथमिकताएँ</string>
     <string name="privacy_local_body">थीम, हैप्टिक्स, ऑटोपायलट प्राथमिकताएँ और भाषा डिवाइस पर सेव हैं। अकाउंट ज़रूरी नहीं है।</string>
     <string name="privacy_files_title">निजी फ़ाइलें</string>
-    <string name="privacy_files_body">Clenova आपकी अनुमति से डिवाइस पर उपलब्ध फ़ोटो और वीडियो स्कैन करता है। फ़ाइल सुरक्षा और हटाना अभी जुड़े नहीं हैं। Clenova निजी मीडिया अपलोड नहीं करता।</string>
+    <string name="privacy_files_body">Clenova अनुमति से डिवाइस पर फ़ोटो और वीडियो स्कैन करता है। आपकी मंज़ूरी से डुप्लिकेट Android ट्रैश में जा सकते हैं। Memory Guard नियम अभी जुड़े नहीं हैं। निजी मीडिया अपलोड नहीं होता।</string>
     <string name="privacy_support_title">सहायता संदेश</string>
     <string name="privacy_support_body">संपर्क और समस्या रिपोर्ट आपका ईमेल ऐप खोलते हैं। संदेश भेजना आपका निर्णय है और भेजने से पहले डायग्नोस्टिक जानकारी बदल या हटा सकते हैं।</string>
     <string name="support_faq_storage">स्टोरेज कैसे मापा जाता है?</string>
-    <string name="support_faq_storage_body">Clenova डिवाइस स्टोरेज की कुल जानकारी पढ़ता है और आपकी अनुमति से उपलब्ध फ़ोटो और वीडियो स्कैन करता है। सफ़ाई अभी उपलब्ध नहीं है।</string>
+    <string name="support_faq_storage_body">Clenova स्टोरेज पढ़ता है और अनुमति से मीडिया स्कैन करता है। Android 11 या नए पर सत्यापित कॉपी ट्रैश में भेज सकते हैं।</string>
     <string name="support_faq_auto_body">ऑटोपायलट प्राथमिकताओं में खाली जगह का लक्ष्य और जाँच की आवृत्ति सेट करें। बैकग्राउंड निगरानी अभी उपलब्ध नहीं है।</string>
     <string name="support_faq_language_body">सेटिंग्स में भाषा खोलें, अपनी भाषा खोजें या चुनें। Android की भाषा के लिए डिवाइस की भाषा चुनें।</string>
     <string name="support_search">सहायता खोजें</string>
@@ -299,7 +299,7 @@
     <string name="legal_terms_intro">ये शर्तें SKYORIGIN के वर्तमान CLENOVA Android बिल्ड पर लागू हैं। स्वीकार करने पर ही ऐप इस्तेमाल करें।</string>
     <string name="legal_use_title">ज़िम्मेदार इस्तेमाल</string>
     <string name="legal_use_body">CLENOVA केवल उन डिवाइस और फ़ाइलों पर इस्तेमाल करें जिन्हें प्रबंधित करने की अनुमति है। कानून या दूसरों के अधिकारों का उल्लंघन न करें।</string>
-    <string name="legal_cleanup_body">सफ़ाई मंज़ूर करने से पहले सुझाव देखें और ज़रूरी फ़ाइलों का बैकअप रखें। यह बिल्ड मीडिया नहीं हटाता।</string>
+    <string name="legal_cleanup_body">सफ़ाई से पहले सुझाव देखें और ज़रूरी फ़ाइलों का बैकअप रखें। सिस्टम की मंज़ूरी पर चुनी कॉपी Android ट्रैश में जा सकती हैं। Android बाद में ट्रैश खाली कर सकता है।</string>
     <string name="legal_availability_title">उपलब्धता और बदलाव</string>
     <string name="legal_availability_body">फ़ीचर बदल सकते हैं, अनुपलब्ध हो सकते हैं या Android और डिवाइस की क्षमताओं पर निर्भर हो सकते हैं। स्टोरेज अनुमान वास्तविक खाली जगह की गारंटी नहीं हैं। अपडेट करते समय नवीनतम सूचनाएँ देखें।</string>
     <string name="legal_rights_body">इन शर्तों से लागू कानून के तहत न छोड़े जा सकने वाले अधिकार या उपाय सीमित नहीं होते। सवालों या चिंताओं के लिए SKYORIGIN से संपर्क करें।</string>
@@ -307,7 +307,7 @@
     <string name="legal_dependency_notices">लाइब्रेरी नोटिस</string>
     <string name="legal_read_license">लाइसेंस पढ़ें</string>
     <string name="clean_history">सफ़ाई का इतिहास</string>
-    <string name="clean_history_empty">अभी कोई सफ़ाई पूरी नहीं हुई है। आपकी फ़ाइलें नहीं बदली गई हैं।</string>
+    <string name="clean_history_empty">सफ़ाई का इतिहास अभी उपलब्ध नहीं है।</string>
     <string name="clean_preview">डिज़ाइन प्रीव्यू</string>
     <string name="clean_review_all">सभी की समीक्षा करें</string>
     <string name="scan_access_title">मीडिया स्कैन करें</string>
@@ -318,4 +318,15 @@
     <string name="scan_accessible_count">%1$d उपलब्ध मीडिया आइटम जाँचे गए</string>
     <string name="scan_partial">सीमित या अधूरा स्कैन। कुछ मीडिया की जाँच नहीं हुई।</string>
     <string name="scan_read_only">श्रेणियाँ ओवरलैप कर सकती हैं। कुल में हर फ़ाइल एक बार गिनी जाती है। स्क्रीनशॉट नाम और फ़ोल्डर से पहचाने जाते हैं; बड़े वीडियो 100 MB या अधिक हैं। कुछ भी नहीं हटाया गया।</string>
+    <string name="duplicates_no_matches">इस स्कैन में समान कॉपी नहीं मिलीं</string>
+    <string name="duplicates_batch_note">पसंदीदा फ़ाइलें और हर समूह की एक कॉपी नहीं चुनी जाएंगी। एक बार में 100 तक चुनें।</string>
+    <string name="duplicates_select_batch">100 तक चुनें</string>
+    <string name="duplicates_move_trash">%1$d को ट्रैश में भेजें</string>
+    <string name="duplicates_trash_confirm">Clenova चुनी हुई कॉपी दोबारा जाँचेगा और Android की अनुमति माँगेगा। ट्रैश में फ़ाइलें कुछ समय रहती हैं; जगह तुरंत खाली नहीं होती।</string>
+    <string name="duplicates_trash_success">Android ने ट्रैश में भेजना पुष्टि किया। परिणाम के लिए दोबारा स्कैन करें।</string>
+    <string name="duplicates_trash_cancelled">ट्रैश अनुरोध रद्द हुआ या मंज़ूर नहीं हुआ। दोबारा स्कैन करें।</string>
+    <string name="duplicates_trash_failed">चुनी कॉपी की पुष्टि या ट्रैश में भेजना संभव नहीं हुआ। दोबारा स्कैन करें।</string>
+    <string name="duplicates_trash_unsupported">ट्रैश अनुरोध के लिए Android 11 या नया चाहिए। कॉपी देख सकते हैं।</string>
+    <string name="duplicates_guard_note">कस्टम Memory Guard नियम अभी जुड़े नहीं हैं। आगे बढ़ने से पहले हर कॉपी देखें।</string>
+    <string name="duplicates_verify_limit">1 GB सत्यापन सीमा के लिए चयन कम करें।</string>
 </resources>

@@ -276,11 +276,11 @@
     <string name="privacy_local_title">端末内の設定</string>
     <string name="privacy_local_body">テーマ、触覚、Autopilot の設定、言語は端末に保存されます。アカウントは不要です。</string>
     <string name="privacy_files_title">個人ファイル</string>
-    <string name="privacy_files_body">Clenova は許可を得て端末上のアクセス可能な写真と動画をスキャンします。ファイル保護と削除はまだ未接続です。個人メディアはアップロードしません。</string>
+    <string name="privacy_files_body">Clenova は許可を得て端末内の写真と動画をスキャンします。承認後、重複を Android のごみ箱に移せます。Memory Guard は未接続です。個人メディアはアップロードしません。</string>
     <string name="privacy_support_title">サポートメッセージ</string>
     <string name="privacy_support_body">お問い合わせや問題報告ではメールアプリを開きます。送信するかどうかはあなたが決め、送信前に診断情報を編集・削除できます。</string>
     <string name="support_faq_storage">ストレージ容量はどう測定されますか？</string>
-    <string name="support_faq_storage_body">Clenova は総ストレージ容量を読み取り、許可を得てアクセス可能な写真と動画をスキャンします。整理機能はまだ利用できません。</string>
+    <string name="support_faq_storage_body">Clenova はストレージを読み取り、許可されたメディアをスキャンします。Android 11 以上で確認済みの重複をごみ箱へ移動できます。</string>
     <string name="support_faq_auto_body">自動管理の設定で空き容量の目標とチェック頻度を設定します。バックグラウンド監視はまだ利用できません。</string>
     <string name="support_faq_language_body">設定の言語を開き、検索または選択します。端末の言語を選ぶと Android の設定に従います。</string>
     <string name="support_search">ヘルプを検索</string>
@@ -299,7 +299,7 @@
     <string name="legal_terms_intro">本規約は SKYORIGIN の CLENOVA Android 現行ビルドの利用に関するものです。同意した場合のみご利用ください。</string>
     <string name="legal_use_title">責任ある利用</string>
     <string name="legal_use_body">管理権限のある端末とファイルにのみ CLENOVA を使用し、法律や他者の権利を侵害しないでください。</string>
-    <string name="legal_cleanup_body">整理を承認する前に推奨内容を確認し、重要なファイルをバックアップしてください。このビルドはメディアを削除しません。</string>
+    <string name="legal_cleanup_body">推奨内容を確認し、重要なファイルをバックアップしてください。システム承認後に選択した重複をごみ箱へ移せます。Android が後で空にする場合があります。</string>
     <string name="legal_availability_title">利用可能性と変更</string>
     <string name="legal_availability_body">機能は変更、利用停止、または Android や端末の性能に依存する場合があります。容量の推定値は実際に確保できる容量を保証しません。更新時に最新の通知をご確認ください。</string>
     <string name="legal_rights_body">本規約は適用法上放棄できない権利や救済手段を制限しません。ご質問は SKYORIGIN までお問い合わせください。</string>
@@ -307,7 +307,7 @@
     <string name="legal_dependency_notices">ライブラリ通知</string>
     <string name="legal_read_license">ライセンスを読む</string>
     <string name="clean_history">クリーンアップ履歴</string>
-    <string name="clean_history_empty">完了したクリーンアップはまだありません。ファイルは変更されていません。</string>
+    <string name="clean_history_empty">クリーンアップ履歴はまだ利用できません。</string>
     <string name="clean_preview">デザインプレビュー</string>
     <string name="clean_review_all">すべて確認</string>
     <string name="scan_access_title">メディアをスキャン</string>
@@ -318,4 +318,15 @@
     <string name="scan_accessible_count">アクセス可能なメディア %1$d 件を確認</string>
     <string name="scan_partial">制限付きまたは未完了のスキャンです。一部のメディアは未確認です。</string>
     <string name="scan_read_only">カテゴリは重複する場合があります。合計では各ファイルを一度だけ数えます。スクリーンショットは名前とフォルダで識別し、大きな動画は100 MB以上です。削除は行っていません。</string>
+    <string name="duplicates_no_matches">完全一致する重複は見つかりませんでした</string>
+    <string name="duplicates_batch_note">お気に入りと各グループの1件は選択されません。1回最大100件。</string>
+    <string name="duplicates_select_batch">最大100件を選択</string>
+    <string name="duplicates_move_trash">%1$d 件をごみ箱へ</string>
+    <string name="duplicates_trash_confirm">Clenova はコピーを再確認し Android の承認を求めます。ごみ箱に一時保存されるため、容量はすぐに解放されません。</string>
+    <string name="duplicates_trash_success">Android がごみ箱への移動を確認しました。再スキャンしてください。</string>
+    <string name="duplicates_trash_cancelled">リクエストがキャンセルまたは拒否されました。再スキャンしてください。</string>
+    <string name="duplicates_trash_failed">コピーの確認または移動に失敗しました。再スキャンしてください。</string>
+    <string name="duplicates_trash_unsupported">ごみ箱への移動には Android 11 以上が必要です。重複の確認は可能です。</string>
+    <string name="duplicates_guard_note">カスタム Memory Guard ルールは未接続です。各コピーを確認してください。</string>
+    <string name="duplicates_verify_limit">確認上限1 GB以内に選択を減らしてください。</string>
 </resources>

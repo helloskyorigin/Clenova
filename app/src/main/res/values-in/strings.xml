@@ -276,11 +276,11 @@
     <string name="privacy_local_title">Preferensi lokal</string>
     <string name="privacy_local_body">Tema, haptik, preferensi Autopilot, dan bahasa disimpan di perangkat. Tidak perlu akun.</string>
     <string name="privacy_files_title">File pribadi</string>
-    <string name="privacy_files_body">Clenova memindai foto dan video yang dapat diakses di perangkat dengan izin Anda. Perlindungan dan penghapusan file belum terhubung. Clenova tidak mengunggah media pribadi.</string>
+    <string name="privacy_files_body">Clenova memindai foto dan video di perangkat dengan izin Anda. Duplikat dapat dipindah ke sampah Android dengan persetujuan Anda. Memory Guard belum terhubung. Media pribadi tidak diunggah.</string>
     <string name="privacy_support_title">Pesan dukungan</string>
     <string name="privacy_support_body">Kontak dan laporan masalah membuka aplikasi email. Anda memutuskan apakah akan mengirim dan dapat mengedit atau menghapus detail diagnostik sebelum mengirim.</string>
     <string name="support_faq_storage">Bagaimana penyimpanan diukur?</string>
-    <string name="support_faq_storage_body">Clenova membaca total penyimpanan dan memindai foto serta video yang dapat diakses dengan izin Anda. Pembersihan belum tersedia.</string>
+    <string name="support_faq_storage_body">Clenova membaca penyimpanan dan memindai media dengan izin. Duplikat terverifikasi dapat dipindah ke sampah pada Android 11 atau lebih baru.</string>
     <string name="support_faq_auto_body">Atur target ruang kosong dan frekuensi di preferensi Autopilot. Pemantauan latar belakang belum tersedia.</string>
     <string name="support_faq_language_body">Buka Bahasa di Pengaturan lalu cari atau pilih bahasa. Pilih Bahasa perangkat untuk mengikuti Android.</string>
     <string name="support_search">Cari bantuan</string>
@@ -299,7 +299,7 @@
     <string name="legal_terms_intro">Ketentuan ini menjelaskan penggunaan versi Android CLENOVA saat ini dari SKYORIGIN. Gunakan aplikasi hanya jika menyetujuinya.</string>
     <string name="legal_use_title">Penggunaan bertanggung jawab</string>
     <string name="legal_use_body">Gunakan CLENOVA hanya pada perangkat dan file yang boleh Anda kelola. Jangan melanggar hukum atau hak orang lain.</string>
-    <string name="legal_cleanup_body">Tinjau rekomendasi dan cadangkan file penting sebelum menyetujui pembersihan. Versi ini tidak menghapus media.</string>
+    <string name="legal_cleanup_body">Tinjau rekomendasi dan cadangkan file penting. Duplikat terpilih dapat dipindah ke sampah setelah persetujuan sistem. Android dapat mengosongkannya nanti.</string>
     <string name="legal_availability_title">Ketersediaan dan perubahan</string>
     <string name="legal_availability_body">Fitur dapat berubah, tidak tersedia, atau bergantung pada kemampuan Android dan perangkat. Perkiraan tidak menjamin ruang yang diperoleh. Lihat pemberitahuan terbaru saat memperbarui.</string>
     <string name="legal_rights_body">Ketentuan ini tidak membatasi hak atau upaya hukum yang tidak dapat dikesampingkan berdasarkan hukum yang berlaku. Hubungi SKYORIGIN jika ada pertanyaan.</string>
@@ -307,7 +307,7 @@
     <string name="legal_dependency_notices">Pemberitahuan pustaka</string>
     <string name="legal_read_license">Baca lisensi</string>
     <string name="clean_history">Riwayat pembersihan</string>
-    <string name="clean_history_empty">Belum ada pembersihan selesai. File Anda tidak diubah.</string>
+    <string name="clean_history_empty">Riwayat belum tersedia.</string>
     <string name="clean_preview">Pratinjau desain</string>
     <string name="clean_review_all">Tinjau semua</string>
     <string name="scan_access_title">Pindai media</string>
@@ -318,4 +318,15 @@
     <string name="scan_accessible_count">%1$d item media yang dapat diakses diperiksa</string>
     <string name="scan_partial">Pemindaian terbatas atau tidak lengkap. Sebagian media belum diperiksa.</string>
     <string name="scan_read_only">Kategori dapat tumpang tindih. Setiap file dihitung sekali dalam total. Tangkapan layar dikenali dari nama dan folder; video besar berukuran 100 MB atau lebih. Tidak ada yang dihapus.</string>
+    <string name="duplicates_no_matches">Tidak ada duplikat identik dalam pemindaian ini</string>
+    <string name="duplicates_batch_note">Favorit dan satu salinan tiap grup tidak dipilih. Maksimal 100 salinan per permintaan.</string>
+    <string name="duplicates_select_batch">Pilih hingga 100</string>
+    <string name="duplicates_move_trash">Pindahkan %1$d ke sampah</string>
+    <string name="duplicates_trash_confirm">Clenova memverifikasi ulang salinan dan meminta persetujuan Android. Sampah dapat menyimpan file sementara; ruang tidak langsung kosong.</string>
+    <string name="duplicates_trash_success">Android mengonfirmasi pemindahan ke sampah. Pindai ulang.</string>
+    <string name="duplicates_trash_cancelled">Permintaan dibatalkan atau tidak disetujui. Pindai ulang.</string>
+    <string name="duplicates_trash_failed">Salinan tidak dapat diverifikasi atau dipindahkan. Pindai ulang.</string>
+    <string name="duplicates_trash_unsupported">Sampah memerlukan Android 11 atau lebih baru. Duplikat tetap bisa ditinjau.</string>
+    <string name="duplicates_guard_note">Aturan khusus Memory Guard belum terhubung. Periksa setiap salinan.</string>
+    <string name="duplicates_verify_limit">Kurangi pilihan agar sesuai batas verifikasi 1 GB.</string>
 </resources>

@@ -276,11 +276,11 @@
     <string name="privacy_local_title">التفضيلات المحلية</string>
     <string name="privacy_local_body">يُحفظ المظهر والاستجابة اللمسية وتفضيلات Autopilot واللغة على جهازك. لا يلزم حساب.</string>
     <string name="privacy_files_title">الملفات الشخصية</string>
-    <string name="privacy_files_body">يفحص Clenova الصور والفيديوهات المتاحة على جهازك بإذنك. لم تُربط حماية الملفات وحذفها بعد. لا يرفع Clenova الوسائط الشخصية.</string>
+    <string name="privacy_files_body">يفحص Clenova الصور والفيديوهات المتاحة بإذنك على الجهاز. يمكن نقل النسخ إلى مهملات Android بموافقتك. قواعد Memory Guard غير متصلة بعد. لا تُرفع الوسائط الشخصية.</string>
     <string name="privacy_support_title">رسائل الدعم</string>
     <string name="privacy_support_body">يفتح التواصل وتقارير المشكلات تطبيق البريد. تقرر أنت إرسال الرسالة ويمكنك تعديل تفاصيل التشخيص أو حذفها قبل الإرسال.</string>
     <string name="support_faq_storage">كيف تُقاس مساحة التخزين؟</string>
-    <string name="support_faq_storage_body">يقرأ Clenova إجمالي التخزين ويفحص الصور والفيديوهات المتاحة بإذنك. التنظيف غير متاح بعد.</string>
+    <string name="support_faq_storage_body">يقرأ Clenova التخزين ويفحص الوسائط بإذنك. يمكن نقل النسخ المتحققة للمهملات على Android 11 أو أحدث.</string>
     <string name="support_faq_auto_body">اضبط هدف المساحة الحرة وتكرار الفحص في تفضيلات Autopilot. المراقبة في الخلفية غير متاحة بعد.</string>
     <string name="support_faq_language_body">افتح اللغة في الإعدادات وابحث عن لغتك أو اخترها. اختر لغة الجهاز لمتابعة Android.</string>
     <string name="support_search">البحث في المساعدة</string>
@@ -299,7 +299,7 @@
     <string name="legal_terms_intro">تصف هذه الشروط استخدام الإصدار الحالي من CLENOVA لنظام Android من SKYORIGIN. استخدم التطبيق فقط إذا وافقت عليها.</string>
     <string name="legal_use_title">الاستخدام المسؤول</string>
     <string name="legal_use_body">استخدم CLENOVA فقط على الأجهزة والملفات المصرح لك بإدارتها. لا تستخدمه لمخالفة القوانين أو حقوق الآخرين.</string>
-    <string name="legal_cleanup_body">راجع التوصيات واحتفظ بنسخ احتياطية من الملفات المهمة قبل الموافقة على التنظيف. لا يحذف هذا الإصدار الوسائط.</string>
+    <string name="legal_cleanup_body">راجع التوصيات وانسخ الملفات المهمة احتياطيًا. يمكن نقل النسخ المحددة إلى المهملات بعد موافقة النظام. قد يفرغ Android المهملات لاحقًا.</string>
     <string name="legal_availability_title">التوافر والتغييرات</string>
     <string name="legal_availability_body">قد تتغير الميزات أو لا تتوفر أو تعتمد على قدرات Android والجهاز. تقديرات التخزين لا تضمن المساحة المستعادة. راجع أحدث الإشعارات عند التحديث.</string>
     <string name="legal_rights_body">لا تحد هذه الشروط من الحقوق أو سبل الانتصاف التي لا يجوز التنازل عنها بموجب القانون الساري. تواصل مع SKYORIGIN بشأن الأسئلة أو المخاوف.</string>
@@ -307,7 +307,7 @@
     <string name="legal_dependency_notices">إشعارات المكتبات</string>
     <string name="legal_read_license">قراءة الترخيص</string>
     <string name="clean_history">سجل التنظيف</string>
-    <string name="clean_history_empty">لا توجد عمليات تنظيف مكتملة بعد. لم تتغير ملفاتك.</string>
+    <string name="clean_history_empty">سجل التنظيف غير متاح بعد.</string>
     <string name="clean_preview">معاينة التصميم</string>
     <string name="clean_review_all">مراجعة الكل</string>
     <string name="scan_access_title">فحص الوسائط</string>
@@ -318,4 +318,15 @@
     <string name="scan_accessible_count">تم فحص %1$d عنصر وسائط متاح</string>
     <string name="scan_partial">فحص محدود أو غير مكتمل. لم تُفحص بعض الوسائط.</string>
     <string name="scan_read_only">قد تتداخل الفئات. يُحسب كل ملف مرة واحدة في الإجمالي. تُحدد لقطات الشاشة بالأسماء والمجلدات، والفيديوهات الكبيرة بحجم 100 MB فأكثر. لم يُحذف شيء.</string>
+    <string name="duplicates_no_matches">لم يُعثر على نسخ مطابقة في هذا الفحص</string>
+    <string name="duplicates_batch_note">تبقى المفضلة ونسخة من كل مجموعة غير محددة. اختر حتى 100 نسخة لكل طلب.</string>
+    <string name="duplicates_select_batch">تحديد حتى 100</string>
+    <string name="duplicates_move_trash">نقل %1$d إلى المهملات</string>
+    <string name="duplicates_trash_confirm">سيتحقق Clenova من النسخ مجددًا ويطلب موافقة Android. قد تحتفظ المهملات بالملفات مؤقتًا؛ لا تتحرر المساحة فورًا.</string>
+    <string name="duplicates_trash_success">أكد Android النقل إلى المهملات. أعد الفحص لتحديث النتائج.</string>
+    <string name="duplicates_trash_cancelled">أُلغي الطلب أو لم يُوافق عليه. أعد الفحص.</string>
+    <string name="duplicates_trash_failed">تعذر التحقق من النسخ أو نقلها. أعد الفحص والمراجعة.</string>
+    <string name="duplicates_trash_unsupported">تتطلب المهملات Android 11 أو أحدث. يمكنك مراجعة النسخ.</string>
+    <string name="duplicates_guard_note">قواعد Memory Guard المخصصة غير متصلة بعد. راجع كل نسخة.</string>
+    <string name="duplicates_verify_limit">قلل التحديد لحد التحقق البالغ 1 GB.</string>
 </resources>

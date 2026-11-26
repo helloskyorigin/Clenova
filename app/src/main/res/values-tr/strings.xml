@@ -276,11 +276,11 @@
     <string name="privacy_local_title">Yerel tercihler</string>
     <string name="privacy_local_body">Tema, dokunsal geri bildirim, Otopilot tercihleri ve dil cihazda saklanır. Hesap gerekmez.</string>
     <string name="privacy_files_title">Kişisel dosyalar</string>
-    <string name="privacy_files_body">Clenova izninizle cihazdaki erişilebilir fotoğraf ve videoları tarar. Dosya koruma ve silme henüz bağlı değildir. Clenova kişisel medya yüklemez.</string>
+    <string name="privacy_files_body">Clenova izninizle cihazda fotoğraf ve videoları tarar. Onayınızla kopyalar Android çöpüne taşınabilir. Memory Guard kuralları henüz bağlı değildir. Kişisel medya yüklenmez.</string>
     <string name="privacy_support_title">Destek mesajları</string>
     <string name="privacy_support_body">İletişim ve sorun bildirimleri e-posta uygulamanızı açar. Gönderip göndermemeye siz karar verir, tanılama bilgilerini göndermeden önce düzenleyebilir veya kaldırabilirsiniz.</string>
     <string name="support_faq_storage">Depolama nasıl ölçülür?</string>
-    <string name="support_faq_storage_body">Clenova toplam depolama bilgilerini okur ve izninizle erişilebilir fotoğraf ve videoları tarar. Temizlik henüz kullanılamıyor.</string>
+    <string name="support_faq_storage_body">Clenova depolamayı okur ve izinli medyayı tarar. Android 11 ve üstünde doğrulanmış kopyalar çöpe taşınabilir.</string>
     <string name="support_faq_auto_body">Otopilot tercihlerinde boş alan hedefini ve kontrol sıklığını ayarlayın. Arka plan izleme henüz kullanılamıyor.</string>
     <string name="support_faq_language_body">Ayarlarda Dil bölümünü açıp dilinizi arayın veya seçin. Android dilini izlemek için Cihaz dili seçeneğini kullanın.</string>
     <string name="support_search">Yardım ara</string>
@@ -299,7 +299,7 @@
     <string name="legal_terms_intro">Bu koşullar SKYORIGIN\'in mevcut CLENOVA Android sürümünün kullanımını açıklar. Yalnızca kabul ediyorsanız uygulamayı kullanın.</string>
     <string name="legal_use_title">Sorumlu kullanım</string>
     <string name="legal_use_body">CLENOVA\'yı yalnızca yönetmeye yetkili olduğunuz cihaz ve dosyalarda kullanın. Yasaları veya başkalarının haklarını ihlal etmeyin.</string>
-    <string name="legal_cleanup_body">Temizliği onaylamadan önce önerileri inceleyin ve önemli dosyaları yedekleyin. Bu sürüm medya silmez.</string>
+    <string name="legal_cleanup_body">Önerileri inceleyin ve önemli dosyaları yedekleyin. Seçili kopyalar sistem onayından sonra çöpe taşınabilir. Android daha sonra çöpü boşaltabilir.</string>
     <string name="legal_availability_title">Kullanılabilirlik ve değişiklikler</string>
     <string name="legal_availability_body">Özellikler değişebilir, kullanılamayabilir veya Android ve cihaz yeteneklerine bağlı olabilir. Depolama tahminleri kazanılacak alanı garanti etmez. Güncellemede son bildirimleri kontrol edin.</string>
     <string name="legal_rights_body">Bu koşullar geçerli yasa uyarınca feragat edilemeyen hakları veya hukuki yolları sınırlamaz. Sorularınız için SKYORIGIN\'e ulaşın.</string>
@@ -307,7 +307,7 @@
     <string name="legal_dependency_notices">Kitaplık bildirimleri</string>
     <string name="legal_read_license">Lisansı oku</string>
     <string name="clean_history">Temizlik geçmişi</string>
-    <string name="clean_history_empty">Henüz tamamlanan temizlik yok. Dosyalarınız değiştirilmedi.</string>
+    <string name="clean_history_empty">Temizlik geçmişi henüz kullanılamıyor.</string>
     <string name="clean_preview">Tasarım önizlemesi</string>
     <string name="clean_review_all">Tümünü incele</string>
     <string name="scan_access_title">Medyayı tara</string>
@@ -318,4 +318,15 @@
     <string name="scan_accessible_count">%1$d erişilebilir medya öğesi kontrol edildi</string>
     <string name="scan_partial">Sınırlı veya eksik tarama. Bazı medya öğeleri kontrol edilmedi.</string>
     <string name="scan_read_only">Kategoriler örtüşebilir. Toplamda her dosya bir kez sayılır. Ekran görüntüleri ad ve klasöre göre belirlenir; büyük videolar 100 MB veya üzeridir. Hiçbir şey silinmedi.</string>
+    <string name="duplicates_no_matches">Bu taramada birebir kopya bulunamadı</string>
+    <string name="duplicates_batch_note">Favoriler ve her gruptan bir kopya seçilmez. İstek başına en fazla 100 kopya.</string>
+    <string name="duplicates_select_batch">100 adede kadar seç</string>
+    <string name="duplicates_move_trash">%1$d öğeyi çöpe taşı</string>
+    <string name="duplicates_trash_confirm">Clenova kopyaları yeniden doğrular ve Android onayı ister. Çöp dosyaları geçici tutabilir; alan hemen boşalmaz.</string>
+    <string name="duplicates_trash_success">Android çöpe taşımayı onayladı. Yeniden tarayın.</string>
+    <string name="duplicates_trash_cancelled">İstek iptal edildi veya onaylanmadı. Yeniden tarayın.</string>
+    <string name="duplicates_trash_failed">Kopyalar doğrulanamadı veya taşınamadı. Yeniden tarayın.</string>
+    <string name="duplicates_trash_unsupported">Çöp için Android 11 veya üstü gerekir. Kopyaları inceleyebilirsiniz.</string>
+    <string name="duplicates_guard_note">Özel Memory Guard kuralları henüz bağlı değil. Her kopyayı kontrol edin.</string>
+    <string name="duplicates_verify_limit">1 GB doğrulama sınırı için seçimi azaltın.</string>
 </resources>

@@ -276,11 +276,11 @@
     <string name="privacy_local_title">Lokale Einstellungen</string>
     <string name="privacy_local_body">Design, Haptik, Autopilot-Einstellungen und Sprache werden auf dem Gerät gespeichert. Kein Konto erforderlich.</string>
     <string name="privacy_files_title">Persönliche Dateien</string>
-    <string name="privacy_files_body">Clenova scannt mit deiner Erlaubnis zugängliche Fotos und Videos auf deinem Gerät. Dateischutz und Löschung sind noch nicht verbunden. Clenova lädt keine persönlichen Medien hoch.</string>
+    <string name="privacy_files_body">Clenova scannt zugängliche Fotos und Videos mit deiner Erlaubnis auf dem Gerät. Duplikate können mit Zustimmung in den Android-Papierkorb. Memory Guard ist noch nicht verbunden. Keine privaten Medien werden hochgeladen.</string>
     <string name="privacy_support_title">Support-Nachrichten</string>
     <string name="privacy_support_body">Kontakt und Problemberichte öffnen deine E-Mail-App. Du entscheidest über den Versand und kannst Diagnosedaten vorher bearbeiten oder entfernen.</string>
     <string name="support_faq_storage">Wie wird der Speicher gemessen?</string>
-    <string name="support_faq_storage_body">Clenova liest Gesamtspeicherwerte und scannt mit deiner Erlaubnis zugängliche Fotos und Videos. Bereinigung ist noch nicht verfügbar.</string>
+    <string name="support_faq_storage_body">Clenova liest Speicherwerte und scannt Medien mit Erlaubnis. Geprüfte Duplikate können ab Android 11 in den Papierkorb.</string>
     <string name="support_faq_auto_body">Lege Speicherziel und Prüfintervall in den Autopilot-Einstellungen fest. Hintergrundüberwachung ist noch nicht verfügbar.</string>
     <string name="support_faq_language_body">Öffne Sprache in den Einstellungen und suche oder wähle deine Sprache. Wähle Gerätesprache, um Android zu folgen.</string>
     <string name="support_search">Hilfe suchen</string>
@@ -299,7 +299,7 @@
     <string name="legal_terms_intro">Diese Bedingungen beschreiben die Nutzung des aktuellen Android-Builds von CLENOVA von SKYORIGIN. Nutze die App nur, wenn du ihnen zustimmst.</string>
     <string name="legal_use_title">Verantwortungsvolle Nutzung</string>
     <string name="legal_use_body">Nutze CLENOVA nur auf Geräten und Dateien, die du verwalten darfst. Verstoße nicht gegen Gesetze oder Rechte anderer.</string>
-    <string name="legal_cleanup_body">Prüfe Empfehlungen und sichere wichtige Dateien vor einer Freigabe. Dieser Build löscht keine Medien.</string>
+    <string name="legal_cleanup_body">Prüfe Empfehlungen und sichere wichtige Dateien. Ausgewählte Duplikate können nach Systemzustimmung in den Papierkorb. Android kann ihn später leeren.</string>
     <string name="legal_availability_title">Verfügbarkeit und Änderungen</string>
     <string name="legal_availability_body">Funktionen können sich ändern, nicht verfügbar sein oder von Android und dem Gerät abhängen. Schätzungen garantieren keinen Speichergewinn. Prüfe beim Aktualisieren die neuesten Hinweise.</string>
     <string name="legal_rights_body">Diese Bedingungen beschränken keine Rechte oder Rechtsbehelfe, auf die nach geltendem Recht nicht verzichtet werden kann. Kontaktiere SKYORIGIN bei Fragen.</string>
@@ -307,7 +307,7 @@
     <string name="legal_dependency_notices">Bibliothekshinweise</string>
     <string name="legal_read_license">Lizenz lesen</string>
     <string name="clean_history">Bereinigungsverlauf</string>
-    <string name="clean_history_empty">Noch keine abgeschlossenen Bereinigungen. Deine Dateien wurden nicht geändert.</string>
+    <string name="clean_history_empty">Verlauf noch nicht verfügbar.</string>
     <string name="clean_preview">Designvorschau</string>
     <string name="clean_review_all">Alles prüfen</string>
     <string name="scan_access_title">Medien scannen</string>
@@ -318,4 +318,15 @@
     <string name="scan_accessible_count">%1$d zugängliche Medienelemente geprüft</string>
     <string name="scan_partial">Eingeschränkter oder unvollständiger Scan. Einige Medien wurden nicht geprüft.</string>
     <string name="scan_read_only">Kategorien können sich überschneiden. Jede Datei zählt in der Summe nur einmal. Screenshots werden anhand von Namen und Ordnern erkannt; große Videos sind mindestens 100 MB groß. Nichts wurde gelöscht.</string>
+    <string name="duplicates_no_matches">Keine exakten Duplikate gefunden</string>
+    <string name="duplicates_batch_note">Favoriten und eine Kopie pro Gruppe bleiben abgewählt. Bis zu 100 Kopien pro Anfrage.</string>
+    <string name="duplicates_select_batch">Bis zu 100 auswählen</string>
+    <string name="duplicates_move_trash">%1$d in den Papierkorb</string>
+    <string name="duplicates_trash_confirm">Clenova prüft die Kopien erneut und bittet Android um Zustimmung. Der Papierkorb kann Dateien vorübergehend behalten; Speicher wird nicht sofort frei.</string>
+    <string name="duplicates_trash_success">Android hat das Verschieben bestätigt. Erneut scannen.</string>
+    <string name="duplicates_trash_cancelled">Anfrage abgebrochen oder abgelehnt. Erneut scannen.</string>
+    <string name="duplicates_trash_failed">Kopien konnten nicht geprüft oder verschoben werden. Erneut scannen.</string>
+    <string name="duplicates_trash_unsupported">Papierkorb erfordert Android 11 oder neuer. Duplikate bleiben einsehbar.</string>
+    <string name="duplicates_guard_note">Eigene Memory-Guard-Regeln sind noch nicht verbunden. Prüfe jede Kopie.</string>
+    <string name="duplicates_verify_limit">Reduziere die Auswahl auf das Prüflimit von 1 GB.</string>
 </resources>

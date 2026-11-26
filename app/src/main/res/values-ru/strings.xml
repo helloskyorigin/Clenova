@@ -276,11 +276,11 @@
     <string name="privacy_local_title">Локальные настройки</string>
     <string name="privacy_local_body">Тема, тактильный отклик, настройки Autopilot и язык хранятся на устройстве. Аккаунт не нужен.</string>
     <string name="privacy_files_title">Личные файлы</string>
-    <string name="privacy_files_body">Clenova с вашего разрешения сканирует доступные фото и видео на устройстве. Защита и удаление файлов ещё не подключены. Clenova не загружает личные медиа.</string>
+    <string name="privacy_files_body">Clenova с разрешения сканирует доступные фото и видео на устройстве. Дубликаты можно перенести в корзину Android с вашего согласия. Memory Guard пока не подключён. Личные медиа не загружаются.</string>
     <string name="privacy_support_title">Сообщения в поддержку</string>
     <string name="privacy_support_body">Связь и отчёты открывают почтовое приложение. Вы решаете, отправлять ли письмо, и можете изменить или удалить диагностические данные перед отправкой.</string>
     <string name="support_faq_storage">Как измеряется объём хранилища?</string>
-    <string name="support_faq_storage_body">Clenova читает общие данные хранилища и с разрешения сканирует доступные фото и видео. Очистка пока недоступна.</string>
+    <string name="support_faq_storage_body">Clenova читает данные хранилища и сканирует медиа с разрешения. Проверенные копии можно перенести в корзину на Android 11 и новее.</string>
     <string name="support_faq_auto_body">Задайте цель свободного места и частоту проверок в настройках Autopilot. Фоновый мониторинг пока недоступен.</string>
     <string name="support_faq_language_body">Откройте Язык в настройках и найдите или выберите язык. Для языка Android выберите язык устройства.</string>
     <string name="support_search">Поиск справки</string>
@@ -299,7 +299,7 @@
     <string name="legal_terms_intro">Эти условия описывают использование текущей сборки CLENOVA для Android от SKYORIGIN. Используйте приложение только при согласии с ними.</string>
     <string name="legal_use_title">Ответственное использование</string>
     <string name="legal_use_body">Используйте CLENOVA только на устройствах и с файлами, которыми вы вправе управлять. Не нарушайте закон или права других лиц.</string>
-    <string name="legal_cleanup_body">Проверьте рекомендации и создайте резервные копии важных файлов перед одобрением очистки. Эта сборка не удаляет медиа.</string>
+    <string name="legal_cleanup_body">Проверяйте рекомендации и сохраняйте резервные копии. Выбранные дубликаты могут попасть в корзину после согласия системы. Android может очистить её позже.</string>
     <string name="legal_availability_title">Доступность и изменения</string>
     <string name="legal_availability_body">Функции могут меняться, быть недоступными или зависеть от возможностей Android и устройства. Оценки не гарантируют освобождённый объём. Проверяйте актуальные уведомления при обновлении.</string>
     <string name="legal_rights_body">Условия не ограничивают права или средства защиты, от которых нельзя отказаться по применимому закону. При вопросах обращайтесь в SKYORIGIN.</string>
@@ -307,7 +307,7 @@
     <string name="legal_dependency_notices">Уведомления библиотек</string>
     <string name="legal_read_license">Читать лицензию</string>
     <string name="clean_history">История очистки</string>
-    <string name="clean_history_empty">Завершённых очисток пока нет. Ваши файлы не изменены.</string>
+    <string name="clean_history_empty">История очистки пока недоступна.</string>
     <string name="clean_preview">Предпросмотр дизайна</string>
     <string name="clean_review_all">Проверить всё</string>
     <string name="scan_access_title">Сканирование медиа</string>
@@ -318,4 +318,15 @@
     <string name="scan_accessible_count">Проверено доступных медиа: %1$d</string>
     <string name="scan_partial">Ограниченное или неполное сканирование. Некоторые медиа не проверены.</string>
     <string name="scan_read_only">Категории могут пересекаться. Каждый файл учтён один раз в общем объёме. Скриншоты определяются по имени и папке; крупные видео имеют размер от 100 MB. Ничего не удалено.</string>
+    <string name="duplicates_no_matches">Точные дубликаты не найдены</string>
+    <string name="duplicates_batch_note">Избранное и одна копия в группе не выбираются. До 100 копий за запрос.</string>
+    <string name="duplicates_select_batch">Выбрать до 100</string>
+    <string name="duplicates_move_trash">В корзину: %1$d</string>
+    <string name="duplicates_trash_confirm">Clenova повторно проверит копии и запросит согласие Android. Корзина может временно хранить файлы; место освобождается не сразу.</string>
+    <string name="duplicates_trash_success">Android подтвердил перенос в корзину. Повторите сканирование.</string>
+    <string name="duplicates_trash_cancelled">Запрос отменён или отклонён. Повторите сканирование.</string>
+    <string name="duplicates_trash_failed">Не удалось проверить или переместить копии. Повторите сканирование.</string>
+    <string name="duplicates_trash_unsupported">Корзина требует Android 11 или новее. Просмотр доступен.</string>
+    <string name="duplicates_guard_note">Правила Memory Guard ещё не подключены. Проверьте каждую копию.</string>
+    <string name="duplicates_verify_limit">Уменьшите выбор до лимита проверки 1 GB.</string>
 </resources>

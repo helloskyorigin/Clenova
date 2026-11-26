@@ -276,11 +276,11 @@
     <string name="privacy_local_title">Preferências locais</string>
     <string name="privacy_local_body">Tema, resposta tátil, preferências do Autopilot e idioma ficam no dispositivo. Não é preciso criar conta.</string>
     <string name="privacy_files_title">Arquivos pessoais</string>
-    <string name="privacy_files_body">Clenova analisa fotos e vídeos acessíveis no dispositivo com sua permissão. Proteção e exclusão ainda não estão conectadas. Clenova não envia mídias pessoais.</string>
+    <string name="privacy_files_body">Clenova analisa fotos e vídeos acessíveis no dispositivo com sua permissão. Duplicatas podem ir à lixeira Android com sua aprovação. Memory Guard ainda não está conectado. Nenhuma mídia pessoal é enviada.</string>
     <string name="privacy_support_title">Mensagens de suporte</string>
     <string name="privacy_support_body">O contato e os relatórios abrem seu app de e-mail. Você decide se envia e pode editar ou remover detalhes de diagnóstico antes do envio.</string>
     <string name="support_faq_storage">Como o armazenamento é medido?</string>
-    <string name="support_faq_storage_body">Clenova lê o total de armazenamento e analisa fotos e vídeos acessíveis com sua permissão. A limpeza ainda não está disponível.</string>
+    <string name="support_faq_storage_body">Clenova lê o armazenamento e analisa mídias com permissão. Duplicatas verificadas podem ir à lixeira no Android 11 ou posterior.</string>
     <string name="support_faq_auto_body">Defina a meta de espaço livre e a frequência nas preferências do Autopilot. O monitoramento em segundo plano ainda não está disponível.</string>
     <string name="support_faq_language_body">Abra Idioma nas configurações e pesquise ou selecione seu idioma. Escolha Idioma do dispositivo para seguir o Android.</string>
     <string name="support_search">Buscar ajuda</string>
@@ -299,7 +299,7 @@
     <string name="legal_terms_intro">Estes termos descrevem o uso da versão Android atual do CLENOVA da SKYORIGIN. Use o app apenas se aceitá-los.</string>
     <string name="legal_use_title">Uso responsável</string>
     <string name="legal_use_body">Use CLENOVA apenas em dispositivos e arquivos que você tem autorização para gerenciar. Não viole leis ou direitos de terceiros.</string>
-    <string name="legal_cleanup_body">Revise as recomendações e mantenha cópias de segurança dos arquivos importantes antes de aprovar a limpeza. Esta versão não exclui mídias.</string>
+    <string name="legal_cleanup_body">Revise as recomendações e faça backup de arquivos importantes. Cópias selecionadas podem ir à lixeira após aprovação do sistema. O Android pode esvaziá-la depois.</string>
     <string name="legal_availability_title">Disponibilidade e alterações</string>
     <string name="legal_availability_body">Recursos podem mudar, ficar indisponíveis ou depender do Android e do dispositivo. Estimativas não garantem espaço recuperado. Consulte os avisos atuais ao atualizar.</string>
     <string name="legal_rights_body">Nada nestes termos limita direitos ou recursos irrenunciáveis pela lei aplicável. Entre em contato com a SKYORIGIN em caso de dúvidas.</string>
@@ -307,7 +307,7 @@
     <string name="legal_dependency_notices">Avisos de bibliotecas</string>
     <string name="legal_read_license">Ler licença</string>
     <string name="clean_history">Histórico de limpeza</string>
-    <string name="clean_history_empty">Nenhuma limpeza concluída. Seus arquivos não foram alterados.</string>
+    <string name="clean_history_empty">O histórico ainda não está disponível.</string>
     <string name="clean_preview">Prévia do design</string>
     <string name="clean_review_all">Revisar tudo</string>
     <string name="scan_access_title">Analisar mídias</string>
@@ -318,4 +318,15 @@
     <string name="scan_accessible_count">%1$d itens de mídia acessíveis verificados</string>
     <string name="scan_partial">Análise limitada ou incompleta. Algumas mídias não foram verificadas.</string>
     <string name="scan_read_only">As categorias podem se sobrepor. Cada arquivo é contado uma vez no total. Capturas são identificadas por nome e pasta; vídeos grandes têm 100 MB ou mais. Nada foi excluído.</string>
+    <string name="duplicates_no_matches">Nenhuma duplicata exata encontrada</string>
+    <string name="duplicates_batch_note">Favoritos e uma cópia por grupo ficam sem seleção. Até 100 cópias por solicitação.</string>
+    <string name="duplicates_select_batch">Selecionar até 100</string>
+    <string name="duplicates_move_trash">Mover %1$d para a lixeira</string>
+    <string name="duplicates_trash_confirm">O Clenova verificará as cópias novamente e pedirá aprovação ao Android. A lixeira pode reter arquivos temporariamente; o espaço não é liberado de imediato.</string>
+    <string name="duplicates_trash_success">Android confirmou o envio à lixeira. Analise novamente.</string>
+    <string name="duplicates_trash_cancelled">Solicitação cancelada ou não aprovada. Analise novamente.</string>
+    <string name="duplicates_trash_failed">Não foi possível verificar ou mover as cópias. Analise novamente.</string>
+    <string name="duplicates_trash_unsupported">A lixeira requer Android 11 ou posterior. Você pode revisar duplicatas.</string>
+    <string name="duplicates_guard_note">Regras personalizadas do Memory Guard ainda não estão conectadas. Revise cada cópia.</string>
+    <string name="duplicates_verify_limit">Reduza a seleção para o limite de verificação de 1 GB.</string>
 </resources>
