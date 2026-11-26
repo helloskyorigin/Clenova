@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">CLENOVA</string>
+    <string name="app_name" translatable="false">CLENOVA</string>
     <string name="app_tagline">Your phone. On autopilot.</string>
 
     <!-- Navigation -->
@@ -26,8 +26,8 @@
     <string name="home_status_not_configured">Not configured</string>
     <string name="home_foundation_note">Phase 0 Foundation — Core navigation, real device storage telemetry, and privacy-first controls.</string>
 
-    <string name="home_brand">clenova</string>
-    <string name="home_pro">✦ Pro</string>
+    <string name="home_brand" translatable="false">clenova</string>
+    <string name="home_pro" translatable="false">✦ Pro</string>
     <string name="home_pro_unavailable">Pro plans are not available yet.</string>
     <string name="home_available_storage">Available storage</string>
     <string name="home_capacity">Capacity</string>
@@ -123,7 +123,7 @@
     <string name="auto_setup_intro">Choose how Clenova should look after your storage.</string>
     <string name="auto_goal_title">Free space goal</string>
     <string name="auto_goal_subtitle">Choose how much space you want to keep available.</string>
-    <string name="auto_goal_value">%1$d GB</string>
+    <string name="auto_goal_value" translatable="false">%1$d GB</string>
     <string name="auto_frequency_title">Check for clutter</string>
     <string name="auto_daily">Every day</string>
     <string name="auto_every_three_days">Every 3 days</string>
@@ -169,7 +169,7 @@
     <string name="scan_stage_screenshots">Checking screenshots</string>
     <string name="scan_stage_videos">Reviewing large videos</string>
     <string name="scan_stage_plan">Preparing recommendations</string>
-    <string name="scan_percent">%1$d%%</string>
+    <string name="scan_percent" translatable="false">%1$d%%</string>
     <string name="scan_running_title">Scanning your phone</string>
     <string name="scan_complete">Scan complete</string>
     <string name="scan_potential">Potential space to recover</string>
@@ -269,7 +269,7 @@
     <string name="settings_about_product">About Clenova</string>
     <string name="settings_version_short">Version %1$s</string>
     <string name="settings_by">A product by</string>
-    <string name="settings_copyright">© 2026 SKYORIGIN</string>
+    <string name="settings_copyright" translatable="false">© 2026 SKYORIGIN</string>
     <string name="settings_action_unavailable">Unable to open</string>
     <string name="settings_action_unavailable_body">The required app or Android settings screen is unavailable. You can contact %1$s directly.</string>
     <string name="settings_section_preferences">PREFERENCES</string>
@@ -289,4 +289,10 @@
     <string name="settings_about_version_label">Version</string>
     <string name="settings_about_version_value">%1$s (Phase 0 Foundation)</string>
     <string name="settings_about_package_label">Application ID</string>
+    <string name="settings_support_subject">Clenova support</string>
+    <string name="settings_report_subject">Clenova problem report</string>
+    <string name="settings_suggest_subject">Clenova feature suggestion</string>
+    <string name="settings_report_intro">Describe the problem here:</string>
+    <string name="settings_report_android">Android: %1$s</string>
+    <string name="settings_report_device">Device: %1$s</string>
 </resources>

@@ -169,11 +169,17 @@ fun SettingsScreen(
             }
             SettingsSection(R.string.settings_support) {
                 if (showPlanned) SettingsRow(Icons.Outlined.HelpOutline, R.string.settings_help)
-                SettingsRow(Icons.Outlined.Email, R.string.settings_contact, onClick = { email("Clenova support") })
+                SettingsRow(Icons.Outlined.Email, R.string.settings_contact, onClick = { email(context.getString(R.string.settings_support_subject)) })
                 SettingsRow(Icons.Outlined.BugReport, R.string.settings_report, onClick = {
-                    email("Clenova problem report", "Describe the problem here:\n\nApp version: " + BuildConfig.VERSION_NAME + "\nAndroid: " + Build.VERSION.RELEASE + "\nDevice: " + Build.MANUFACTURER + " " + Build.MODEL)
+                    email(context.getString(R.string.settings_report_subject), listOf(
+                        context.getString(R.string.settings_report_intro),
+                        "",
+                        context.getString(R.string.settings_version_short, BuildConfig.VERSION_NAME),
+                        context.getString(R.string.settings_report_android, Build.VERSION.RELEASE),
+                        context.getString(R.string.settings_report_device, Build.MANUFACTURER + " " + Build.MODEL),
+                    ).joinToString("\n"))
                 })
-                SettingsRow(Icons.Outlined.ChatBubbleOutline, R.string.settings_suggest, onClick = { email("Clenova feature suggestion") })
+                SettingsRow(Icons.Outlined.ChatBubbleOutline, R.string.settings_suggest, onClick = { email(context.getString(R.string.settings_suggest_subject)) })
             }
             if (showPlanned) SettingsSection(R.string.settings_about_section) {
                 SettingsRow(Icons.Outlined.Description, R.string.settings_policy)
@@ -187,7 +193,7 @@ fun SettingsScreen(
                 Text(stringResource(R.string.settings_by), color = colors.textSecondary, style = MaterialTheme.typography.bodySmall)
                 Text("SKYORIGIN", color = colors.textPrimary, style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold, letterSpacing = 3.sp))
                 Text(SUPPORT_EMAIL, color = colors.textSecondary, style = MaterialTheme.typography.bodySmall,
-                    modifier = Modifier.clip(ClenovaShapes.tile).clickable { email("Clenova support") }.padding(4.dp))
+                    modifier = Modifier.clip(ClenovaShapes.tile).clickable { email(context.getString(R.string.settings_support_subject)) }.padding(4.dp))
                 Text(stringResource(R.string.settings_copyright), color = colors.textSecondary, style = MaterialTheme.typography.labelSmall)
             }
         }
