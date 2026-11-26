@@ -168,6 +168,7 @@ fun ClenovaNavHost(
                 onBack = { onSelectionHaptic(); navController.popBackStack() },
                 onSelectionHaptic = onSelectionHaptic,
                 onResult = { scanResult = it },
+                activityLifecycleOwner = lifecycleOwner,
             )
         }
 

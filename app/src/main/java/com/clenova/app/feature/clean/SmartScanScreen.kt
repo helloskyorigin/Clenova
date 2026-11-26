@@ -28,7 +28,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
-import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.LifecycleOwner
 import com.clenova.app.core.designsystem.ClenovaShapes
 import com.clenova.app.core.designsystem.ClenovaThemeTokens
 import com.clenova.app.core.utilities.ByteFormatter
@@ -45,10 +45,11 @@ internal fun SmartScanScreen(
     onBack: () -> Unit,
     onSelectionHaptic: () -> Unit,
     onResult: (MediaScanResult?) -> Unit,
+    activityLifecycleOwner: LifecycleOwner,
     modifier: Modifier = Modifier,
 ) {
     val context = LocalContext.current
-    val owner = LocalLifecycleOwner.current
+    val owner = activityLifecycleOwner
     val colors = ClenovaThemeTokens.colors
     val scope = rememberCoroutineScope()
     val scanner = remember(context) { MediaScanner(context.applicationContext) }

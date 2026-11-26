@@ -1,5 +1,16 @@
 package com.clenova.app.feature.clean
 
+import androidx.compose.foundation.Image
+import android.os.Build
+import android.util.Size
+import android.graphics.Bitmap
+import android.net.Uri
+import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import kotlinx.coroutines.CancellationException
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -77,7 +88,9 @@ internal fun CleanScreen(
             PhotoStrip(
                 title = R.string.clean_tool_duplicates_title,
                 count = result?.let { stringResource(R.string.guard_item_count, it.extras.size) } ?: if (preview) stringResource(R.string.guard_item_count, DuplicateDesignData.removableIds.size) else null,
-                preview = preview, similar = false, tag = "clean_duplicates", onClick = onDuplicates,
+                preview = preview, similar = false, tag = "clean_duplicates",
+                thumbnails = result?.duplicateGroups?.firstOrNull { group -> group.all { !it.video } }?.take(3)?.map { it.uri }.orEmpty(),
+                onClick = onDuplicates,
             )
             if (result != null) Text(ByteFormatter.format(result.duplicateBytes), style = MaterialTheme.typography.bodySmall, color = colors.textSecondary)
             if (preview) Text(CleanupDesignPlan.spaceLabel(1) + " · " + stringResource(R.string.review_duplicates_detail),
@@ -115,7 +128,7 @@ internal fun CleanScreen(
 }
 
 @Composable
-private fun PhotoStrip(title: Int, count: String?, preview: Boolean, similar: Boolean, tag: String, onClick: () -> Unit) {
+private fun PhotoStrip(title: Int, count: String?, preview: Boolean, similar: Boolean, tag: String, thumbnails: List<Uri> = emptyList(), onClick: () -> Unit) {
     val colors = ClenovaThemeTokens.colors
     Column(Modifier.fillMaxWidth().clip(RoundedCornerShape(10.dp)).testTag(tag)
         .clickable(role = Role.Button, onClick = onClick), verticalArrangement = Arrangement.spacedBy(9.dp)) {
@@ -129,7 +142,7 @@ private fun PhotoStrip(title: Int, count: String?, preview: Boolean, similar: Bo
                 Box(Modifier.weight(1f).aspectRatio(1f).clip(RoundedCornerShape(8.dp)).background(colors.surface),
                     contentAlignment = Alignment.Center) {
                     if (preview) DuplicateArtwork(if (similar) 1 else 0, Modifier.fillMaxSize(), variant = if (similar) index else 0)
-                    else Icon(Icons.Outlined.Image, null, Modifier.size(25.dp), tint = colors.textSecondary.copy(alpha = .5f))
+                    else MediaThumbnail(thumbnails.getOrNull(index))
                 }
             }
         }
@@ -157,4 +170,23 @@ private fun CleanQuickTool(icon: ImageVector, title: Int, tag: String, modifier:
         Icon(icon, null, Modifier.size(26.dp), tint = colors.primary)
         Text(stringResource(title), style = MaterialTheme.typography.titleSmall, color = colors.textPrimary)
     }
+}
+
+@Composable
+private fun MediaThumbnail(uri: Uri?) {
+    val context = LocalContext.current
+    val colors = ClenovaThemeTokens.colors
+    val bitmap by produceState<Bitmap?>(null, uri) {
+        value = null
+        if (uri != null && Build.VERSION.SDK_INT >= 29) {
+            value = withContext(Dispatchers.IO) {
+                try { context.contentResolver.loadThumbnail(uri, Size(240, 240), null) }
+                catch (e: CancellationException) { throw e }
+                catch (_: Exception) { null }
+            }
+        }
+    }
+    val photo = bitmap
+    if (photo != null) Image(photo.asImageBitmap(), contentDescription = null, modifier = Modifier.fillMaxSize(), contentScale = ContentScale.Crop)
+    else Icon(Icons.Outlined.Image, null, Modifier.size(25.dp), tint = colors.textSecondary.copy(alpha = .5f))
 }
