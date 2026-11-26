@@ -309,11 +309,11 @@
     <string name="privacy_local_title">Local preferences</string>
     <string name="privacy_local_body">Theme, haptics, Autopilot preferences and language are stored on your device. No account is required.</string>
     <string name="privacy_files_title">Personal files</string>
-    <string name="privacy_files_body">This build reads device storage totals. Media scanning, file protection and deletion engines are not yet connected. No personal media is uploaded by Clenova.</string>
+    <string name="privacy_files_body">Clenova scans accessible photos and videos on your device with your permission. File protection and deletion are not yet connected. No personal media is uploaded by Clenova.</string>
     <string name="privacy_support_title">Support messages</string>
     <string name="privacy_support_body">Contact and problem reports open your email app. You decide whether to send the message and can edit or remove diagnostic details before sending.</string>
     <string name="support_faq_storage">How is storage measured?</string>
-    <string name="support_faq_storage_body">Clenova reads the device storage totals. Detailed media categories and cleaning require a supported scanning engine.</string>
+    <string name="support_faq_storage_body">Clenova reads device storage totals and scans accessible photos and videos with your permission. Cleaning is not yet available.</string>
     <string name="support_faq_auto_body">Set a free space goal and check frequency in Autopilot preferences. Background monitoring is not yet available.</string>
     <string name="support_faq_language_body">Open Language in Settings, search or select your language. Choose Device language to follow Android.</string>
     <string name="support_search">Search help</string>
@@ -343,4 +343,12 @@
     <string name="clean_history_empty">No completed cleanups yet. Your files have not been changed.</string>
     <string name="clean_preview">Design preview</string>
     <string name="clean_review_all">Review all</string>
+    <string name="scan_access_title">Scan your media</string>
+    <string name="scan_access_body">Allow photo and video access to scan the media you choose. Scanning stays on your device and does not remove files.</string>
+    <string name="scan_allow_access">Allow media access</string>
+    <string name="scan_read_error">Could not complete the scan</string>
+    <string name="scan_review_space">Space to review</string>
+    <string name="scan_accessible_count">%1$d accessible media items checked</string>
+    <string name="scan_partial">Limited or incomplete scan. Some media was not checked.</string>
+    <string name="scan_read_only">Categories may overlap. Total counts each file once. Screenshots are identified by names and folders; large videos are 100 MB or more. Nothing has been deleted.</string>
 </resources>

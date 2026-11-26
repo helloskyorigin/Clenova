@@ -27,12 +27,15 @@ import com.clenova.app.core.designsystem.ClenovaSpacing
 import com.clenova.app.core.designsystem.ClenovaThemeTokens
 import com.clenova.app.feature.agent.CleanupDesignPlan
 import com.example.BuildConfig
+import com.clenova.app.data.storage.MediaScanResult
+import com.clenova.app.core.utilities.ByteFormatter
 import com.example.R
 
 @Composable
-fun CleanScreen(
+internal fun CleanScreen(
     modifier: Modifier = Modifier,
     sample: Boolean = false,
+    result: MediaScanResult? = null,
     onSmartScan: () -> Unit,
     onDuplicates: () -> Unit,
     onCompress: () -> Unit,
@@ -55,11 +58,12 @@ fun CleanScreen(
             }
             Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(3.dp)) {
-                    Text(if (preview) CleanupDesignPlan.spaceLabel(CleanupDesignPlan.ALL) else "—",
+                    Text(result?.let { ByteFormatter.format(it.reviewBytes) } ?: if (preview) CleanupDesignPlan.spaceLabel(CleanupDesignPlan.ALL) else "—",
                         modifier = Modifier.testTag("clean_recoverable"),
                         style = MaterialTheme.typography.displaySmall.copy(fontSize = 39.sp, lineHeight = 45.sp, fontWeight = FontWeight.SemiBold, letterSpacing = (-1.4).sp),
                         color = colors.textPrimary)
-                    Text(stringResource(R.string.review_estimated_space), style = MaterialTheme.typography.bodySmall, color = colors.textSecondary)
+                    Text(stringResource(if (result != null) R.string.scan_review_space else R.string.review_estimated_space), style = MaterialTheme.typography.bodySmall, color = colors.textSecondary)
+                    if (result != null && (!result.access.full || result.incomplete)) Text(stringResource(R.string.scan_partial), style = MaterialTheme.typography.labelSmall, color = colors.textSecondary)
                     if (preview) Text(stringResource(R.string.clean_preview), style = MaterialTheme.typography.labelSmall, color = colors.textSecondary)
                 }
                 Button(onClick = onSmartScan, shape = ClenovaShapes.pill,
@@ -72,9 +76,10 @@ fun CleanScreen(
             HorizontalDivider(color = colors.border)
             PhotoStrip(
                 title = R.string.clean_tool_duplicates_title,
-                count = if (preview) stringResource(R.string.guard_item_count, DuplicateDesignData.removableIds.size) else null,
+                count = result?.let { stringResource(R.string.guard_item_count, it.extras.size) } ?: if (preview) stringResource(R.string.guard_item_count, DuplicateDesignData.removableIds.size) else null,
                 preview = preview, similar = false, tag = "clean_duplicates", onClick = onDuplicates,
             )
+            if (result != null) Text(ByteFormatter.format(result.duplicateBytes), style = MaterialTheme.typography.bodySmall, color = colors.textSecondary)
             if (preview) Text(CleanupDesignPlan.spaceLabel(1) + " · " + stringResource(R.string.review_duplicates_detail),
                 style = MaterialTheme.typography.bodySmall, color = colors.textSecondary)
             PhotoStrip(
@@ -86,10 +91,10 @@ fun CleanScreen(
             HorizontalDivider(color = colors.border)
             Column {
                 CleanFileRow(Icons.Outlined.Screenshot, R.string.clean_tool_screenshots_title,
-                    if (preview) stringResource(R.string.guard_item_count, 84) else null, "clean_screenshots") { dialog = R.string.clean_tool_screenshots_title }
+                    result?.let { stringResource(R.string.guard_item_count, it.screenshots.size) } ?: if (preview) stringResource(R.string.guard_item_count, 84) else null, "clean_screenshots") { dialog = R.string.clean_tool_screenshots_title }
                 HorizontalDivider(color = colors.border)
                 CleanFileRow(Icons.Outlined.VideoFile, R.string.review_videos,
-                    if (preview) CleanupDesignPlan.spaceLabel(2) else null, "clean_large_videos") { dialog = R.string.review_videos }
+                    result?.let { ByteFormatter.format(it.largeVideos.sumOf { video -> video.bytes }) } ?: if (preview) CleanupDesignPlan.spaceLabel(2) else null, "clean_large_videos") { dialog = R.string.review_videos }
                 HorizontalDivider(color = colors.border)
                 CleanFileRow(Icons.Outlined.FolderOpen, R.string.clean_tool_large_files_title,
                     if (preview) stringResource(R.string.guard_item_count, 8) else null, "clean_large_files") { dialog = R.string.clean_tool_large_files_title }

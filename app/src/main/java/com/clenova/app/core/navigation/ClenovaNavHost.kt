@@ -27,6 +27,10 @@ import com.clenova.app.domain.repository.StorageRepository
 import com.clenova.app.feature.agent.AgentScreen
 import com.clenova.app.feature.clean.CleanScreen
 import com.clenova.app.feature.clean.SmartScanScreen
+import com.clenova.app.data.storage.MediaScanResult
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.clenova.app.feature.clean.DuplicatesScreen
 import com.clenova.app.feature.clean.VideoCompressScreen
 import com.clenova.app.feature.guard.GuardScreen
@@ -79,6 +83,13 @@ fun ClenovaNavHost(
     var sampleApprovedMask by rememberSaveable { mutableStateOf(0) }
     var sampleGuardMask by rememberSaveable { mutableIntStateOf(GuardDesignData.INITIAL_MASK) }
     val sample = BuildConfig.DEBUG && showSampleHome
+    var scanResult by remember { mutableStateOf<MediaScanResult?>(null) }
+    val lifecycleOwner = LocalLifecycleOwner.current
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event -> if (event == Lifecycle.Event.ON_STOP) scanResult = null }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
+    }
     NavHost(
         navController = navController,
         startDestination = ClenovaRoute.Home,
@@ -132,7 +143,8 @@ fun ClenovaNavHost(
 
         composable<ClenovaRoute.Clean> {
             CleanScreen(
-                sample = sample,
+                sample = false,
+                result = scanResult,
                 onSmartScan = { onSelectionHaptic(); navController.navigate(ClenovaRoute.SmartScan) { launchSingleTop = true } },
                 onDuplicates = { onSelectionHaptic(); navController.navigate(ClenovaRoute.Duplicates) { launchSingleTop = true } },
                 onCompress = { onSelectionHaptic(); navController.navigate(ClenovaRoute.VideoCompress) { launchSingleTop = true } },
@@ -153,11 +165,9 @@ fun ClenovaNavHost(
 
         composable<ClenovaRoute.SmartScan> {
             SmartScanScreen(
-                sample = sample,
-                protectedCount = GuardDesignData.count(sampleGuardMask),
                 onBack = { onSelectionHaptic(); navController.popBackStack() },
                 onSelectionHaptic = onSelectionHaptic,
-                onDuplicates = { onSelectionHaptic(); navController.navigate(ClenovaRoute.Duplicates) { launchSingleTop = true } },
+                onResult = { scanResult = it },
             )
         }
 
