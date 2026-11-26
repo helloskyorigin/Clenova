@@ -184,6 +184,18 @@
     <string name="scan_unavailable_title">Smart Scan is not ready yet</string>
     <string name="scan_unavailable_body">Media scanning is not available in this build. Your files have not been scanned or changed.</string>
 
+    <!-- Duplicates -->
+    <string name="duplicates_selected_space">Selected space to recover</string>
+    <string name="duplicates_summary">%1$d copies selected · %2$d groups</string>
+    <string name="duplicates_keep_rule">One copy in every group is always kept.</string>
+    <string name="duplicates_groups">Duplicate groups</string>
+    <string name="duplicates_group_title">Group %1$d</string>
+    <string name="duplicates_group_detail">%1$d identical photos · %2$s each</string>
+    <string name="duplicates_keep">Keep</string>
+    <string name="duplicates_copy">Copy %1$d</string>
+    <string name="duplicates_unavailable_title">Duplicate scanning is not available yet</string>
+    <string name="duplicates_unavailable_body">No files have been compared or removed. Verified duplicate results will appear when the scanning engine is connected.</string>
+
     <!-- Settings -->
     <string name="settings_title">Settings</string>
     <string name="settings_section_preferences">PREFERENCES</string>

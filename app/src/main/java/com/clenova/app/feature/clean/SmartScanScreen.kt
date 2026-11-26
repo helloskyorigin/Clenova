@@ -6,6 +6,7 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -57,6 +58,7 @@ fun SmartScanScreen(
     sample: Boolean,
     onBack: () -> Unit,
     onSelectionHaptic: () -> Unit,
+    onDuplicates: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val colors = ClenovaThemeTokens.colors
@@ -120,7 +122,7 @@ fun SmartScanScreen(
                             Text(stringResource(R.string.scan_unavailable_body), style = MaterialTheme.typography.bodyMedium, color = colors.textSecondary)
                         }
                         running -> ScanProgress(progress)
-                        else -> ScanResults(approvedMask, onReview = { reviewing = true; onSelectionHaptic() })
+                        else -> ScanResults(approvedMask, onReview = { reviewing = true; onSelectionHaptic() }, onDuplicates = onDuplicates)
                     }
                 }
                 if (scanning) TextButton(onClick = { cancelPrompt = true }, modifier = Modifier.align(Alignment.CenterHorizontally).padding(bottom = 14.dp)) {
@@ -182,7 +184,7 @@ private fun ScanProgress(progress: Int) {
 }
 
 @Composable
-private fun ScanResults(approvedMask: Int, onReview: () -> Unit) {
+private fun ScanResults(approvedMask: Int, onReview: () -> Unit, onDuplicates: () -> Unit) {
     val colors = ClenovaThemeTokens.colors
     Column(Modifier.fillMaxSize()) {
         Column(Modifier.weight(1f).fillMaxWidth().verticalScroll(rememberScrollState()).padding(vertical = 24.dp),
@@ -206,7 +208,7 @@ private fun ScanResults(approvedMask: Int, onReview: () -> Unit) {
                 Text(stringResource(R.string.scan_findings), style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.SemiBold), color = colors.textPrimary)
                 CleanupDesignPlan.groups.forEachIndexed { index, group ->
                     val icon = when(group.bit) { 1 -> Icons.Outlined.ContentCopy; 2 -> Icons.Outlined.VideoFile; else -> Icons.Outlined.Screenshot }
-                    ScanFinding(icon, stringResource(group.title), stringResource(group.detail), CleanupDesignPlan.spaceLabel(group.bit))
+                    ScanFinding(icon, stringResource(group.title), stringResource(group.detail), CleanupDesignPlan.spaceLabel(group.bit), if (group.bit == 1) onDuplicates else null)
                     if (index < CleanupDesignPlan.groups.lastIndex) HorizontalDivider(color = colors.border.copy(alpha = .65f))
                 }
                 HorizontalDivider(color = colors.border.copy(alpha = .65f))
@@ -231,9 +233,9 @@ private fun ScanResults(approvedMask: Int, onReview: () -> Unit) {
 }
 
 @Composable
-private fun ScanFinding(icon: ImageVector, title: String, detail: String, value: String) {
+private fun ScanFinding(icon: ImageVector, title: String, detail: String, value: String, onClick: (() -> Unit)? = null) {
     val colors = ClenovaThemeTokens.colors
-    Row(Modifier.fillMaxWidth().padding(vertical = 9.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+    Row(Modifier.fillMaxWidth().then(if (onClick != null) Modifier.clip(ClenovaShapes.tile).clickable(onClick = onClick) else Modifier).padding(vertical = 9.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
         Box(Modifier.size(44.dp).clip(ClenovaShapes.tile).background(colors.softBlue), contentAlignment = Alignment.Center) {
             Icon(icon, null, Modifier.size(23.dp), tint = colors.primary)
         }

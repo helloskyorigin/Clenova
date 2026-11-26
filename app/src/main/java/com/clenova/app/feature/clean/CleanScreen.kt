@@ -1,6 +1,9 @@
 package com.clenova.app.feature.clean
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.material.icons.automirrored.rounded.ArrowForward
+import androidx.compose.ui.platform.testTag
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -62,6 +65,7 @@ private val plannedCleanTools = listOf(
 fun CleanScreen(
     modifier: Modifier = Modifier,
     onSmartScan: () -> Unit,
+    onDuplicates: () -> Unit,
 ) {
     val colors = ClenovaThemeTokens.colors
     val scrollState = rememberScrollState()
@@ -100,7 +104,7 @@ fun CleanScreen(
             plannedCleanTools.forEach { tool ->
                 ClenovaSurfaceCard {
                     Row(
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier.fillMaxWidth().then(if (tool.titleRes == R.string.clean_tool_duplicates_title) Modifier.testTag("clean_duplicates").clickable(onClick = onDuplicates) else Modifier),
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(ClenovaSpacing.md),
                     ) {
@@ -130,11 +134,15 @@ fun CleanScreen(
                                     style = MaterialTheme.typography.titleMedium,
                                     color = colors.textPrimary,
                                 )
-                                ClenovaStatusBadge(
-                                    label = stringResource(R.string.clean_badge_planned),
-                                    containerColor = colors.background,
-                                    contentColor = colors.textSecondary,
-                                )
+                                if (tool.titleRes == R.string.clean_tool_duplicates_title) {
+                                    Icon(Icons.AutoMirrored.Rounded.ArrowForward, null, Modifier.size(18.dp), tint = colors.primary)
+                                } else {
+                                    ClenovaStatusBadge(
+                                        label = stringResource(R.string.clean_badge_planned),
+                                        containerColor = colors.background,
+                                        contentColor = colors.textSecondary,
+                                    )
+                                }
                             }
                             Spacer(modifier = Modifier.height(ClenovaSpacing.xxs))
                             Text(

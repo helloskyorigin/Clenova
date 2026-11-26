@@ -186,6 +186,25 @@ class ClenovaNavigationRobolectricTest {
     }
 
     @Test
+    fun `duplicates opens from home with no fabricated release results`() {
+        composeTestRule.setContent {
+            ClenovaApp(
+                storageRepository = FakeStorageRepository(),
+                preferencesRepository = FakePreferencesRepository(),
+                showSampleHome = false,
+            )
+        }
+        composeTestRule.waitForIdle()
+        composeTestRule.onNodeWithTag("home_duplicates").performScrollTo().performClick()
+        composeTestRule.waitForIdle()
+        composeTestRule.onNodeWithText("Duplicate scanning is not available yet").assertIsDisplayed()
+        composeTestRule.onNodeWithTag("duplicates_total").assertDoesNotExist()
+        composeTestRule.onNodeWithTag("duplicates_back").performClick()
+        composeTestRule.waitForIdle()
+        composeTestRule.onNodeWithTag("nav_tab_home").assertIsDisplayed()
+    }
+
+    @Test
     fun `home displays honest unavailable state when storage cannot be read`() {
         composeTestRule.setContent {
             ClenovaApp(

@@ -27,6 +27,7 @@ import com.clenova.app.domain.repository.StorageRepository
 import com.clenova.app.feature.agent.AgentScreen
 import com.clenova.app.feature.clean.CleanScreen
 import com.clenova.app.feature.clean.SmartScanScreen
+import com.clenova.app.feature.clean.DuplicatesScreen
 import com.clenova.app.feature.guard.GuardScreen
 import com.clenova.app.feature.home.HomeScreen
 import com.clenova.app.feature.home.HomeViewModel
@@ -45,6 +46,7 @@ fun NavDestination?.toClenovaRoute(): ClenovaRoute? = when {
     hasRoute<ClenovaRoute.AutopilotSetup>() -> ClenovaRoute.AutopilotSetup
     hasRoute<ClenovaRoute.CleanupReview>() -> ClenovaRoute.CleanupReview
     hasRoute<ClenovaRoute.SmartScan>() -> ClenovaRoute.SmartScan
+    hasRoute<ClenovaRoute.Duplicates>() -> ClenovaRoute.Duplicates
     else -> null
 }
 
@@ -109,6 +111,7 @@ fun ClenovaNavHost(
                     onSelectionHaptic()
                     navController.navigate(ClenovaRoute.StorageDetails) { launchSingleTop = true }
                 },
+                onOpenDuplicates = { onSelectionHaptic(); navController.navigate(ClenovaRoute.Duplicates) { launchSingleTop = true } },
                 onOpenSmartScan = { onSelectionHaptic(); navController.navigate(ClenovaRoute.SmartScan) { launchSingleTop = true } },
                 onOpenClean = { onSelectionHaptic(); navController.navigateTopLevel(ClenovaRoute.Clean) },
                 onOpenGuard = { onSelectionHaptic(); navController.navigateTopLevel(ClenovaRoute.Guard) },
@@ -122,7 +125,18 @@ fun ClenovaNavHost(
         }
 
         composable<ClenovaRoute.Clean> {
-            CleanScreen(onSmartScan = { onSelectionHaptic(); navController.navigate(ClenovaRoute.SmartScan) { launchSingleTop = true } })
+            CleanScreen(
+                onSmartScan = { onSelectionHaptic(); navController.navigate(ClenovaRoute.SmartScan) { launchSingleTop = true } },
+                onDuplicates = { onSelectionHaptic(); navController.navigate(ClenovaRoute.Duplicates) { launchSingleTop = true } },
+            )
+        }
+
+        composable<ClenovaRoute.Duplicates> {
+            DuplicatesScreen(
+                sample = sample,
+                onBack = { onSelectionHaptic(); navController.popBackStack() },
+                onSelectionHaptic = onSelectionHaptic,
+            )
         }
 
         composable<ClenovaRoute.SmartScan> {
@@ -130,6 +144,7 @@ fun ClenovaNavHost(
                 sample = sample,
                 onBack = { onSelectionHaptic(); navController.popBackStack() },
                 onSelectionHaptic = onSelectionHaptic,
+                onDuplicates = { onSelectionHaptic(); navController.navigate(ClenovaRoute.Duplicates) { launchSingleTop = true } },
             )
         }
 
