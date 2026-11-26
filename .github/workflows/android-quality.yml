@@ -21,9 +21,18 @@ jobs:
           java-version: '17'
       - name: Verify localization resources
         run: python3 tools/check_localization.py
-      - uses: android-actions/setup-android@v3
       - name: Install required Android SDK
-        run: sdkmanager 'platforms;android-36.1' 'platforms;android-36' 'build-tools;36.0.0'
+        shell: bash
+        run: |
+          # GitHub-hosted Ubuntu already includes Android command-line tools.
+          # Avoid setup-android's obsolete "tools" package installation.
+          SDKMANAGER="$(command -v sdkmanager || true)"
+          if [ -z "$SDKMANAGER" ]; then
+            SDKMANAGER="${ANDROID_HOME:?Android SDK missing}/cmdline-tools/latest/bin/sdkmanager"
+          fi
+          test -x "$SDKMANAGER"
+          "$SDKMANAGER" --version
+          "$SDKMANAGER" 'platforms;android-36.1' 'platforms;android-36' 'build-tools;36.0.0'
       - name: Build debug APK and run tests
         run: bash gradlew :app:assembleDebug :app:testDebugUnitTest :app:lintDebug --stacktrace
       - uses: actions/upload-artifact@v4
