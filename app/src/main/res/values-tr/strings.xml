@@ -184,7 +184,7 @@
     <string name="clean_tool_duplicates_desc">Tamamen aynı dosya ve medyaları bulun.</string>
     <string name="clean_tool_similar_desc">Seri çekimleri ve benzer fotoğrafları gruplayın, en iyi kareyi seçin.</string>
     <string name="clean_tool_screenshots_desc">Eski ve geçici ekran görüntülerini inceleyin.</string>
-    <string name="clean_tool_large_files_desc">Büyük videoları, arşivleri ve indirmeleri güvenle bulun.</string>
+    <string name="clean_tool_large_files_desc">Erişilebilir 100 MB veya daha büyük fotoğraf ve videoları inceleyin.</string>
     <string name="clean_tool_swipe_clean_desc">Fotoğraf ve medyaları tek tek hızla ayırın.</string>
     <string name="clean_tool_video_compress_desc">Önizlemeden sonra Media3 ile videoları cihazda küçültün.</string>
     <string name="clean_footer_honesty">0. aşamada tarama ve MediaStore silme etkin değildir.</string>
@@ -276,7 +276,7 @@
     <string name="privacy_local_title">Yerel tercihler</string>
     <string name="privacy_local_body">Tema, dokunsal geri bildirim, Otopilot tercihleri ve dil cihazda saklanır. Hesap gerekmez.</string>
     <string name="privacy_files_title">Kişisel dosyalar</string>
-    <string name="privacy_files_body">Clenova izninizle cihazda fotoğraf ve videoları tarar. Onayınızla kopyalar Android çöpüne taşınabilir. Memory Guard kuralları henüz bağlı değildir. Kişisel medya yüklenmez. Benzer fotoğraflar da onayınızla çöp kutusuna taşınabilir. Ekran görüntüleri de onayınızla Android çöp kutusuna taşınabilir.</string>
+    <string name="privacy_files_body">Clenova izninizle cihazda fotoğraf ve videoları tarar. Onayınızla kopyalar Android çöpüne taşınabilir. Memory Guard kuralları henüz bağlı değildir. Kişisel medya yüklenmez. Benzer fotoğraflar da onayınızla çöp kutusuna taşınabilir. Ekran görüntüleri de onayınızla Android çöp kutusuna taşınabilir. Büyük fotoğraf ve videolar onayınızla Android çöp kutusuna taşınabilir.</string>
     <string name="privacy_support_title">Destek mesajları</string>
     <string name="privacy_support_body">İletişim ve sorun bildirimleri e-posta uygulamanızı açar. Gönderip göndermemeye siz karar verir, tanılama bilgilerini göndermeden önce düzenleyebilir veya kaldırabilirsiniz.</string>
     <string name="support_faq_storage">Depolama nasıl ölçülür?</string>
@@ -334,4 +334,7 @@
     <string name="similar_confirm">Seçilen her fotoğrafı inceleyin. Clenova dosyaların değişmediğini kontrol eder ve Android onayı ister. Çöp kutusu dosyaları geçici olarak saklayabilir.</string>
     <string name="screenshots_no_matches">Bu taramada ekran görüntüsü bulunamadı</string>
     <string name="screenshots_manual_rule">Ekran görüntülerini elle seçin. Favoriler, korunan kopyalar ve doğrulanmamış dosyalar seçilemez.</string>
+    <string name="large_media_empty">Bu taramada büyük medya bulunamadı</string>
+    <string name="large_media_rule">Erişilebilir 100 MB veya daha büyük fotoğraf ve videoları inceleyin. Diğer dosyalar taranmaz. Favoriler ve korunan kopyalar seçilemez.</string>
+    <string name="large_media_confirm">Seçiminizi inceleyin. Clenova medya üst verilerini yeniden kontrol eder ve Android onayı ister. Çöp kutusu dosyaları geçici olarak saklayabilir.</string>
 </resources>

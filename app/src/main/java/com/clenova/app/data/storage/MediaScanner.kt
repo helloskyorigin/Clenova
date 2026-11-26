@@ -36,7 +36,7 @@ internal fun mediaPermissions(): Array<String> = when {
     else -> arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE)
 }
 
-internal data class ScannedMedia(val uri: Uri, val name: String, val bytes: Long, val video: Boolean, val folder: String, val favorite: Boolean = false, val verifiedHash: String? = null) {
+internal data class ScannedMedia(val uri: Uri, val name: String, val bytes: Long, val video: Boolean, val folder: String, val favorite: Boolean = false, val verifiedHash: String? = null, val generation: Long? = null, val modified: Long? = null) {
     val screenshot: Boolean get() = !video && (folder.replace('\\', '/').split('/').any { it.equals("screenshots", true) || it.equals("screenshot", true) }
         || name.startsWith("Screenshot", true) || name.startsWith("Screen_Shot", true))
 }
@@ -49,10 +49,11 @@ internal data class MediaScanResult(
     val largeVideos: List<ScannedMedia>,
     val incomplete: Boolean,
     val similarGroups: List<List<ScannedMedia>> = emptyList(),
+    val largeFiles: List<ScannedMedia> = largeVideos,
 ) {
     val extras = duplicateGroups.flatMap { it.drop(1).filterNot { media -> media.favorite } }
     // A file may appear in multiple categories; count it only once.
-    val reviewBytes = (extras + screenshots + largeVideos).distinctBy { it.uri }.sumOf { it.bytes }
+    val reviewBytes = (extras + screenshots + largeFiles + largeVideos).distinctBy { it.uri }.sumOf { it.bytes }
     val duplicateBytes = extras.sumOf { it.bytes }
 }
 
@@ -81,7 +82,7 @@ internal class MediaScanner(private val context: Context) {
         for ((collection, video) in collections) {
             currentCoroutineContext().ensureActive()
             val folderColumn = if (Build.VERSION.SDK_INT >= 29) MediaStore.MediaColumns.RELATIVE_PATH else MediaStore.MediaColumns.DATA
-            val projection = arrayOf(MediaStore.MediaColumns._ID, MediaStore.MediaColumns.DISPLAY_NAME, MediaStore.MediaColumns.SIZE, folderColumn) + if (Build.VERSION.SDK_INT >= 30) arrayOf(MediaStore.MediaColumns.IS_FAVORITE) else emptyArray<String>()
+            val projection = arrayOf(MediaStore.MediaColumns._ID, MediaStore.MediaColumns.DISPLAY_NAME, MediaStore.MediaColumns.SIZE, folderColumn) + if (Build.VERSION.SDK_INT >= 30) arrayOf(MediaStore.MediaColumns.IS_FAVORITE, MediaStore.MediaColumns.GENERATION_MODIFIED, MediaStore.MediaColumns.DATE_MODIFIED) else emptyArray<String>()
             val selection = if (Build.VERSION.SDK_INT >= 30) "${MediaStore.MediaColumns.IS_PENDING}=0 AND ${MediaStore.MediaColumns.IS_TRASHED}=0"
                 else if (Build.VERSION.SDK_INT >= 29) "${MediaStore.MediaColumns.IS_PENDING}=0" else null
             val cursor = resolver.query(collection, projection, selection, null, "${MediaStore.MediaColumns._ID} ASC")
@@ -93,7 +94,9 @@ internal class MediaScanner(private val context: Context) {
                     val bytes = it.getLong(2)
                     if (bytes <= 0L) { incomplete = true; continue }
                     val uri = ContentUris.withAppendedId(collection, it.getLong(0))
-                    inventory[uri] = ScannedMedia(uri, it.getString(1).orEmpty(), bytes, video, it.getString(3).orEmpty(), favorite = Build.VERSION.SDK_INT >= 30 && it.getInt(4) != 0)
+                    inventory[uri] = ScannedMedia(uri, it.getString(1).orEmpty(), bytes, video, it.getString(3).orEmpty(), favorite = Build.VERSION.SDK_INT >= 30 && it.getInt(4) != 0,
+                        generation = if (Build.VERSION.SDK_INT >= 30 && !it.isNull(5)) it.getLong(5) else null,
+                        modified = if (Build.VERSION.SDK_INT >= 30 && !it.isNull(6)) it.getLong(6) else null)
                 }
             }
             if (inventory.size >= MAX_ITEMS) { incomplete = true; break }
@@ -137,14 +140,15 @@ internal class MediaScanner(private val context: Context) {
             screenshots.add(verified)
             onProgress(4, index + 1, captures.size)
         }
-        val largeVideos = items.filter { it.video && it.bytes >= LARGE_VIDEO_BYTES }.sortedByDescending { it.bytes }
+        val largeFiles = items.filter { it.bytes >= LARGE_VIDEO_BYTES }.sortedByDescending { it.bytes }
+        val largeVideos = largeFiles.filter { it.video }
         val groups = hashes.values.filter { it.size > 1 }.map { it.sortedWith(compareByDescending<ScannedMedia> { m -> m.favorite }.thenBy { m -> m.uri.toString() }) }
         val exactUris = groups.flatten().map { it.uri }.toSet()
         val similar = SimilarPhotos.find(resolver, items.filter { !it.video && !it.screenshot && it.uri !in exactUris }, onProgress) { hash(resolver, it) }
         incomplete = incomplete || similar.incomplete
         currentCoroutineContext().ensureActive()
         if (mediaAccess(context) != access) throw SecurityException("Media access changed")
-        MediaScanResult(access, items.size, groups, screenshots, largeVideos, incomplete, similar.groups)
+        MediaScanResult(access, items.size, groups, screenshots, largeVideos, incomplete, similar.groups, largeFiles)
     }
 
     internal suspend fun hash(resolver: ContentResolver, media: ScannedMedia): String {

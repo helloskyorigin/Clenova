@@ -184,7 +184,7 @@
     <string name="clean_tool_duplicates_desc">Identifique arquivos e mídias idênticos.</string>
     <string name="clean_tool_similar_desc">Agrupe fotos em sequência e semelhantes com sugestões da melhor foto.</string>
     <string name="clean_tool_screenshots_desc">Revise capturas antigas e temporárias.</string>
-    <string name="clean_tool_large_files_desc">Encontre vídeos grandes, arquivos compactados e downloads com segurança.</string>
+    <string name="clean_tool_large_files_desc">Revise fotos e vídeos acessíveis de 100 MB ou mais.</string>
     <string name="clean_tool_swipe_clean_desc">Classifique fotos e mídias rapidamente, uma por vez.</string>
     <string name="clean_tool_video_compress_desc">Reduza o tamanho dos vídeos localmente com Media3 após a prévia.</string>
     <string name="clean_footer_honesty">A análise e a exclusão via MediaStore não estão habilitadas na fase 0.</string>
@@ -276,7 +276,7 @@
     <string name="privacy_local_title">Preferências locais</string>
     <string name="privacy_local_body">Tema, resposta tátil, preferências do Autopilot e idioma ficam no dispositivo. Não é preciso criar conta.</string>
     <string name="privacy_files_title">Arquivos pessoais</string>
-    <string name="privacy_files_body">Clenova analisa fotos e vídeos acessíveis no dispositivo com sua permissão. Duplicatas podem ir à lixeira Android com sua aprovação. Memory Guard ainda não está conectado. Nenhuma mídia pessoal é enviada. Fotos semelhantes também podem ser revisadas e enviadas à lixeira com sua aprovação. Capturas de tela também podem ser revisadas e enviadas à lixeira do Android com sua aprovação.</string>
+    <string name="privacy_files_body">Clenova analisa fotos e vídeos acessíveis no dispositivo com sua permissão. Duplicatas podem ir à lixeira Android com sua aprovação. Memory Guard ainda não está conectado. Nenhuma mídia pessoal é enviada. Fotos semelhantes também podem ser revisadas e enviadas à lixeira com sua aprovação. Capturas de tela também podem ser revisadas e enviadas à lixeira do Android com sua aprovação. Fotos e vídeos grandes podem ser enviados à lixeira do Android com sua aprovação.</string>
     <string name="privacy_support_title">Mensagens de suporte</string>
     <string name="privacy_support_body">O contato e os relatórios abrem seu app de e-mail. Você decide se envia e pode editar ou remover detalhes de diagnóstico antes do envio.</string>
     <string name="support_faq_storage">Como o armazenamento é medido?</string>
@@ -334,4 +334,7 @@
     <string name="similar_confirm">Revise cada foto selecionada. Clenova verifica se os arquivos não mudaram e pede aprovação ao Android. A lixeira pode manter os arquivos temporariamente.</string>
     <string name="screenshots_no_matches">Nenhuma captura de tela encontrada nesta análise</string>
     <string name="screenshots_manual_rule">Selecione as capturas manualmente. Favoritas, cópias protegidas e arquivos não verificados não podem ser selecionados.</string>
+    <string name="large_media_empty">Nenhum arquivo de mídia grande encontrado</string>
+    <string name="large_media_rule">Revise fotos e vídeos acessíveis de 100 MB ou mais. Outros arquivos não são analisados. Favoritos e cópias protegidas não podem ser selecionados.</string>
+    <string name="large_media_confirm">Revise sua seleção. Clenova verifica novamente os metadados e pede aprovação ao Android. A lixeira pode manter os arquivos temporariamente.</string>
 </resources>

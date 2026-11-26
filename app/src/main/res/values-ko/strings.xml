@@ -184,7 +184,7 @@
     <string name="clean_tool_duplicates_desc">완전히 동일한 파일과 미디어를 찾습니다.</string>
     <string name="clean_tool_similar_desc">연속 촬영과 유사 사진을 묶고 최고의 사진을 추천합니다.</string>
     <string name="clean_tool_screenshots_desc">오래된 스크린샷과 임시 캡처를 검토합니다.</string>
-    <string name="clean_tool_large_files_desc">대용량 동영상, 압축 파일 및 다운로드를 안전하게 찾습니다.</string>
+    <string name="clean_tool_large_files_desc">접근 가능한 100 MB 이상의 사진과 동영상을 검토하세요.</string>
     <string name="clean_tool_swipe_clean_desc">사진과 미디어를 하나씩 빠르게 분류합니다.</string>
     <string name="clean_tool_video_compress_desc">미리보기 후 Media3로 기기에서 동영상 크기를 줄입니다.</string>
     <string name="clean_footer_honesty">0단계에서는 스캔 및 MediaStore 삭제가 활성화되지 않았습니다.</string>
@@ -276,7 +276,7 @@
     <string name="privacy_local_title">로컬 환경설정</string>
     <string name="privacy_local_body">테마, 햅틱, 자동 관리 설정 및 언어는 기기에 저장됩니다. 계정이 필요하지 않습니다.</string>
     <string name="privacy_files_title">개인 파일</string>
-    <string name="privacy_files_body">Clenova는 허가를 받아 기기의 사진과 동영상을 스캔합니다. 승인 후 중복 파일을 Android 휴지통으로 옮길 수 있습니다. Memory Guard 규칙은 아직 연결되지 않았습니다. 개인 미디어는 업로드하지 않습니다. 유사한 사진도 사용자의 승인 후 휴지통으로 이동할 수 있습니다. 스크린샷도 승인 후 Android 휴지통으로 이동할 수 있습니다.</string>
+    <string name="privacy_files_body">Clenova는 허가를 받아 기기의 사진과 동영상을 스캔합니다. 승인 후 중복 파일을 Android 휴지통으로 옮길 수 있습니다. Memory Guard 규칙은 아직 연결되지 않았습니다. 개인 미디어는 업로드하지 않습니다. 유사한 사진도 사용자의 승인 후 휴지통으로 이동할 수 있습니다. 스크린샷도 승인 후 Android 휴지통으로 이동할 수 있습니다. 대용량 사진과 동영상도 승인 후 Android 휴지통으로 이동할 수 있습니다.</string>
     <string name="privacy_support_title">지원 메시지</string>
     <string name="privacy_support_body">문의 및 문제 신고는 이메일 앱을 엽니다. 전송 여부를 직접 결정하며 전송 전에 진단 정보를 수정하거나 삭제할 수 있습니다.</string>
     <string name="support_faq_storage">저장공간은 어떻게 측정하나요?</string>
@@ -334,4 +334,7 @@
     <string name="similar_confirm">선택한 사진을 확인하세요. Clenova는 파일 변경 여부를 확인하고 Android 승인을 요청합니다. 휴지통에 파일이 일시적으로 남을 수 있습니다.</string>
     <string name="screenshots_no_matches">이번 검사에서 스크린샷을 찾지 못했습니다</string>
     <string name="screenshots_manual_rule">스크린샷을 직접 선택하세요. 즐겨찾기, 보호된 사본, 확인되지 않은 파일은 선택할 수 없습니다.</string>
+    <string name="large_media_empty">이번 검사에서 대용량 미디어를 찾지 못했습니다</string>
+    <string name="large_media_rule">접근 가능한 100 MB 이상의 사진과 동영상을 검토하세요. 다른 파일은 검사하지 않습니다. 즐겨찾기와 보호된 사본은 선택할 수 없습니다.</string>
+    <string name="large_media_confirm">선택 항목을 검토하세요. Clenova는 미디어 메타데이터를 다시 확인하고 Android 승인을 요청합니다. 휴지통에 파일이 일시적으로 남을 수 있습니다.</string>
 </resources>

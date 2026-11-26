@@ -184,7 +184,7 @@
     <string name="clean_tool_duplicates_desc">Identifica archivos y medios idénticos.</string>
     <string name="clean_tool_similar_desc">Agrupa ráfagas y fotos similares con sugerencias de la mejor toma.</string>
     <string name="clean_tool_screenshots_desc">Revisa capturas antiguas y temporales.</string>
-    <string name="clean_tool_large_files_desc">Localiza vídeos grandes, archivos comprimidos y descargas de forma segura.</string>
+    <string name="clean_tool_large_files_desc">Revisa fotos y vídeos accesibles de 100 MB o más.</string>
     <string name="clean_tool_swipe_clean_desc">Clasifica fotos y medios rápidamente, uno por uno.</string>
     <string name="clean_tool_video_compress_desc">Reduce el tamaño del vídeo localmente con Media3 tras la vista previa.</string>
     <string name="clean_footer_honesty">El escaneo y la eliminación mediante MediaStore no están habilitados en la fase 0.</string>
@@ -276,7 +276,7 @@
     <string name="privacy_local_title">Preferencias locales</string>
     <string name="privacy_local_body">El tema, la respuesta háptica, las preferencias de Autopilot y el idioma se guardan en tu dispositivo. No necesitas cuenta.</string>
     <string name="privacy_files_title">Archivos personales</string>
-    <string name="privacy_files_body">Clenova escanea fotos y vídeos accesibles con tu permiso. Las copias duplicadas pueden ir a la papelera de Android con tu aprobación. Memory Guard aún no está conectado. No sube medios personales. También puedes revisar y enviar fotos similares a la papelera con tu aprobación. Las capturas también pueden revisarse y enviarse a la papelera de Android con tu aprobación.</string>
+    <string name="privacy_files_body">Clenova escanea fotos y vídeos accesibles con tu permiso. Las copias duplicadas pueden ir a la papelera de Android con tu aprobación. Memory Guard aún no está conectado. No sube medios personales. También puedes revisar y enviar fotos similares a la papelera con tu aprobación. Las capturas también pueden revisarse y enviarse a la papelera de Android con tu aprobación. Las fotos y vídeos grandes pueden enviarse a la papelera de Android con tu aprobación.</string>
     <string name="privacy_support_title">Mensajes de soporte</string>
     <string name="privacy_support_body">El contacto y los informes abren tu aplicación de correo. Tú decides si envías el mensaje y puedes editar o eliminar datos de diagnóstico antes de enviarlo.</string>
     <string name="support_faq_storage">¿Cómo se mide el almacenamiento?</string>
@@ -334,4 +334,7 @@
     <string name="similar_confirm">Revisa cada foto seleccionada. Clenova comprueba que los archivos no hayan cambiado y solicita autorización a Android. La papelera puede conservarlos temporalmente.</string>
     <string name="screenshots_no_matches">No se encontraron capturas en este análisis</string>
     <string name="screenshots_manual_rule">Selecciona las capturas manualmente. No se pueden seleccionar favoritas, copias protegidas ni archivos sin verificar.</string>
+    <string name="large_media_empty">No se encontraron archivos multimedia grandes</string>
+    <string name="large_media_rule">Revisa fotos y vídeos accesibles de 100 MB o más. No se escanean otros archivos. Las favoritas y copias protegidas no se pueden seleccionar.</string>
+    <string name="large_media_confirm">Revisa tu selección. Clenova vuelve a comprobar los metadatos y solicita autorización a Android. La papelera puede conservar los archivos temporalmente.</string>
 </resources>

@@ -184,7 +184,7 @@
     <string name="clean_tool_duplicates_desc">بالکل یکساں فائلیں اور میڈیا تلاش کریں۔</string>
     <string name="clean_tool_similar_desc">برسٹ اور ملتی جلتی تصاویر کے گروپ بنائیں اور بہترین تصویر چنیں۔</string>
     <string name="clean_tool_screenshots_desc">پرانے اور عارضی اسکرین شاٹس دیکھیں۔</string>
-    <string name="clean_tool_large_files_desc">بڑی ویڈیوز، آرکائیوز اور ڈاؤن لوڈز محفوظ طریقے سے تلاش کریں۔</string>
+    <string name="clean_tool_large_files_desc">100 MB یا زیادہ کی دستیاب تصاویر اور ویڈیوز دیکھیں۔</string>
     <string name="clean_tool_swipe_clean_desc">تصاویر اور میڈیا کو ایک ایک کرکے جلد چھانٹیں۔</string>
     <string name="clean_tool_video_compress_desc">پیش نظارے کے بعد Media3 سے ڈیوائس پر ویڈیو کا حجم کم کریں۔</string>
     <string name="clean_footer_honesty">مرحلہ 0 میں اسکین اور MediaStore سے حذف فعال نہیں ہیں۔</string>
@@ -276,7 +276,7 @@
     <string name="privacy_local_title">مقامی ترجیحات</string>
     <string name="privacy_local_body">تھیم، لمسی ردعمل، آٹو پائلٹ ترجیحات اور زبان ڈیوائس پر محفوظ ہیں۔ اکاؤنٹ ضروری نہیں۔</string>
     <string name="privacy_files_title">ذاتی فائلیں</string>
-    <string name="privacy_files_body">Clenova اجازت سے ڈیوائس پر تصاویر اور ویڈیوز اسکین کرتا ہے۔ منظوری سے نقول Android کوڑے دان میں جا سکتی ہیں۔ Memory Guard قواعد ابھی منسلک نہیں۔ ذاتی میڈیا اپ لوڈ نہیں ہوتا۔ آپ کی منظوری سے ملتی جلتی تصاویر بھی ٹریش میں بھیجی جا سکتی ہیں۔ آپ کی منظوری سے اسکرین شاٹس بھی Android ٹریش میں بھیجے جا سکتے ہیں۔</string>
+    <string name="privacy_files_body">Clenova اجازت سے ڈیوائس پر تصاویر اور ویڈیوز اسکین کرتا ہے۔ منظوری سے نقول Android کوڑے دان میں جا سکتی ہیں۔ Memory Guard قواعد ابھی منسلک نہیں۔ ذاتی میڈیا اپ لوڈ نہیں ہوتا۔ آپ کی منظوری سے ملتی جلتی تصاویر بھی ٹریش میں بھیجی جا سکتی ہیں۔ آپ کی منظوری سے اسکرین شاٹس بھی Android ٹریش میں بھیجے جا سکتے ہیں۔ آپ کی منظوری سے بڑی تصاویر اور ویڈیوز Android ٹریش میں بھیجی جا سکتی ہیں۔</string>
     <string name="privacy_support_title">معاونت کے پیغامات</string>
     <string name="privacy_support_body">رابطہ اور مسئلے کی رپورٹ آپ کی ای میل ایپ کھولتے ہیں۔ بھیجنا آپ کا فیصلہ ہے اور بھیجنے سے پہلے تشخیصی تفصیلات بدل یا ہٹا سکتے ہیں۔</string>
     <string name="support_faq_storage">اسٹوریج کیسے ناپا جاتا ہے؟</string>
@@ -334,4 +334,7 @@
     <string name="similar_confirm">ہر منتخب تصویر دیکھیں۔ Clenova فائلوں میں تبدیلی کی جانچ کرتا ہے اور Android سے منظوری مانگتا ہے۔ ٹریش میں فائلیں عارضی طور پر رہ سکتی ہیں۔</string>
     <string name="screenshots_no_matches">اس اسکین میں اسکرین شاٹس نہیں ملے</string>
     <string name="screenshots_manual_rule">اسکرین شاٹس خود منتخب کریں۔ پسندیدہ، محفوظ نقول اور غیر تصدیق شدہ فائلیں منتخب نہیں ہو سکتیں۔</string>
+    <string name="large_media_empty">اس اسکین میں بڑی میڈیا فائلیں نہیں ملیں</string>
+    <string name="large_media_rule">100 MB یا زیادہ کی دستیاب تصاویر اور ویڈیوز دیکھیں۔ دیگر فائلیں اسکین نہیں ہوتیں۔ پسندیدہ اور محفوظ نقول منتخب نہیں ہو سکتیں۔</string>
+    <string name="large_media_confirm">اپنا انتخاب دیکھیں۔ Clenova میڈیا کی معلومات دوبارہ جانچتا ہے اور Android سے منظوری مانگتا ہے۔ ٹریش میں فائلیں عارضی طور پر رہ سکتی ہیں۔</string>
 </resources>

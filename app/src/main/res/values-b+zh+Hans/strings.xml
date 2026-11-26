@@ -184,7 +184,7 @@
     <string name="clean_tool_duplicates_desc">查找完全重复的文件和媒体。</string>
     <string name="clean_tool_similar_desc">将连拍和相似照片分组，推荐最佳照片。</string>
     <string name="clean_tool_screenshots_desc">查看旧截图和临时截屏。</string>
-    <string name="clean_tool_large_files_desc">安全查看大视频、压缩包和下载文件。</string>
+    <string name="clean_tool_large_files_desc">检查可访问的 100 MB 或更大的照片和视频。</string>
     <string name="clean_tool_swipe_clean_desc">逐张快速筛选照片和媒体。</string>
     <string name="clean_tool_video_compress_desc">预览后使用 Media3 在设备上压缩视频。</string>
     <string name="clean_footer_honesty">阶段 0 尚未启用扫描和 MediaStore 删除流程。</string>
@@ -276,7 +276,7 @@
     <string name="privacy_local_title">本地偏好设置</string>
     <string name="privacy_local_body">主题、触感反馈、自动管理偏好和语言保存在设备上。无需账户。</string>
     <string name="privacy_files_title">个人文件</string>
-    <string name="privacy_files_body">Clenova 经你授权在设备上扫描照片和视频。经批准可将重复副本移至 Android 回收站。Memory Guard 规则尚未连接。不上传个人媒体。 相似照片也可以在您批准后移入回收站。 截图也可以在您批准后移入 Android 回收站。</string>
+    <string name="privacy_files_body">Clenova 经你授权在设备上扫描照片和视频。经批准可将重复副本移至 Android 回收站。Memory Guard 规则尚未连接。不上传个人媒体。 相似照片也可以在您批准后移入回收站。 截图也可以在您批准后移入 Android 回收站。 经您批准，大型照片和视频也可移入 Android 回收站。</string>
     <string name="privacy_support_title">支持消息</string>
     <string name="privacy_support_body">联系和问题报告会打开电子邮件应用。是否发送由你决定，发送前可编辑或删除诊断详情。</string>
     <string name="support_faq_storage">如何测量存储空间？</string>
@@ -334,4 +334,7 @@
     <string name="similar_confirm">请检查每张选中的照片。Clenova 会验证文件是否已更改并请求 Android 批准。回收站可能暂时保留文件。</string>
     <string name="screenshots_no_matches">本次扫描未找到截图</string>
     <string name="screenshots_manual_rule">请手动选择截图。收藏、受保护的重复副本和未经验证的文件无法选择。</string>
+    <string name="large_media_empty">本次扫描未找到大型媒体文件</string>
+    <string name="large_media_rule">检查可访问的 100 MB 或更大的照片和视频。不会扫描其他文件。收藏和受保护的副本无法选择。</string>
+    <string name="large_media_confirm">请检查所选文件。Clenova 会重新检查媒体元数据并请求 Android 批准。回收站可能暂时保留文件。</string>
 </resources>

@@ -184,7 +184,7 @@
     <string name="clean_tool_duplicates_desc">完全に重複したファイルやメディアを検出。</string>
     <string name="clean_tool_similar_desc">連写や似た写真をまとめ、ベストショットを提案。</string>
     <string name="clean_tool_screenshots_desc">古いスクリーンショットや一時的な画像を確認。</string>
-    <string name="clean_tool_large_files_desc">大きな動画、アーカイブ、ダウンロードを安全に確認。</string>
+    <string name="clean_tool_large_files_desc">アクセス可能な 100 MB 以上の写真と動画を確認します。</string>
     <string name="clean_tool_swipe_clean_desc">写真やメディアを一枚ずつ素早く整理。</string>
     <string name="clean_tool_video_compress_desc">プレビュー後に Media3 で端末上の動画を圧縮。</string>
     <string name="clean_footer_honesty">フェーズ0ではスキャンと MediaStore による削除は無効です。</string>
@@ -276,7 +276,7 @@
     <string name="privacy_local_title">端末内の設定</string>
     <string name="privacy_local_body">テーマ、触覚、Autopilot の設定、言語は端末に保存されます。アカウントは不要です。</string>
     <string name="privacy_files_title">個人ファイル</string>
-    <string name="privacy_files_body">Clenova は許可を得て端末内の写真と動画をスキャンします。承認後、重複を Android のごみ箱に移せます。Memory Guard は未接続です。個人メディアはアップロードしません。 類似写真も承認後にゴミ箱へ移動できます。 スクリーンショットも承認後に Android のゴミ箱へ移動できます。</string>
+    <string name="privacy_files_body">Clenova は許可を得て端末内の写真と動画をスキャンします。承認後、重複を Android のごみ箱に移せます。Memory Guard は未接続です。個人メディアはアップロードしません。 類似写真も承認後にゴミ箱へ移動できます。 スクリーンショットも承認後に Android のゴミ箱へ移動できます。 大容量の写真と動画も承認後に Android のゴミ箱へ移動できます。</string>
     <string name="privacy_support_title">サポートメッセージ</string>
     <string name="privacy_support_body">お問い合わせや問題報告ではメールアプリを開きます。送信するかどうかはあなたが決め、送信前に診断情報を編集・削除できます。</string>
     <string name="support_faq_storage">ストレージ容量はどう測定されますか？</string>
@@ -334,4 +334,7 @@
     <string name="similar_confirm">選択した写真を確認してください。Clenova はファイルが変更されていないか確認し、Android の承認を求めます。ゴミ箱に一時的に残る場合があります。</string>
     <string name="screenshots_no_matches">このスキャンではスクリーンショットが見つかりませんでした</string>
     <string name="screenshots_manual_rule">スクリーンショットを手動で選択してください。お気に入り、保護されたコピー、未検証のファイルは選択できません。</string>
+    <string name="large_media_empty">このスキャンでは大容量メディアが見つかりませんでした</string>
+    <string name="large_media_rule">アクセス可能な 100 MB 以上の写真と動画を確認します。他のファイルはスキャンされません。お気に入りと保護されたコピーは選択できません。</string>
+    <string name="large_media_confirm">選択したファイルを確認してください。Clenova はメタデータを再確認し、Android の承認を求めます。ゴミ箱に一時的に残る場合があります。</string>
 </resources>

@@ -184,7 +184,7 @@
     <string name="clean_tool_duplicates_desc">Identifiez les fichiers et médias identiques.</string>
     <string name="clean_tool_similar_desc">Regroupez les rafales et photos similaires avec une suggestion de la meilleure prise.</string>
     <string name="clean_tool_screenshots_desc">Examinez les captures anciennes et temporaires.</string>
-    <string name="clean_tool_large_files_desc">Repérez les vidéos volumineuses, archives et téléchargements en toute sécurité.</string>
+    <string name="clean_tool_large_files_desc">Vérifiez les photos et vidéos accessibles de 100 Mo ou plus.</string>
     <string name="clean_tool_swipe_clean_desc">Triez rapidement vos photos et médias, un par un.</string>
     <string name="clean_tool_video_compress_desc">Réduisez la taille des vidéos localement avec Media3 après aperçu.</string>
     <string name="clean_footer_honesty">L’analyse et la suppression via MediaStore ne sont pas activées en phase 0.</string>
@@ -276,7 +276,7 @@
     <string name="privacy_local_title">Préférences locales</string>
     <string name="privacy_local_body">Le thème, le retour haptique, les préférences Autopilot et la langue sont enregistrés sur votre appareil. Aucun compte requis.</string>
     <string name="privacy_files_title">Fichiers personnels</string>
-    <string name="privacy_files_body">Clenova analyse les médias accessibles avec votre autorisation sur l’appareil. Les doublons peuvent être placés dans la corbeille Android avec votre accord. Memory Guard n’est pas encore connecté. Aucun média personnel téléversé. Les photos similaires peuvent aussi être vérifiées et mises à la corbeille avec votre accord. Les captures peuvent aussi être vérifiées et mises à la corbeille Android avec votre accord.</string>
+    <string name="privacy_files_body">Clenova analyse les médias accessibles avec votre autorisation sur l’appareil. Les doublons peuvent être placés dans la corbeille Android avec votre accord. Memory Guard n’est pas encore connecté. Aucun média personnel téléversé. Les photos similaires peuvent aussi être vérifiées et mises à la corbeille avec votre accord. Les captures peuvent aussi être vérifiées et mises à la corbeille Android avec votre accord. Les photos et vidéos volumineuses peuvent être mises à la corbeille Android avec votre accord.</string>
     <string name="privacy_support_title">Messages d’assistance</string>
     <string name="privacy_support_body">Le contact et les rapports ouvrent votre application de messagerie. Vous choisissez d’envoyer ou non le message et pouvez modifier ou retirer les données de diagnostic avant l’envoi.</string>
     <string name="support_faq_storage">Comment le stockage est-il mesuré ?</string>
@@ -334,4 +334,7 @@
     <string name="similar_confirm">Vérifiez chaque photo sélectionnée. Clenova vérifie que les fichiers sont inchangés et demande la validation Android. La corbeille peut les conserver temporairement.</string>
     <string name="screenshots_no_matches">Aucune capture trouvée lors de cette analyse</string>
     <string name="screenshots_manual_rule">Sélectionnez les captures manuellement. Les favoris, copies protégées et fichiers non vérifiés ne sont pas sélectionnables.</string>
+    <string name="large_media_empty">Aucun fichier multimédia volumineux trouvé</string>
+    <string name="large_media_rule">Vérifiez les photos et vidéos accessibles de 100 Mo ou plus. Les autres fichiers ne sont pas analysés. Les favoris et copies protégées ne sont pas sélectionnables.</string>
+    <string name="large_media_confirm">Vérifiez votre sélection. Clenova vérifie à nouveau les métadonnées et demande la validation Android. La corbeille peut conserver les fichiers temporairement.</string>
 </resources>

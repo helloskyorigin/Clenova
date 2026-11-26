@@ -45,17 +45,20 @@ import kotlinx.coroutines.launch
 
 @Composable
 internal fun ScreenshotsScreen(result: MediaScanResult?, owner: LifecycleOwner, onBack: () -> Unit,
-    onScan: () -> Unit, onInvalidate: () -> Unit, onHaptic: () -> Unit) {
+    onScan: () -> Unit, onInvalidate: () -> Unit, onHaptic: () -> Unit, largeMedia: Boolean = false, videosOnly: Boolean = false) {
     val context = LocalContext.current
     val colors = ClenovaThemeTokens.colors
     val scope = rememberCoroutineScope()
-    val items = result?.screenshots.orEmpty()
-    val eligible = remember(result) { result?.let { ScreenshotTrash.eligible(it).map { m -> m.uri }.toSet() }.orEmpty() }
+    val title = if (!largeMedia) R.string.clean_tool_screenshots_title else if (videosOnly) R.string.review_videos else R.string.clean_tool_large_files_title
+    val items = (if (!largeMedia) result?.screenshots else if (videosOnly) result?.largeVideos else result?.largeFiles).orEmpty()
+    val eligible = remember(result, largeMedia, videosOnly) { result?.let { snapshot ->
+        (if (largeMedia) LargeMediaTrash.eligible(snapshot, videosOnly) else ScreenshotTrash.eligible(snapshot)).map { m -> m.uri }.toSet()
+    }.orEmpty() }
     var selected by remember(result) { mutableStateOf(emptySet<Uri>()) }
     val chosen = selected.intersect(eligible)
     val bytes = items.filter { it.uri in chosen }.sumOf { it.bytes }
     val supported = Build.VERSION.SDK_INT >= 30
-    val valid = result != null && runCatching { ScreenshotTrash.plan(result, chosen) }.isSuccess
+    val valid = result != null && runCatching { if (largeMedia) LargeMediaTrash.plan(result, chosen, videosOnly) else ScreenshotTrash.plan(result, chosen) }.isSuccess
     var confirming by remember { mutableStateOf(false) }
     var checking by remember { mutableStateOf(false) }
     var pending by rememberSaveable { mutableStateOf(false) }
@@ -86,15 +89,15 @@ internal fun ScreenshotsScreen(result: MediaScanResult?, owner: LifecycleOwner, 
                 IconButton(onClick = onBack, enabled = !busy) {
                     Icon(Icons.AutoMirrored.Rounded.ArrowBack, stringResource(R.string.cd_back_button), tint = colors.textPrimary)
                 }
-                Text(stringResource(R.string.clean_tool_screenshots_title), Modifier.weight(1f),
+                Text(stringResource(title), Modifier.weight(1f),
                     style = MaterialTheme.typography.titleLarge, color = colors.textPrimary)
                 if (result != null) TextButton(onClick = onScan, enabled = !busy) { Text(stringResource(R.string.scan_rescan)) }
             }
             HorizontalDivider(color = colors.border)
             if (result == null || items.isEmpty()) {
                 Column(Modifier.weight(1f).padding(vertical = 30.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                    Icon(Icons.Outlined.Screenshot, null, Modifier.size(38.dp), tint = colors.primary)
-                    Text(stringResource(if (result == null) R.string.review_empty_title else R.string.screenshots_no_matches),
+                    Icon(if (largeMedia) Icons.Outlined.FolderOpen else Icons.Outlined.Screenshot, null, Modifier.size(38.dp), tint = colors.primary)
+                    Text(stringResource(if (result == null) R.string.review_empty_title else if (largeMedia) R.string.large_media_empty else R.string.screenshots_no_matches),
                         style = MaterialTheme.typography.headlineSmall, color = colors.textPrimary)
                     Text(stringResource(if (result == null) R.string.review_empty_body else R.string.scan_read_only), color = colors.textSecondary)
                     if (result != null && (!result.access.full || result.incomplete)) Text(stringResource(R.string.scan_partial), color = colors.textSecondary)
@@ -107,7 +110,7 @@ internal fun ScreenshotsScreen(result: MediaScanResult?, owner: LifecycleOwner, 
                         style = MaterialTheme.typography.displaySmall.copy(fontSize = 48.sp, fontWeight = FontWeight.SemiBold), color = colors.textPrimary)
                     Text(stringResource(R.string.duplicates_selected_space), color = colors.textSecondary)
                     Text(stringResource(R.string.guard_item_count, chosen.size), color = colors.primary)
-                    Text(stringResource(R.string.screenshots_manual_rule), style = MaterialTheme.typography.bodySmall, color = colors.textSecondary)
+                    Text(stringResource(if (largeMedia) R.string.large_media_rule else R.string.screenshots_manual_rule), style = MaterialTheme.typography.bodySmall, color = colors.textSecondary)
                     Text(stringResource(R.string.duplicates_guard_note), style = MaterialTheme.typography.bodySmall, color = colors.textSecondary)
                     if (!result.access.full || result.incomplete) Text(stringResource(R.string.scan_partial), color = colors.textSecondary, style = MaterialTheme.typography.bodySmall)
                     Row(verticalAlignment = Alignment.CenterVertically) {
@@ -117,15 +120,15 @@ internal fun ScreenshotsScreen(result: MediaScanResult?, owner: LifecycleOwner, 
                         }
                     }
                 }
-                LazyVerticalGrid(columns = GridCells.Adaptive(104.dp), modifier = Modifier.weight(1f),
+                LazyVerticalGrid(columns = GridCells.Adaptive(if (largeMedia) 144.dp else 104.dp), modifier = Modifier.weight(1f),
                     horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                     items(items, key = { it.uri.toString() }) { media ->
                         val locked = media.uri !in eligible
                         val checked = media.uri in chosen
                         Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                            Box(Modifier.fillMaxWidth().aspectRatio(.78f).clip(RoundedCornerShape(10.dp)).background(colors.surface)
+                            Box(Modifier.fillMaxWidth().aspectRatio(if (largeMedia) 1.25f else .78f).clip(RoundedCornerShape(10.dp)).background(colors.surface)
                                 .then(if (locked) Modifier else Modifier.toggleable(checked,
-                                    enabled = supported && !busy && (checked || chosen.size < ScreenshotTrash.MAX_BATCH),
+                                    enabled = supported && !busy && (checked || chosen.size < (if (largeMedia) LargeMediaTrash.MAX_BATCH else ScreenshotTrash.MAX_BATCH)),
                                     role = Role.Checkbox, onValueChange = {
                                         selected = if (it) chosen + media.uri else chosen - media.uri
                                         onHaptic()
@@ -135,7 +138,7 @@ internal fun ScreenshotsScreen(result: MediaScanResult?, owner: LifecycleOwner, 
                                     modifier = Modifier.align(Alignment.TopEnd).padding(6.dp).size(26.dp)) {
                                     Box(contentAlignment = Alignment.Center) {
                                         Icon(if (locked) Icons.Outlined.Lock else if (checked) Icons.Outlined.CheckCircle else Icons.Outlined.RadioButtonUnchecked,
-                                            stringResource(if (locked) R.string.duplicates_keep else R.string.clean_tool_screenshots_title),
+                                            stringResource(if (locked) R.string.duplicates_keep else title),
                                             Modifier.size(18.dp), tint = if (checked) colors.onPrimary else colors.textSecondary)
                                     }
                                 }
@@ -146,7 +149,7 @@ internal fun ScreenshotsScreen(result: MediaScanResult?, owner: LifecycleOwner, 
                     }
                 }
                 if (!supported) Text(stringResource(R.string.duplicates_trash_unsupported), style = MaterialTheme.typography.bodySmall, color = colors.textSecondary)
-                if (chosen.isNotEmpty() && !valid) Text(stringResource(R.string.duplicates_verify_limit), color = colors.error, style = MaterialTheme.typography.bodySmall)
+                if (!largeMedia && chosen.isNotEmpty() && !valid) Text(stringResource(R.string.duplicates_verify_limit), color = colors.error, style = MaterialTheme.typography.bodySmall)
                 Button(onClick = { confirming = true }, enabled = supported && !busy && valid,
                     modifier = Modifier.fillMaxWidth().padding(vertical = 12.dp).heightIn(min = 52.dp).testTag("screenshots_approve"), shape = ClenovaShapes.pill) {
                     if (busy) CircularProgressIndicator(Modifier.size(20.dp), strokeWidth = 2.dp)
@@ -157,13 +160,13 @@ internal fun ScreenshotsScreen(result: MediaScanResult?, owner: LifecycleOwner, 
     }
     if (confirming && result != null) AlertDialog(onDismissRequest = { confirming = false },
         title = { Text(stringResource(R.string.duplicates_move_trash, chosen.size)) },
-        text = { Text(stringResource(R.string.similar_confirm)) },
+        text = { Text(stringResource(if (largeMedia) R.string.large_media_confirm else R.string.similar_confirm)) },
         confirmButton = { TextButton(onClick = {
             confirming = false
             checking = true
             job = scope.launch {
                 try {
-                    val request = ScreenshotTrash.request(context, result, chosen)
+                    val request = if (largeMedia) LargeMediaTrash.request(context, result, chosen, videosOnly) else ScreenshotTrash.request(context, result, chosen)
                     if (!owner.lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED)) return@launch
                     pending = true
                     launcher.launch(IntentSenderRequest.Builder(request.intentSender).build())

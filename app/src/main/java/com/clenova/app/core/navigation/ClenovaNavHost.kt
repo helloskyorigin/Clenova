@@ -56,6 +56,8 @@ fun NavDestination?.toClenovaRoute(): ClenovaRoute? = when {
     hasRoute<ClenovaRoute.Duplicates>() -> ClenovaRoute.Duplicates
     hasRoute<ClenovaRoute.SimilarPhotos>() -> ClenovaRoute.SimilarPhotos
     hasRoute<ClenovaRoute.Screenshots>() -> ClenovaRoute.Screenshots
+    hasRoute<ClenovaRoute.LargeFiles>() -> ClenovaRoute.LargeFiles
+    hasRoute<ClenovaRoute.LargeVideos>() -> ClenovaRoute.LargeVideos
     hasRoute<ClenovaRoute.VideoCompress>() -> ClenovaRoute.VideoCompress
     else -> null
 }
@@ -153,6 +155,8 @@ fun ClenovaNavHost(
                 onCompress = { onSelectionHaptic(); navController.navigate(ClenovaRoute.VideoCompress) { launchSingleTop = true } },
                 onSimilar = { onSelectionHaptic(); navController.navigate(ClenovaRoute.SimilarPhotos) { launchSingleTop = true } },
                 onScreenshots = { onSelectionHaptic(); navController.navigate(ClenovaRoute.Screenshots) { launchSingleTop = true } },
+                onLargeFiles = { onSelectionHaptic(); navController.navigate(ClenovaRoute.LargeFiles) { launchSingleTop = true } },
+                onLargeVideos = { onSelectionHaptic(); navController.navigate(ClenovaRoute.LargeVideos) { launchSingleTop = true } },
             )
         }
 
@@ -188,6 +192,18 @@ fun ClenovaNavHost(
                 onScan = { onSelectionHaptic(); navController.navigate(ClenovaRoute.SmartScan) { launchSingleTop = true } },
                 onInvalidate = { scanResult = null }, onHaptic = onSelectionHaptic)
         }
+        composable<ClenovaRoute.LargeFiles> {
+            ScreenshotsScreen(result = scanResult, owner = lifecycleOwner,
+                onBack = { onSelectionHaptic(); navController.popBackStack() },
+                onScan = { onSelectionHaptic(); navController.navigate(ClenovaRoute.SmartScan) { launchSingleTop = true } },
+                onInvalidate = { scanResult = null }, onHaptic = onSelectionHaptic, largeMedia = true)
+        }
+        composable<ClenovaRoute.LargeVideos> {
+            ScreenshotsScreen(result = scanResult, owner = lifecycleOwner,
+                onBack = { onSelectionHaptic(); navController.popBackStack() },
+                onScan = { onSelectionHaptic(); navController.navigate(ClenovaRoute.SmartScan) { launchSingleTop = true } },
+                onInvalidate = { scanResult = null }, onHaptic = onSelectionHaptic, largeMedia = true, videosOnly = true)
+        }
         composable<ClenovaRoute.SmartScan> {
             SmartScanScreen(
                 onBack = { onSelectionHaptic(); navController.popBackStack() },
@@ -197,6 +213,8 @@ fun ClenovaNavHost(
                 onDuplicates = { onSelectionHaptic(); navController.navigate(ClenovaRoute.Duplicates) { popUpTo<ClenovaRoute.SmartScan> { inclusive = true }; launchSingleTop = true } },
                 onSimilar = { onSelectionHaptic(); navController.navigate(ClenovaRoute.SimilarPhotos) { popUpTo<ClenovaRoute.SmartScan> { inclusive = true }; launchSingleTop = true } },
                 onScreenshots = { onSelectionHaptic(); navController.navigate(ClenovaRoute.Screenshots) { popUpTo<ClenovaRoute.SmartScan> { inclusive = true }; launchSingleTop = true } },
+                onLargeFiles = { onSelectionHaptic(); navController.navigate(ClenovaRoute.LargeFiles) { popUpTo<ClenovaRoute.SmartScan> { inclusive = true }; launchSingleTop = true } },
+                onLargeVideos = { onSelectionHaptic(); navController.navigate(ClenovaRoute.LargeVideos) { popUpTo<ClenovaRoute.SmartScan> { inclusive = true }; launchSingleTop = true } },
             )
         }
 

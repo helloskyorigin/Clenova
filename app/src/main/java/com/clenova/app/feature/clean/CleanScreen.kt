@@ -52,6 +52,8 @@ internal fun CleanScreen(
     onCompress: () -> Unit,
     onSimilar: () -> Unit = {},
     onScreenshots: () -> Unit = {},
+    onLargeFiles: () -> Unit = {},
+    onLargeVideos: () -> Unit = {},
 ) {
     val colors = ClenovaThemeTokens.colors
     val preview = BuildConfig.DEBUG && sample
@@ -110,10 +112,10 @@ internal fun CleanScreen(
                     result?.let { stringResource(R.string.guard_item_count, it.screenshots.size) } ?: if (preview) stringResource(R.string.guard_item_count, 84) else null, "clean_screenshots", onScreenshots)
                 HorizontalDivider(color = colors.border)
                 CleanFileRow(Icons.Outlined.VideoFile, R.string.review_videos,
-                    result?.let { ByteFormatter.format(it.largeVideos.sumOf { video -> video.bytes }) } ?: if (preview) CleanupDesignPlan.spaceLabel(2) else null, "clean_large_videos") { dialog = R.string.review_videos }
+                    result?.let { ByteFormatter.format(it.largeVideos.sumOf { video -> video.bytes }) } ?: if (preview) CleanupDesignPlan.spaceLabel(2) else null, "clean_large_videos", onLargeVideos)
                 HorizontalDivider(color = colors.border)
                 CleanFileRow(Icons.Outlined.FolderOpen, R.string.clean_tool_large_files_title,
-                    if (preview) stringResource(R.string.guard_item_count, 8) else null, "clean_large_files") { dialog = R.string.clean_tool_large_files_title }
+                    result?.let { stringResource(R.string.guard_item_count, it.largeFiles.size) } ?: if (preview) stringResource(R.string.guard_item_count, 8) else null, "clean_large_files", onLargeFiles)
                 HorizontalDivider(color = colors.border)
             }
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {

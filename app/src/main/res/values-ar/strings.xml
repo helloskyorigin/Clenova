@@ -184,7 +184,7 @@
     <string name="clean_tool_duplicates_desc">ابحث عن الملفات والوسائط المتطابقة.</string>
     <string name="clean_tool_similar_desc">جمّع الصور المتتابعة والمتشابهة مع اقتراح أفضل لقطة.</string>
     <string name="clean_tool_screenshots_desc">راجع لقطات الشاشة القديمة والمؤقتة.</string>
-    <string name="clean_tool_large_files_desc">اعثر بأمان على الفيديوهات الكبيرة والأرشيفات والتنزيلات.</string>
+    <string name="clean_tool_large_files_desc">راجع الصور والفيديوهات المتاحة بحجم 100 MB أو أكثر.</string>
     <string name="clean_tool_swipe_clean_desc">افرز الصور والوسائط بسرعة بطاقة تلو الأخرى.</string>
     <string name="clean_tool_video_compress_desc">قلّل حجم الفيديو محليًا باستخدام Media3 بعد المعاينة.</string>
     <string name="clean_footer_honesty">الفحص والحذف عبر MediaStore غير مفعّلين في المرحلة 0.</string>
@@ -276,7 +276,7 @@
     <string name="privacy_local_title">التفضيلات المحلية</string>
     <string name="privacy_local_body">يُحفظ المظهر والاستجابة اللمسية وتفضيلات Autopilot واللغة على جهازك. لا يلزم حساب.</string>
     <string name="privacy_files_title">الملفات الشخصية</string>
-    <string name="privacy_files_body">يفحص Clenova الصور والفيديوهات المتاحة بإذنك على الجهاز. يمكن نقل النسخ إلى مهملات Android بموافقتك. قواعد Memory Guard غير متصلة بعد. لا تُرفع الوسائط الشخصية. يمكن أيضاً مراجعة الصور المتشابهة ونقلها إلى سلة المهملات بموافقتك. يمكن نقل لقطات الشاشة إلى سلة مهملات Android بموافقتك.</string>
+    <string name="privacy_files_body">يفحص Clenova الصور والفيديوهات المتاحة بإذنك على الجهاز. يمكن نقل النسخ إلى مهملات Android بموافقتك. قواعد Memory Guard غير متصلة بعد. لا تُرفع الوسائط الشخصية. يمكن أيضاً مراجعة الصور المتشابهة ونقلها إلى سلة المهملات بموافقتك. يمكن نقل لقطات الشاشة إلى سلة مهملات Android بموافقتك. يمكن نقل الصور والفيديوهات الكبيرة إلى سلة مهملات Android بموافقتك.</string>
     <string name="privacy_support_title">رسائل الدعم</string>
     <string name="privacy_support_body">يفتح التواصل وتقارير المشكلات تطبيق البريد. تقرر أنت إرسال الرسالة ويمكنك تعديل تفاصيل التشخيص أو حذفها قبل الإرسال.</string>
     <string name="support_faq_storage">كيف تُقاس مساحة التخزين؟</string>
@@ -334,4 +334,7 @@
     <string name="similar_confirm">راجع كل صورة محددة. يتحقق Clenova من عدم تغير الملفات ويطلب موافقة Android. قد تحتفظ سلة المهملات بالملفات مؤقتاً.</string>
     <string name="screenshots_no_matches">لم يتم العثور على لقطات شاشة في هذا الفحص</string>
     <string name="screenshots_manual_rule">اختر لقطات الشاشة يدوياً. لا يمكن تحديد المفضلة أو النسخ المحمية أو الملفات غير المتحقق منها.</string>
+    <string name="large_media_empty">لم يتم العثور على وسائط كبيرة في هذا الفحص</string>
+    <string name="large_media_rule">راجع الصور والفيديوهات المتاحة بحجم 100 MB أو أكثر. لا يتم فحص الملفات الأخرى. لا يمكن تحديد المفضلة والنسخ المحمية.</string>
+    <string name="large_media_confirm">راجع اختيارك. يعيد Clenova فحص بيانات الوسائط ويطلب موافقة Android. قد تحتفظ سلة المهملات بالملفات مؤقتاً.</string>
 </resources>

@@ -184,7 +184,7 @@
     <string name="clean_tool_duplicates_desc">बिल्कुल समान फ़ाइलें और मीडिया खोजें।</string>
     <string name="clean_tool_similar_desc">बर्स्ट और मिलती-जुलती फ़ोटो समूह में देखें, बेहतर फ़ोटो चुनें।</string>
     <string name="clean_tool_screenshots_desc">पुराने और अस्थायी स्क्रीनशॉट देखें।</string>
-    <string name="clean_tool_large_files_desc">बड़े वीडियो, आर्काइव और डाउनलोड सुरक्षित रूप से देखें।</string>
+    <string name="clean_tool_large_files_desc">100 MB या उससे बड़ी उपलब्ध तस्वीरें और वीडियो देखें।</string>
     <string name="clean_tool_swipe_clean_desc">फ़ोटो और मीडिया को एक-एक करके जल्दी छाँटें।</string>
     <string name="clean_tool_video_compress_desc">प्रीव्यू के बाद Media3 से डिवाइस पर वीडियो का आकार घटाएँ।</string>
     <string name="clean_footer_honesty">चरण 0 में स्कैन और MediaStore से फ़ाइल हटाने की सुविधा चालू नहीं है।</string>
@@ -276,7 +276,7 @@
     <string name="privacy_local_title">स्थानीय प्राथमिकताएँ</string>
     <string name="privacy_local_body">थीम, हैप्टिक्स, ऑटोपायलट प्राथमिकताएँ और भाषा डिवाइस पर सेव हैं। अकाउंट ज़रूरी नहीं है।</string>
     <string name="privacy_files_title">निजी फ़ाइलें</string>
-    <string name="privacy_files_body">Clenova अनुमति से डिवाइस पर फ़ोटो और वीडियो स्कैन करता है। आपकी मंज़ूरी से डुप्लिकेट Android ट्रैश में जा सकते हैं। Memory Guard नियम अभी जुड़े नहीं हैं। निजी मीडिया अपलोड नहीं होता। आपकी अनुमति से समान तस्वीरें भी ट्रैश में भेजी जा सकती हैं। आपकी अनुमति से स्क्रीनशॉट भी Android ट्रैश में भेजे जा सकते हैं।</string>
+    <string name="privacy_files_body">Clenova अनुमति से डिवाइस पर फ़ोटो और वीडियो स्कैन करता है। आपकी मंज़ूरी से डुप्लिकेट Android ट्रैश में जा सकते हैं। Memory Guard नियम अभी जुड़े नहीं हैं। निजी मीडिया अपलोड नहीं होता। आपकी अनुमति से समान तस्वीरें भी ट्रैश में भेजी जा सकती हैं। आपकी अनुमति से स्क्रीनशॉट भी Android ट्रैश में भेजे जा सकते हैं। आपकी अनुमति से बड़ी तस्वीरें और वीडियो Android ट्रैश में भेजे जा सकते हैं।</string>
     <string name="privacy_support_title">सहायता संदेश</string>
     <string name="privacy_support_body">संपर्क और समस्या रिपोर्ट आपका ईमेल ऐप खोलते हैं। संदेश भेजना आपका निर्णय है और भेजने से पहले डायग्नोस्टिक जानकारी बदल या हटा सकते हैं।</string>
     <string name="support_faq_storage">स्टोरेज कैसे मापा जाता है?</string>
@@ -334,4 +334,7 @@
     <string name="similar_confirm">चुनी गई हर तस्वीर की समीक्षा करें। Clenova जाँचता है कि फ़ाइलें बदली नहीं हैं और Android की अनुमति माँगता है। ट्रैश में फ़ाइलें कुछ समय रह सकती हैं।</string>
     <string name="screenshots_no_matches">इस स्कैन में स्क्रीनशॉट नहीं मिले</string>
     <string name="screenshots_manual_rule">स्क्रीनशॉट खुद चुनें। पसंदीदा, सुरक्षित डुप्लिकेट और असत्यापित फ़ाइलें नहीं चुनी जा सकतीं।</string>
+    <string name="large_media_empty">इस स्कैन में बड़ी मीडिया फ़ाइलें नहीं मिलीं</string>
+    <string name="large_media_rule">100 MB या उससे बड़ी उपलब्ध तस्वीरें और वीडियो देखें। अन्य फ़ाइलें स्कैन नहीं होतीं। पसंदीदा और सुरक्षित प्रतियाँ नहीं चुनी जा सकतीं।</string>
+    <string name="large_media_confirm">चुनी गई फ़ाइलें देखें। Clenova मीडिया की जानकारी दोबारा जाँचता है और Android की अनुमति माँगता है। ट्रैश में फ़ाइलें कुछ समय रह सकती हैं।</string>
 </resources>

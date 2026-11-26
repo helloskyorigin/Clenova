@@ -53,6 +53,12 @@ sealed interface ClenovaRoute {
     data object Screenshots : ClenovaRoute
 
     @Serializable
+    data object LargeFiles : ClenovaRoute
+
+    @Serializable
+    data object LargeVideos : ClenovaRoute
+
+    @Serializable
     data object VideoCompress : ClenovaRoute
 }
 

@@ -184,7 +184,7 @@
     <string name="clean_tool_duplicates_desc">Identische Dateien und Medien finden.</string>
     <string name="clean_tool_similar_desc">Serienbilder und ähnliche Fotos gruppieren, mit Empfehlung der besten Aufnahme.</string>
     <string name="clean_tool_screenshots_desc">Alte und vorübergehende Screenshots prüfen.</string>
-    <string name="clean_tool_large_files_desc">Große Videos, Archive und Downloads sicher finden.</string>
+    <string name="clean_tool_large_files_desc">Prüfe zugängliche Fotos und Videos ab 100 MB.</string>
     <string name="clean_tool_swipe_clean_desc">Fotos und Medien schnell einzeln sortieren.</string>
     <string name="clean_tool_video_compress_desc">Videos nach der Vorschau lokal mit Media3 verkleinern.</string>
     <string name="clean_footer_honesty">Scan und Löschung über MediaStore sind in Phase 0 nicht aktiviert.</string>
@@ -276,7 +276,7 @@
     <string name="privacy_local_title">Lokale Einstellungen</string>
     <string name="privacy_local_body">Design, Haptik, Autopilot-Einstellungen und Sprache werden auf dem Gerät gespeichert. Kein Konto erforderlich.</string>
     <string name="privacy_files_title">Persönliche Dateien</string>
-    <string name="privacy_files_body">Clenova scannt zugängliche Fotos und Videos mit deiner Erlaubnis auf dem Gerät. Duplikate können mit Zustimmung in den Android-Papierkorb. Memory Guard ist noch nicht verbunden. Keine privaten Medien werden hochgeladen. Ähnliche Fotos können mit deiner Zustimmung ebenfalls in den Papierkorb verschoben werden. Screenshots können mit deiner Zustimmung ebenfalls in den Android-Papierkorb verschoben werden.</string>
+    <string name="privacy_files_body">Clenova scannt zugängliche Fotos und Videos mit deiner Erlaubnis auf dem Gerät. Duplikate können mit Zustimmung in den Android-Papierkorb. Memory Guard ist noch nicht verbunden. Keine privaten Medien werden hochgeladen. Ähnliche Fotos können mit deiner Zustimmung ebenfalls in den Papierkorb verschoben werden. Screenshots können mit deiner Zustimmung ebenfalls in den Android-Papierkorb verschoben werden. Große Fotos und Videos können mit deiner Zustimmung in den Android-Papierkorb verschoben werden.</string>
     <string name="privacy_support_title">Support-Nachrichten</string>
     <string name="privacy_support_body">Kontakt und Problemberichte öffnen deine E-Mail-App. Du entscheidest über den Versand und kannst Diagnosedaten vorher bearbeiten oder entfernen.</string>
     <string name="support_faq_storage">Wie wird der Speicher gemessen?</string>
@@ -334,4 +334,7 @@
     <string name="similar_confirm">Prüfe jedes ausgewählte Foto. Clenova prüft, ob die Dateien unverändert sind, und bittet Android um Zustimmung. Der Papierkorb kann Dateien vorübergehend behalten.</string>
     <string name="screenshots_no_matches">Bei diesem Scan wurden keine Screenshots gefunden</string>
     <string name="screenshots_manual_rule">Wähle Screenshots manuell aus. Favoriten, geschützte Kopien und ungeprüfte Dateien sind nicht auswählbar.</string>
+    <string name="large_media_empty">Bei diesem Scan wurden keine großen Mediendateien gefunden</string>
+    <string name="large_media_rule">Prüfe zugängliche Fotos und Videos ab 100 MB. Andere Dateien werden nicht gescannt. Favoriten und geschützte Kopien sind nicht auswählbar.</string>
+    <string name="large_media_confirm">Prüfe deine Auswahl. Clenova prüft die Metadaten erneut und bittet Android um Zustimmung. Der Papierkorb kann Dateien vorübergehend behalten.</string>
 </resources>

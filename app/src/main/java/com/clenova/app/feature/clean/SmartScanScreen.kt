@@ -50,6 +50,8 @@ internal fun SmartScanScreen(
     modifier: Modifier = Modifier,
     onSimilar: () -> Unit = {},
     onScreenshots: () -> Unit = {},
+    onLargeFiles: () -> Unit = {},
+    onLargeVideos: () -> Unit = {},
 ) {
     val context = LocalContext.current
     val owner = activityLifecycleOwner
@@ -135,7 +137,7 @@ internal fun SmartScanScreen(
                         Text(stringResource(when(stage) { 0 -> R.string.scan_stage_inventory; 1 -> R.string.scan_stage_duplicates; 3 -> R.string.clean_tool_similar_title; 4 -> R.string.scan_stage_screenshots; else -> R.string.scan_stage_plan }), color = colors.textSecondary)
                         if ((stage == 1 || stage == 3 || stage == 4) && total > 0) Text("$done / $total", color = colors.textSecondary)
                     }
-                    snapshot != null -> ActualResults(snapshot, onDuplicates, onSimilar, onScreenshots)
+                    snapshot != null -> ActualResults(snapshot, onDuplicates, onSimilar, onScreenshots, onLargeFiles, onLargeVideos)
                     else -> Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(vertical = 32.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
                         Icon(Icons.Outlined.VerifiedUser, null, Modifier.size(40.dp), tint = colors.primary)
                         Text(stringResource(if (failed) R.string.scan_read_error else R.string.scan_access_title), style = MaterialTheme.typography.headlineSmall, color = colors.textPrimary)
@@ -161,7 +163,7 @@ internal fun SmartScanScreen(
 }
 
 @Composable
-private fun ActualResults(result: MediaScanResult, onDuplicates: () -> Unit, onSimilar: () -> Unit, onScreenshots: () -> Unit) {
+private fun ActualResults(result: MediaScanResult, onDuplicates: () -> Unit, onSimilar: () -> Unit, onScreenshots: () -> Unit, onLargeFiles: () -> Unit, onLargeVideos: () -> Unit) {
     val colors = ClenovaThemeTokens.colors
     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(vertical = 24.dp), verticalArrangement = Arrangement.spacedBy(18.dp)) {
         Text(stringResource(R.string.scan_complete), style = MaterialTheme.typography.labelMedium, color = colors.success)
@@ -174,6 +176,7 @@ private fun ActualResults(result: MediaScanResult, onDuplicates: () -> Unit, onS
             Triple(R.string.clean_tool_duplicates_title, result.extras.size, result.duplicateBytes),
             Triple(R.string.clean_tool_screenshots_title, result.screenshots.size, result.screenshots.sumOf { it.bytes }),
             Triple(R.string.review_videos, result.largeVideos.size, result.largeVideos.sumOf { it.bytes }),
+            Triple(R.string.clean_tool_large_files_title, result.largeFiles.size, result.largeFiles.sumOf { it.bytes }),
         ).forEach { (title, count, bytes) ->
             Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(3.dp)) {
@@ -185,6 +188,8 @@ private fun ActualResults(result: MediaScanResult, onDuplicates: () -> Unit, onS
             HorizontalDivider(color = colors.border)
         }
         if (result.duplicateGroups.isNotEmpty()) OutlinedButton(onClick = onDuplicates, modifier = Modifier.fillMaxWidth().testTag("scan_duplicates")) { Text(stringResource(R.string.clean_tool_duplicates_title)) }
+        if (result.largeFiles.isNotEmpty()) OutlinedButton(onClick = onLargeFiles, modifier = Modifier.fillMaxWidth().testTag("scan_large_files")) { Text(stringResource(R.string.clean_tool_large_files_title)) }
+        if (result.largeVideos.isNotEmpty()) OutlinedButton(onClick = onLargeVideos, modifier = Modifier.fillMaxWidth().testTag("scan_large_videos")) { Text(stringResource(R.string.review_videos)) }
         if (result.screenshots.isNotEmpty()) OutlinedButton(onClick = onScreenshots, modifier = Modifier.fillMaxWidth().testTag("scan_screenshots")) { Text(stringResource(R.string.clean_tool_screenshots_title)) }
         if (result.similarGroups.isNotEmpty()) {
             OutlinedButton(onClick = onSimilar, modifier = Modifier.fillMaxWidth().testTag("scan_similar")) { Text(stringResource(R.string.clean_tool_similar_title)) }
