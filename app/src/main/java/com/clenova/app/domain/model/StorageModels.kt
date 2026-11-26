@@ -42,6 +42,4 @@ data class UserPreferences(
     val themePreference: ThemePreference = ThemePreference.LIGHT,
     val hapticsEnabled: Boolean = true,
     val autopilotStatus: AutopilotStatus = AutopilotStatus.NotConfigured,
-    val storageGoalGb: Int = 20,
-    val checkIntervalDays: Int = 1,
 )
