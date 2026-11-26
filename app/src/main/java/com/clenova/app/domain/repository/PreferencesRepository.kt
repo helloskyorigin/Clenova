@@ -8,4 +8,5 @@ interface PreferencesRepository {
     val userPreferences: Flow<UserPreferences>
     suspend fun setThemePreference(preference: ThemePreference)
     suspend fun setHapticsEnabled(enabled: Boolean)
+    suspend fun setAutopilotPreferences(goalGb: Int, intervalDays: Int)
 }

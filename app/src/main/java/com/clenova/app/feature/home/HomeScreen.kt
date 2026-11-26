@@ -57,6 +57,9 @@ fun HomeScreen(
     onOpenClean: () -> Unit,
     onOpenGuard: () -> Unit,
     onOpenStorage: () -> Unit,
+    onOpenAutopilot: () -> Unit,
+    sampleAutoOn: Boolean = true,
+    onSampleAutoChange: (Boolean) -> Unit = {},
     modifier: Modifier = Modifier,
     showSampleHome: Boolean = false,
 ) {
@@ -64,7 +67,6 @@ fun HomeScreen(
     var dialogTitle by rememberSaveable { mutableStateOf<Int?>(null) }
     // Local design review only. Never feed these values into storage, protection or deletion logic.
     val sample = BuildConfig.DEBUG && showSampleHome
-    var sampleAutoOn by rememberSaveable { mutableStateOf(true) }
     val shownStorage = if (sample) StorageDesignData.state else uiState.storageState
 
     Box(
@@ -85,7 +87,7 @@ fun HomeScreen(
                 HorizontalDivider(color = colors.border.copy(alpha = .65f))
             }
             StorageOverviewSection(shownStorage, onRefreshStorage, sample, onOpenStorage)
-            AutopilotPanel(uiState.autopilotStatus, onOpenAgent, sample, sampleAutoOn) { sampleAutoOn = it }
+            AutopilotPanel(uiState.autopilotStatus, onOpenAgent, onOpenAutopilot, sample, sampleAutoOn, onSampleAutoChange)
             Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
                 Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                     Text(stringResource(R.string.home_quick_actions), Modifier.weight(1f),
@@ -222,7 +224,7 @@ private fun StorageOverviewSection(state: StorageState, onRefresh: () -> Unit, s
 }
 
 @Composable
-private fun AutopilotPanel(status: AutopilotStatus, onOpenAgent: () -> Unit, sample: Boolean, sampleAutoOn: Boolean, onSampleToggle: (Boolean) -> Unit) {
+private fun AutopilotPanel(status: AutopilotStatus, onOpenAgent: () -> Unit, onOpenAutopilot: () -> Unit, sample: Boolean, sampleAutoOn: Boolean, onSampleToggle: (Boolean) -> Unit) {
     val colors = ClenovaThemeTokens.colors
     val awaiting = if (sample) sampleAutoOn else status == AutopilotStatus.AwaitingApproval
     val statusLabel = if (sample && sampleAutoOn) R.string.home_sample_monitoring else if (sample) R.string.home_auto_off else when (status) {
@@ -241,7 +243,7 @@ private fun AutopilotPanel(status: AutopilotStatus, onOpenAgent: () -> Unit, sam
                     }
                 }
                 // The workspace owns activation; a tap must not claim monitoring has started.
-                Switch(checked = awaiting, onCheckedChange = { if (sample) onSampleToggle(it) else onOpenAgent() },
+                Switch(checked = awaiting, onCheckedChange = { if (sample && !it) onSampleToggle(false) else onOpenAutopilot() },
                     modifier = Modifier.testTag("home_autopilot_switch"))
             }
             HorizontalDivider(color = colors.border)
@@ -259,7 +261,7 @@ private fun AutopilotPanel(status: AutopilotStatus, onOpenAgent: () -> Unit, sam
                 Text(stringResource(if (awaiting) R.string.home_auto_review_body else R.string.home_auto_body),
                     style = MaterialTheme.typography.bodySmall, color = colors.textSecondary)
             }
-            Button(onClick = { if (sample && !sampleAutoOn) onSampleToggle(true) else onOpenAgent() }, modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp).testTag("open_agent_workspace_button"),
+            Button(onClick = { if (awaiting) onOpenAgent() else onOpenAutopilot() }, modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp).testTag("open_agent_workspace_button"),
                 shape = ClenovaShapes.pill, colors = ButtonDefaults.buttonColors(containerColor = colors.primary, contentColor = colors.onPrimary)) {
                 Text(stringResource(if (awaiting) R.string.home_auto_review else if (sample) R.string.home_sample_activate else R.string.home_auto_setup), Modifier.weight(1f),
                     style = MaterialTheme.typography.labelLarge, textAlign = androidx.compose.ui.text.style.TextAlign.Center)

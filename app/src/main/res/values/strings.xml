@@ -117,6 +117,23 @@
     <string name="agent_pillar_history_title">Activity &amp; Verified Results</string>
     <string name="agent_pillar_history_desc">Transparent audit log of every approved and verified outcome.</string>
 
+    <!-- Autopilot setup -->
+    <string name="auto_configure">Configure Autopilot</string>
+    <string name="auto_setup_headline">Set it once.</string>
+    <string name="auto_setup_intro">Choose how Clenova should look after your storage.</string>
+    <string name="auto_goal_title">Free space goal</string>
+    <string name="auto_goal_subtitle">Choose how much space you want to keep available.</string>
+    <string name="auto_goal_value">%1$d GB</string>
+    <string name="auto_frequency_title">Check for clutter</string>
+    <string name="auto_daily">Every day</string>
+    <string name="auto_every_three_days">Every 3 days</string>
+    <string name="auto_weekly">Every week</string>
+    <string name="auto_safety_title">Always in your control</string>
+    <string name="auto_safety_body">Cleanup requires your approval. Protected memories are excluded from cleanup plans when protection is configured.</string>
+    <string name="auto_save_preferences">Save preferences</string>
+    <string name="auto_monitoring_unavailable">Background monitoring is not available yet.</string>
+    <string name="auto_save_failed">Could not save preferences. Please try again.</string>
+
     <!-- Settings -->
     <string name="settings_title">Settings</string>
     <string name="settings_section_preferences">PREFERENCES</string>

@@ -56,7 +56,7 @@ fun ClenovaApp(
         DisposableEffect(currentRoute, view) {
             val window = (view.context as? Activity)?.window
             val controller = window?.let { WindowCompat.getInsetsController(it, view) }
-            if (currentRoute == null || currentRoute == ClenovaRoute.Home || currentRoute == ClenovaRoute.StorageDetails) {
+            if (currentRoute == null || currentRoute == ClenovaRoute.Home || currentRoute == ClenovaRoute.StorageDetails || currentRoute == ClenovaRoute.AutopilotSetup) {
                 controller?.systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
                 controller?.hide(WindowInsetsCompat.Type.statusBars())
             } else {
@@ -64,7 +64,7 @@ fun ClenovaApp(
             }
             onDispose { controller?.show(WindowInsetsCompat.Type.statusBars()) }
         }
-        val showFloatingNav = currentRoute != ClenovaRoute.Settings && currentRoute != ClenovaRoute.StorageDetails
+        val showFloatingNav = currentRoute != ClenovaRoute.Settings && currentRoute != ClenovaRoute.StorageDetails && currentRoute != ClenovaRoute.AutopilotSetup
 
         Box(
             modifier = modifier

@@ -50,6 +50,10 @@ class ClenovaNavigationRobolectricTest {
             _prefs.value = _prefs.value.copy(themePreference = preference)
         }
 
+        override suspend fun setAutopilotPreferences(goalGb: Int, intervalDays: Int) {
+            _prefs.value = _prefs.value.copy(storageGoalGb = goalGb, checkIntervalDays = intervalDays)
+        }
+
         override suspend fun setHapticsEnabled(enabled: Boolean) {
             _prefs.value = _prefs.value.copy(hapticsEnabled = enabled)
         }
@@ -124,7 +128,13 @@ class ClenovaNavigationRobolectricTest {
             composeTestRule.onNodeWithText("24.6 GB").assertIsDisplayed()
             composeTestRule.onNodeWithText("4.8 GB").performScrollTo().assertIsDisplayed()
             composeTestRule.onNodeWithTag("home_autopilot_switch").performScrollTo().performClick()
-            composeTestRule.onNodeWithText("Activate Autopilot").performScrollTo().assertIsDisplayed()
+            composeTestRule.onNodeWithText("Activate Autopilot").performScrollTo().performClick()
+            composeTestRule.waitForIdle()
+            composeTestRule.onNodeWithTag("auto_goal_10").performScrollTo().performClick()
+            composeTestRule.onNodeWithTag("auto_interval_3").performScrollTo().performClick()
+            composeTestRule.onNodeWithTag("auto_setup_save").performClick()
+            composeTestRule.waitForIdle()
+            composeTestRule.onNodeWithText("4.8 GB").performScrollTo().assertIsDisplayed()
         } else {
             composeTestRule.onNodeWithText("Storage details unavailable").assertIsDisplayed()
         }
