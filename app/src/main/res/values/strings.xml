@@ -6,10 +6,10 @@
     <string name="nav_home">Home</string>
     <string name="nav_clean">Clean</string>
     <string name="nav_guard">Guard</string>
-    <string name="nav_agent">Agent</string>
+    <string name="nav_agent">Auto</string>
     <string name="cd_settings_button">Open settings</string>
     <string name="cd_back_button">Navigate back</string>
-    <string name="cd_agent_button">Open Agent workspace</string>
+    <string name="cd_agent_button">Open Autopilot workspace</string>
     <string name="cd_refresh_storage">Refresh device storage reading</string>
 
     <!-- Home -->
@@ -25,6 +25,30 @@
     <string name="home_agent_open_workspace">Open Agent workspace</string>
     <string name="home_status_not_configured">Not configured</string>
     <string name="home_foundation_note">Phase 0 Foundation — Core navigation, real device storage telemetry, and privacy-first controls.</string>
+
+    <string name="home_brand">clenova</string>
+    <string name="home_pro">✦ Pro</string>
+    <string name="home_pro_unavailable">Pro plans are not available yet.</string>
+    <string name="home_available_storage">Available storage</string>
+    <string name="home_capacity">Capacity</string>
+    <string name="home_used_value">%1$s used</string>
+    <string name="home_available_percent">%1$d%% available</string>
+    <string name="home_autopilot">Autopilot</string>
+    <string name="home_auto_off">Not activated</string>
+    <string name="home_auto_paused">Paused</string>
+    <string name="home_auto_pending">Awaiting approval</string>
+    <string name="home_auto_title">Let Clenova take care of your storage.</string>
+    <string name="home_auto_body">Automatic checks. Smart cleanup plans. Your approval.</string>
+    <string name="home_auto_setup">Set up Autopilot</string>
+    <string name="home_auto_review_title">A cleanup plan is waiting.</string>
+    <string name="home_auto_review_body">Open Autopilot to review your next action.</string>
+    <string name="home_auto_review">Review cleanup</string>
+    <string name="home_quick_actions">Quick actions</string>
+    <string name="home_view_all">View all</string>
+    <string name="home_smart_scan">Smart Scan</string>
+    <string name="home_compress">Compress</string>
+    <string name="home_tool_unavailable">This tool is not available yet.</string>
+    <string name="home_guard_status">Protection not configured</string>
 
     <!-- Clean -->
     <string name="clean_title">Clean</string>

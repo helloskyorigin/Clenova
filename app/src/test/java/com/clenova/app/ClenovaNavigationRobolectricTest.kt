@@ -66,12 +66,12 @@ class ClenovaNavigationRobolectricTest {
         composeTestRule.waitForIdle()
 
         // Home renders branding, real storage summary, and honest inactive agent card
-        composeTestRule.onNodeWithText("CLENOVA").assertIsDisplayed()
-        composeTestRule.onNodeWithText("42.5 GB free").assertIsDisplayed()
-        composeTestRule.onNodeWithText("Autopilot is inactive").performScrollTo().assertIsDisplayed()
+        composeTestRule.onNodeWithText("clenova").assertIsDisplayed()
+        composeTestRule.onNodeWithText("42.5 GB").assertIsDisplayed()
+        composeTestRule.onNodeWithText("Not activated").performScrollTo().assertIsDisplayed()
 
-        // Navigate to Clean
-        composeTestRule.onNodeWithTag("nav_tab_clean").performClick()
+        // Home shortcut opens the full manual-tool workspace
+        composeTestRule.onNodeWithTag("home_view_all").performScrollTo().performClick()
         composeTestRule.waitForIdle()
         composeTestRule.onNodeWithText("Duplicates").assertIsDisplayed()
 

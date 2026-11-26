@@ -8,6 +8,12 @@ import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import android.app.Activity
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.ui.platform.LocalView
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.WindowInsetsControllerCompat
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -45,6 +51,18 @@ fun ClenovaApp(
         val colors = ClenovaThemeTokens.colors
         val navBackStackEntry by navController.currentBackStackEntryAsState()
         val currentRoute = navBackStackEntry?.destination.toClenovaRoute()
+        val view = LocalView.current
+        DisposableEffect(currentRoute, view) {
+            val window = (view.context as? Activity)?.window
+            val controller = window?.let { WindowCompat.getInsetsController(it, view) }
+            if (currentRoute == null || currentRoute == ClenovaRoute.Home) {
+                controller?.systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+                controller?.hide(WindowInsetsCompat.Type.statusBars())
+            } else {
+                controller?.show(WindowInsetsCompat.Type.statusBars())
+            }
+            onDispose { controller?.show(WindowInsetsCompat.Type.statusBars()) }
+        }
         val showFloatingNav = currentRoute != ClenovaRoute.Settings
 
         Box(

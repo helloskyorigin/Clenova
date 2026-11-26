@@ -1,60 +1,47 @@
 package com.clenova.app.feature.home
 
 import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.statusBars
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowForward
+import androidx.compose.material.icons.outlined.ContentCopy
+import androidx.compose.material.icons.outlined.CropFree
 import androidx.compose.material.icons.outlined.Refresh
 import androidx.compose.material.icons.outlined.Settings
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.material3.minimumInteractiveComponentSize
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
+import androidx.compose.material.icons.outlined.VerifiedUser
+import androidx.compose.material.icons.outlined.Compress
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.ProgressBarRangeInfo
+import androidx.compose.ui.semantics.progressBarRangeInfo
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.clenova.app.core.designsystem.ClenovaMotion
-import com.clenova.app.core.designsystem.ClenovaOrbitalIcon
-import com.clenova.app.core.designsystem.ClenovaSectionLabel
 import com.clenova.app.core.designsystem.ClenovaShapes
 import com.clenova.app.core.designsystem.ClenovaSpacing
-import com.clenova.app.core.designsystem.ClenovaStatusBadge
-import com.clenova.app.core.designsystem.ClenovaSurfaceCard
 import com.clenova.app.core.designsystem.ClenovaThemeTokens
 import com.clenova.app.core.utilities.ByteFormatter
+import com.clenova.app.domain.model.AutopilotStatus
 import com.clenova.app.domain.model.StorageState
 import com.example.R
+import kotlin.math.roundToInt
 
 @Composable
 fun HomeScreen(
@@ -62,271 +49,200 @@ fun HomeScreen(
     onRefreshStorage: () -> Unit,
     onOpenAgent: () -> Unit,
     onOpenSettings: () -> Unit,
+    onOpenClean: () -> Unit,
+    onOpenGuard: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val colors = ClenovaThemeTokens.colors
-    val scrollState = rememberScrollState()
+    var dialogTitle by rememberSaveable { mutableStateOf<Int?>(null) }
 
     Box(
-        modifier = modifier
-            .fillMaxSize()
-            .background(colors.background)
-            .windowInsetsPadding(WindowInsets.statusBars),
+        modifier = modifier.fillMaxSize().background(colors.background)
+            .windowInsetsPadding(WindowInsets.displayCutout),
         contentAlignment = Alignment.TopCenter,
     ) {
         Column(
-            modifier = Modifier
-                .widthIn(max = 600.dp)
-                .fillMaxSize()
-                .verticalScroll(scrollState)
-                .padding(
-                    start = ClenovaSpacing.screenHorizontal,
-                    end = ClenovaSpacing.screenHorizontal,
-                    top = ClenovaSpacing.md,
-                    bottom = ClenovaSpacing.floatingNavBottomClearance,
-                ),
-            verticalArrangement = Arrangement.spacedBy(ClenovaSpacing.lg),
+            modifier = Modifier.widthIn(max = 560.dp).fillMaxSize()
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = 24.dp)
+                .padding(top = 24.dp, bottom = ClenovaSpacing.floatingNavBottomClearance)
+                .navigationBarsPadding(),
+            verticalArrangement = Arrangement.spacedBy(26.dp),
         ) {
-            // Minimal Brand Header + Settings Entry
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween,
-            ) {
-                Column(modifier = Modifier.weight(1f)) {
-                    Text(
-                        text = stringResource(R.string.app_name),
-                        style = MaterialTheme.typography.headlineMedium.copy(
-                            fontWeight = FontWeight.Bold,
-                        ),
-                        color = colors.textPrimary,
-                    )
-                    Spacer(modifier = Modifier.height(2.dp))
-                    Text(
-                        text = stringResource(R.string.app_tagline),
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = colors.textSecondary,
-                    )
-                }
-
-                Surface(
-                    shape = CircleShape,
-                    color = colors.surface,
-                    border = BorderStroke(1.dp, colors.border),
-                ) {
-                    IconButton(
-                        onClick = onOpenSettings,
-                        modifier = Modifier
-                            .minimumInteractiveComponentSize()
-                            .testTag("settings_button"),
-                    ) {
-                        Icon(
-                            imageVector = Icons.Outlined.Settings,
-                            contentDescription = stringResource(R.string.cd_settings_button),
-                            tint = colors.textPrimary,
-                            modifier = Modifier.size(22.dp),
-                        )
+            BrandHeader(onOpenSettings = onOpenSettings, onOpenPro = { dialogTitle = R.string.home_pro })
+            HorizontalDivider(color = colors.border.copy(alpha = .65f))
+            StorageOverviewSection(uiState.storageState, onRefreshStorage)
+            AutopilotPanel(uiState.autopilotStatus, onOpenAgent)
+            Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
+                Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                    Text(stringResource(R.string.home_quick_actions), Modifier.weight(1f),
+                        style = MaterialTheme.typography.titleLarge.copy(fontSize = 20.sp, fontWeight = FontWeight.SemiBold),
+                        color = colors.textPrimary)
+                    TextButton(onClick = onOpenClean, modifier = Modifier.testTag("home_view_all")) {
+                        Text(stringResource(R.string.home_view_all), color = colors.primary)
+                        Icon(Icons.AutoMirrored.Rounded.ArrowForward, null, Modifier.padding(start = 4.dp).size(14.dp), tint = colors.primary)
                     }
+                }
+                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    QuickAction(Icons.Outlined.CropFree, R.string.home_smart_scan, { dialogTitle = R.string.home_smart_scan }, Modifier.weight(1f))
+                    QuickAction(Icons.Outlined.ContentCopy, R.string.clean_tool_duplicates_title, { dialogTitle = R.string.clean_tool_duplicates_title }, Modifier.weight(1f))
+                    QuickAction(Icons.Outlined.Compress, R.string.home_compress, { dialogTitle = R.string.home_compress }, Modifier.weight(1f))
                 }
             }
-
-            // Real Device Storage Card
-            ClenovaSurfaceCard {
+            Column {
+                HorizontalDivider(color = colors.border.copy(alpha = .65f))
                 Row(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier.fillMaxWidth().clip(ClenovaShapes.tile)
+                        .clickable(onClick = onOpenGuard).testTag("home_memory_guard").padding(vertical = 15.dp),
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween,
+                    horizontalArrangement = Arrangement.spacedBy(13.dp),
                 ) {
-                    ClenovaSectionLabel(
-                        text = stringResource(R.string.home_storage_section_label),
-                    )
-                    IconButton(
-                        onClick = onRefreshStorage,
-                        modifier = Modifier
-                            .size(48.dp)
-                            .testTag("refresh_storage_button"),
-                    ) {
-                        Icon(
-                            imageVector = Icons.Outlined.Refresh,
-                            contentDescription = stringResource(R.string.cd_refresh_storage),
-                            tint = colors.textSecondary,
-                            modifier = Modifier.size(20.dp),
-                        )
+                    Icon(Icons.Outlined.VerifiedUser, null, Modifier.size(29.dp), tint = colors.success)
+                    Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(3.dp)) {
+                        Text(stringResource(R.string.guard_title), style = MaterialTheme.typography.titleMedium, color = colors.textPrimary)
+                        Text(stringResource(R.string.home_guard_status), style = MaterialTheme.typography.bodySmall, color = colors.textSecondary)
                     }
-                }
-
-                Spacer(modifier = Modifier.height(ClenovaSpacing.xs))
-
-                when (val storage = uiState.storageState) {
-                    StorageState.Loading -> {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(ClenovaSpacing.sm),
-                            modifier = Modifier.padding(vertical = ClenovaSpacing.sm),
-                        ) {
-                            CircularProgressIndicator(
-                                modifier = Modifier.size(18.dp),
-                                strokeWidth = 2.dp,
-                                color = colors.primary,
-                            )
-                            Text(
-                                text = stringResource(R.string.home_storage_loading),
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = colors.textSecondary,
-                            )
-                        }
-                    }
-
-                    is StorageState.Ready -> {
-                        val overview = storage.overview
-                        val animatedFraction by animateFloatAsState(
-                            targetValue = overview.usedFraction,
-                            animationSpec = ClenovaMotion.gentleSpring(),
-                            label = "storage_used_fraction",
-                        )
-
-                        Text(
-                            text = stringResource(
-                                R.string.home_storage_available_value,
-                                ByteFormatter.format(overview.availableBytes),
-                            ),
-                            style = MaterialTheme.typography.displaySmall,
-                            color = colors.textPrimary,
-                        )
-                        Spacer(modifier = Modifier.height(ClenovaSpacing.xxs))
-                        Text(
-                            text = stringResource(
-                                R.string.home_storage_used_of_total,
-                                ByteFormatter.format(overview.usedBytes),
-                                ByteFormatter.format(overview.totalBytes),
-                            ),
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = colors.textSecondary,
-                        )
-
-                        Spacer(modifier = Modifier.height(ClenovaSpacing.md))
-
-                        // Minimal Storage Progress Bar
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(8.dp)
-                                .clip(ClenovaShapes.pill)
-                                .background(colors.border),
-                        ) {
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxWidth(fraction = animatedFraction.coerceAtLeast(0.02f))
-                                    .height(8.dp)
-                                    .clip(ClenovaShapes.pill)
-                                    .background(colors.primary),
-                            )
-                        }
-                    }
-
-                    StorageState.Unavailable -> {
-                        Text(
-                            text = stringResource(R.string.home_storage_unavailable_title),
-                            style = MaterialTheme.typography.titleMedium,
-                            color = colors.textPrimary,
-                        )
-                        Spacer(modifier = Modifier.height(ClenovaSpacing.xxs))
-                        Text(
-                            text = stringResource(R.string.home_storage_unavailable_body),
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = colors.textSecondary,
-                        )
-                    }
+                    Icon(Icons.AutoMirrored.Rounded.ArrowForward, null, Modifier.size(18.dp), tint = colors.textSecondary)
                 }
             }
-
-            // Honest Autopilot Agent Status Card (Not configured / inactive)
-            ClenovaSurfaceCard(
-                containerColor = colors.surfaceElevated,
-            ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                ) {
-                    ClenovaSectionLabel(
-                        text = stringResource(R.string.home_agent_section_label),
-                    )
-                    ClenovaStatusBadge(
-                        label = stringResource(R.string.home_status_not_configured),
-                        containerColor = colors.surface,
-                        contentColor = colors.textSecondary,
-                        dotColor = colors.textSecondary,
-                    )
-                }
-
-                Spacer(modifier = Modifier.height(ClenovaSpacing.md))
-
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(ClenovaSpacing.md),
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .size(44.dp)
-                            .clip(CircleShape)
-                            .background(colors.softBlue),
-                        contentAlignment = Alignment.Center,
-                    ) {
-                        ClenovaOrbitalIcon(
-                            tint = colors.primary,
-                            size = 24.dp,
-                        )
-                    }
-                    Text(
-                        text = stringResource(R.string.home_agent_inactive_title),
-                        style = MaterialTheme.typography.titleLarge,
-                        color = colors.textPrimary,
-                    )
-                }
-
-                Spacer(modifier = Modifier.height(ClenovaSpacing.sm))
-
-                Text(
-                    text = stringResource(R.string.home_agent_inactive_body),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = colors.textSecondary,
-                )
-
-                Spacer(modifier = Modifier.height(ClenovaSpacing.lg))
-
-                Button(
-                    onClick = onOpenAgent,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(50.dp)
-                        .testTag("open_agent_workspace_button"),
-                    shape = ClenovaShapes.pill,
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = colors.primary,
-                        contentColor = colors.onPrimary,
-                    ),
-                    contentPadding = PaddingValues(horizontal = ClenovaSpacing.lg),
-                ) {
-                    Text(
-                        text = stringResource(R.string.home_agent_open_workspace),
-                        style = MaterialTheme.typography.labelLarge,
-                    )
-                    Spacer(modifier = Modifier.width(ClenovaSpacing.xs))
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Rounded.ArrowForward,
-                        contentDescription = null,
-                        modifier = Modifier.size(18.dp),
-                    )
-                }
-            }
-
-            Text(
-                text = stringResource(R.string.home_foundation_note),
-                style = MaterialTheme.typography.bodySmall,
-                color = colors.textSecondary,
-                modifier = Modifier.padding(horizontal = ClenovaSpacing.xxs),
-            )
         }
+    }
+
+    dialogTitle?.let { title ->
+        AlertDialog(
+            onDismissRequest = { dialogTitle = null },
+            title = { Text(stringResource(title)) },
+            text = { Text(stringResource(if (title == R.string.home_pro) R.string.home_pro_unavailable else R.string.home_tool_unavailable)) },
+            confirmButton = { TextButton(onClick = { dialogTitle = null; if (title != R.string.home_pro) onOpenClean() }) {
+                Text(stringResource(if (title == R.string.home_pro) android.R.string.ok else R.string.home_view_all))
+            } },
+            dismissButton = { if (title != R.string.home_pro) TextButton(onClick = { dialogTitle = null }) { Text(stringResource(android.R.string.cancel)) } },
+        )
+    }
+}
+
+@Composable
+private fun BrandHeader(onOpenSettings: () -> Unit, onOpenPro: () -> Unit) {
+    val colors = ClenovaThemeTokens.colors
+    Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+        Image(painterResource(R.drawable.clenova_brand_logo), contentDescription = null,
+            modifier = Modifier.size(42.dp).clip(RoundedCornerShape(13.dp)))
+        Spacer(Modifier.width(10.dp))
+        Column(Modifier.weight(1f)) {
+            Text(stringResource(R.string.home_brand), color = colors.textPrimary,
+                style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold, letterSpacing = (-1).sp),
+                maxLines = 1, overflow = TextOverflow.Ellipsis)
+            Text(stringResource(R.string.app_tagline), color = colors.textSecondary,
+                style = MaterialTheme.typography.bodySmall.copy(fontSize = 10.sp, lineHeight = 14.sp),
+                maxLines = 1, overflow = TextOverflow.Ellipsis)
+        }
+        TextButton(onClick = onOpenPro, modifier = Modifier.heightIn(min = 48.dp),
+            contentPadding = PaddingValues(horizontal = 4.dp)) {
+            Text(stringResource(R.string.home_pro), modifier = Modifier.clip(ClenovaShapes.pill)
+                .background(colors.softBlue).padding(horizontal = 10.dp, vertical = 7.dp),
+                color = colors.primary, style = MaterialTheme.typography.labelMedium)
+        }
+        IconButton(onClick = onOpenSettings, modifier = Modifier.testTag("settings_button")) {
+            Icon(Icons.Outlined.Settings, stringResource(R.string.cd_settings_button), Modifier.size(24.dp), tint = colors.textPrimary)
+        }
+    }
+}
+
+@Composable
+private fun StorageOverviewSection(state: StorageState, onRefresh: () -> Unit) {
+    val colors = ClenovaThemeTokens.colors
+    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+            Text(stringResource(R.string.home_available_storage), Modifier.weight(1f),
+                style = MaterialTheme.typography.bodyMedium, color = colors.textSecondary)
+            IconButton(onClick = onRefresh, modifier = Modifier.size(48.dp).testTag("refresh_storage_button")) {
+                Icon(Icons.Outlined.Refresh, stringResource(R.string.cd_refresh_storage), Modifier.size(21.dp), tint = colors.textSecondary)
+            }
+        }
+        when (state) {
+            StorageState.Loading -> Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                CircularProgressIndicator(Modifier.size(20.dp), strokeWidth = 2.dp, color = colors.primary)
+                Text(stringResource(R.string.home_storage_loading), color = colors.textSecondary)
+            }
+            StorageState.Unavailable -> {
+                Text(stringResource(R.string.home_storage_unavailable_title), style = MaterialTheme.typography.titleMedium, color = colors.textPrimary)
+                Text(stringResource(R.string.home_storage_unavailable_body), style = MaterialTheme.typography.bodySmall, color = colors.textSecondary)
+            }
+            is StorageState.Ready -> {
+                val overview = state.overview
+                val formatted = ByteFormatter.format(overview.availableBytes)
+                val usedFraction by animateFloatAsState(overview.usedFraction, ClenovaMotion.gentleSpring(), label = "storage_fraction")
+                Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.Bottom, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                    Text(formatted, Modifier.weight(1f).testTag("home_storage_value"),
+                        style = MaterialTheme.typography.displayLarge.copy(fontSize = 48.sp, lineHeight = 54.sp, letterSpacing = (-2).sp, fontWeight = FontWeight.SemiBold),
+                        color = colors.textPrimary, maxLines = 2)
+                    Column(horizontalAlignment = Alignment.End, modifier = Modifier.padding(bottom = 5.dp)) {
+                        Text(stringResource(R.string.home_capacity), style = MaterialTheme.typography.bodySmall, color = colors.textSecondary)
+                        Text(ByteFormatter.format(overview.totalBytes), style = MaterialTheme.typography.titleMedium, color = colors.textPrimary)
+                    }
+                }
+                Box(Modifier.fillMaxWidth().height(10.dp).clip(ClenovaShapes.pill).background(colors.border)
+                    .semantics { progressBarRangeInfo = ProgressBarRangeInfo(overview.usedFraction, 0f..1f) }) {
+                    if (usedFraction > 0f) Box(Modifier.fillMaxWidth(usedFraction.coerceIn(0f, 1f)).fillMaxHeight()
+                        .clip(ClenovaShapes.pill).background(colors.primary))
+                }
+                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                    Text(stringResource(R.string.home_used_value, ByteFormatter.format(overview.usedBytes)), style = MaterialTheme.typography.bodySmall, color = colors.textSecondary)
+                    Text(stringResource(R.string.home_available_percent, ((1f - overview.usedFraction) * 100).roundToInt()), style = MaterialTheme.typography.bodySmall, color = colors.textSecondary)
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun AutopilotPanel(status: AutopilotStatus, onOpenAgent: () -> Unit) {
+    val colors = ClenovaThemeTokens.colors
+    val awaiting = status == AutopilotStatus.AwaitingApproval
+    val statusLabel = when (status) {
+        AutopilotStatus.NotConfigured -> R.string.home_auto_off
+        AutopilotStatus.Paused -> R.string.home_auto_paused
+        AutopilotStatus.AwaitingApproval -> R.string.home_auto_pending
+    }
+    Surface(shape = RoundedCornerShape(28.dp), color = colors.surface, modifier = Modifier.fillMaxWidth()) {
+        Column(Modifier.padding(19.dp), verticalArrangement = Arrangement.spacedBy(13.dp)) {
+            Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                    Text(stringResource(R.string.home_autopilot), style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.SemiBold), color = colors.textPrimary)
+                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                        Box(Modifier.size(7.dp).clip(ClenovaShapes.pill).background(if (awaiting) colors.primary else colors.textSecondary))
+                        Text(stringResource(statusLabel), style = MaterialTheme.typography.labelMedium, color = colors.textSecondary)
+                    }
+                }
+                // The workspace owns activation; a tap must not claim monitoring has started.
+                Switch(checked = awaiting, onCheckedChange = { onOpenAgent() },
+                    modifier = Modifier.testTag("home_autopilot_switch"))
+            }
+            HorizontalDivider(color = colors.border)
+            Text(stringResource(if (awaiting) R.string.home_auto_review_title else R.string.home_auto_title),
+                style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.SemiBold, letterSpacing = (-.6).sp),
+                color = colors.textPrimary)
+            Text(stringResource(if (awaiting) R.string.home_auto_review_body else R.string.home_auto_body),
+                style = MaterialTheme.typography.bodySmall, color = colors.textSecondary)
+            Button(onClick = onOpenAgent, modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp).testTag("open_agent_workspace_button"),
+                shape = ClenovaShapes.pill, colors = ButtonDefaults.buttonColors(containerColor = colors.primary, contentColor = colors.onPrimary)) {
+                Text(stringResource(if (awaiting) R.string.home_auto_review else R.string.home_auto_setup), Modifier.weight(1f),
+                    style = MaterialTheme.typography.labelLarge, textAlign = androidx.compose.ui.text.style.TextAlign.Center)
+                Icon(Icons.AutoMirrored.Rounded.ArrowForward, null, Modifier.size(18.dp))
+            }
+        }
+    }
+}
+
+@Composable
+private fun QuickAction(icon: ImageVector, label: Int, onClick: () -> Unit, modifier: Modifier = Modifier) {
+    val colors = ClenovaThemeTokens.colors
+    Column(modifier.clip(ClenovaShapes.tile).clickable(onClick = onClick).padding(vertical = 5.dp),
+        horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(9.dp)) {
+        Box(Modifier.size(58.dp).clip(RoundedCornerShape(19.dp)).background(colors.softBlue), contentAlignment = Alignment.Center) {
+            Icon(icon, null, Modifier.size(28.dp), tint = colors.primary)
+        }
+        Text(stringResource(label), style = MaterialTheme.typography.labelMedium, color = colors.textPrimary,
+            maxLines = 2, textAlign = androidx.compose.ui.text.style.TextAlign.Center)
     }
 }

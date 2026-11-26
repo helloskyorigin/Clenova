@@ -83,6 +83,8 @@ fun ClenovaNavHost(
                     onSelectionHaptic()
                     navController.navigateTopLevel(ClenovaRoute.Agent)
                 },
+                onOpenClean = { onSelectionHaptic(); navController.navigateTopLevel(ClenovaRoute.Clean) },
+                onOpenGuard = { onSelectionHaptic(); navController.navigateTopLevel(ClenovaRoute.Guard) },
                 onOpenSettings = {
                     onSelectionHaptic()
                     navController.navigate(ClenovaRoute.Settings) {
