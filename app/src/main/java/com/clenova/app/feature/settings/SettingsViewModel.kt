@@ -10,6 +10,9 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 
 class SettingsViewModel(
     private val preferencesRepository: PreferencesRepository,
@@ -22,16 +25,29 @@ class SettingsViewModel(
             initialValue = UserPreferences(),
         )
 
-    fun updateTheme(preference: ThemePreference) {
+    private val _saveFailed = MutableStateFlow(false)
+    val saveFailed = _saveFailed.asStateFlow()
+
+    fun dismissSaveError() { _saveFailed.value = false }
+
+    private fun write(action: suspend () -> Unit) {
         viewModelScope.launch {
-            preferencesRepository.setThemePreference(preference)
+            try {
+                action()
+            } catch (e: CancellationException) {
+                throw e
+            } catch (_: Exception) {
+                _saveFailed.value = true
+            }
         }
     }
 
+    fun updateTheme(preference: ThemePreference) {
+        write { preferencesRepository.setThemePreference(preference) }
+    }
+
     fun updateHapticsEnabled(enabled: Boolean) {
-        viewModelScope.launch {
-            preferencesRepository.setHapticsEnabled(enabled)
-        }
+        write { preferencesRepository.setHapticsEnabled(enabled) }
     }
 
     class Factory(

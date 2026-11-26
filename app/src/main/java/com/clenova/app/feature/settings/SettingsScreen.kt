@@ -1,15 +1,8 @@
 package com.clenova.app.feature.settings
 
-import android.content.Intent
-import android.net.Uri
-import android.provider.Settings
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
 import androidx.activity.compose.BackHandler
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleEventObserver
-import androidx.lifecycle.compose.LocalLifecycleOwner
-import android.os.Build
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -19,6 +12,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
+import androidx.compose.material.icons.automirrored.outlined.ChevronRight
 import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -55,7 +49,8 @@ fun SettingsScreen(
     onNavigateBack: () -> Unit,
     onOpenAutopilot: () -> Unit,
     onResetPreferences: suspend () -> Unit,
-    showUnfinishedRows: Boolean = false,
+    saveFailed: Boolean = false,
+    onDismissSaveError: () -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
     val colors = ClenovaThemeTokens.colors
@@ -233,6 +228,9 @@ fun SettingsScreen(
             title = { Text(stringResource(result)) },
             confirmButton = { TextButton(onClick = { resetResult = null }, modifier = Modifier.testTag("settings_reset_done")) { Text(stringResource(android.R.string.ok)) } })
     }
+    if (saveFailed) AlertDialog(onDismissRequest = onDismissSaveError,
+        title = { Text(stringResource(R.string.auto_save_failed)) },
+        confirmButton = { TextButton(onClick = onDismissSaveError) { Text(stringResource(android.R.string.ok)) } })
     if (languageFailed) AlertDialog(onDismissRequest = { languageFailed = false },
         title = { Text(stringResource(R.string.settings_language_failed)) },
         confirmButton = { TextButton(onClick = { languageFailed = false }) { Text(stringResource(android.R.string.ok)) } })
@@ -266,7 +264,7 @@ private fun SettingsRow(icon: ImageVector, title: Int, value: String? = null, dr
         Icon(icon, null, Modifier.size(22.dp), tint = tint)
         Text(stringResource(title), Modifier.weight(1f), color = tint, style = MaterialTheme.typography.bodyLarge)
         if (value != null) Text(value, color = colors.textSecondary, style = MaterialTheme.typography.bodySmall)
-        Icon(if (dropdown) Icons.Outlined.KeyboardArrowDown else Icons.Outlined.ChevronRight, null,
+        Icon(if (dropdown) Icons.Outlined.KeyboardArrowDown else Icons.AutoMirrored.Outlined.ChevronRight, null,
             Modifier.size(19.dp), tint = colors.textSecondary)
     }
 }

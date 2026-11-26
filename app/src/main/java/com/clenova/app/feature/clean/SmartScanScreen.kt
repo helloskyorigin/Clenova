@@ -69,7 +69,7 @@ fun SmartScanScreen(
     var approvedMask by rememberSaveable { mutableIntStateOf(0) }
     var cancelPrompt by rememberSaveable { mutableStateOf(false) }
     val scanning = preview && progress < 100
-    LaunchedEffect(preview, cancelPrompt) {
+    LaunchedEffect(scanning, cancelPrompt) {
         if (preview && !cancelPrompt) {
             while (progress < 100) {
                 delay(42)

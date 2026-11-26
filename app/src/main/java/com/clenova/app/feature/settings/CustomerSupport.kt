@@ -6,6 +6,7 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Build
+import android.os.PersistableBundle
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -35,7 +36,13 @@ internal object SupportMail {
     )
     fun copy(context: Context, text: String): Boolean = runCatching {
         val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-        clipboard.setPrimaryClip(ClipData.newPlainText("Clenova", text))
+        val clip = ClipData.newPlainText("Clenova", text)
+        if (Build.VERSION.SDK_INT >= 24) {
+            clip.description.extras = PersistableBundle().apply {
+                putBoolean("android.content.extra.IS_SENSITIVE", true)
+            }
+        }
+        clipboard.setPrimaryClip(clip)
     }.isSuccess
 }
 
@@ -97,7 +104,7 @@ internal fun SupportComposeDialog(kind: String, onDismiss: () -> Unit) {
         "suggest" -> R.string.settings_suggest_subject
         else -> R.string.settings_support_subject
     })
-    var message by rememberSaveable(kind) { mutableStateOf("") }
+    var message by remember(kind) { mutableStateOf("") }
     var includeDetails by rememberSaveable(kind) { mutableStateOf(false) }
     var failed by rememberSaveable(kind) { mutableStateOf(false) }
     var copied by rememberSaveable(kind) { mutableStateOf(false) }

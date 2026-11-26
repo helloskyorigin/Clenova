@@ -25,6 +25,8 @@ import com.google.android.gms.oss.licenses.v2.OssLicensesMenuActivity
 internal fun LegalAboutDialog(kind: String, onDismiss: () -> Unit, onContact: () -> Unit) {
     val colors = ClenovaThemeTokens.colors
     val context = LocalContext.current
+    val colorScheme = MaterialTheme.colorScheme
+    val typography = MaterialTheme.typography
     var fontExpanded by rememberSaveable(kind) { mutableStateOf(false) }
     var failed by rememberSaveable(kind) { mutableStateOf(false) }
     val title = when (kind) {
@@ -64,6 +66,7 @@ internal fun LegalAboutDialog(kind: String, onDismiss: () -> Unit, onContact: ()
                         Text(stringResource(R.string.legal_licenses_intro))
                         OutlinedButton(onClick = {
                             failed = runCatching {
+                                OssLicensesMenuActivity.setTheme(colorScheme, colorScheme, typography)
                                 OssLicensesMenuActivity.setActivityTitle(context.getString(R.string.settings_licenses))
                                 context.startActivity(Intent(context, OssLicensesMenuActivity::class.java))
                             }.isFailure

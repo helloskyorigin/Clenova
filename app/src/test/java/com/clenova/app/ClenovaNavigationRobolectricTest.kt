@@ -1,6 +1,7 @@
 package com.clenova.app
 
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
@@ -275,6 +276,29 @@ class ClenovaNavigationRobolectricTest {
         composeTestRule.onNodeWithTag("settings_reset_done").performClick()
         composeTestRule.onNodeWithTag("settings_appearance").performScrollTo().assertIsDisplayed()
         composeTestRule.onNodeWithText("Light").assertIsDisplayed()
+    }
+
+    @Test
+    fun `support and legal rows open actual content`() {
+        composeTestRule.setContent { ClenovaApp(storageRepository = FakeStorageRepository(), preferencesRepository = FakePreferencesRepository()) }
+        composeTestRule.waitForIdle()
+        composeTestRule.onNodeWithTag("settings_button").performClick()
+        composeTestRule.waitForIdle()
+        composeTestRule.onNodeWithTag("settings_help").performScrollTo().performClick()
+        composeTestRule.onNodeWithTag("help_search").assertIsDisplayed()
+        composeTestRule.onNodeWithTag("help_contact").performClick()
+        composeTestRule.onNodeWithTag("support_message").assertIsDisplayed()
+        composeTestRule.onNodeWithTag("support_open_email").assertIsNotEnabled()
+        composeTestRule.onNodeWithText("Cancel", ignoreCase = true).performClick()
+        composeTestRule.onNodeWithTag("settings_policy").performScrollTo().performClick()
+        composeTestRule.onNodeWithTag("legal_done").performClick()
+        composeTestRule.onNodeWithTag("settings_terms").performScrollTo().performClick()
+        composeTestRule.onNodeWithTag("legal_done").performClick()
+        composeTestRule.onNodeWithTag("settings_licenses").performScrollTo().performClick()
+        composeTestRule.onNodeWithTag("licenses_dependencies").performScrollTo().assertIsDisplayed()
+        composeTestRule.onNodeWithTag("legal_done").performClick()
+        composeTestRule.onNodeWithTag("settings_about").performScrollTo().performClick()
+        composeTestRule.onNodeWithTag("legal_done").performClick()
     }
 
     @Test

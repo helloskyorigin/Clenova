@@ -273,7 +273,8 @@ fun ClenovaNavHost(
             val preferences = viewModel.preferences.collectAsStateWithLifecycle().value
             SettingsScreen(
                 preferences = preferences,
-                showUnfinishedRows = showSampleHome,
+                saveFailed = viewModel.saveFailed.collectAsStateWithLifecycle().value,
+                onDismissSaveError = viewModel::dismissSaveError,
                 onOpenAutopilot = { onSelectionHaptic(); navController.navigate(ClenovaRoute.AutopilotSetup) { launchSingleTop = true } },
                 onResetPreferences = { preferencesRepository.resetPreferences() },
                 onSelectTheme = { theme ->
