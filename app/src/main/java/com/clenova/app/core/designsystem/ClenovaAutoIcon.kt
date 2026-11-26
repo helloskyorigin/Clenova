@@ -18,10 +18,10 @@ fun ClenovaAutoIcon(tint: Color, size: Dp) {
     Canvas(Modifier.size(size)) {
         scale(this.size.width / 28f, this.size.height / 28f, pivot = androidx.compose.ui.geometry.Offset.Zero) {
             val path = Path().apply {
-                moveTo(2f, 5f); lineTo(8f, 5f); quadraticTo(14f, 5f, 14f, 11f)
-                lineTo(14f, 17f); quadraticTo(14f, 23f, 20f, 23f); lineTo(26f, 23f)
+                moveTo(2f, 5f); lineTo(8f, 5f); quadraticBezierTo(14f, 5f, 14f, 11f)
+                lineTo(14f, 17f); quadraticBezierTo(14f, 23f, 20f, 23f); lineTo(26f, 23f)
                 moveTo(21f, 18f); lineTo(26f, 23f); lineTo(21f, 28f)
-                moveTo(2f, 23f); lineTo(8f, 23f); quadraticTo(10f, 23f, 11f, 21f)
+                moveTo(2f, 23f); lineTo(8f, 23f); quadraticBezierTo(10f, 23f, 11f, 21f)
                 moveTo(20f, 5f); lineTo(26f, 5f)
                 moveTo(21f, 0f); lineTo(26f, 5f); lineTo(21f, 10f)
             }

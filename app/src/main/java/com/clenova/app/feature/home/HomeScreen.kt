@@ -29,6 +29,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.ProgressBarRangeInfo
 import androidx.compose.ui.semantics.progressBarRangeInfo
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -67,10 +70,12 @@ fun HomeScreen(
                 .padding(horizontal = 24.dp)
                 .padding(top = 24.dp, bottom = ClenovaSpacing.floatingNavBottomClearance)
                 .navigationBarsPadding(),
-            verticalArrangement = Arrangement.spacedBy(26.dp),
+            verticalArrangement = Arrangement.spacedBy(22.dp),
         ) {
-            BrandHeader(onOpenSettings = onOpenSettings, onOpenPro = { dialogTitle = R.string.home_pro })
-            HorizontalDivider(color = colors.border.copy(alpha = .65f))
+            Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                BrandHeader(onOpenSettings = onOpenSettings, onOpenPro = { dialogTitle = R.string.home_pro })
+                HorizontalDivider(color = colors.border.copy(alpha = .65f))
+            }
             StorageOverviewSection(uiState.storageState, onRefreshStorage)
             AutopilotPanel(uiState.autopilotStatus, onOpenAgent)
             Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
@@ -151,7 +156,7 @@ private fun BrandHeader(onOpenSettings: () -> Unit, onOpenPro: () -> Unit) {
 @Composable
 private fun StorageOverviewSection(state: StorageState, onRefresh: () -> Unit) {
     val colors = ClenovaThemeTokens.colors
-    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
         Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
             Text(stringResource(R.string.home_available_storage), Modifier.weight(1f),
                 style = MaterialTheme.typography.bodyMedium, color = colors.textSecondary)
@@ -173,8 +178,13 @@ private fun StorageOverviewSection(state: StorageState, onRefresh: () -> Unit) {
                 val formatted = ByteFormatter.format(overview.availableBytes)
                 val usedFraction by animateFloatAsState(overview.usedFraction, ClenovaMotion.gentleSpring(), label = "storage_fraction")
                 Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.Bottom, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                    Text(formatted, Modifier.weight(1f).testTag("home_storage_value"),
-                        style = MaterialTheme.typography.displayLarge.copy(fontSize = 48.sp, lineHeight = 54.sp, letterSpacing = (-2).sp, fontWeight = FontWeight.SemiBold),
+                    Text(buildAnnotatedString {
+                        append(formatted.substringBeforeLast(" "))
+                        withStyle(SpanStyle(fontSize = 24.sp, fontWeight = FontWeight.Normal, color = colors.textSecondary, letterSpacing = 0.sp)) {
+                            append(" " + formatted.substringAfterLast(" "))
+                        }
+                    }, Modifier.weight(1f).testTag("home_storage_value"),
+                        style = MaterialTheme.typography.displayLarge.copy(fontSize = 56.sp, lineHeight = 62.sp, letterSpacing = (-2.5).sp, fontWeight = FontWeight.SemiBold),
                         color = colors.textPrimary, maxLines = 2)
                     Column(horizontalAlignment = Alignment.End, modifier = Modifier.padding(bottom = 5.dp)) {
                         Text(stringResource(R.string.home_capacity), style = MaterialTheme.typography.bodySmall, color = colors.textSecondary)
