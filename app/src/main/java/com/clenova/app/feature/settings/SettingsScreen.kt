@@ -45,7 +45,7 @@ import com.clenova.app.domain.model.UserPreferences
 import com.example.BuildConfig
 import com.example.R
 
-private const val SUPPORT_EMAIL = "hello.skyorigin@gmail.com"
+internal const val SUPPORT_EMAIL = "hello.skyorigin@gmail.com"
 
 @Composable
 fun SettingsScreen(
@@ -79,10 +79,6 @@ fun SettingsScreen(
         ThemePreference.LIGHT -> R.string.settings_theme_light
         ThemePreference.DARK -> R.string.settings_theme_dark
         ThemePreference.SYSTEM -> R.string.settings_theme_system
-    }
-    fun email(subject: String, body: String = "") {
-        val uri = Uri.parse("mailto:" + SUPPORT_EMAIL + "?subject=" + Uri.encode(subject) + "&body=" + Uri.encode(body))
-        actionFailed = runCatching { context.startActivity(Intent(Intent.ACTION_SENDTO, uri)) }.isFailure
     }
 
     Box(modifier.fillMaxSize().background(colors.background).windowInsetsPadding(WindowInsets.displayCutout)
@@ -176,18 +172,10 @@ fun SettingsScreen(
                 SettingsRow(Icons.Outlined.Refresh, R.string.settings_reset, tag = "settings_reset", onClick = { detail = "reset" })
             }
             SettingsSection(R.string.settings_support) {
-                if (showPlanned) SettingsRow(Icons.Outlined.HelpOutline, R.string.settings_help)
-                SettingsRow(Icons.Outlined.Email, R.string.settings_contact, onClick = { email(context.getString(R.string.settings_support_subject)) })
-                SettingsRow(Icons.Outlined.BugReport, R.string.settings_report, onClick = {
-                    email(context.getString(R.string.settings_report_subject), listOf(
-                        context.getString(R.string.settings_report_intro),
-                        "",
-                        context.getString(R.string.settings_version_short, BuildConfig.VERSION_NAME),
-                        context.getString(R.string.settings_report_android, Build.VERSION.RELEASE),
-                        context.getString(R.string.settings_report_device, Build.MANUFACTURER + " " + Build.MODEL),
-                    ).joinToString("\n"))
-                })
-                SettingsRow(Icons.Outlined.ChatBubbleOutline, R.string.settings_suggest, onClick = { email(context.getString(R.string.settings_suggest_subject)) })
+                SettingsRow(Icons.Outlined.HelpOutline, R.string.settings_help, tag = "settings_help", onClick = { detail = "help" })
+                SettingsRow(Icons.Outlined.Email, R.string.settings_contact, tag = "settings_contact", onClick = { detail = "contact" })
+                SettingsRow(Icons.Outlined.BugReport, R.string.settings_report, tag = "settings_report", onClick = { detail = "report" })
+                SettingsRow(Icons.Outlined.ChatBubbleOutline, R.string.settings_suggest, tag = "settings_suggest", onClick = { detail = "suggest" })
             }
             if (showPlanned) SettingsSection(R.string.settings_about_section) {
                 SettingsRow(Icons.Outlined.Description, R.string.settings_policy)
@@ -201,11 +189,13 @@ fun SettingsScreen(
                 Text(stringResource(R.string.settings_by), color = colors.textSecondary, style = MaterialTheme.typography.bodySmall)
                 Text("SKYORIGIN", color = colors.textPrimary, style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold, letterSpacing = 3.sp))
                 Text(SUPPORT_EMAIL, color = colors.textSecondary, style = MaterialTheme.typography.bodySmall,
-                    modifier = Modifier.clip(ClenovaShapes.tile).clickable { email(context.getString(R.string.settings_support_subject)) }.padding(4.dp))
+                    modifier = Modifier.clip(ClenovaShapes.tile).clickable { detail = "contact" }.padding(4.dp))
                 Text(stringResource(R.string.settings_copyright), color = colors.textSecondary, style = MaterialTheme.typography.labelSmall)
             }
         }
     }
+    if (detail == "help") HelpCenterDialog(onDismiss = { detail = "" }, onContact = { detail = "contact" })
+    if (detail in listOf("contact", "report", "suggest")) SupportComposeDialog(kind = detail, onDismiss = { detail = "" })
     if (detail == "permissions") PermissionsDialog(onDismiss = { detail = "" })
     if (detail == "privacy") DataPrivacyDialog(onDismiss = { detail = "" })
     if (detail == "reset") AlertDialog(

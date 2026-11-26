@@ -312,4 +312,16 @@
     <string name="privacy_files_body">This build reads device storage totals. Media scanning, file protection and deletion engines are not yet connected. No personal media is uploaded by Clenova.</string>
     <string name="privacy_support_title">Support messages</string>
     <string name="privacy_support_body">Contact and problem reports open your email app. You decide whether to send the message and can edit or remove diagnostic details before sending.</string>
+    <string name="support_faq_storage">How is storage measured?</string>
+    <string name="support_faq_storage_body">Clenova reads the device storage totals. Detailed media categories and cleaning require a supported scanning engine.</string>
+    <string name="support_faq_auto_body">Set a free space goal and check frequency in Autopilot preferences. Background monitoring is not yet available.</string>
+    <string name="support_faq_language_body">Open Language in Settings, search or select your language. Choose Device language to follow Android.</string>
+    <string name="support_search">Search help</string>
+    <string name="support_no_results">No matching articles</string>
+    <string name="support_message">Your message</string>
+    <string name="support_include_details">Include app version, Android version and device model</string>
+    <string name="support_open_email">Open email</string>
+    <string name="support_copy">Copy message</string>
+    <string name="support_copied">Message copied</string>
+    <string name="support_email_unavailable">Unable to open email. Copy your message and send it using your preferred email service.</string>
 </resources>
