@@ -309,7 +309,7 @@
     <string name="privacy_local_title">Local preferences</string>
     <string name="privacy_local_body">Theme, haptics, Autopilot preferences and language are stored on your device. No account is required.</string>
     <string name="privacy_files_title">Personal files</string>
-    <string name="privacy_files_body">Clenova scans accessible photos and videos on your device with your permission. Duplicate copies can be moved to Android Trash with your approval. Memory Guard rules are not yet connected. No personal media is uploaded by Clenova. Similar photos can also be reviewed and moved to Trash with your approval. Screenshots can also be reviewed and moved to Android Trash with your approval. Large photos and videos can be moved to Android Trash with your approval. Photos can also be reviewed with Swipe Clean and moved to Android Trash with your approval.</string>
+    <string name="privacy_files_body">Clenova scans accessible photos and videos on your device with your permission. Duplicate copies can be moved to Android Trash with your approval. Memory Guard rules are not yet connected. No personal media is uploaded by Clenova. Similar photos can also be reviewed and moved to Trash with your approval. Screenshots can also be reviewed and moved to Android Trash with your approval. Large photos and videos can be moved to Android Trash with your approval. Photos can also be reviewed with Swipe Clean and moved to Android Trash with your approval. Videos can be compressed locally and saved as separate copies.</string>
     <string name="privacy_support_title">Support messages</string>
     <string name="privacy_support_body">Contact and problem reports open your email app. You decide whether to send the message and can edit or remove diagnostic details before sending.</string>
     <string name="support_faq_storage">How is storage measured?</string>
@@ -377,4 +377,17 @@
     <string name="swipe_undo">Undo</string>
     <string name="swipe_finished">All accessible photos reviewed</string>
     <string name="swipe_preview_unavailable">Photo preview unavailable or loading</string>
+    <string name="compress_real_pick">Choose video</string>
+    <string name="compress_real_unsupported">Saving compressed videos requires Android 10 or later.</string>
+    <string name="compress_real_running">Compressing video</string>
+    <string name="compress_real_saved">Compressed copy saved</string>
+    <string name="compress_real_ready">Compression complete</string>
+    <string name="compress_real_output">Output · %1$s</string>
+    <string name="compress_real_not_smaller">The output is not smaller. Try a lower quality.</string>
+    <string name="compress_real_reduction">Size reduction · %1$s</string>
+    <string name="compress_real_error">Could not read, encode, save or open the video. Try again.</string>
+    <string name="compress_real_space_note">Saving a copy uses extra space. The original is not removed.</string>
+    <string name="compress_real_open">Open video</string>
+    <string name="compress_real_start">Compress video</string>
+    <string name="compress_real_save">Save compressed copy</string>
 </resources>

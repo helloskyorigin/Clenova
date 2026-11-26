@@ -276,7 +276,7 @@
     <string name="privacy_local_title">Локальные настройки</string>
     <string name="privacy_local_body">Тема, тактильный отклик, настройки Autopilot и язык хранятся на устройстве. Аккаунт не нужен.</string>
     <string name="privacy_files_title">Личные файлы</string>
-    <string name="privacy_files_body">Clenova с разрешения сканирует доступные фото и видео на устройстве. Дубликаты можно перенести в корзину Android с вашего согласия. Memory Guard пока не подключён. Личные медиа не загружаются. Похожие фото также можно переместить в корзину с вашего согласия. Снимки экрана также можно переместить в корзину Android с вашего согласия. Крупные фото и видео можно переместить в корзину Android с вашего согласия. Фото также можно просматривать свайпами и перемещать в корзину Android с вашего согласия.</string>
+    <string name="privacy_files_body">Clenova с разрешения сканирует доступные фото и видео на устройстве. Дубликаты можно перенести в корзину Android с вашего согласия. Memory Guard пока не подключён. Личные медиа не загружаются. Похожие фото также можно переместить в корзину с вашего согласия. Снимки экрана также можно переместить в корзину Android с вашего согласия. Крупные фото и видео можно переместить в корзину Android с вашего согласия. Фото также можно просматривать свайпами и перемещать в корзину Android с вашего согласия. Видео можно сжимать локально и сохранять отдельными копиями.</string>
     <string name="privacy_support_title">Сообщения в поддержку</string>
     <string name="privacy_support_body">Связь и отчёты открывают почтовое приложение. Вы решаете, отправлять ли письмо, и можете изменить или удалить диагностические данные перед отправкой.</string>
     <string name="support_faq_storage">Как измеряется объём хранилища?</string>
@@ -344,4 +344,17 @@
     <string name="swipe_undo">Отменить</string>
     <string name="swipe_finished">Все доступные фото просмотрены</string>
     <string name="swipe_preview_unavailable">Предпросмотр недоступен или загружается</string>
+    <string name="compress_real_pick">Выбрать видео</string>
+    <string name="compress_real_unsupported">Для сохранения сжатых видео нужен Android 10 или новее.</string>
+    <string name="compress_real_running">Сжатие видео</string>
+    <string name="compress_real_saved">Сжатая копия сохранена</string>
+    <string name="compress_real_ready">Сжатие завершено</string>
+    <string name="compress_real_output">Результат · %1$s</string>
+    <string name="compress_real_not_smaller">Размер не уменьшился. Попробуйте более низкое качество.</string>
+    <string name="compress_real_reduction">Уменьшение размера · %1$s</string>
+    <string name="compress_real_error">Не удалось прочитать, сжать, сохранить или открыть видео. Попробуйте снова.</string>
+    <string name="compress_real_space_note">Копия занимает дополнительное место. Оригинал не удаляется.</string>
+    <string name="compress_real_open">Открыть видео</string>
+    <string name="compress_real_start">Сжать видео</string>
+    <string name="compress_real_save">Сохранить сжатую копию</string>
 </resources>

@@ -276,7 +276,7 @@
     <string name="privacy_local_title">Preferencias locales</string>
     <string name="privacy_local_body">El tema, la respuesta háptica, las preferencias de Autopilot y el idioma se guardan en tu dispositivo. No necesitas cuenta.</string>
     <string name="privacy_files_title">Archivos personales</string>
-    <string name="privacy_files_body">Clenova escanea fotos y vídeos accesibles con tu permiso. Las copias duplicadas pueden ir a la papelera de Android con tu aprobación. Memory Guard aún no está conectado. No sube medios personales. También puedes revisar y enviar fotos similares a la papelera con tu aprobación. Las capturas también pueden revisarse y enviarse a la papelera de Android con tu aprobación. Las fotos y vídeos grandes pueden enviarse a la papelera de Android con tu aprobación. También puedes revisar fotos deslizando y enviarlas a la papelera de Android con tu aprobación.</string>
+    <string name="privacy_files_body">Clenova escanea fotos y vídeos accesibles con tu permiso. Las copias duplicadas pueden ir a la papelera de Android con tu aprobación. Memory Guard aún no está conectado. No sube medios personales. También puedes revisar y enviar fotos similares a la papelera con tu aprobación. Las capturas también pueden revisarse y enviarse a la papelera de Android con tu aprobación. Las fotos y vídeos grandes pueden enviarse a la papelera de Android con tu aprobación. También puedes revisar fotos deslizando y enviarlas a la papelera de Android con tu aprobación. Los vídeos pueden comprimirse localmente y guardarse como copias independientes.</string>
     <string name="privacy_support_title">Mensajes de soporte</string>
     <string name="privacy_support_body">El contacto y los informes abren tu aplicación de correo. Tú decides si envías el mensaje y puedes editar o eliminar datos de diagnóstico antes de enviarlo.</string>
     <string name="support_faq_storage">¿Cómo se mide el almacenamiento?</string>
@@ -344,4 +344,17 @@
     <string name="swipe_undo">Deshacer</string>
     <string name="swipe_finished">Todas las fotos accesibles revisadas</string>
     <string name="swipe_preview_unavailable">Vista previa no disponible o cargando</string>
+    <string name="compress_real_pick">Elegir vídeo</string>
+    <string name="compress_real_unsupported">Guardar vídeos comprimidos requiere Android 10 o posterior.</string>
+    <string name="compress_real_running">Comprimiendo vídeo</string>
+    <string name="compress_real_saved">Copia comprimida guardada</string>
+    <string name="compress_real_ready">Compresión completa</string>
+    <string name="compress_real_output">Salida · %1$s</string>
+    <string name="compress_real_not_smaller">El resultado no es más pequeño. Prueba una calidad inferior.</string>
+    <string name="compress_real_reduction">Reducción de tamaño · %1$s</string>
+    <string name="compress_real_error">No se pudo leer, codificar, guardar o abrir el vídeo. Inténtalo de nuevo.</string>
+    <string name="compress_real_space_note">Guardar una copia ocupa espacio adicional. El original no se elimina.</string>
+    <string name="compress_real_open">Abrir vídeo</string>
+    <string name="compress_real_start">Comprimir vídeo</string>
+    <string name="compress_real_save">Guardar copia comprimida</string>
 </resources>

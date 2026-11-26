@@ -276,7 +276,7 @@
     <string name="privacy_local_title">本地偏好设置</string>
     <string name="privacy_local_body">主题、触感反馈、自动管理偏好和语言保存在设备上。无需账户。</string>
     <string name="privacy_files_title">个人文件</string>
-    <string name="privacy_files_body">Clenova 经你授权在设备上扫描照片和视频。经批准可将重复副本移至 Android 回收站。Memory Guard 规则尚未连接。不上传个人媒体。 相似照片也可以在您批准后移入回收站。 截图也可以在您批准后移入 Android 回收站。 经您批准，大型照片和视频也可移入 Android 回收站。 您也可以通过滑动清理检查照片，并在批准后移入 Android 回收站。</string>
+    <string name="privacy_files_body">Clenova 经你授权在设备上扫描照片和视频。经批准可将重复副本移至 Android 回收站。Memory Guard 规则尚未连接。不上传个人媒体。 相似照片也可以在您批准后移入回收站。 截图也可以在您批准后移入 Android 回收站。 经您批准，大型照片和视频也可移入 Android 回收站。 您也可以通过滑动清理检查照片，并在批准后移入 Android 回收站。 视频可在本地压缩并另存为副本。</string>
     <string name="privacy_support_title">支持消息</string>
     <string name="privacy_support_body">联系和问题报告会打开电子邮件应用。是否发送由你决定，发送前可编辑或删除诊断详情。</string>
     <string name="support_faq_storage">如何测量存储空间？</string>
@@ -344,4 +344,17 @@
     <string name="swipe_undo">撤销</string>
     <string name="swipe_finished">已检查所有可访问照片</string>
     <string name="swipe_preview_unavailable">照片预览不可用或正在加载</string>
+    <string name="compress_real_pick">选择视频</string>
+    <string name="compress_real_unsupported">保存压缩视频需要 Android 10 或更高版本。</string>
+    <string name="compress_real_running">正在压缩视频</string>
+    <string name="compress_real_saved">已保存压缩副本</string>
+    <string name="compress_real_ready">压缩完成</string>
+    <string name="compress_real_output">输出 · %1$s</string>
+    <string name="compress_real_not_smaller">输出文件没有变小。请尝试较低画质。</string>
+    <string name="compress_real_reduction">大小减少 · %1$s</string>
+    <string name="compress_real_error">无法读取、编码、保存或打开视频。请重试。</string>
+    <string name="compress_real_space_note">保存副本会占用额外空间。原视频不会被删除。</string>
+    <string name="compress_real_open">打开视频</string>
+    <string name="compress_real_start">压缩视频</string>
+    <string name="compress_real_save">保存压缩副本</string>
 </resources>

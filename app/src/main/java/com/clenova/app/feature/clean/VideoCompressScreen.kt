@@ -40,6 +40,10 @@ import kotlinx.coroutines.delay
 fun VideoCompressScreen(sample: Boolean, onBack: () -> Unit, onSelectionHaptic: () -> Unit, modifier: Modifier = Modifier) {
     val colors = ClenovaThemeTokens.colors
     val preview = BuildConfig.DEBUG && sample
+    if (!preview) {
+        RealVideoCompressScreen(onBack, onSelectionHaptic, modifier)
+        return
+    }
     var selected by rememberSaveable { mutableStateOf(intArrayOf(0)) }
     var qualityName by rememberSaveable { mutableStateOf(CompressDesignData.Quality.BALANCED.name) }
     var phase by rememberSaveable { mutableIntStateOf(0) }

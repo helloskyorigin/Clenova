@@ -276,7 +276,7 @@
     <string name="privacy_local_title">स्थानीय प्राथमिकताएँ</string>
     <string name="privacy_local_body">थीम, हैप्टिक्स, ऑटोपायलट प्राथमिकताएँ और भाषा डिवाइस पर सेव हैं। अकाउंट ज़रूरी नहीं है।</string>
     <string name="privacy_files_title">निजी फ़ाइलें</string>
-    <string name="privacy_files_body">Clenova अनुमति से डिवाइस पर फ़ोटो और वीडियो स्कैन करता है। आपकी मंज़ूरी से डुप्लिकेट Android ट्रैश में जा सकते हैं। Memory Guard नियम अभी जुड़े नहीं हैं। निजी मीडिया अपलोड नहीं होता। आपकी अनुमति से समान तस्वीरें भी ट्रैश में भेजी जा सकती हैं। आपकी अनुमति से स्क्रीनशॉट भी Android ट्रैश में भेजे जा सकते हैं। आपकी अनुमति से बड़ी तस्वीरें और वीडियो Android ट्रैश में भेजे जा सकते हैं। स्वाइप क्लीन से भी तस्वीरें देख सकते हैं और आपकी अनुमति से Android ट्रैश में भेज सकते हैं।</string>
+    <string name="privacy_files_body">Clenova अनुमति से डिवाइस पर फ़ोटो और वीडियो स्कैन करता है। आपकी मंज़ूरी से डुप्लिकेट Android ट्रैश में जा सकते हैं। Memory Guard नियम अभी जुड़े नहीं हैं। निजी मीडिया अपलोड नहीं होता। आपकी अनुमति से समान तस्वीरें भी ट्रैश में भेजी जा सकती हैं। आपकी अनुमति से स्क्रीनशॉट भी Android ट्रैश में भेजे जा सकते हैं। आपकी अनुमति से बड़ी तस्वीरें और वीडियो Android ट्रैश में भेजे जा सकते हैं। स्वाइप क्लीन से भी तस्वीरें देख सकते हैं और आपकी अनुमति से Android ट्रैश में भेज सकते हैं। वीडियो डिवाइस पर कंप्रेस करके अलग कॉपी के रूप में सहेजे जा सकते हैं।</string>
     <string name="privacy_support_title">सहायता संदेश</string>
     <string name="privacy_support_body">संपर्क और समस्या रिपोर्ट आपका ईमेल ऐप खोलते हैं। संदेश भेजना आपका निर्णय है और भेजने से पहले डायग्नोस्टिक जानकारी बदल या हटा सकते हैं।</string>
     <string name="support_faq_storage">स्टोरेज कैसे मापा जाता है?</string>
@@ -344,4 +344,17 @@
     <string name="swipe_undo">पूर्ववत करें</string>
     <string name="swipe_finished">सभी उपलब्ध तस्वीरों की समीक्षा हुई</string>
     <string name="swipe_preview_unavailable">तस्वीर का पूर्वावलोकन उपलब्ध नहीं है या लोड हो रहा है</string>
+    <string name="compress_real_pick">वीडियो चुनें</string>
+    <string name="compress_real_unsupported">कंप्रेस वीडियो सहेजने के लिए Android 10 या नया संस्करण चाहिए।</string>
+    <string name="compress_real_running">वीडियो कंप्रेस हो रहा है</string>
+    <string name="compress_real_saved">कंप्रेस कॉपी सहेजी गई</string>
+    <string name="compress_real_ready">कंप्रेशन पूरा हुआ</string>
+    <string name="compress_real_output">आउटपुट · %1$s</string>
+    <string name="compress_real_not_smaller">आउटपुट छोटा नहीं है। कम गुणवत्ता आज़माएँ।</string>
+    <string name="compress_real_reduction">आकार में कमी · %1$s</string>
+    <string name="compress_real_error">वीडियो पढ़ना, कंप्रेस करना, सहेजना या खोलना संभव नहीं हुआ। फिर कोशिश करें।</string>
+    <string name="compress_real_space_note">कॉपी सहेजने से अतिरिक्त जगह लगती है। मूल वीडियो नहीं हटता।</string>
+    <string name="compress_real_open">वीडियो खोलें</string>
+    <string name="compress_real_start">वीडियो कंप्रेस करें</string>
+    <string name="compress_real_save">कंप्रेस कॉपी सहेजें</string>
 </resources>

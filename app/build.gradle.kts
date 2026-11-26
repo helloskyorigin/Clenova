@@ -80,6 +80,8 @@ dependencies {
   implementation("com.google.android.gms:play-services-oss-licenses:17.5.3")
 
   implementation(libs.androidx.activity.compose)
+  implementation("androidx.media3:media3-transformer:1.5.1")
+  implementation("androidx.media3:media3-effect:1.5.1")
 
   implementation(libs.androidx.compose.material.icons.core)
   implementation(libs.androidx.compose.material.icons.extended)

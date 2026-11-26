@@ -276,7 +276,7 @@
     <string name="privacy_local_title">端末内の設定</string>
     <string name="privacy_local_body">テーマ、触覚、Autopilot の設定、言語は端末に保存されます。アカウントは不要です。</string>
     <string name="privacy_files_title">個人ファイル</string>
-    <string name="privacy_files_body">Clenova は許可を得て端末内の写真と動画をスキャンします。承認後、重複を Android のごみ箱に移せます。Memory Guard は未接続です。個人メディアはアップロードしません。 類似写真も承認後にゴミ箱へ移動できます。 スクリーンショットも承認後に Android のゴミ箱へ移動できます。 大容量の写真と動画も承認後に Android のゴミ箱へ移動できます。 スワイプで写真を確認し、承認後に Android のゴミ箱へ移動することもできます。</string>
+    <string name="privacy_files_body">Clenova は許可を得て端末内の写真と動画をスキャンします。承認後、重複を Android のごみ箱に移せます。Memory Guard は未接続です。個人メディアはアップロードしません。 類似写真も承認後にゴミ箱へ移動できます。 スクリーンショットも承認後に Android のゴミ箱へ移動できます。 大容量の写真と動画も承認後に Android のゴミ箱へ移動できます。 スワイプで写真を確認し、承認後に Android のゴミ箱へ移動することもできます。 動画を端末で圧縮して別のコピーとして保存できます。</string>
     <string name="privacy_support_title">サポートメッセージ</string>
     <string name="privacy_support_body">お問い合わせや問題報告ではメールアプリを開きます。送信するかどうかはあなたが決め、送信前に診断情報を編集・削除できます。</string>
     <string name="support_faq_storage">ストレージ容量はどう測定されますか？</string>
@@ -344,4 +344,17 @@
     <string name="swipe_undo">元に戻す</string>
     <string name="swipe_finished">アクセス可能な写真をすべて確認しました</string>
     <string name="swipe_preview_unavailable">プレビューを表示できないか読み込み中です</string>
+    <string name="compress_real_pick">動画を選択</string>
+    <string name="compress_real_unsupported">圧縮動画の保存には Android 10 以降が必要です。</string>
+    <string name="compress_real_running">動画を圧縮中</string>
+    <string name="compress_real_saved">圧縮コピーを保存しました</string>
+    <string name="compress_real_ready">圧縮完了</string>
+    <string name="compress_real_output">出力 · %1$s</string>
+    <string name="compress_real_not_smaller">出力サイズが小さくなりませんでした。低い画質を試してください。</string>
+    <string name="compress_real_reduction">サイズ削減 · %1$s</string>
+    <string name="compress_real_error">動画の読み込み、圧縮、保存、または再生ができませんでした。再試行してください。</string>
+    <string name="compress_real_space_note">コピーの保存には追加の容量が必要です。元の動画は削除されません。</string>
+    <string name="compress_real_open">動画を開く</string>
+    <string name="compress_real_start">動画を圧縮</string>
+    <string name="compress_real_save">圧縮コピーを保存</string>
 </resources>

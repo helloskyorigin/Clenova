@@ -276,7 +276,7 @@
     <string name="privacy_local_title">Preferências locais</string>
     <string name="privacy_local_body">Tema, resposta tátil, preferências do Autopilot e idioma ficam no dispositivo. Não é preciso criar conta.</string>
     <string name="privacy_files_title">Arquivos pessoais</string>
-    <string name="privacy_files_body">Clenova analisa fotos e vídeos acessíveis no dispositivo com sua permissão. Duplicatas podem ir à lixeira Android com sua aprovação. Memory Guard ainda não está conectado. Nenhuma mídia pessoal é enviada. Fotos semelhantes também podem ser revisadas e enviadas à lixeira com sua aprovação. Capturas de tela também podem ser revisadas e enviadas à lixeira do Android com sua aprovação. Fotos e vídeos grandes podem ser enviados à lixeira do Android com sua aprovação. Fotos também podem ser revisadas deslizando e enviadas à lixeira do Android com sua aprovação.</string>
+    <string name="privacy_files_body">Clenova analisa fotos e vídeos acessíveis no dispositivo com sua permissão. Duplicatas podem ir à lixeira Android com sua aprovação. Memory Guard ainda não está conectado. Nenhuma mídia pessoal é enviada. Fotos semelhantes também podem ser revisadas e enviadas à lixeira com sua aprovação. Capturas de tela também podem ser revisadas e enviadas à lixeira do Android com sua aprovação. Fotos e vídeos grandes podem ser enviados à lixeira do Android com sua aprovação. Fotos também podem ser revisadas deslizando e enviadas à lixeira do Android com sua aprovação. Vídeos podem ser compactados localmente e salvos como cópias separadas.</string>
     <string name="privacy_support_title">Mensagens de suporte</string>
     <string name="privacy_support_body">O contato e os relatórios abrem seu app de e-mail. Você decide se envia e pode editar ou remover detalhes de diagnóstico antes do envio.</string>
     <string name="support_faq_storage">Como o armazenamento é medido?</string>
@@ -344,4 +344,17 @@
     <string name="swipe_undo">Desfazer</string>
     <string name="swipe_finished">Todas as fotos acessíveis revisadas</string>
     <string name="swipe_preview_unavailable">Prévia indisponível ou carregando</string>
+    <string name="compress_real_pick">Escolher vídeo</string>
+    <string name="compress_real_unsupported">Salvar vídeos compactados requer Android 10 ou posterior.</string>
+    <string name="compress_real_running">Compactando vídeo</string>
+    <string name="compress_real_saved">Cópia compactada salva</string>
+    <string name="compress_real_ready">Compactação concluída</string>
+    <string name="compress_real_output">Saída · %1$s</string>
+    <string name="compress_real_not_smaller">O resultado não é menor. Tente uma qualidade inferior.</string>
+    <string name="compress_real_reduction">Redução de tamanho · %1$s</string>
+    <string name="compress_real_error">Não foi possível ler, codificar, salvar ou abrir o vídeo. Tente novamente.</string>
+    <string name="compress_real_space_note">Salvar uma cópia ocupa espaço adicional. O original não é removido.</string>
+    <string name="compress_real_open">Abrir vídeo</string>
+    <string name="compress_real_start">Compactar vídeo</string>
+    <string name="compress_real_save">Salvar cópia compactada</string>
 </resources>

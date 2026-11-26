@@ -276,7 +276,7 @@
     <string name="privacy_local_title">Préférences locales</string>
     <string name="privacy_local_body">Le thème, le retour haptique, les préférences Autopilot et la langue sont enregistrés sur votre appareil. Aucun compte requis.</string>
     <string name="privacy_files_title">Fichiers personnels</string>
-    <string name="privacy_files_body">Clenova analyse les médias accessibles avec votre autorisation sur l’appareil. Les doublons peuvent être placés dans la corbeille Android avec votre accord. Memory Guard n’est pas encore connecté. Aucun média personnel téléversé. Les photos similaires peuvent aussi être vérifiées et mises à la corbeille avec votre accord. Les captures peuvent aussi être vérifiées et mises à la corbeille Android avec votre accord. Les photos et vidéos volumineuses peuvent être mises à la corbeille Android avec votre accord. Les photos peuvent aussi être vérifiées par balayage et mises à la corbeille Android avec votre accord.</string>
+    <string name="privacy_files_body">Clenova analyse les médias accessibles avec votre autorisation sur l’appareil. Les doublons peuvent être placés dans la corbeille Android avec votre accord. Memory Guard n’est pas encore connecté. Aucun média personnel téléversé. Les photos similaires peuvent aussi être vérifiées et mises à la corbeille avec votre accord. Les captures peuvent aussi être vérifiées et mises à la corbeille Android avec votre accord. Les photos et vidéos volumineuses peuvent être mises à la corbeille Android avec votre accord. Les photos peuvent aussi être vérifiées par balayage et mises à la corbeille Android avec votre accord. Les vidéos peuvent être compressées localement et enregistrées comme copies distinctes.</string>
     <string name="privacy_support_title">Messages d’assistance</string>
     <string name="privacy_support_body">Le contact et les rapports ouvrent votre application de messagerie. Vous choisissez d’envoyer ou non le message et pouvez modifier ou retirer les données de diagnostic avant l’envoi.</string>
     <string name="support_faq_storage">Comment le stockage est-il mesuré ?</string>
@@ -344,4 +344,17 @@
     <string name="swipe_undo">Annuler</string>
     <string name="swipe_finished">Toutes les photos accessibles vérifiées</string>
     <string name="swipe_preview_unavailable">Aperçu indisponible ou en chargement</string>
+    <string name="compress_real_pick">Choisir une vidéo</string>
+    <string name="compress_real_unsupported">Android 10 ou ultérieur est requis pour enregistrer une vidéo compressée.</string>
+    <string name="compress_real_running">Compression de la vidéo</string>
+    <string name="compress_real_saved">Copie compressée enregistrée</string>
+    <string name="compress_real_ready">Compression terminée</string>
+    <string name="compress_real_output">Résultat · %1$s</string>
+    <string name="compress_real_not_smaller">Le résultat est plus grand ou de même taille. Essayez une qualité inférieure.</string>
+    <string name="compress_real_reduction">Réduction de taille · %1$s</string>
+    <string name="compress_real_error">Impossible de lire, encoder, enregistrer ou ouvrir la vidéo. Réessayez.</string>
+    <string name="compress_real_space_note">Une copie occupe un espace supplémentaire. La vidéo originale reste intacte.</string>
+    <string name="compress_real_open">Ouvrir la vidéo</string>
+    <string name="compress_real_start">Compresser la vidéo</string>
+    <string name="compress_real_save">Enregistrer la copie compressée</string>
 </resources>

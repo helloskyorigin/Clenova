@@ -276,7 +276,7 @@
     <string name="privacy_local_title">স্থানীয় পছন্দ</string>
     <string name="privacy_local_body">থিম, স্পর্শ প্রতিক্রিয়া, অটোপাইলট পছন্দ ও ভাষা ডিভাইসে সংরক্ষিত। অ্যাকাউন্ট দরকার নেই।</string>
     <string name="privacy_files_title">ব্যক্তিগত ফাইল</string>
-    <string name="privacy_files_body">Clenova অনুমতি নিয়ে ডিভাইসের ছবি ও ভিডিও স্ক্যান করে। অনুমোদনে কপি Android ট্র্যাশে যায়। Memory Guard নিয়ম এখনও যুক্ত নয়। ব্যক্তিগত মিডিয়া আপলোড হয় না। আপনার অনুমোদনে অনুরূপ ছবিও ট্র্যাশে পাঠানো যায়। আপনার অনুমোদনে স্ক্রিনশটও Android ট্র্যাশে পাঠানো যায়। আপনার অনুমোদনে বড় ছবি ও ভিডিও Android ট্র্যাশে পাঠানো যায়। সোয়াইপ করে ছবিও পর্যালোচনা করা যায় এবং আপনার অনুমোদনে Android ট্র্যাশে পাঠানো যায়।</string>
+    <string name="privacy_files_body">Clenova অনুমতি নিয়ে ডিভাইসের ছবি ও ভিডিও স্ক্যান করে। অনুমোদনে কপি Android ট্র্যাশে যায়। Memory Guard নিয়ম এখনও যুক্ত নয়। ব্যক্তিগত মিডিয়া আপলোড হয় না। আপনার অনুমোদনে অনুরূপ ছবিও ট্র্যাশে পাঠানো যায়। আপনার অনুমোদনে স্ক্রিনশটও Android ট্র্যাশে পাঠানো যায়। আপনার অনুমোদনে বড় ছবি ও ভিডিও Android ট্র্যাশে পাঠানো যায়। সোয়াইপ করে ছবিও পর্যালোচনা করা যায় এবং আপনার অনুমোদনে Android ট্র্যাশে পাঠানো যায়। ভিডিও ডিভাইসে সংকুচিত করে আলাদা কপি হিসেবে সংরক্ষণ করা যায়।</string>
     <string name="privacy_support_title">সহায়তা বার্তা</string>
     <string name="privacy_support_body">যোগাযোগ ও সমস্যা রিপোর্ট ইমেল অ্যাপ খুলে। পাঠাবেন কি না আপনি ঠিক করেন এবং পাঠানোর আগে ডায়াগনস্টিক তথ্য বদলাতে বা সরাতে পারেন।</string>
     <string name="support_faq_storage">স্টোরেজ কীভাবে মাপা হয়?</string>
@@ -344,4 +344,17 @@
     <string name="swipe_undo">পূর্বাবস্থায় ফেরান</string>
     <string name="swipe_finished">সব অ্যাক্সেসযোগ্য ছবি পর্যালোচনা হয়েছে</string>
     <string name="swipe_preview_unavailable">ছবির প্রিভিউ অনুপলব্ধ বা লোড হচ্ছে</string>
+    <string name="compress_real_pick">ভিডিও বেছে নিন</string>
+    <string name="compress_real_unsupported">সংকুচিত ভিডিও সংরক্ষণ করতে Android 10 বা নতুন সংস্করণ প্রয়োজন।</string>
+    <string name="compress_real_running">ভিডিও সংকুচিত হচ্ছে</string>
+    <string name="compress_real_saved">সংকুচিত কপি সংরক্ষিত</string>
+    <string name="compress_real_ready">সংকোচন সম্পন্ন</string>
+    <string name="compress_real_output">আউটপুট · %1$s</string>
+    <string name="compress_real_not_smaller">আউটপুট ছোট হয়নি। কম মান চেষ্টা করুন।</string>
+    <string name="compress_real_reduction">আকার হ্রাস · %1$s</string>
+    <string name="compress_real_error">ভিডিও পড়া, এনকোড, সংরক্ষণ বা খোলা যায়নি। আবার চেষ্টা করুন।</string>
+    <string name="compress_real_space_note">কপি সংরক্ষণে অতিরিক্ত জায়গা লাগে। মূল ভিডিও মোছা হয় না।</string>
+    <string name="compress_real_open">ভিডিও খুলুন</string>
+    <string name="compress_real_start">ভিডিও সংকুচিত করুন</string>
+    <string name="compress_real_save">সংকুচিত কপি সংরক্ষণ করুন</string>
 </resources>

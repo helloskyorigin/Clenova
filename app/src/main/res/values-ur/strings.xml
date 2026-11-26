@@ -276,7 +276,7 @@
     <string name="privacy_local_title">مقامی ترجیحات</string>
     <string name="privacy_local_body">تھیم، لمسی ردعمل، آٹو پائلٹ ترجیحات اور زبان ڈیوائس پر محفوظ ہیں۔ اکاؤنٹ ضروری نہیں۔</string>
     <string name="privacy_files_title">ذاتی فائلیں</string>
-    <string name="privacy_files_body">Clenova اجازت سے ڈیوائس پر تصاویر اور ویڈیوز اسکین کرتا ہے۔ منظوری سے نقول Android کوڑے دان میں جا سکتی ہیں۔ Memory Guard قواعد ابھی منسلک نہیں۔ ذاتی میڈیا اپ لوڈ نہیں ہوتا۔ آپ کی منظوری سے ملتی جلتی تصاویر بھی ٹریش میں بھیجی جا سکتی ہیں۔ آپ کی منظوری سے اسکرین شاٹس بھی Android ٹریش میں بھیجے جا سکتے ہیں۔ آپ کی منظوری سے بڑی تصاویر اور ویڈیوز Android ٹریش میں بھیجی جا سکتی ہیں۔ سوائپ کے ذریعے تصاویر کا جائزہ لے کر آپ کی منظوری سے Android ٹریش میں بھیجا جا سکتا ہے۔</string>
+    <string name="privacy_files_body">Clenova اجازت سے ڈیوائس پر تصاویر اور ویڈیوز اسکین کرتا ہے۔ منظوری سے نقول Android کوڑے دان میں جا سکتی ہیں۔ Memory Guard قواعد ابھی منسلک نہیں۔ ذاتی میڈیا اپ لوڈ نہیں ہوتا۔ آپ کی منظوری سے ملتی جلتی تصاویر بھی ٹریش میں بھیجی جا سکتی ہیں۔ آپ کی منظوری سے اسکرین شاٹس بھی Android ٹریش میں بھیجے جا سکتے ہیں۔ آپ کی منظوری سے بڑی تصاویر اور ویڈیوز Android ٹریش میں بھیجی جا سکتی ہیں۔ سوائپ کے ذریعے تصاویر کا جائزہ لے کر آپ کی منظوری سے Android ٹریش میں بھیجا جا سکتا ہے۔ ویڈیوز مقامی طور پر کمپریس کرکے الگ کاپی میں محفوظ کی جا سکتی ہیں۔</string>
     <string name="privacy_support_title">معاونت کے پیغامات</string>
     <string name="privacy_support_body">رابطہ اور مسئلے کی رپورٹ آپ کی ای میل ایپ کھولتے ہیں۔ بھیجنا آپ کا فیصلہ ہے اور بھیجنے سے پہلے تشخیصی تفصیلات بدل یا ہٹا سکتے ہیں۔</string>
     <string name="support_faq_storage">اسٹوریج کیسے ناپا جاتا ہے؟</string>
@@ -344,4 +344,17 @@
     <string name="swipe_undo">واپس کریں</string>
     <string name="swipe_finished">تمام دستیاب تصاویر کا جائزہ ہو گیا</string>
     <string name="swipe_preview_unavailable">تصویر کا پیش منظر دستیاب نہیں یا لوڈ ہو رہا ہے</string>
+    <string name="compress_real_pick">ویڈیو منتخب کریں</string>
+    <string name="compress_real_unsupported">کمپریس ویڈیو محفوظ کرنے کے لیے Android 10 یا نیا ورژن درکار ہے۔</string>
+    <string name="compress_real_running">ویڈیو کمپریس ہو رہی ہے</string>
+    <string name="compress_real_saved">کمپریس کاپی محفوظ ہو گئی</string>
+    <string name="compress_real_ready">کمپریشن مکمل</string>
+    <string name="compress_real_output">آؤٹ پٹ · %1$s</string>
+    <string name="compress_real_not_smaller">آؤٹ پٹ چھوٹی نہیں ہے۔ کم معیار آزمائیں۔</string>
+    <string name="compress_real_reduction">سائز میں کمی · %1$s</string>
+    <string name="compress_real_error">ویڈیو پڑھنا، کمپریس کرنا، محفوظ کرنا یا کھولنا ممکن نہیں ہوا۔ دوبارہ کوشش کریں۔</string>
+    <string name="compress_real_space_note">کاپی محفوظ کرنے سے اضافی جگہ استعمال ہوتی ہے۔ اصل ویڈیو نہیں ہٹتی۔</string>
+    <string name="compress_real_open">ویڈیو کھولیں</string>
+    <string name="compress_real_start">ویڈیو کمپریس کریں</string>
+    <string name="compress_real_save">کمپریس کاپی محفوظ کریں</string>
 </resources>

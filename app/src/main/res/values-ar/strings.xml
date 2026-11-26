@@ -276,7 +276,7 @@
     <string name="privacy_local_title">التفضيلات المحلية</string>
     <string name="privacy_local_body">يُحفظ المظهر والاستجابة اللمسية وتفضيلات Autopilot واللغة على جهازك. لا يلزم حساب.</string>
     <string name="privacy_files_title">الملفات الشخصية</string>
-    <string name="privacy_files_body">يفحص Clenova الصور والفيديوهات المتاحة بإذنك على الجهاز. يمكن نقل النسخ إلى مهملات Android بموافقتك. قواعد Memory Guard غير متصلة بعد. لا تُرفع الوسائط الشخصية. يمكن أيضاً مراجعة الصور المتشابهة ونقلها إلى سلة المهملات بموافقتك. يمكن نقل لقطات الشاشة إلى سلة مهملات Android بموافقتك. يمكن نقل الصور والفيديوهات الكبيرة إلى سلة مهملات Android بموافقتك. يمكن أيضاً مراجعة الصور بالسحب ونقلها إلى سلة مهملات Android بموافقتك.</string>
+    <string name="privacy_files_body">يفحص Clenova الصور والفيديوهات المتاحة بإذنك على الجهاز. يمكن نقل النسخ إلى مهملات Android بموافقتك. قواعد Memory Guard غير متصلة بعد. لا تُرفع الوسائط الشخصية. يمكن أيضاً مراجعة الصور المتشابهة ونقلها إلى سلة المهملات بموافقتك. يمكن نقل لقطات الشاشة إلى سلة مهملات Android بموافقتك. يمكن نقل الصور والفيديوهات الكبيرة إلى سلة مهملات Android بموافقتك. يمكن أيضاً مراجعة الصور بالسحب ونقلها إلى سلة مهملات Android بموافقتك. يمكن ضغط الفيديوهات محلياً وحفظها كنسخ منفصلة.</string>
     <string name="privacy_support_title">رسائل الدعم</string>
     <string name="privacy_support_body">يفتح التواصل وتقارير المشكلات تطبيق البريد. تقرر أنت إرسال الرسالة ويمكنك تعديل تفاصيل التشخيص أو حذفها قبل الإرسال.</string>
     <string name="support_faq_storage">كيف تُقاس مساحة التخزين؟</string>
@@ -344,4 +344,17 @@
     <string name="swipe_undo">تراجع</string>
     <string name="swipe_finished">تمت مراجعة جميع الصور المتاحة</string>
     <string name="swipe_preview_unavailable">معاينة الصورة غير متاحة أو قيد التحميل</string>
+    <string name="compress_real_pick">اختر فيديو</string>
+    <string name="compress_real_unsupported">يتطلب حفظ الفيديو المضغوط Android 10 أو أحدث.</string>
+    <string name="compress_real_running">جارٍ ضغط الفيديو</string>
+    <string name="compress_real_saved">تم حفظ النسخة المضغوطة</string>
+    <string name="compress_real_ready">اكتمل الضغط</string>
+    <string name="compress_real_output">الناتج · %1$s</string>
+    <string name="compress_real_not_smaller">الناتج ليس أصغر. جرّب جودة أقل.</string>
+    <string name="compress_real_reduction">تقليل الحجم · %1$s</string>
+    <string name="compress_real_error">تعذرت قراءة الفيديو أو ترميزه أو حفظه أو فتحه. أعد المحاولة.</string>
+    <string name="compress_real_space_note">يستهلك حفظ نسخة مساحة إضافية. لا يتم حذف الأصل.</string>
+    <string name="compress_real_open">فتح الفيديو</string>
+    <string name="compress_real_start">ضغط الفيديو</string>
+    <string name="compress_real_save">حفظ النسخة المضغوطة</string>
 </resources>

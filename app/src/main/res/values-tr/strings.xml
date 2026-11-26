@@ -276,7 +276,7 @@
     <string name="privacy_local_title">Yerel tercihler</string>
     <string name="privacy_local_body">Tema, dokunsal geri bildirim, Otopilot tercihleri ve dil cihazda saklanır. Hesap gerekmez.</string>
     <string name="privacy_files_title">Kişisel dosyalar</string>
-    <string name="privacy_files_body">Clenova izninizle cihazda fotoğraf ve videoları tarar. Onayınızla kopyalar Android çöpüne taşınabilir. Memory Guard kuralları henüz bağlı değildir. Kişisel medya yüklenmez. Benzer fotoğraflar da onayınızla çöp kutusuna taşınabilir. Ekran görüntüleri de onayınızla Android çöp kutusuna taşınabilir. Büyük fotoğraf ve videolar onayınızla Android çöp kutusuna taşınabilir. Fotoğraflar kaydırılarak incelenebilir ve onayınızla Android çöp kutusuna taşınabilir.</string>
+    <string name="privacy_files_body">Clenova izninizle cihazda fotoğraf ve videoları tarar. Onayınızla kopyalar Android çöpüne taşınabilir. Memory Guard kuralları henüz bağlı değildir. Kişisel medya yüklenmez. Benzer fotoğraflar da onayınızla çöp kutusuna taşınabilir. Ekran görüntüleri de onayınızla Android çöp kutusuna taşınabilir. Büyük fotoğraf ve videolar onayınızla Android çöp kutusuna taşınabilir. Fotoğraflar kaydırılarak incelenebilir ve onayınızla Android çöp kutusuna taşınabilir. Videolar cihazda sıkıştırılabilir ve ayrı kopyalar olarak kaydedilebilir.</string>
     <string name="privacy_support_title">Destek mesajları</string>
     <string name="privacy_support_body">İletişim ve sorun bildirimleri e-posta uygulamanızı açar. Gönderip göndermemeye siz karar verir, tanılama bilgilerini göndermeden önce düzenleyebilir veya kaldırabilirsiniz.</string>
     <string name="support_faq_storage">Depolama nasıl ölçülür?</string>
@@ -344,4 +344,17 @@
     <string name="swipe_undo">Geri al</string>
     <string name="swipe_finished">Erişilebilir tüm fotoğraflar incelendi</string>
     <string name="swipe_preview_unavailable">Önizleme kullanılamıyor veya yükleniyor</string>
+    <string name="compress_real_pick">Video seç</string>
+    <string name="compress_real_unsupported">Sıkıştırılmış videoları kaydetmek için Android 10 veya üstü gerekir.</string>
+    <string name="compress_real_running">Video sıkıştırılıyor</string>
+    <string name="compress_real_saved">Sıkıştırılmış kopya kaydedildi</string>
+    <string name="compress_real_ready">Sıkıştırma tamamlandı</string>
+    <string name="compress_real_output">Çıktı · %1$s</string>
+    <string name="compress_real_not_smaller">Çıktı daha küçük değil. Daha düşük kaliteyi deneyin.</string>
+    <string name="compress_real_reduction">Boyut azalması · %1$s</string>
+    <string name="compress_real_error">Video okunamadı, sıkıştırılamadı, kaydedilemedi veya açılamadı. Tekrar deneyin.</string>
+    <string name="compress_real_space_note">Kopya kaydetmek ek alan kullanır. Orijinal kaldırılmaz.</string>
+    <string name="compress_real_open">Videoyu aç</string>
+    <string name="compress_real_start">Videoyu sıkıştır</string>
+    <string name="compress_real_save">Sıkıştırılmış kopyayı kaydet</string>
 </resources>
