@@ -1,0 +1,92 @@
+<resources>
+    <string name="app_name">CLENOVA</string>
+    <string name="app_tagline">Your phone. On autopilot.</string>
+
+    <!-- Navigation -->
+    <string name="nav_home">Home</string>
+    <string name="nav_clean">Clean</string>
+    <string name="nav_guard">Guard</string>
+    <string name="nav_agent">Agent</string>
+    <string name="cd_settings_button">Open settings</string>
+    <string name="cd_back_button">Navigate back</string>
+    <string name="cd_agent_button">Open Agent workspace</string>
+    <string name="cd_refresh_storage">Refresh device storage reading</string>
+
+    <!-- Home -->
+    <string name="home_storage_section_label">DEVICE STORAGE</string>
+    <string name="home_storage_available_value">%1$s free</string>
+    <string name="home_storage_used_of_total">%1$s used of %2$s</string>
+    <string name="home_storage_loading">Reading device storage…</string>
+    <string name="home_storage_unavailable_title">Storage details unavailable</string>
+    <string name="home_storage_unavailable_body">Unable to read local volume metrics on this device right now.</string>
+    <string name="home_agent_section_label">AUTOPILOT AGENT</string>
+    <string name="home_agent_inactive_title">Autopilot is inactive</string>
+    <string name="home_agent_inactive_body">CLENOVA is not monitoring or modifying files yet. Configure goals and approval rules in the Agent workspace when ready.</string>
+    <string name="home_agent_open_workspace">Open Agent workspace</string>
+    <string name="home_status_not_configured">Not configured</string>
+    <string name="home_foundation_note">Phase 0 Foundation — Core navigation, real device storage telemetry, and privacy-first controls.</string>
+
+    <!-- Clean -->
+    <string name="clean_title">Clean</string>
+    <string name="clean_subtitle">Manual cleaning tools with explicit approval before any change.</string>
+    <string name="clean_badge_planned">Planned</string>
+    <string name="clean_tool_duplicates_title">Duplicates</string>
+    <string name="clean_tool_duplicates_desc">Identify exact duplicate files and media across storage.</string>
+    <string name="clean_tool_similar_title">Similar Photos</string>
+    <string name="clean_tool_similar_desc">Group burst shots and near-duplicates with best-shot guidance.</string>
+    <string name="clean_tool_screenshots_title">Screenshots</string>
+    <string name="clean_tool_screenshots_desc">Review aging screenshots and temporary captures.</string>
+    <string name="clean_tool_large_files_title">Large Files</string>
+    <string name="clean_tool_large_files_desc">Surface heavy videos, archives, and downloads safely.</string>
+    <string name="clean_tool_swipe_clean_title">Swipe Clean</string>
+    <string name="clean_tool_swipe_clean_desc">Fast card-by-card triage for photos and media.</string>
+    <string name="clean_tool_video_compress_title">Video Compress</string>
+    <string name="clean_tool_video_compress_desc">Reduce video footprint locally with Media3 after preview.</string>
+    <string name="clean_footer_honesty">Scanning and MediaStore deletion workflows are not enabled in Phase 0.</string>
+
+    <!-- Guard -->
+    <string name="guard_title">Memory Guard</string>
+    <string name="guard_subtitle">Safeguard important photos, videos, and files across manual and agent actions.</string>
+    <string name="guard_status_unconfigured">Protection rules not configured</string>
+    <string name="guard_empty_title">No protected collections yet</string>
+    <string name="guard_empty_body">Memory Guard will exclude your protected albums, uncertain files, and pinned items from every cleanup plan.</string>
+    <string name="guard_pillar_exclusions_title">Protected Item Exclusion</string>
+    <string name="guard_pillar_exclusions_desc">Keep family albums, documents, and pinned media untouched.</string>
+    <string name="guard_pillar_uncertain_title">Uncertain File Safety</string>
+    <string name="guard_pillar_uncertain_desc">Ambiguous or unverified files are held back for human review.</string>
+    <string name="guard_pillar_cross_tool_title">Unified Protection</string>
+    <string name="guard_pillar_cross_tool_desc">Enforced across both Smart Scan tools and Autopilot plans.</string>
+
+    <!-- Agent -->
+    <string name="agent_title">Agent Workspace</string>
+    <string name="agent_subtitle">Proactive storage intelligence that prepares plans and waits for your approval.</string>
+    <string name="agent_status_inactive">Inactive — Setup required</string>
+    <string name="agent_workspace_banner_title">Approval-first automation</string>
+    <string name="agent_workspace_banner_body">Autopilot is currently off. No background scans, thresholds, or cleanup actions are running in Phase 0.</string>
+    <string name="agent_pillar_goals_title">Goals &amp; Thresholds</string>
+    <string name="agent_pillar_goals_desc">Define target free space and conservative cleanup boundaries.</string>
+    <string name="agent_pillar_planning_title">Intelligent Cleanup Plans</string>
+    <string name="agent_pillar_planning_desc">Review estimated space recovery before approving a single action.</string>
+    <string name="agent_pillar_history_title">Activity &amp; Verified Results</string>
+    <string name="agent_pillar_history_desc">Transparent audit log of every approved and verified outcome.</string>
+
+    <!-- Settings -->
+    <string name="settings_title">Settings</string>
+    <string name="settings_section_preferences">PREFERENCES</string>
+    <string name="settings_theme_label">Appearance</string>
+    <string name="settings_theme_light">Light</string>
+    <string name="settings_theme_dark">Dark</string>
+    <string name="settings_theme_system">System</string>
+    <string name="settings_haptics_label">Tactile feedback</string>
+    <string name="settings_haptics_desc">Subtle haptic response on navigation and primary controls.</string>
+    <string name="settings_section_safety">SAFETY &amp; PRIVACY</string>
+    <string name="settings_safety_approval_title">Explicit user approval</string>
+    <string name="settings_safety_approval_desc">CLENOVA never deletes files silently or bypasses Android system confirmation.</string>
+    <string name="settings_safety_local_title">On-device processing</string>
+    <string name="settings_safety_local_desc">Personal photos and files stay on your device without external server uploads.</string>
+    <string name="settings_section_about">APPLICATION</string>
+    <string name="settings_about_name_label">Product</string>
+    <string name="settings_about_version_label">Version</string>
+    <string name="settings_about_version_value">%1$s (Phase 0 Foundation)</string>
+    <string name="settings_about_package_label">Application ID</string>
+</resources>

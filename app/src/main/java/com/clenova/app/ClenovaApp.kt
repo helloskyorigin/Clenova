@@ -1,0 +1,88 @@
+package com.clenova.app
+
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.navigation.compose.rememberNavController
+import com.clenova.app.core.designsystem.ClenovaMotion
+import com.clenova.app.core.designsystem.ClenovaTheme
+import com.clenova.app.core.designsystem.ClenovaThemeTokens
+import com.clenova.app.core.navigation.ClenovaFloatingNavBar
+import com.clenova.app.core.navigation.ClenovaNavHost
+import com.clenova.app.core.navigation.ClenovaRoute
+import com.clenova.app.core.navigation.navigateTopLevel
+import com.clenova.app.core.navigation.toClenovaRoute
+import com.clenova.app.core.utilities.rememberClenovaHaptics
+import com.clenova.app.domain.model.UserPreferences
+import com.clenova.app.domain.repository.PreferencesRepository
+import com.clenova.app.domain.repository.StorageRepository
+
+@Composable
+fun ClenovaApp(
+    storageRepository: StorageRepository,
+    preferencesRepository: PreferencesRepository,
+    modifier: Modifier = Modifier,
+    navController: NavHostController = rememberNavController(),
+) {
+    val preferences by preferencesRepository.userPreferences
+        .collectAsStateWithLifecycle(initialValue = UserPreferences())
+
+    val haptics = rememberClenovaHaptics(enabled = preferences.hapticsEnabled)
+
+    ClenovaTheme(themePreference = preferences.themePreference) {
+        val colors = ClenovaThemeTokens.colors
+        val navBackStackEntry by navController.currentBackStackEntryAsState()
+        val currentRoute = navBackStackEntry?.destination.toClenovaRoute()
+        val showFloatingNav = currentRoute != ClenovaRoute.Settings
+
+        Box(
+            modifier = modifier
+                .fillMaxSize()
+                .background(colors.background),
+        ) {
+            ClenovaNavHost(
+                navController = navController,
+                storageRepository = storageRepository,
+                preferencesRepository = preferencesRepository,
+                onSelectionHaptic = { haptics.performSelection() },
+            )
+
+            AnimatedVisibility(
+                visible = showFloatingNav,
+                enter = slideInVertically(
+                    initialOffsetY = { it },
+                    animationSpec = ClenovaMotion.snappySpring(),
+                ) + fadeIn(animationSpec = ClenovaMotion.quickTween()),
+                exit = slideOutVertically(
+                    targetOffsetY = { it },
+                    animationSpec = ClenovaMotion.snappySpring(),
+                ) + fadeOut(animationSpec = ClenovaMotion.quickTween()),
+                modifier = Modifier.align(Alignment.BottomCenter),
+            ) {
+                ClenovaFloatingNavBar(
+                    currentRoute = currentRoute,
+                    onNavigate = { route ->
+                        if (route == ClenovaRoute.Agent) {
+                            haptics.performPrimaryAction()
+                        } else {
+                            haptics.performSelection()
+                        }
+                        navController.navigateTopLevel(route)
+                    },
+                )
+            }
+        }
+    }
+}

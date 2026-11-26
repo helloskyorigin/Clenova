@@ -1,0 +1,116 @@
+package com.clenova.app
+
+import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollTo
+import com.clenova.app.domain.model.StorageOverview
+import com.clenova.app.domain.model.StorageState
+import com.clenova.app.domain.model.ThemePreference
+import com.clenova.app.domain.model.UserPreferences
+import com.clenova.app.domain.repository.PreferencesRepository
+import com.clenova.app.domain.repository.StorageRepository
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import org.junit.Rule
+import org.junit.Test
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
+import org.robolectric.annotation.Config
+
+@RunWith(RobolectricTestRunner::class)
+@Config(sdk = [36], qualifiers = "w411dp-h891dp-xxhdpi")
+class ClenovaNavigationRobolectricTest {
+
+    @get:Rule
+    val composeTestRule = createComposeRule()
+
+    private class FakeStorageRepository(
+        initialState: StorageState = StorageState.Ready(
+            StorageOverview(
+                totalBytes = 128_000_000_000L,
+                availableBytes = 42_500_000_000L,
+                usedBytes = 85_500_000_000L,
+            ),
+        ),
+    ) : StorageRepository {
+        private val _state = MutableStateFlow(initialState)
+        override val storageState: StateFlow<StorageState> = _state.asStateFlow()
+        override suspend fun refreshStorage() = Unit
+    }
+
+    private class FakePreferencesRepository : PreferencesRepository {
+        private val _prefs = MutableStateFlow(UserPreferences())
+        override val userPreferences: Flow<UserPreferences> = _prefs.asStateFlow()
+        override suspend fun setThemePreference(preference: ThemePreference) {
+            _prefs.value = _prefs.value.copy(themePreference = preference)
+        }
+
+        override suspend fun setHapticsEnabled(enabled: Boolean) {
+            _prefs.value = _prefs.value.copy(hapticsEnabled = enabled)
+        }
+    }
+
+    @Test
+    fun `navigates across 3 plus 1 destinations and hides bottom nav on settings`() {
+        composeTestRule.setContent {
+            ClenovaApp(
+                storageRepository = FakeStorageRepository(),
+                preferencesRepository = FakePreferencesRepository(),
+            )
+        }
+        composeTestRule.waitForIdle()
+
+        // Home renders branding, real storage summary, and honest inactive agent card
+        composeTestRule.onNodeWithText("CLENOVA").assertIsDisplayed()
+        composeTestRule.onNodeWithText("42.5 GB free").assertIsDisplayed()
+        composeTestRule.onNodeWithText("Autopilot is inactive").performScrollTo().assertIsDisplayed()
+
+        // Navigate to Clean
+        composeTestRule.onNodeWithTag("nav_tab_clean").performClick()
+        composeTestRule.waitForIdle()
+        composeTestRule.onNodeWithText("Duplicates").assertIsDisplayed()
+
+        // Navigate to Guard
+        composeTestRule.onNodeWithTag("nav_tab_guard").performClick()
+        composeTestRule.waitForIdle()
+        composeTestRule.onNodeWithText("Memory Guard").assertIsDisplayed()
+
+        // Navigate to Agent via 3+1 circular button
+        composeTestRule.onNodeWithTag("nav_tab_agent").performClick()
+        composeTestRule.waitForIdle()
+        composeTestRule.onNodeWithText("Agent Workspace").assertIsDisplayed()
+
+        // Return to Home and open Settings
+        composeTestRule.onNodeWithTag("nav_tab_home").performClick()
+        composeTestRule.waitForIdle()
+        composeTestRule.onNodeWithTag("settings_button").performClick()
+        composeTestRule.waitForIdle()
+
+        // Settings renders and hides bottom nav
+        composeTestRule.onNodeWithText("Settings").assertIsDisplayed()
+        composeTestRule.onNodeWithTag("nav_tab_home").assertDoesNotExist()
+
+        // Back from Settings restores Home and bottom nav
+        composeTestRule.onNodeWithTag("settings_back_button").performClick()
+        composeTestRule.waitForIdle()
+        composeTestRule.onNodeWithTag("nav_tab_home").assertIsDisplayed()
+    }
+
+    @Test
+    fun `home displays honest unavailable state when storage cannot be read`() {
+        composeTestRule.setContent {
+            ClenovaApp(
+                storageRepository = FakeStorageRepository(StorageState.Unavailable),
+                preferencesRepository = FakePreferencesRepository(),
+            )
+        }
+        composeTestRule.waitForIdle()
+
+        composeTestRule.onNodeWithText("Storage details unavailable").assertIsDisplayed()
+    }
+}

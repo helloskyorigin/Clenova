@@ -1,0 +1,33 @@
+# Build & IDE artifacts
+*.iml
+.gradle
+.kotlin
+/build
+/app/build
+/captures
+.externalNativeBuild
+.cxx
+
+# Android Studio / IntelliJ
+/.idea/caches
+/.idea/libraries
+/.idea/modules.xml
+/.idea/workspace.xml
+/.idea/navEditor.xml
+/.idea/assetWizardSettings.xml
+
+# Generated binaries & local configuration
+*.apk
+*.aab
+*.ap_
+local.properties
+/local.properties
+.env
+*.jks
+*.keystore
+debug.keystore
+google-services.json
+
+# OS files
+.DS_Store
+Thumbs.db

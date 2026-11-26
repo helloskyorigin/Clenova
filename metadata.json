@@ -1,0 +1,6 @@
+{
+  "name": "CLENOVA",
+  "description": "Your phone. On autopilot. Intelligent, user-controlled Android storage management foundation.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
