@@ -22,6 +22,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.window.PopupProperties
+import com.clenova.app.core.localization.AppLanguages
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -51,7 +54,14 @@ fun SettingsScreen(
     val colors = ClenovaThemeTokens.colors
     val context = LocalContext.current
     val showPlanned = BuildConfig.DEBUG && showUnfinishedRows
-    var themeMenu by rememberSaveable { mutableStateOf(false) }
+    var themeMenu by remember { mutableStateOf(false) }
+    var languageMenu by remember { mutableStateOf(false) }
+    var search by remember { mutableStateOf("") }
+    val configuration = LocalConfiguration.current
+    val localeTag = remember(context, configuration) { AppLanguages.current(context) }
+    val languageLabel = AppLanguages.supported.firstOrNull { it.tag == localeTag }?.nativeName
+        ?: stringResource(R.string.settings_language_system)
+    var languageFailed by remember { mutableStateOf(false) }
     var actionFailed by rememberSaveable { mutableStateOf(false) }
     val themeLabel = when (preferences.themePreference) {
         ThemePreference.LIGHT -> R.string.settings_theme_light
@@ -89,7 +99,8 @@ fun SettingsScreen(
                     SettingsRow(Icons.Outlined.Brightness6, R.string.settings_theme_label, value = stringResource(themeLabel),
                         dropdown = true, tag = "settings_appearance", onClick = { themeMenu = true })
                     DropdownMenu(expanded = themeMenu, onDismissRequest = { themeMenu = false },
-                        modifier = Modifier.widthIn(min = 180.dp).background(colors.surfaceElevated)) {
+                        modifier = Modifier.widthIn(min = 196.dp, max = 260.dp).background(colors.surfaceElevated),
+                        properties = PopupProperties(focusable = true)) {
                         listOf(
                             Triple(ThemePreference.LIGHT, R.string.settings_theme_light, "theme_option_light"),
                             Triple(ThemePreference.DARK, R.string.settings_theme_dark, "theme_option_dark"),
@@ -102,7 +113,41 @@ fun SettingsScreen(
                         }
                     }
                 }
-                if (showPlanned) SettingsRow(Icons.Outlined.Language, R.string.settings_language, value = "English", dropdown = true)
+                Box(Modifier.fillMaxWidth()) {
+                    SettingsRow(Icons.Outlined.Language, R.string.settings_language, value = languageLabel,
+                        dropdown = true, tag = "settings_language", onClick = { search = ""; languageMenu = true })
+                    DropdownMenu(expanded = languageMenu, onDismissRequest = { languageMenu = false },
+                        modifier = Modifier.widthIn(min = 250.dp, max = 320.dp).heightIn(max = 420.dp).background(colors.surfaceElevated),
+                        properties = PopupProperties(focusable = true)) {
+                        OutlinedTextField(value = search, onValueChange = { search = it }, singleLine = true,
+                            placeholder = { Text(stringResource(R.string.settings_language_search)) },
+                            leadingIcon = { Icon(Icons.Outlined.Search, null) },
+                            shape = ClenovaShapes.tile,
+                            modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 6.dp).testTag("language_search"))
+                        if (search.isBlank()) DropdownMenuItem(
+                            text = { Text(stringResource(R.string.settings_language_system), color = colors.textPrimary) },
+                            onClick = { languageMenu = false; languageFailed = !AppLanguages.select(context, "") },
+                            trailingIcon = { if (localeTag.isEmpty()) Icon(Icons.Outlined.Check, null, tint = colors.primary) },
+                            modifier = Modifier.testTag("language_system"))
+                        val matches = AppLanguages.supported.filter {
+                            it.nativeName.contains(search.trim(), ignoreCase = true) || it.englishName.contains(search.trim(), ignoreCase = true)
+                        }
+                        matches.forEach { language ->
+                            DropdownMenuItem(
+                                text = {
+                                    Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                                        Text(language.nativeName, color = colors.textPrimary, style = MaterialTheme.typography.bodyLarge)
+                                        if (language.nativeName != language.englishName) Text(language.englishName, color = colors.textSecondary, style = MaterialTheme.typography.bodySmall)
+                                    }
+                                },
+                                trailingIcon = { if (localeTag == language.tag) Icon(Icons.Outlined.Check, null, tint = colors.primary) },
+                                onClick = { languageMenu = false; languageFailed = !AppLanguages.select(context, language.tag) },
+                                modifier = Modifier.testTag("language_${language.tag}"))
+                        }
+                        if (matches.isEmpty()) Text(stringResource(R.string.settings_language_no_results),
+                            color = colors.textSecondary, modifier = Modifier.padding(16.dp))
+                    }
+                }
                 Row(Modifier.fillMaxWidth().heightIn(min = 52.dp), verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(14.dp)) {
                     Icon(Icons.Outlined.Vibration, null, Modifier.size(22.dp), tint = colors.textPrimary)
@@ -147,6 +192,9 @@ fun SettingsScreen(
             }
         }
     }
+    if (languageFailed) AlertDialog(onDismissRequest = { languageFailed = false },
+        title = { Text(stringResource(R.string.settings_language_failed)) },
+        confirmButton = { TextButton(onClick = { languageFailed = false }) { Text(stringResource(android.R.string.ok)) } })
     if (actionFailed) AlertDialog(onDismissRequest = { actionFailed = false },
         title = { Text(stringResource(R.string.settings_action_unavailable)) },
         text = { Text(stringResource(R.string.settings_action_unavailable_body, SUPPORT_EMAIL)) },

@@ -1,6 +1,8 @@
 package com.example
 
 import android.animation.ValueAnimator
+import android.content.Context
+import com.clenova.app.core.localization.AppLanguages
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -21,6 +23,10 @@ import com.clenova.app.feature.splash.SplashMotionMillis
 import kotlinx.coroutines.delay
 
 class MainActivity : ComponentActivity() {
+    override fun attachBaseContext(newBase: Context) {
+        super.attachBaseContext(AppLanguages.wrapLegacy(newBase))
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         installSplashScreen()
         super.onCreate(savedInstanceState)
