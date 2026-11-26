@@ -26,6 +26,7 @@ import com.clenova.app.domain.repository.PreferencesRepository
 import com.clenova.app.domain.repository.StorageRepository
 import com.clenova.app.feature.agent.AgentScreen
 import com.clenova.app.feature.clean.CleanScreen
+import com.clenova.app.feature.clean.SmartScanScreen
 import com.clenova.app.feature.guard.GuardScreen
 import com.clenova.app.feature.home.HomeScreen
 import com.clenova.app.feature.home.HomeViewModel
@@ -43,6 +44,7 @@ fun NavDestination?.toClenovaRoute(): ClenovaRoute? = when {
     hasRoute<ClenovaRoute.StorageDetails>() -> ClenovaRoute.StorageDetails
     hasRoute<ClenovaRoute.AutopilotSetup>() -> ClenovaRoute.AutopilotSetup
     hasRoute<ClenovaRoute.CleanupReview>() -> ClenovaRoute.CleanupReview
+    hasRoute<ClenovaRoute.SmartScan>() -> ClenovaRoute.SmartScan
     else -> null
 }
 
@@ -107,6 +109,7 @@ fun ClenovaNavHost(
                     onSelectionHaptic()
                     navController.navigate(ClenovaRoute.StorageDetails) { launchSingleTop = true }
                 },
+                onOpenSmartScan = { onSelectionHaptic(); navController.navigate(ClenovaRoute.SmartScan) { launchSingleTop = true } },
                 onOpenClean = { onSelectionHaptic(); navController.navigateTopLevel(ClenovaRoute.Clean) },
                 onOpenGuard = { onSelectionHaptic(); navController.navigateTopLevel(ClenovaRoute.Guard) },
                 onOpenSettings = {
@@ -119,7 +122,15 @@ fun ClenovaNavHost(
         }
 
         composable<ClenovaRoute.Clean> {
-            CleanScreen()
+            CleanScreen(onSmartScan = { onSelectionHaptic(); navController.navigate(ClenovaRoute.SmartScan) { launchSingleTop = true } })
+        }
+
+        composable<ClenovaRoute.SmartScan> {
+            SmartScanScreen(
+                sample = sample,
+                onBack = { onSelectionHaptic(); navController.popBackStack() },
+                onSelectionHaptic = onSelectionHaptic,
+            )
         }
 
         composable<ClenovaRoute.Guard> {

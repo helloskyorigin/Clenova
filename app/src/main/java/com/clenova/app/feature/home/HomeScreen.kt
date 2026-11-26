@@ -59,6 +59,7 @@ fun HomeScreen(
     onOpenGuard: () -> Unit,
     onOpenStorage: () -> Unit,
     onOpenAutopilot: () -> Unit,
+    onOpenSmartScan: () -> Unit,
     sampleAutoOn: Boolean = true,
     sampleApprovedMask: Int = 0,
     onSampleAutoChange: (Boolean) -> Unit = {},
@@ -101,7 +102,7 @@ fun HomeScreen(
                     }
                 }
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    QuickAction(Icons.Outlined.CropFree, R.string.home_smart_scan, { dialogTitle = R.string.home_smart_scan }, Modifier.weight(1f))
+                    QuickAction(Icons.Outlined.CropFree, R.string.home_smart_scan, onOpenSmartScan, Modifier.weight(1f))
                     QuickAction(Icons.Outlined.ContentCopy, R.string.clean_tool_duplicates_title, { dialogTitle = R.string.clean_tool_duplicates_title }, Modifier.weight(1f))
                     QuickAction(Icons.Outlined.Compress, R.string.home_compress, { dialogTitle = R.string.home_compress }, Modifier.weight(1f))
                 }
@@ -276,7 +277,7 @@ private fun AutopilotPanel(status: AutopilotStatus, onOpenAgent: () -> Unit, onO
 @Composable
 private fun QuickAction(icon: ImageVector, label: Int, onClick: () -> Unit, modifier: Modifier = Modifier) {
     val colors = ClenovaThemeTokens.colors
-    Column(modifier.clip(ClenovaShapes.tile).clickable(onClick = onClick).padding(vertical = 5.dp),
+    Column(modifier.clip(ClenovaShapes.tile).clickable(onClick = onClick).then(if (label == R.string.home_smart_scan) Modifier.testTag("home_smart_scan") else Modifier).padding(vertical = 5.dp),
         horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(9.dp)) {
         Box(Modifier.size(58.dp).clip(RoundedCornerShape(19.dp)).background(colors.softBlue), contentAlignment = Alignment.Center) {
             Icon(icon, null, Modifier.size(28.dp), tint = colors.primary)

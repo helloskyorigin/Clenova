@@ -166,6 +166,26 @@ class ClenovaNavigationRobolectricTest {
     }
 
     @Test
+    fun `smart scan opens from home and does not fabricate release results`() {
+        composeTestRule.setContent {
+            ClenovaApp(
+                storageRepository = FakeStorageRepository(),
+                preferencesRepository = FakePreferencesRepository(),
+                showSampleHome = false,
+            )
+        }
+        composeTestRule.waitForIdle()
+        composeTestRule.onNodeWithTag("home_smart_scan").performScrollTo().performClick()
+        composeTestRule.waitForIdle()
+        composeTestRule.onNodeWithText("Smart Scan is not ready yet").assertIsDisplayed()
+        composeTestRule.onNodeWithTag("scan_result_total").assertDoesNotExist()
+        composeTestRule.onNodeWithTag("nav_tab_home").assertDoesNotExist()
+        composeTestRule.onNodeWithTag("scan_back").performClick()
+        composeTestRule.waitForIdle()
+        composeTestRule.onNodeWithTag("nav_tab_home").assertIsDisplayed()
+    }
+
+    @Test
     fun `home displays honest unavailable state when storage cannot be read`() {
         composeTestRule.setContent {
             ClenovaApp(

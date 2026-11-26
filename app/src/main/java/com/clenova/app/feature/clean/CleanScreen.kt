@@ -24,6 +24,7 @@ import androidx.compose.material.icons.outlined.FolderZip
 import androidx.compose.material.icons.outlined.Screenshot
 import androidx.compose.material.icons.outlined.Swipe
 import androidx.compose.material.icons.outlined.VideoSettings
+import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -60,6 +61,7 @@ private val plannedCleanTools = listOf(
 @Composable
 fun CleanScreen(
     modifier: Modifier = Modifier,
+    onSmartScan: () -> Unit,
 ) {
     val colors = ClenovaThemeTokens.colors
     val scrollState = rememberScrollState()
@@ -90,6 +92,10 @@ fun CleanScreen(
             )
 
             Spacer(modifier = Modifier.height(ClenovaSpacing.xs))
+
+            Button(onClick = onSmartScan, modifier = Modifier.fillMaxWidth(), shape = ClenovaShapes.pill) {
+                Text(stringResource(R.string.home_smart_scan))
+            }
 
             plannedCleanTools.forEach { tool ->
                 ClenovaSurfaceCard {

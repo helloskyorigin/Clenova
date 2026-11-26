@@ -39,6 +39,9 @@ sealed interface ClenovaRoute {
 
     @Serializable
     data object CleanupReview : ClenovaRoute
+
+    @Serializable
+    data object SmartScan : ClenovaRoute
 }
 
 enum class PillDestination(

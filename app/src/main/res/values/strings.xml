@@ -163,6 +163,27 @@
     <string name="review_empty_title">No cleanup plan yet</string>
     <string name="review_empty_body">A cleanup plan will appear here when a supported scan has prepared one.</string>
 
+    <!-- Smart Scan -->
+    <string name="scan_stage_inventory">Checking storage</string>
+    <string name="scan_stage_duplicates">Finding duplicates</string>
+    <string name="scan_stage_screenshots">Checking screenshots</string>
+    <string name="scan_stage_videos">Reviewing large videos</string>
+    <string name="scan_stage_plan">Preparing recommendations</string>
+    <string name="scan_percent">%1$d%%</string>
+    <string name="scan_running_title">Scanning your phone</string>
+    <string name="scan_complete">Scan complete</string>
+    <string name="scan_potential">Potential space to recover</string>
+    <string name="scan_findings">What we found</string>
+    <string name="scan_similar_detail">Review separately · not included in total</string>
+    <string name="scan_similar_count">36 photos</string>
+    <string name="scan_cancel">Cancel scan</string>
+    <string name="scan_cancel_title">Stop this scan?</string>
+    <string name="scan_cancel_body">You can start another scan whenever you want.</string>
+    <string name="scan_continue">Keep scanning</string>
+    <string name="scan_rescan">Rescan</string>
+    <string name="scan_unavailable_title">Smart Scan is not ready yet</string>
+    <string name="scan_unavailable_body">Media scanning is not available in this build. Your files have not been scanned or changed.</string>
+
     <!-- Settings -->
     <string name="settings_title">Settings</string>
     <string name="settings_section_preferences">PREFERENCES</string>
