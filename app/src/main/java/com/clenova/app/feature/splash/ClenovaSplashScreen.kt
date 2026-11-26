@@ -61,6 +61,7 @@ fun ClenovaSplashScreen() {
     BoxWithConstraints(
         modifier = Modifier.fillMaxSize().testTag("clenova_splash"),
     ) {
+        val narrow = maxWidth < 350.dp
         val logoSize = minOf(maxWidth * 0.54f, maxHeight * 0.31f, 240.dp)
         val compact = maxHeight < 480.dp
         val logoCenter = if (compact) 0.30f else 0.385f
@@ -110,7 +111,7 @@ fun ClenovaSplashScreen() {
                 color = Color(0xFF123457),
                 fontFamily = ManropeFontFamily,
                 fontWeight = FontWeight.Bold,
-                fontSize = if (maxWidth < 350.dp) 34.sp else 42.sp,
+                fontSize = if (narrow) 34.sp else 42.sp,
                 lineHeight = 48.sp,
                 letterSpacing = (-1.2).sp,
                 textAlign = TextAlign.Center,
@@ -120,7 +121,7 @@ fun ClenovaSplashScreen() {
                 text = stringResource(R.string.app_tagline),
                 color = Color(0xFF294A70),
                 fontFamily = ManropeFontFamily,
-                fontSize = if (maxWidth < 350.dp) 15.sp else 17.sp,
+                fontSize = if (narrow) 15.sp else 17.sp,
                 textAlign = TextAlign.Center,
             )
         }

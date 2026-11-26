@@ -18,7 +18,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.outlined.ChevronRight
 import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -141,7 +140,7 @@ private fun PhotoStrip(title: Int, count: String?, preview: Boolean, similar: Bo
         Row(Modifier.fillMaxWidth().heightIn(min = 38.dp), verticalAlignment = Alignment.CenterVertically) {
             Text(stringResource(title), Modifier.weight(1f), style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.SemiBold), color = colors.textPrimary)
             if (count != null) Text(count, style = MaterialTheme.typography.bodySmall, color = colors.primary)
-            Icon(Icons.AutoMirrored.Outlined.ChevronRight, null, Modifier.size(18.dp), tint = colors.primary)
+            Icon(Icons.Outlined.ChevronRight, null, Modifier.size(18.dp), tint = colors.primary)
         }
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(4.dp)) {
             repeat(3) { index ->
@@ -164,7 +163,7 @@ private fun CleanFileRow(icon: ImageVector, title: Int, value: String?, tag: Str
         Icon(icon, null, Modifier.size(24.dp), tint = colors.textPrimary)
         Text(stringResource(title), Modifier.weight(1f), style = MaterialTheme.typography.bodyLarge, color = colors.textPrimary)
         if (value != null) Text(value, style = MaterialTheme.typography.bodySmall, color = colors.textSecondary)
-        Icon(Icons.AutoMirrored.Outlined.ChevronRight, null, Modifier.size(18.dp), tint = colors.textSecondary)
+        Icon(Icons.Outlined.ChevronRight, null, Modifier.size(18.dp), tint = colors.textSecondary)
     }
 }
 

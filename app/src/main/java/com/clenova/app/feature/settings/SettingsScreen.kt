@@ -12,7 +12,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
-import androidx.compose.material.icons.automirrored.outlined.ChevronRight
 import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -264,7 +263,7 @@ private fun SettingsRow(icon: ImageVector, title: Int, value: String? = null, dr
         Icon(icon, null, Modifier.size(22.dp), tint = tint)
         Text(stringResource(title), Modifier.weight(1f), color = tint, style = MaterialTheme.typography.bodyLarge)
         if (value != null) Text(value, color = colors.textSecondary, style = MaterialTheme.typography.bodySmall)
-        Icon(if (dropdown) Icons.Outlined.KeyboardArrowDown else Icons.AutoMirrored.Outlined.ChevronRight, null,
+        Icon(if (dropdown) Icons.Outlined.KeyboardArrowDown else Icons.Outlined.ChevronRight, null,
             Modifier.size(19.dp), tint = colors.textSecondary)
     }
 }
