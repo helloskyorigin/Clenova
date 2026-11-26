@@ -306,4 +306,8 @@
     <string name="legal_licenses_intro">依存ライブラリの通知はビルド時のメタデータから生成されます。同梱素材は別途通知されます。ライセンス文は原文のままです。</string>
     <string name="legal_dependency_notices">ライブラリ通知</string>
     <string name="legal_read_license">ライセンスを読む</string>
+    <string name="clean_history">クリーンアップ履歴</string>
+    <string name="clean_history_empty">完了したクリーンアップはまだありません。ファイルは変更されていません。</string>
+    <string name="clean_preview">デザインプレビュー</string>
+    <string name="clean_review_all">すべて確認</string>
 </resources>

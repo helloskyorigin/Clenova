@@ -306,4 +306,8 @@
     <string name="legal_licenses_intro">تُنشأ إشعارات التبعيات من بيانات المكتبات أثناء البناء. للأصول المضمنة إشعارات منفصلة. تبقى نصوص التراخيص بلغتها الأصلية.</string>
     <string name="legal_dependency_notices">إشعارات المكتبات</string>
     <string name="legal_read_license">قراءة الترخيص</string>
+    <string name="clean_history">سجل التنظيف</string>
+    <string name="clean_history_empty">لا توجد عمليات تنظيف مكتملة بعد. لم تتغير ملفاتك.</string>
+    <string name="clean_preview">معاينة التصميم</string>
+    <string name="clean_review_all">مراجعة الكل</string>
 </resources>

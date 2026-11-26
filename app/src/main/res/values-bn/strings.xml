@@ -306,4 +306,8 @@
     <string name="legal_licenses_intro">বিল্ডের সময় লাইব্রেরি মেটাডেটা থেকে নির্ভরতার বিজ্ঞপ্তি তৈরি হয়। অন্তর্ভুক্ত সম্পদের আলাদা বিজ্ঞপ্তি আছে। লাইসেন্স মূল ভাষায় থাকে।</string>
     <string name="legal_dependency_notices">লাইব্রেরির বিজ্ঞপ্তি</string>
     <string name="legal_read_license">লাইসেন্স পড়ুন</string>
+    <string name="clean_history">পরিষ্কারের ইতিহাস</string>
+    <string name="clean_history_empty">এখনও কোনো পরিষ্কার সম্পন্ন হয়নি। আপনার ফাইল পরিবর্তন করা হয়নি।</string>
+    <string name="clean_preview">ডিজাইন প্রিভিউ</string>
+    <string name="clean_review_all">সব পর্যালোচনা করুন</string>
 </resources>

@@ -306,4 +306,8 @@
     <string name="legal_licenses_intro">Abhängigkeitshinweise werden beim Build aus Bibliotheksmetadaten erzeugt. Enthaltene Ressourcen haben eigene Hinweise. Lizenztexte bleiben in der Originalsprache.</string>
     <string name="legal_dependency_notices">Bibliothekshinweise</string>
     <string name="legal_read_license">Lizenz lesen</string>
+    <string name="clean_history">Bereinigungsverlauf</string>
+    <string name="clean_history_empty">Noch keine abgeschlossenen Bereinigungen. Deine Dateien wurden nicht geändert.</string>
+    <string name="clean_preview">Designvorschau</string>
+    <string name="clean_review_all">Alles prüfen</string>
 </resources>

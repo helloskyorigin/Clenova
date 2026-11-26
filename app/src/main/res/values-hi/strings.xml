@@ -306,4 +306,8 @@
     <string name="legal_licenses_intro">डिपेंडेंसी नोटिस बिल्ड के समय लाइब्रेरी मेटाडेटा से बनते हैं। शामिल एसेट के अलग नोटिस हैं। लाइसेंस मूल भाषा में हैं।</string>
     <string name="legal_dependency_notices">लाइब्रेरी नोटिस</string>
     <string name="legal_read_license">लाइसेंस पढ़ें</string>
+    <string name="clean_history">सफ़ाई का इतिहास</string>
+    <string name="clean_history_empty">अभी कोई सफ़ाई पूरी नहीं हुई है। आपकी फ़ाइलें नहीं बदली गई हैं।</string>
+    <string name="clean_preview">डिज़ाइन प्रीव्यू</string>
+    <string name="clean_review_all">सभी की समीक्षा करें</string>
 </resources>

@@ -306,4 +306,8 @@
     <string name="legal_licenses_intro">Pemberitahuan dependensi dibuat dari metadata pustaka saat build. Aset bawaan memiliki pemberitahuan terpisah. Teks lisensi tetap dalam bahasa asli.</string>
     <string name="legal_dependency_notices">Pemberitahuan pustaka</string>
     <string name="legal_read_license">Baca lisensi</string>
+    <string name="clean_history">Riwayat pembersihan</string>
+    <string name="clean_history_empty">Belum ada pembersihan selesai. File Anda tidak diubah.</string>
+    <string name="clean_preview">Pratinjau desain</string>
+    <string name="clean_review_all">Tinjau semua</string>
 </resources>

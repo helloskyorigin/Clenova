@@ -306,4 +306,8 @@
     <string name="legal_licenses_intro">Les notices des dépendances sont générées à partir des métadonnées de compilation. Les ressources intégrées ont des notices distinctes. Les licences restent dans leur langue originale.</string>
     <string name="legal_dependency_notices">Notices des bibliothèques</string>
     <string name="legal_read_license">Lire la licence</string>
+    <string name="clean_history">Historique de nettoyage</string>
+    <string name="clean_history_empty">Aucun nettoyage terminé. Vos fichiers n’ont pas été modifiés.</string>
+    <string name="clean_preview">Aperçu de conception</string>
+    <string name="clean_review_all">Tout examiner</string>
 </resources>

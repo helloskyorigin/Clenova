@@ -306,4 +306,8 @@
     <string name="legal_licenses_intro">Bağımlılık bildirimleri derleme sırasında kitaplık meta verilerinden oluşturulur. Dahili varlıkların ayrı bildirimleri vardır. Lisans metinleri özgün dilinde kalır.</string>
     <string name="legal_dependency_notices">Kitaplık bildirimleri</string>
     <string name="legal_read_license">Lisansı oku</string>
+    <string name="clean_history">Temizlik geçmişi</string>
+    <string name="clean_history_empty">Henüz tamamlanan temizlik yok. Dosyalarınız değiştirilmedi.</string>
+    <string name="clean_preview">Tasarım önizlemesi</string>
+    <string name="clean_review_all">Tümünü incele</string>
 </resources>

@@ -306,4 +306,8 @@
     <string name="legal_licenses_intro">依赖库声明由构建时的库元数据生成。内置资源有单独声明。许可证保留原文。</string>
     <string name="legal_dependency_notices">库声明</string>
     <string name="legal_read_license">阅读许可证</string>
+    <string name="clean_history">清理记录</string>
+    <string name="clean_history_empty">尚无已完成的清理。你的文件没有被更改。</string>
+    <string name="clean_preview">设计预览</string>
+    <string name="clean_review_all">查看全部</string>
 </resources>

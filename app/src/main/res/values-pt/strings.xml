@@ -306,4 +306,8 @@
     <string name="legal_licenses_intro">Avisos de dependências são gerados dos metadados das bibliotecas durante a compilação. Recursos incluídos têm avisos próprios. Licenças permanecem no idioma original.</string>
     <string name="legal_dependency_notices">Avisos de bibliotecas</string>
     <string name="legal_read_license">Ler licença</string>
+    <string name="clean_history">Histórico de limpeza</string>
+    <string name="clean_history_empty">Nenhuma limpeza concluída. Seus arquivos não foram alterados.</string>
+    <string name="clean_preview">Prévia do design</string>
+    <string name="clean_review_all">Revisar tudo</string>
 </resources>

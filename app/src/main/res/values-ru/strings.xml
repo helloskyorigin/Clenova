@@ -306,4 +306,8 @@
     <string name="legal_licenses_intro">Уведомления о зависимостях создаются из метаданных библиотек при сборке. Встроенные ресурсы имеют отдельные уведомления. Лицензии остаются на исходном языке.</string>
     <string name="legal_dependency_notices">Уведомления библиотек</string>
     <string name="legal_read_license">Читать лицензию</string>
+    <string name="clean_history">История очистки</string>
+    <string name="clean_history_empty">Завершённых очисток пока нет. Ваши файлы не изменены.</string>
+    <string name="clean_preview">Предпросмотр дизайна</string>
+    <string name="clean_review_all">Проверить всё</string>
 </resources>

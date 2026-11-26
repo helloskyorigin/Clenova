@@ -306,4 +306,8 @@
     <string name="legal_licenses_intro">의존성 고지는 빌드 시 라이브러리 메타데이터에서 생성됩니다. 포함된 에셋에는 별도 고지가 있습니다. 라이선스 원문은 그대로 유지됩니다.</string>
     <string name="legal_dependency_notices">라이브러리 고지</string>
     <string name="legal_read_license">라이선스 읽기</string>
+    <string name="clean_history">정리 기록</string>
+    <string name="clean_history_empty">완료된 정리가 없습니다. 파일은 변경되지 않았습니다.</string>
+    <string name="clean_preview">디자인 미리보기</string>
+    <string name="clean_review_all">모두 검토</string>
 </resources>

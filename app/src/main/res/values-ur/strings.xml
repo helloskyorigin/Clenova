@@ -306,4 +306,8 @@
     <string name="legal_licenses_intro">ڈپینڈنسی نوٹس بلڈ کے وقت لائبریری میٹا ڈیٹا سے بنتے ہیں۔ شامل اثاثوں کے الگ نوٹس ہیں۔ لائسنس اصل زبان میں رہتے ہیں۔</string>
     <string name="legal_dependency_notices">لائبریری نوٹس</string>
     <string name="legal_read_license">لائسنس پڑھیں</string>
+    <string name="clean_history">صفائی کی تاریخ</string>
+    <string name="clean_history_empty">ابھی کوئی صفائی مکمل نہیں ہوئی۔ آپ کی فائلیں تبدیل نہیں ہوئیں۔</string>
+    <string name="clean_preview">ڈیزائن پیش نظارہ</string>
+    <string name="clean_review_all">سب کا جائزہ لیں</string>
 </resources>
