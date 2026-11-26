@@ -25,6 +25,10 @@ import com.clenova.app.core.designsystem.ClenovaMotion
 import com.clenova.app.domain.repository.PreferencesRepository
 import com.clenova.app.domain.repository.StorageRepository
 import com.clenova.app.feature.agent.AgentScreen
+import com.clenova.app.feature.agent.AgentAction
+import com.clenova.app.data.agent.AgentScanCache
+import com.clenova.app.data.agent.AgentReport
+import android.os.StatFs
 import com.clenova.app.data.agent.AgentReportStore
 import com.clenova.app.data.agent.AgentScheduler
 import com.clenova.app.data.preferences.DataStorePreferencesRepository
@@ -104,6 +108,13 @@ fun ClenovaNavHost(
     var sampleGuardMask by rememberSaveable { mutableIntStateOf(GuardDesignData.INITIAL_MASK) }
     val sample = BuildConfig.DEBUG && showSampleHome
     var scanResult by remember { mutableStateOf<MediaScanResult?>(null) }
+    var agentTarget by rememberSaveable { mutableStateOf(AgentAction.ALL.name) }
+    val context = LocalContext.current
+    fun invalidateReview() {
+        scanResult = null
+        AgentScanCache.clear()
+        AgentReportStore(context).clear()
+    }
     val lifecycleOwner = LocalLifecycleOwner.current
     DisposableEffect(lifecycleOwner) {
         val observer = LifecycleEventObserver { _, event -> if (event == Lifecycle.Event.ON_STOP) scanResult = null }
@@ -187,8 +198,8 @@ fun ClenovaNavHost(
                 result = scanResult,
                 activityLifecycleOwner = lifecycleOwner,
                 onBack = { onSelectionHaptic(); navController.popBackStack() },
-                onScan = { onSelectionHaptic(); navController.navigate(ClenovaRoute.SmartScan) { launchSingleTop = true } },
-                onInvalidate = { scanResult = null },
+                onScan = { onSelectionHaptic(); if (navController.previousBackStackEntry?.destination.toClenovaRoute() == ClenovaRoute.CleanupReview) { invalidateReview(); navController.popBackStack() } else navController.navigate(ClenovaRoute.SmartScan) { launchSingleTop = true } },
+                onInvalidate = { invalidateReview() },
                 onSelectionHaptic = onSelectionHaptic,
             )
         }
@@ -198,8 +209,8 @@ fun ClenovaNavHost(
                 result = scanResult,
                 activityLifecycleOwner = lifecycleOwner,
                 onBack = { onSelectionHaptic(); navController.popBackStack() },
-                onScan = { onSelectionHaptic(); navController.navigate(ClenovaRoute.SmartScan) { launchSingleTop = true } },
-                onInvalidate = { scanResult = null },
+                onScan = { onSelectionHaptic(); if (navController.previousBackStackEntry?.destination.toClenovaRoute() == ClenovaRoute.CleanupReview) { invalidateReview(); navController.popBackStack() } else navController.navigate(ClenovaRoute.SmartScan) { launchSingleTop = true } },
+                onInvalidate = { invalidateReview() },
                 onSelectionHaptic = onSelectionHaptic,
                 similar = true,
             )
@@ -207,20 +218,20 @@ fun ClenovaNavHost(
         composable<ClenovaRoute.Screenshots> {
             ScreenshotsScreen(result = scanResult, owner = lifecycleOwner,
                 onBack = { onSelectionHaptic(); navController.popBackStack() },
-                onScan = { onSelectionHaptic(); navController.navigate(ClenovaRoute.SmartScan) { launchSingleTop = true } },
-                onInvalidate = { scanResult = null }, onHaptic = onSelectionHaptic)
+                onScan = { onSelectionHaptic(); if (navController.previousBackStackEntry?.destination.toClenovaRoute() == ClenovaRoute.CleanupReview) { invalidateReview(); navController.popBackStack() } else navController.navigate(ClenovaRoute.SmartScan) { launchSingleTop = true } },
+                onInvalidate = { invalidateReview() }, onHaptic = onSelectionHaptic)
         }
         composable<ClenovaRoute.LargeFiles> {
             ScreenshotsScreen(result = scanResult, owner = lifecycleOwner,
                 onBack = { onSelectionHaptic(); navController.popBackStack() },
-                onScan = { onSelectionHaptic(); navController.navigate(ClenovaRoute.SmartScan) { launchSingleTop = true } },
-                onInvalidate = { scanResult = null }, onHaptic = onSelectionHaptic, largeMedia = true)
+                onScan = { onSelectionHaptic(); if (navController.previousBackStackEntry?.destination.toClenovaRoute() == ClenovaRoute.CleanupReview) { invalidateReview(); navController.popBackStack() } else navController.navigate(ClenovaRoute.SmartScan) { launchSingleTop = true } },
+                onInvalidate = { invalidateReview() }, onHaptic = onSelectionHaptic, largeMedia = true)
         }
         composable<ClenovaRoute.LargeVideos> {
             ScreenshotsScreen(result = scanResult, owner = lifecycleOwner,
                 onBack = { onSelectionHaptic(); navController.popBackStack() },
-                onScan = { onSelectionHaptic(); navController.navigate(ClenovaRoute.SmartScan) { launchSingleTop = true } },
-                onInvalidate = { scanResult = null }, onHaptic = onSelectionHaptic, largeMedia = true, videosOnly = true)
+                onScan = { onSelectionHaptic(); if (navController.previousBackStackEntry?.destination.toClenovaRoute() == ClenovaRoute.CleanupReview) { invalidateReview(); navController.popBackStack() } else navController.navigate(ClenovaRoute.SmartScan) { launchSingleTop = true } },
+                onInvalidate = { invalidateReview() }, onHaptic = onSelectionHaptic, largeMedia = true, videosOnly = true)
         }
         composable<ClenovaRoute.CleanupHistory> {
             CleanupHistoryScreen(onBack = { onSelectionHaptic(); navController.popBackStack() })
@@ -228,8 +239,8 @@ fun ClenovaNavHost(
         composable<ClenovaRoute.SwipeClean> {
             SwipeCleanScreen(result = scanResult, owner = lifecycleOwner,
                 onBack = { onSelectionHaptic(); navController.popBackStack() },
-                onScan = { onSelectionHaptic(); navController.navigate(ClenovaRoute.SmartScan) { launchSingleTop = true } },
-                onInvalidate = { scanResult = null }, onHaptic = onSelectionHaptic)
+                onScan = { onSelectionHaptic(); if (navController.previousBackStackEntry?.destination.toClenovaRoute() == ClenovaRoute.CleanupReview) { invalidateReview(); navController.popBackStack() } else navController.navigate(ClenovaRoute.SmartScan) { launchSingleTop = true } },
+                onInvalidate = { invalidateReview() }, onHaptic = onSelectionHaptic)
         }
         composable<ClenovaRoute.SmartScan> {
             SmartScanScreen(
@@ -250,8 +261,8 @@ fun ClenovaNavHost(
                 onMaskChange = { sampleGuardMask = it and GuardDesignData.ALL_MASK; sampleApprovedMask = 0 },
                 onSelectionHaptic = onSelectionHaptic)
             else RealGuardScreen(result = scanResult,
-                onScan = { onSelectionHaptic(); navController.navigate(ClenovaRoute.SmartScan) { launchSingleTop = true } },
-                onChanged = { protected -> scanResult = scanResult?.copy(protectedUris = protected) },
+                onScan = { onSelectionHaptic(); if (navController.previousBackStackEntry?.destination.toClenovaRoute() == ClenovaRoute.CleanupReview) { invalidateReview(); navController.popBackStack() } else navController.navigate(ClenovaRoute.SmartScan) { launchSingleTop = true } },
+                onChanged = { protected -> scanResult = scanResult?.copy(protectedUris = protected); AgentScanCache.clear(); AgentReportStore(context).clear() },
                 onHaptic = onSelectionHaptic)
         }
 
@@ -283,7 +294,8 @@ fun ClenovaNavHost(
                     catch (_: Exception) { failed = true }
                 } },
                 onCheck = { if (production) AgentScheduler.checkNow(context) },
-                onReview = { onSelectionHaptic(); navController.navigate(ClenovaRoute.SmartScan) { launchSingleTop = true } },
+                onReview = { onSelectionHaptic(); agentTarget = AgentAction.ALL.name; scanResult = AgentScanCache.take(context); navController.navigate(ClenovaRoute.CleanupReview) { launchSingleTop = true } },
+                onReviewCategory = { target -> onSelectionHaptic(); agentTarget = target.name; scanResult = AgentScanCache.take(context); navController.navigate(ClenovaRoute.CleanupReview) { launchSingleTop = true } },
                 onHistory = { navController.navigate(ClenovaRoute.CleanupHistory) { launchSingleTop = true } },
                 onSettings = { navController.navigate(ClenovaRoute.Settings) { launchSingleTop = true } },
                 onGuard = { navController.navigateTopLevel(ClenovaRoute.Guard) },
@@ -291,7 +303,23 @@ fun ClenovaNavHost(
         }
 
         composable<ClenovaRoute.CleanupReview> {
-            CleanupReviewScreen(
+            if (!sample) {
+                SmartScanScreen(
+                    agentAction = AgentAction.valueOf(agentTarget), initialResult = scanResult,
+                    onBack = { scanResult = null; onSelectionHaptic(); navController.popBackStack() },
+                    onSelectionHaptic = onSelectionHaptic,
+                    activityLifecycleOwner = lifecycleOwner,
+                    onResult = { snapshot ->
+                        scanResult = snapshot
+                        if (snapshot != null) runCatching {
+                            AgentReportStore(context).save(AgentReport.from(snapshot, StatFs(context.filesDir.absolutePath).availableBytes, System.currentTimeMillis()))
+                        }
+                    },
+                    onDuplicates = { onSelectionHaptic(); navController.navigate(ClenovaRoute.Duplicates) { launchSingleTop = true } },
+                    onScreenshots = { onSelectionHaptic(); navController.navigate(ClenovaRoute.Screenshots) { launchSingleTop = true } },
+                    onLargeVideos = { onSelectionHaptic(); navController.navigate(ClenovaRoute.LargeVideos) { launchSingleTop = true } },
+                )
+            } else CleanupReviewScreen(
                 sample = sample && sampleAutoOn,
                 protectedCount = GuardDesignData.count(sampleGuardMask),
                 approvedMask = if (sample) sampleApprovedMask else 0,

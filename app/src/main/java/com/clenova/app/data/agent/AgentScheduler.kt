@@ -18,6 +18,7 @@ internal object AgentScheduler {
     const val PERIODIC = "clenova_agent_periodic"
     const val IMMEDIATE = "clenova_agent_now"
     fun activate(context: Context, days: Int) {
+        AgentScanCache.clear()
         val manager = WorkManager.getInstance(context.applicationContext)
         val request = PeriodicWorkRequestBuilder<AgentCheckWorker>(days.toLong(), TimeUnit.DAYS)
             .setInitialDelay(days.toLong(), TimeUnit.DAYS)
@@ -30,6 +31,7 @@ internal object AgentScheduler {
             IMMEDIATE, ExistingWorkPolicy.REPLACE, OneTimeWorkRequestBuilder<AgentCheckWorker>().build())
     }
     fun pause(context: Context) {
+        AgentScanCache.clear()
         WorkManager.getInstance(context.applicationContext).apply { cancelUniqueWork(PERIODIC); cancelUniqueWork(IMMEDIATE) }
     }
 }
@@ -42,15 +44,22 @@ class AgentCheckWorker(context: Context, parameters: WorkerParameters) : Corouti
         if (prefs.autopilotStatus != AutopilotStatus.Active) return@withLock Result.success()
         val store = AgentReportStore(applicationContext)
         try {
+            var snapshotForCache: com.clenova.app.data.storage.MediaScanResult? = null
             val report = if (!mediaAccess(applicationContext).any) AgentReport.problem("permission")
             else {
                 val available = StatFs(applicationContext.filesDir.absolutePath).availableBytes
-                AgentReport.from(MediaScanner(applicationContext).scan { _, _, _ -> }, available, System.currentTimeMillis())
+                val snapshot = MediaScanner(applicationContext).scan { _, _, _ -> }
+                kotlinx.coroutines.currentCoroutineContext().ensureActive()
+                snapshotForCache = snapshot
+                AgentReport.from(snapshot, available, System.currentTimeMillis())
             }
             kotlinx.coroutines.currentCoroutineContext().let { it[kotlinx.coroutines.Job]?.ensureActive() }
             val current = repo.userPreferences.first()
             if (current.autopilotStatus == AutopilotStatus.Active && current.storageGoalGb == prefs.storageGoalGb && current.checkIntervalDays == prefs.checkIntervalDays)
+            {
+                snapshotForCache?.let { AgentScanCache.put(it) } ?: AgentScanCache.clear()
                 store.save(report)
+            }
             Result.success()
         } catch (e: CancellationException) { throw e }
         catch (_: Exception) {

@@ -34,6 +34,8 @@ import com.clenova.app.core.designsystem.ClenovaThemeTokens
 import com.clenova.app.core.utilities.ByteFormatter
 import com.clenova.app.data.storage.*
 import com.example.R
+import com.clenova.app.data.agent.AgentReport
+import com.clenova.app.feature.agent.AgentAction
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
@@ -52,6 +54,8 @@ internal fun SmartScanScreen(
     onScreenshots: () -> Unit = {},
     onLargeFiles: () -> Unit = {},
     onLargeVideos: () -> Unit = {},
+    agentAction: AgentAction? = null,
+    initialResult: MediaScanResult? = null,
 ) {
     val context = LocalContext.current
     val owner = activityLifecycleOwner
@@ -59,7 +63,7 @@ internal fun SmartScanScreen(
     val scope = rememberCoroutineScope()
     val scanner = remember(context) { MediaScanner(context.applicationContext) }
     var access by remember { mutableStateOf(mediaAccess(context)) }
-    var result by remember { mutableStateOf<MediaScanResult?>(null) }
+    var result by remember { mutableStateOf(initialResult?.takeIf { it.access == access && it.access.full }) }
     var job by remember { mutableStateOf<Job?>(null) }
     var running by remember { mutableStateOf(false) }
     var failed by remember { mutableStateOf(false) }
@@ -110,9 +114,18 @@ internal fun SmartScanScreen(
         owner.lifecycle.addObserver(observer)
         onDispose { owner.lifecycle.removeObserver(observer); job?.cancel() }
     }
-    LaunchedEffect(Unit) { if (access.any) start() }
+    LaunchedEffect(Unit) {
+        val snapshot = result
+        if (snapshot == null && access.any) start()
+    }
+    LaunchedEffect(initialResult) {
+        if (agentAction != null && initialResult == null && result != null && !running) {
+            result = null
+            if (mediaAccess(context).any) start()
+        }
+    }
     val requestBack = { if (running) cancelPrompt = true else onBack() }
-    BackHandler(enabled = running) { cancelPrompt = true }
+    BackHandler(enabled = running || agentAction != null) { if (running) cancelPrompt = true else onBack() }
 
     Box(modifier.fillMaxSize().background(colors.background).windowInsetsPadding(WindowInsets.displayCutout), contentAlignment = Alignment.TopCenter) {
         Column(Modifier.widthIn(max = 560.dp).fillMaxSize().navigationBarsPadding().padding(horizontal = 24.dp)) {
@@ -120,7 +133,7 @@ internal fun SmartScanScreen(
                 IconButton(onClick = requestBack, modifier = Modifier.testTag("scan_back")) {
                     Icon(Icons.AutoMirrored.Rounded.ArrowBack, stringResource(R.string.cd_back_button), tint = colors.textPrimary)
                 }
-                Text(stringResource(R.string.home_smart_scan), Modifier.weight(1f), style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.SemiBold), color = colors.textPrimary)
+                Text(stringResource(if (agentAction == null) R.string.home_smart_scan else R.string.review_title), Modifier.weight(1f), style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.SemiBold), color = colors.textPrimary)
                 if (result != null && !running) TextButton(onClick = { start() }, modifier = Modifier.testTag("scan_rescan")) { Text(stringResource(R.string.scan_rescan)) }
             }
             HorizontalDivider(color = colors.border)
@@ -137,6 +150,7 @@ internal fun SmartScanScreen(
                         Text(stringResource(when(stage) { 0 -> R.string.scan_stage_inventory; 1 -> R.string.scan_stage_duplicates; 3 -> R.string.clean_tool_similar_title; 4 -> R.string.scan_stage_screenshots; else -> R.string.scan_stage_plan }), color = colors.textSecondary)
                         if ((stage == 1 || stage == 3 || stage == 4) && total > 0) Text("$done / $total", color = colors.textSecondary)
                     }
+                    snapshot != null && agentAction != null -> AgentResults(snapshot, agentAction, onDuplicates, onScreenshots, onLargeVideos)
                     snapshot != null -> ActualResults(snapshot, onDuplicates, onSimilar, onScreenshots, onLargeFiles, onLargeVideos)
                     else -> Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(vertical = 32.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
                         Icon(Icons.Outlined.VerifiedUser, null, Modifier.size(40.dp), tint = colors.primary)
@@ -196,5 +210,44 @@ private fun ActualResults(result: MediaScanResult, onDuplicates: () -> Unit, onS
             Text(stringResource(R.string.scan_similar_detail), color = colors.textSecondary, style = MaterialTheme.typography.bodySmall)
         }
         Text(stringResource(R.string.scan_read_only), color = colors.textSecondary, style = MaterialTheme.typography.bodySmall)
+    }
+}
+
+@Composable
+private fun AgentResults(result: MediaScanResult, target: AgentAction, onDuplicates: () -> Unit, onScreenshots: () -> Unit, onVideos: () -> Unit) {
+    val colors = ClenovaThemeTokens.colors
+    val report = remember(result) { AgentReport.from(result, 0L, 0L) }
+    data class Item(val kind: AgentAction, val title: Int, val count: Int, val bytes: Long, val action: () -> Unit, val tag: String)
+    val rows = listOf(
+        Item(AgentAction.DUPLICATES, R.string.clean_tool_duplicates_title, report.duplicateCount, report.duplicateBytes, onDuplicates, "agent_action_duplicates"),
+        Item(AgentAction.SCREENSHOTS, R.string.clean_tool_screenshots_title, report.screenshotCount, report.screenshotBytes, onScreenshots, "agent_action_screenshots"),
+        Item(AgentAction.VIDEOS, R.string.review_videos, report.videoCount, report.videoBytes, onVideos, "agent_action_videos"),
+    ).filter { it.count > 0 }.sortedBy { if (it.kind == target) 0 else 1 }
+    Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(vertical = 24.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
+        Text(stringResource(R.string.review_recommendations), style = MaterialTheme.typography.labelMedium, color = colors.primary)
+        Text(ByteFormatter.format(report.reviewBytes), Modifier.testTag("agent_plan_total"), style = MaterialTheme.typography.displaySmall.copy(fontWeight = FontWeight.SemiBold), color = colors.textPrimary)
+        Text(stringResource(R.string.review_estimated_space), color = colors.textSecondary)
+        if (report.partial) Text(stringResource(R.string.scan_partial), style = MaterialTheme.typography.bodySmall, color = colors.textSecondary)
+        HorizontalDivider(color = colors.border)
+        if (rows.isEmpty()) Text(stringResource(R.string.review_empty_title), style = MaterialTheme.typography.titleLarge, color = colors.textPrimary)
+        rows.forEach { item ->
+            Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                Column(Modifier.weight(1f)) {
+                    Text(stringResource(item.title), style = MaterialTheme.typography.titleMedium, color = colors.textPrimary)
+                    Text(stringResource(R.string.guard_item_count, item.count), style = MaterialTheme.typography.bodySmall, color = colors.textSecondary)
+                }
+                Text(ByteFormatter.format(item.bytes), color = colors.textPrimary, style = MaterialTheme.typography.titleSmall)
+            }
+            OutlinedButton(onClick = item.action, modifier = Modifier.fillMaxWidth().testTag(item.tag), shape = ClenovaShapes.pill) {
+                Text(stringResource(R.string.agent_real_review))
+                Spacer(Modifier.width(8.dp))
+                Icon(Icons.Outlined.ChevronRight, null, Modifier.size(18.dp))
+            }
+            HorizontalDivider(color = colors.border)
+        }
+        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            Icon(Icons.Outlined.VerifiedUser, null, tint = colors.primary)
+            Text(stringResource(R.string.auto_safety_body), color = colors.textSecondary, style = MaterialTheme.typography.bodySmall)
+        }
     }
 }

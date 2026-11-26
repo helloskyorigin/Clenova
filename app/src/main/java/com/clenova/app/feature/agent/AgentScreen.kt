@@ -41,6 +41,7 @@ internal fun AgentScreen(
     onToggle: (Boolean) -> Unit,
     onCheck: () -> Unit,
     onReview: () -> Unit,
+    onReviewCategory: (AgentAction) -> Unit,
     onHistory: () -> Unit,
     onSettings: () -> Unit,
     onGuard: () -> Unit,
@@ -119,12 +120,12 @@ internal fun AgentScreen(
                 }
                 if (error) Text(stringResource(R.string.auto_save_failed), color = colors.error)
                 Text(stringResource(R.string.agent_real_attention), style = MaterialTheme.typography.titleLarge, color = colors.textPrimary)
-                if (report != null && report.problem.isEmpty() && report.reviewBytes > 0) {
-                    if (report.duplicateCount > 0) AgentOpportunity(Icons.Outlined.ContentCopy, R.string.clean_tool_duplicates_title, report.duplicateCount, report.duplicateBytes, onReview)
-                    if (report.screenshotCount > 0) AgentOpportunity(Icons.Outlined.Image, R.string.clean_tool_screenshots_title, report.screenshotCount, report.screenshotBytes, onReview)
-                    if (report.videoCount > 0) AgentOpportunity(Icons.Outlined.VideoFile, R.string.review_videos, report.videoCount, report.videoBytes, onReview)
+                if (!checking && report != null && report.problem.isEmpty() && report.reviewBytes > 0) {
+                    if (report.duplicateCount > 0) AgentOpportunity(Icons.Outlined.ContentCopy, R.string.clean_tool_duplicates_title, report.duplicateCount, report.duplicateBytes) { onReviewCategory(AgentAction.DUPLICATES) }
+                    if (report.screenshotCount > 0) AgentOpportunity(Icons.Outlined.Image, R.string.clean_tool_screenshots_title, report.screenshotCount, report.screenshotBytes) { onReviewCategory(AgentAction.SCREENSHOTS) }
+                    if (report.videoCount > 0) AgentOpportunity(Icons.Outlined.VideoFile, R.string.review_videos, report.videoCount, report.videoBytes) { onReviewCategory(AgentAction.VIDEOS) }
                     Button(onClick = onReview, modifier = Modifier.fillMaxWidth().heightIn(min = 50.dp).testTag("agent_review"), shape = ClenovaShapes.pill) { Text(stringResource(R.string.agent_real_review)) }
-                } else Text(stringResource(R.string.review_empty_title), color = colors.textSecondary, style = MaterialTheme.typography.bodyMedium)
+                } else Text(stringResource(if (checking) R.string.agent_real_checking else R.string.review_empty_title), color = colors.textSecondary, style = MaterialTheme.typography.bodyMedium)
                 Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                     Row(Modifier.weight(1f).clickable(onClick = onGuard), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(5.dp)) {
                         Icon(Icons.Outlined.VerifiedUser, null, tint = colors.primary, modifier = Modifier.size(20.dp))

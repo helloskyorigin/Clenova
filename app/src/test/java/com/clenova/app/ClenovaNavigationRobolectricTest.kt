@@ -44,8 +44,8 @@ class ClenovaNavigationRobolectricTest {
         override suspend fun refreshStorage() = Unit
     }
 
-    private class FakePreferencesRepository : PreferencesRepository {
-        private val _prefs = MutableStateFlow(UserPreferences())
+    private class FakePreferencesRepository(initial: UserPreferences = UserPreferences()) : PreferencesRepository {
+        private val _prefs = MutableStateFlow(initial)
         override val userPreferences: Flow<UserPreferences> = _prefs.asStateFlow()
         override suspend fun setThemePreference(preference: ThemePreference) {
             _prefs.value = _prefs.value.copy(themePreference = preference)
@@ -314,6 +314,18 @@ class ClenovaNavigationRobolectricTest {
         composeTestRule.onNodeWithTag("clean_screenshots").performScrollTo().performClick()
         composeTestRule.onNodeWithTag("screenshots_scan").assertIsDisplayed()
         composeTestRule.onNodeWithTag("screenshots_approve").assertDoesNotExist()
+    }
+
+    @Test
+    fun `configured agent pauses without returning to welcome`() {
+        val prefs = FakePreferencesRepository(UserPreferences(autopilotStatus = com.clenova.app.domain.model.AutopilotStatus.Active))
+        composeTestRule.setContent { ClenovaApp(storageRepository = FakeStorageRepository(), preferencesRepository = prefs) }
+        composeTestRule.onNodeWithTag("nav_tab_agent").performClick()
+        composeTestRule.onNodeWithTag("agent_toggle").assertIsDisplayed().performClick()
+        composeTestRule.onNodeWithText("Paused").assertIsDisplayed()
+        composeTestRule.onNodeWithTag("agent_setup").assertDoesNotExist()
+        composeTestRule.onNodeWithTag("agent_toggle").performClick()
+        composeTestRule.onNodeWithText("Active").assertIsDisplayed()
     }
 
     @Test
