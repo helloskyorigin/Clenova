@@ -3,6 +3,12 @@ package com.clenova.app.feature.settings
 import android.content.Intent
 import android.net.Uri
 import android.provider.Settings
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.launch
+import androidx.activity.compose.BackHandler
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import android.os.Build
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -48,6 +54,7 @@ fun SettingsScreen(
     onToggleHaptics: (Boolean) -> Unit,
     onNavigateBack: () -> Unit,
     onOpenAutopilot: () -> Unit,
+    onResetPreferences: suspend () -> Unit,
     showUnfinishedRows: Boolean = false,
     modifier: Modifier = Modifier,
 ) {
@@ -63,6 +70,11 @@ fun SettingsScreen(
         ?: stringResource(R.string.settings_language_system)
     var languageFailed by remember { mutableStateOf(false) }
     var actionFailed by rememberSaveable { mutableStateOf(false) }
+    var detail by rememberSaveable { mutableStateOf("") }
+    var resetting by remember { mutableStateOf(false) }
+    var resetResult by rememberSaveable { mutableStateOf<Int?>(null) }
+    val scope = rememberCoroutineScope()
+    BackHandler(enabled = resetting) { }
     val themeLabel = when (preferences.themePreference) {
         ThemePreference.LIGHT -> R.string.settings_theme_light
         ThemePreference.DARK -> R.string.settings_theme_dark
@@ -159,13 +171,9 @@ fun SettingsScreen(
             }
             SettingsSection(R.string.settings_privacy_control) {
                 SettingsRow(Icons.Outlined.Tune, R.string.settings_autopilot, onClick = onOpenAutopilot)
-                SettingsRow(Icons.Outlined.VerifiedUser, R.string.settings_permissions, onClick = {
-                    actionFailed = runCatching { context.startActivity(Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.fromParts("package", context.packageName, null))) }.isFailure
-                })
-                if (showPlanned) {
-                    SettingsRow(Icons.Outlined.Lock, R.string.settings_data_privacy)
-                    SettingsRow(Icons.Outlined.Refresh, R.string.settings_reset)
-                }
+                SettingsRow(Icons.Outlined.VerifiedUser, R.string.settings_permissions, tag = "settings_permissions", onClick = { detail = "permissions" })
+                SettingsRow(Icons.Outlined.Lock, R.string.settings_data_privacy, tag = "settings_privacy", onClick = { detail = "privacy" })
+                SettingsRow(Icons.Outlined.Refresh, R.string.settings_reset, tag = "settings_reset", onClick = { detail = "reset" })
             }
             SettingsSection(R.string.settings_support) {
                 if (showPlanned) SettingsRow(Icons.Outlined.HelpOutline, R.string.settings_help)
@@ -197,6 +205,41 @@ fun SettingsScreen(
                 Text(stringResource(R.string.settings_copyright), color = colors.textSecondary, style = MaterialTheme.typography.labelSmall)
             }
         }
+    }
+    if (detail == "permissions") PermissionsDialog(onDismiss = { detail = "" })
+    if (detail == "privacy") DataPrivacyDialog(onDismiss = { detail = "" })
+    if (detail == "reset") AlertDialog(
+        onDismissRequest = { if (!resetting) detail = "" },
+        title = { Text(stringResource(R.string.settings_reset_confirm_title)) },
+        text = { Text(stringResource(R.string.settings_reset_confirm_body)) },
+        confirmButton = {
+            TextButton(enabled = !resetting, modifier = Modifier.testTag("settings_reset_confirm"), onClick = {
+                if (!resetting) {
+                    resetting = true
+                    scope.launch {
+                        try {
+                            onResetPreferences()
+                            detail = ""
+                            resetResult = R.string.settings_reset_success
+                        } catch (e: CancellationException) {
+                            throw e
+                        } catch (_: Exception) {
+                            detail = ""
+                            resetResult = R.string.settings_reset_failure
+                        } finally { resetting = false }
+                    }
+                }
+            }) {
+                if (resetting) CircularProgressIndicator(Modifier.size(18.dp), strokeWidth = 2.dp)
+                else Text(stringResource(R.string.settings_reset))
+            }
+        },
+        dismissButton = { TextButton(enabled = !resetting, onClick = { detail = "" }) { Text(stringResource(android.R.string.cancel)) } },
+    )
+    resetResult?.let { result ->
+        AlertDialog(onDismissRequest = { resetResult = null },
+            title = { Text(stringResource(result)) },
+            confirmButton = { TextButton(onClick = { resetResult = null }, modifier = Modifier.testTag("settings_reset_done")) { Text(stringResource(android.R.string.ok)) } })
     }
     if (languageFailed) AlertDialog(onDismissRequest = { languageFailed = false },
         title = { Text(stringResource(R.string.settings_language_failed)) },

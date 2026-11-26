@@ -187,13 +187,14 @@ fun ClenovaNavHost(
         }
 
         composable<ClenovaRoute.AutopilotSetup> {
+            val activationPreview = sample && navController.previousBackStackEntry?.destination.toClenovaRoute() != ClenovaRoute.Settings
             val prefs by preferencesRepository.userPreferences.collectAsStateWithLifecycle(initialValue = UserPreferences())
             val scope = rememberCoroutineScope()
             var saving by remember { mutableStateOf(false) }
             var failed by remember { mutableStateOf(false) }
             AutopilotSetupScreen(
                 preferences = prefs,
-                sample = sample,
+                sample = activationPreview,
                 saving = saving,
                 failed = failed,
                 onBack = { if (!saving) { onSelectionHaptic(); navController.popBackStack() } },
@@ -204,7 +205,7 @@ fun ClenovaNavHost(
                         scope.launch {
                             try {
                                 preferencesRepository.setAutopilotPreferences(goal, interval)
-                                if (sample) sampleAutoOn = true
+                                if (activationPreview) sampleAutoOn = true
                                 onSelectionHaptic()
                                 navController.popBackStack()
                             } catch (e: CancellationException) {
@@ -274,6 +275,7 @@ fun ClenovaNavHost(
                 preferences = preferences,
                 showUnfinishedRows = showSampleHome,
                 onOpenAutopilot = { onSelectionHaptic(); navController.navigate(ClenovaRoute.AutopilotSetup) { launchSingleTop = true } },
+                onResetPreferences = { preferencesRepository.resetPreferences() },
                 onSelectTheme = { theme ->
                     onSelectionHaptic()
                     viewModel.updateTheme(theme)

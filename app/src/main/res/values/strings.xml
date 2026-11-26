@@ -295,4 +295,21 @@
     <string name="settings_report_intro">Describe the problem here:</string>
     <string name="settings_report_android">Android: %1$s</string>
     <string name="settings_report_device">Device: %1$s</string>
+    <string name="settings_reset_confirm_title">Reset preferences?</string>
+    <string name="settings_reset_confirm_body">Restores appearance, haptics, free space goal and check frequency to defaults. Language, permissions and personal files stay unchanged.</string>
+    <string name="settings_reset_success">Preferences reset</string>
+    <string name="settings_reset_failure">Could not reset preferences. Please try again.</string>
+    <string name="permissions_intro">Review runtime permissions requested by this installed app. Manage access in Android settings.</string>
+    <string name="permissions_none">This build does not declare any runtime permissions.</string>
+    <string name="permissions_read_failed">Could not read permissions on this device.</string>
+    <string name="permissions_granted">Allowed</string>
+    <string name="permissions_denied">Not allowed</string>
+    <string name="permissions_manage">Open Android app settings</string>
+    <string name="privacy_current_build">Privacy in this build</string>
+    <string name="privacy_local_title">Local preferences</string>
+    <string name="privacy_local_body">Theme, haptics, Autopilot preferences and language are stored on your device. No account is required.</string>
+    <string name="privacy_files_title">Personal files</string>
+    <string name="privacy_files_body">This build reads device storage totals. Media scanning, file protection and deletion engines are not yet connected. No personal media is uploaded by Clenova.</string>
+    <string name="privacy_support_title">Support messages</string>
+    <string name="privacy_support_body">Contact and problem reports open your email app. You decide whether to send the message and can edit or remove diagnostic details before sending.</string>
 </resources>

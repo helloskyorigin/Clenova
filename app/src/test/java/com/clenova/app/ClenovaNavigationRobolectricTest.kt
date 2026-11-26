@@ -54,6 +54,8 @@ class ClenovaNavigationRobolectricTest {
             _prefs.value = _prefs.value.copy(storageGoalGb = goalGb, checkIntervalDays = intervalDays)
         }
 
+        override suspend fun resetPreferences() { _prefs.value = UserPreferences() }
+
         override suspend fun setHapticsEnabled(enabled: Boolean) {
             _prefs.value = _prefs.value.copy(hapticsEnabled = enabled)
         }
@@ -250,6 +252,29 @@ class ClenovaNavigationRobolectricTest {
         } else {
             composeTestRule.onNodeWithText("No protected collections yet").assertIsDisplayed()
         }
+    }
+
+    @Test
+    fun `privacy dialogs and reset use real preference interface`() {
+        val prefs = FakePreferencesRepository()
+        composeTestRule.setContent { ClenovaApp(storageRepository = FakeStorageRepository(), preferencesRepository = prefs) }
+        composeTestRule.waitForIdle()
+        composeTestRule.onNodeWithTag("settings_button").performClick()
+        composeTestRule.waitForIdle()
+        composeTestRule.onNodeWithTag("settings_permissions").performScrollTo().performClick()
+        composeTestRule.onNodeWithTag("permissions_manage").assertIsDisplayed()
+        composeTestRule.onNodeWithTag("permissions_back").performClick()
+        composeTestRule.onNodeWithTag("settings_privacy").performScrollTo().performClick()
+        composeTestRule.onNodeWithTag("privacy_back").performClick()
+        composeTestRule.onNodeWithTag("settings_appearance").performScrollTo().performClick()
+        composeTestRule.onNodeWithTag("theme_option_dark").performClick()
+        composeTestRule.waitForIdle()
+        composeTestRule.onNodeWithTag("settings_reset").performScrollTo().performClick()
+        composeTestRule.onNodeWithTag("settings_reset_confirm").performClick()
+        composeTestRule.waitForIdle()
+        composeTestRule.onNodeWithTag("settings_reset_done").performClick()
+        composeTestRule.onNodeWithTag("settings_appearance").performScrollTo().assertIsDisplayed()
+        composeTestRule.onNodeWithText("Light").assertIsDisplayed()
     }
 
     @Test

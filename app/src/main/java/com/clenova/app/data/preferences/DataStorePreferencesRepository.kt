@@ -71,6 +71,15 @@ class DataStorePreferencesRepository(
         }
     }
 
+    override suspend fun resetPreferences() {
+        context.clenovaDataStore.edit { prefs ->
+            prefs.remove(Keys.THEME_PREFERENCE)
+            prefs.remove(Keys.HAPTICS_ENABLED)
+            prefs.remove(Keys.STORAGE_GOAL)
+            prefs.remove(Keys.CHECK_INTERVAL)
+        }
+    }
+
     override suspend fun setHapticsEnabled(enabled: Boolean) {
         context.clenovaDataStore.edit { prefs ->
             prefs[Keys.HAPTICS_ENABLED] = enabled
