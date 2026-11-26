@@ -21,6 +21,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.FactCheck
 import androidx.compose.material.icons.outlined.History
 import androidx.compose.material.icons.outlined.Tune
+import androidx.compose.material3.Button
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -59,6 +61,7 @@ private val agentPillars = listOf(
 @Composable
 fun AgentScreen(
     modifier: Modifier = Modifier,
+    onConfigure: () -> Unit = {},
 ) {
     val colors = ClenovaThemeTokens.colors
     val scrollState = rememberScrollState()
@@ -130,6 +133,10 @@ fun AgentScreen(
                     style = MaterialTheme.typography.bodyMedium,
                     color = colors.textSecondary,
                 )
+            }
+
+            Button(onClick = onConfigure, modifier = Modifier.fillMaxWidth(), shape = ClenovaShapes.pill) {
+                Text(stringResource(R.string.auto_configure))
             }
 
             agentPillars.forEach { pillar ->

@@ -6,6 +6,7 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.emptyPreferences
+import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import com.clenova.app.domain.model.AutopilotStatus
@@ -28,6 +29,8 @@ class DataStorePreferencesRepository(
     private object Keys {
         val THEME_PREFERENCE = stringPreferencesKey("theme_preference")
         val HAPTICS_ENABLED = booleanPreferencesKey("haptics_enabled")
+        val STORAGE_GOAL = intPreferencesKey("storage_goal_gb")
+        val CHECK_INTERVAL = intPreferencesKey("check_interval_days")
     }
 
     override val userPreferences: Flow<UserPreferences> = context.clenovaDataStore.data
@@ -48,12 +51,23 @@ class DataStorePreferencesRepository(
                 themePreference = theme,
                 hapticsEnabled = hapticsEnabled,
                 autopilotStatus = AutopilotStatus.NotConfigured,
+                storageGoalGb = prefs[Keys.STORAGE_GOAL]?.takeIf { it in listOf(5, 10, 20, 30) } ?: 20,
+                checkIntervalDays = prefs[Keys.CHECK_INTERVAL]?.takeIf { it in listOf(1, 3, 7) } ?: 1,
             )
         }
 
     override suspend fun setThemePreference(preference: ThemePreference) {
         context.clenovaDataStore.edit { prefs ->
             prefs[Keys.THEME_PREFERENCE] = preference.name
+        }
+    }
+
+    override suspend fun setAutopilotPreferences(goalGb: Int, intervalDays: Int) {
+        require(goalGb in listOf(5, 10, 20, 30))
+        require(intervalDays in listOf(1, 3, 7))
+        context.clenovaDataStore.edit { prefs ->
+            prefs[Keys.STORAGE_GOAL] = goalGb
+            prefs[Keys.CHECK_INTERVAL] = intervalDays
         }
     }
 

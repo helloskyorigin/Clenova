@@ -52,7 +52,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.clenova.app.core.designsystem.ClenovaMotion
-import com.clenova.app.core.designsystem.ClenovaOrbitalIcon
+import com.clenova.app.core.designsystem.ClenovaAutoIcon
 import com.clenova.app.core.designsystem.ClenovaShapes
 import com.clenova.app.core.designsystem.ClenovaSpacing
 import com.clenova.app.core.designsystem.ClenovaThemeTokens
@@ -195,7 +195,7 @@ fun ClenovaFloatingNavBar(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Center,
                 ) {
-                    ClenovaOrbitalIcon(
+                    ClenovaAutoIcon(
                         tint = colors.onPrimary,
                         size = 24.dp,
                     )
