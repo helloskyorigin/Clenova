@@ -3,8 +3,8 @@
     <style name="Theme.Clenova" parent="android:Theme.Material.Light.NoActionBar" />
 
     <style name="Theme.Clenova.Splash" parent="Theme.SplashScreen">
-        <item name="windowSplashScreenBackground">@color/clenova_background</item>
-        <item name="windowSplashScreenAnimatedIcon">@drawable/ic_splash_orbital</item>
+        <item name="windowSplashScreenBackground">#F4F9FE</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/ic_splash_brand</item>
         <item name="postSplashScreenTheme">@style/Theme.Clenova</item>
     </style>
 </resources>
