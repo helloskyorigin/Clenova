@@ -196,6 +196,31 @@
     <string name="duplicates_unavailable_title">Duplicate scanning is not available yet</string>
     <string name="duplicates_unavailable_body">No files have been compared or removed. Verified duplicate results will appear when the scanning engine is connected.</string>
 
+    <!-- Video compression -->
+    <string name="compress_unavailable_title">Video compression is not available yet</string>
+    <string name="compress_unavailable_body">The video encoder has not been connected. Your original videos have not been changed.</string>
+    <string name="compress_select_title">Make room for more.</string>
+    <string name="compress_select_body">Choose videos to compress.</string>
+    <string name="compress_selected">%1$d selected</string>
+    <string name="compress_quality_title">Choose quality</string>
+    <string name="compress_quality_body">Find the right balance between quality and file size.</string>
+    <string name="compress_high">High quality</string>
+    <string name="compress_high_body">Prioritize visual detail.</string>
+    <string name="compress_balanced">Balanced</string>
+    <string name="compress_balanced_body">Recommended balance of size and quality.</string>
+    <string name="compress_small">Smaller file</string>
+    <string name="compress_small_body">Prioritize storage savings.</string>
+    <string name="compress_estimated_savings">Estimated size reduction</string>
+    <string name="compress_total_original">Original · %1$s</string>
+    <string name="compress_estimated_output">Estimated · %1$s</string>
+    <string name="compress_original_safe">Your original videos stay untouched.</string>
+    <string name="compress_continue">Continue</string>
+    <string name="compress_start">Preview compression</string>
+    <string name="compress_running">Preparing compression estimate</string>
+    <string name="compress_estimate_ready">Your estimate is ready.</string>
+    <string name="compress_no_output">No video has been encoded or replaced. Actual output size depends on the source video.</string>
+    <string name="compress_cancel_title">Stop compression preview?</string>
+
     <!-- Settings -->
     <string name="settings_title">Settings</string>
     <string name="settings_section_preferences">PREFERENCES</string>

@@ -45,6 +45,9 @@ sealed interface ClenovaRoute {
 
     @Serializable
     data object Duplicates : ClenovaRoute
+
+    @Serializable
+    data object VideoCompress : ClenovaRoute
 }
 
 enum class PillDestination(

@@ -28,6 +28,7 @@ import com.clenova.app.feature.agent.AgentScreen
 import com.clenova.app.feature.clean.CleanScreen
 import com.clenova.app.feature.clean.SmartScanScreen
 import com.clenova.app.feature.clean.DuplicatesScreen
+import com.clenova.app.feature.clean.VideoCompressScreen
 import com.clenova.app.feature.guard.GuardScreen
 import com.clenova.app.feature.home.HomeScreen
 import com.clenova.app.feature.home.HomeViewModel
@@ -47,6 +48,7 @@ fun NavDestination?.toClenovaRoute(): ClenovaRoute? = when {
     hasRoute<ClenovaRoute.CleanupReview>() -> ClenovaRoute.CleanupReview
     hasRoute<ClenovaRoute.SmartScan>() -> ClenovaRoute.SmartScan
     hasRoute<ClenovaRoute.Duplicates>() -> ClenovaRoute.Duplicates
+    hasRoute<ClenovaRoute.VideoCompress>() -> ClenovaRoute.VideoCompress
     else -> null
 }
 
@@ -111,6 +113,7 @@ fun ClenovaNavHost(
                     onSelectionHaptic()
                     navController.navigate(ClenovaRoute.StorageDetails) { launchSingleTop = true }
                 },
+                onOpenCompress = { onSelectionHaptic(); navController.navigate(ClenovaRoute.VideoCompress) { launchSingleTop = true } },
                 onOpenDuplicates = { onSelectionHaptic(); navController.navigate(ClenovaRoute.Duplicates) { launchSingleTop = true } },
                 onOpenSmartScan = { onSelectionHaptic(); navController.navigate(ClenovaRoute.SmartScan) { launchSingleTop = true } },
                 onOpenClean = { onSelectionHaptic(); navController.navigateTopLevel(ClenovaRoute.Clean) },
@@ -128,7 +131,12 @@ fun ClenovaNavHost(
             CleanScreen(
                 onSmartScan = { onSelectionHaptic(); navController.navigate(ClenovaRoute.SmartScan) { launchSingleTop = true } },
                 onDuplicates = { onSelectionHaptic(); navController.navigate(ClenovaRoute.Duplicates) { launchSingleTop = true } },
+                onCompress = { onSelectionHaptic(); navController.navigate(ClenovaRoute.VideoCompress) { launchSingleTop = true } },
             )
+        }
+
+        composable<ClenovaRoute.VideoCompress> {
+            VideoCompressScreen(sample = sample, onBack = { onSelectionHaptic(); navController.popBackStack() }, onSelectionHaptic = onSelectionHaptic)
         }
 
         composable<ClenovaRoute.Duplicates> {

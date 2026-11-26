@@ -205,6 +205,24 @@ class ClenovaNavigationRobolectricTest {
     }
 
     @Test
+    fun `compress opens from home without fake release results`() {
+        composeTestRule.setContent {
+            ClenovaApp(
+                storageRepository = FakeStorageRepository(),
+                preferencesRepository = FakePreferencesRepository(),
+                showSampleHome = false,
+            )
+        }
+        composeTestRule.waitForIdle()
+        composeTestRule.onNodeWithTag("home_compress").performScrollTo().performClick()
+        composeTestRule.waitForIdle()
+        composeTestRule.onNodeWithText("Video compression is not available yet").assertIsDisplayed()
+        composeTestRule.onNodeWithTag("compress_back").performClick()
+        composeTestRule.waitForIdle()
+        composeTestRule.onNodeWithTag("nav_tab_home").assertIsDisplayed()
+    }
+
+    @Test
     fun `home displays honest unavailable state when storage cannot be read`() {
         composeTestRule.setContent {
             ClenovaApp(

@@ -66,6 +66,7 @@ fun CleanScreen(
     modifier: Modifier = Modifier,
     onSmartScan: () -> Unit,
     onDuplicates: () -> Unit,
+    onCompress: () -> Unit,
 ) {
     val colors = ClenovaThemeTokens.colors
     val scrollState = rememberScrollState()
@@ -104,7 +105,7 @@ fun CleanScreen(
             plannedCleanTools.forEach { tool ->
                 ClenovaSurfaceCard {
                     Row(
-                        modifier = Modifier.fillMaxWidth().then(if (tool.titleRes == R.string.clean_tool_duplicates_title) Modifier.testTag("clean_duplicates").clickable(onClick = onDuplicates) else Modifier),
+                        modifier = Modifier.fillMaxWidth().then(when (tool.titleRes) { R.string.clean_tool_duplicates_title -> Modifier.testTag("clean_duplicates").clickable(onClick = onDuplicates); R.string.clean_tool_video_compress_title -> Modifier.testTag("clean_compress").clickable(onClick = onCompress); else -> Modifier }),
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(ClenovaSpacing.md),
                     ) {
@@ -134,7 +135,7 @@ fun CleanScreen(
                                     style = MaterialTheme.typography.titleMedium,
                                     color = colors.textPrimary,
                                 )
-                                if (tool.titleRes == R.string.clean_tool_duplicates_title) {
+                                if (tool.titleRes == R.string.clean_tool_duplicates_title || tool.titleRes == R.string.clean_tool_video_compress_title) {
                                     Icon(Icons.AutoMirrored.Rounded.ArrowForward, null, Modifier.size(18.dp), tint = colors.primary)
                                 } else {
                                     ClenovaStatusBadge(
