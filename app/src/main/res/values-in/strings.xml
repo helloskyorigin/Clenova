@@ -291,4 +291,19 @@
     <string name="support_copy">Salin pesan</string>
     <string name="support_copied">Pesan disalin</string>
     <string name="support_email_unavailable">Email tidak dapat dibuka. Salin pesan dan kirim melalui layanan email pilihan Anda.</string>
+    <string name="legal_revision">Versi: 26 November 2026</string>
+    <string name="legal_policy_intro">Pemberitahuan ini menjelaskan versi Android CLENOVA saat ini dari SKYORIGIN, bukan fitur mendatang.</string>
+    <string name="legal_support_processing">Email dukungan hanya dikirim jika Anda memilih mengirim. Penyedia email menangani pengiriman. SKYORIGIN dapat memakai informasi yang dikirim untuk menanggapi dan menyelesaikan permintaan. Jangan sertakan kata sandi atau file sensitif.</string>
+    <string name="legal_retention_title">Retensi dan pilihan</string>
+    <string name="legal_retention_body">Preferensi lokal tetap ada hingga diatur ulang atau data aplikasi dihapus. Pesan dukungan dapat disimpan untuk menyelesaikan permintaan atau memenuhi kewajiban yang berlaku. Hubungi kami untuk meminta akses, koreksi, atau penghapusan informasi dukungan sesuai hukum yang berlaku.</string>
+    <string name="legal_terms_intro">Ketentuan ini menjelaskan penggunaan versi Android CLENOVA saat ini dari SKYORIGIN. Gunakan aplikasi hanya jika menyetujuinya.</string>
+    <string name="legal_use_title">Penggunaan bertanggung jawab</string>
+    <string name="legal_use_body">Gunakan CLENOVA hanya pada perangkat dan file yang boleh Anda kelola. Jangan melanggar hukum atau hak orang lain.</string>
+    <string name="legal_cleanup_body">Tinjau rekomendasi dan cadangkan file penting sebelum menyetujui pembersihan. Versi ini tidak menghapus media.</string>
+    <string name="legal_availability_title">Ketersediaan dan perubahan</string>
+    <string name="legal_availability_body">Fitur dapat berubah, tidak tersedia, atau bergantung pada kemampuan Android dan perangkat. Perkiraan tidak menjamin ruang yang diperoleh. Lihat pemberitahuan terbaru saat memperbarui.</string>
+    <string name="legal_rights_body">Ketentuan ini tidak membatasi hak atau upaya hukum yang tidak dapat dikesampingkan berdasarkan hukum yang berlaku. Hubungi SKYORIGIN jika ada pertanyaan.</string>
+    <string name="legal_licenses_intro">Pemberitahuan dependensi dibuat dari metadata pustaka saat build. Aset bawaan memiliki pemberitahuan terpisah. Teks lisensi tetap dalam bahasa asli.</string>
+    <string name="legal_dependency_notices">Pemberitahuan pustaka</string>
+    <string name="legal_read_license">Baca lisensi</string>
 </resources>

@@ -291,4 +291,19 @@
     <string name="support_copy">संदेश कॉपी करें</string>
     <string name="support_copied">संदेश कॉपी हुआ</string>
     <string name="support_email_unavailable">ईमेल नहीं खुल सका। संदेश कॉपी करके अपनी पसंद की ईमेल सेवा से भेजें।</string>
+    <string name="legal_revision">संस्करण: 26 नवंबर 2026</string>
+    <string name="legal_policy_intro">यह सूचना SKYORIGIN के CLENOVA Android के वर्तमान बिल्ड के बारे में है, भविष्य के फ़ीचर के बारे में नहीं।</string>
+    <string name="legal_support_processing">सहायता ईमेल तभी भेजे जाते हैं जब आप भेजना चुनते हैं। आपका ईमेल प्रदाता डिलीवरी करता है। SKYORIGIN आपके भेजे डेटा का उपयोग जवाब और समस्या समाधान के लिए कर सकता है। पासवर्ड या संवेदनशील फ़ाइलें न भेजें।</string>
+    <string name="legal_retention_title">डेटा रखना और विकल्प</string>
+    <string name="legal_retention_body">स्थानीय प्राथमिकताएँ रीसेट या ऐप डेटा हटाने तक रहती हैं। सहायता संदेश समस्या समाधान या लागू दायित्वों के लिए आवश्यक अवधि तक रखे जा सकते हैं। लागू कानून के अनुसार सहायता डेटा देखने, सुधारने या हटाने के लिए हमसे संपर्क करें।</string>
+    <string name="legal_terms_intro">ये शर्तें SKYORIGIN के वर्तमान CLENOVA Android बिल्ड पर लागू हैं। स्वीकार करने पर ही ऐप इस्तेमाल करें।</string>
+    <string name="legal_use_title">ज़िम्मेदार इस्तेमाल</string>
+    <string name="legal_use_body">CLENOVA केवल उन डिवाइस और फ़ाइलों पर इस्तेमाल करें जिन्हें प्रबंधित करने की अनुमति है। कानून या दूसरों के अधिकारों का उल्लंघन न करें।</string>
+    <string name="legal_cleanup_body">सफ़ाई मंज़ूर करने से पहले सुझाव देखें और ज़रूरी फ़ाइलों का बैकअप रखें। यह बिल्ड मीडिया नहीं हटाता।</string>
+    <string name="legal_availability_title">उपलब्धता और बदलाव</string>
+    <string name="legal_availability_body">फ़ीचर बदल सकते हैं, अनुपलब्ध हो सकते हैं या Android और डिवाइस की क्षमताओं पर निर्भर हो सकते हैं। स्टोरेज अनुमान वास्तविक खाली जगह की गारंटी नहीं हैं। अपडेट करते समय नवीनतम सूचनाएँ देखें।</string>
+    <string name="legal_rights_body">इन शर्तों से लागू कानून के तहत न छोड़े जा सकने वाले अधिकार या उपाय सीमित नहीं होते। सवालों या चिंताओं के लिए SKYORIGIN से संपर्क करें।</string>
+    <string name="legal_licenses_intro">डिपेंडेंसी नोटिस बिल्ड के समय लाइब्रेरी मेटाडेटा से बनते हैं। शामिल एसेट के अलग नोटिस हैं। लाइसेंस मूल भाषा में हैं।</string>
+    <string name="legal_dependency_notices">लाइब्रेरी नोटिस</string>
+    <string name="legal_read_license">लाइसेंस पढ़ें</string>
 </resources>

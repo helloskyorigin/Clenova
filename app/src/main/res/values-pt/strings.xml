@@ -291,4 +291,19 @@
     <string name="support_copy">Copiar mensagem</string>
     <string name="support_copied">Mensagem copiada</string>
     <string name="support_email_unavailable">Não foi possível abrir o e-mail. Copie sua mensagem e envie pelo serviço de e-mail de sua preferência.</string>
+    <string name="legal_revision">Versão: 26 de novembro de 2026</string>
+    <string name="legal_policy_intro">Este aviso descreve a versão Android atual do CLENOVA da SKYORIGIN, não recursos futuros.</string>
+    <string name="legal_support_processing">E-mails de suporte só são enviados se você decidir enviá-los. Seu provedor cuida da entrega. A SKYORIGIN pode usar as informações enviadas para responder e resolver sua solicitação. Não inclua senhas ou arquivos sensíveis.</string>
+    <string name="legal_retention_title">Retenção e escolhas</string>
+    <string name="legal_retention_body">As preferências locais permanecem até a redefinição ou remoção dos dados do app. Mensagens de suporte podem ser mantidas para resolver solicitações ou cumprir obrigações aplicáveis. Entre em contato para solicitar acesso, correção ou exclusão de informações de suporte, conforme a lei aplicável.</string>
+    <string name="legal_terms_intro">Estes termos descrevem o uso da versão Android atual do CLENOVA da SKYORIGIN. Use o app apenas se aceitá-los.</string>
+    <string name="legal_use_title">Uso responsável</string>
+    <string name="legal_use_body">Use CLENOVA apenas em dispositivos e arquivos que você tem autorização para gerenciar. Não viole leis ou direitos de terceiros.</string>
+    <string name="legal_cleanup_body">Revise as recomendações e mantenha cópias de segurança dos arquivos importantes antes de aprovar a limpeza. Esta versão não exclui mídias.</string>
+    <string name="legal_availability_title">Disponibilidade e alterações</string>
+    <string name="legal_availability_body">Recursos podem mudar, ficar indisponíveis ou depender do Android e do dispositivo. Estimativas não garantem espaço recuperado. Consulte os avisos atuais ao atualizar.</string>
+    <string name="legal_rights_body">Nada nestes termos limita direitos ou recursos irrenunciáveis pela lei aplicável. Entre em contato com a SKYORIGIN em caso de dúvidas.</string>
+    <string name="legal_licenses_intro">Avisos de dependências são gerados dos metadados das bibliotecas durante a compilação. Recursos incluídos têm avisos próprios. Licenças permanecem no idioma original.</string>
+    <string name="legal_dependency_notices">Avisos de bibliotecas</string>
+    <string name="legal_read_license">Ler licença</string>
 </resources>

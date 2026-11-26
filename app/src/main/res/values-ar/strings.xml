@@ -291,4 +291,19 @@
     <string name="support_copy">نسخ الرسالة</string>
     <string name="support_copied">تم نسخ الرسالة</string>
     <string name="support_email_unavailable">تعذر فتح البريد. انسخ رسالتك وأرسلها بخدمة البريد المفضلة لديك.</string>
+    <string name="legal_revision">الإصدار: 26 نوفمبر 2026</string>
+    <string name="legal_policy_intro">يصف هذا الإشعار الإصدار الحالي من CLENOVA لنظام Android من SKYORIGIN، وليس الميزات المستقبلية.</string>
+    <string name="legal_support_processing">لا تُرسل رسائل الدعم إلا إذا اخترت إرسالها. يتولى مزود البريد التسليم. قد تستخدم SKYORIGIN المعلومات المرسلة للرد وحل طلبك. لا تُدرج كلمات مرور أو ملفات حساسة.</string>
+    <string name="legal_retention_title">الاحتفاظ والخيارات</string>
+    <string name="legal_retention_body">تبقى التفضيلات المحلية حتى إعادة ضبطها أو إزالة بيانات التطبيق. قد تُحفظ رسائل الدعم لحل الطلبات أو الوفاء بالالتزامات السارية. تواصل معنا لطلب الوصول إلى معلومات الدعم أو تصحيحها أو حذفها وفق القانون الساري.</string>
+    <string name="legal_terms_intro">تصف هذه الشروط استخدام الإصدار الحالي من CLENOVA لنظام Android من SKYORIGIN. استخدم التطبيق فقط إذا وافقت عليها.</string>
+    <string name="legal_use_title">الاستخدام المسؤول</string>
+    <string name="legal_use_body">استخدم CLENOVA فقط على الأجهزة والملفات المصرح لك بإدارتها. لا تستخدمه لمخالفة القوانين أو حقوق الآخرين.</string>
+    <string name="legal_cleanup_body">راجع التوصيات واحتفظ بنسخ احتياطية من الملفات المهمة قبل الموافقة على التنظيف. لا يحذف هذا الإصدار الوسائط.</string>
+    <string name="legal_availability_title">التوافر والتغييرات</string>
+    <string name="legal_availability_body">قد تتغير الميزات أو لا تتوفر أو تعتمد على قدرات Android والجهاز. تقديرات التخزين لا تضمن المساحة المستعادة. راجع أحدث الإشعارات عند التحديث.</string>
+    <string name="legal_rights_body">لا تحد هذه الشروط من الحقوق أو سبل الانتصاف التي لا يجوز التنازل عنها بموجب القانون الساري. تواصل مع SKYORIGIN بشأن الأسئلة أو المخاوف.</string>
+    <string name="legal_licenses_intro">تُنشأ إشعارات التبعيات من بيانات المكتبات أثناء البناء. للأصول المضمنة إشعارات منفصلة. تبقى نصوص التراخيص بلغتها الأصلية.</string>
+    <string name="legal_dependency_notices">إشعارات المكتبات</string>
+    <string name="legal_read_license">قراءة الترخيص</string>
 </resources>

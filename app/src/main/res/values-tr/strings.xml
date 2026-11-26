@@ -291,4 +291,19 @@
     <string name="support_copy">Mesajı kopyala</string>
     <string name="support_copied">Mesaj kopyalandı</string>
     <string name="support_email_unavailable">E-posta açılamadı. Mesajınızı kopyalayıp tercih ettiğiniz e-posta hizmetinden gönderin.</string>
+    <string name="legal_revision">Sürüm: 26 Kasım 2026</string>
+    <string name="legal_policy_intro">Bu bildirim SKYORIGIN tarafından geliştirilen mevcut CLENOVA Android sürümünü açıklar; gelecekteki özellikleri kapsamaz.</string>
+    <string name="legal_support_processing">Destek e-postaları yalnızca göndermeyi seçtiğinizde gönderilir. Teslimatı e-posta sağlayıcınız yapar. SKYORIGIN gönderdiğiniz bilgileri yanıtlamak ve talebinizi çözmek için kullanabilir. Parola veya hassas dosya eklemeyin.</string>
+    <string name="legal_retention_title">Saklama ve tercihler</string>
+    <string name="legal_retention_body">Yerel tercihler sıfırlanana veya uygulama verileri silinene kadar saklanır. Destek mesajları talepleri çözmek veya geçerli yükümlülükleri yerine getirmek için gerektiği sürece saklanabilir. Geçerli yasa kapsamında destek bilgilerine erişim, düzeltme veya silme talebi için bize ulaşın.</string>
+    <string name="legal_terms_intro">Bu koşullar SKYORIGIN\'in mevcut CLENOVA Android sürümünün kullanımını açıklar. Yalnızca kabul ediyorsanız uygulamayı kullanın.</string>
+    <string name="legal_use_title">Sorumlu kullanım</string>
+    <string name="legal_use_body">CLENOVA\'yı yalnızca yönetmeye yetkili olduğunuz cihaz ve dosyalarda kullanın. Yasaları veya başkalarının haklarını ihlal etmeyin.</string>
+    <string name="legal_cleanup_body">Temizliği onaylamadan önce önerileri inceleyin ve önemli dosyaları yedekleyin. Bu sürüm medya silmez.</string>
+    <string name="legal_availability_title">Kullanılabilirlik ve değişiklikler</string>
+    <string name="legal_availability_body">Özellikler değişebilir, kullanılamayabilir veya Android ve cihaz yeteneklerine bağlı olabilir. Depolama tahminleri kazanılacak alanı garanti etmez. Güncellemede son bildirimleri kontrol edin.</string>
+    <string name="legal_rights_body">Bu koşullar geçerli yasa uyarınca feragat edilemeyen hakları veya hukuki yolları sınırlamaz. Sorularınız için SKYORIGIN\'e ulaşın.</string>
+    <string name="legal_licenses_intro">Bağımlılık bildirimleri derleme sırasında kitaplık meta verilerinden oluşturulur. Dahili varlıkların ayrı bildirimleri vardır. Lisans metinleri özgün dilinde kalır.</string>
+    <string name="legal_dependency_notices">Kitaplık bildirimleri</string>
+    <string name="legal_read_license">Lisansı oku</string>
 </resources>

@@ -291,4 +291,19 @@
     <string name="support_copy">메시지 복사</string>
     <string name="support_copied">메시지가 복사되었습니다</string>
     <string name="support_email_unavailable">이메일을 열 수 없습니다. 메시지를 복사해 원하는 이메일 서비스에서 보내세요.</string>
+    <string name="legal_revision">버전: 2026년 11월 26일</string>
+    <string name="legal_policy_intro">이 안내는 SKYORIGIN의 현재 CLENOVA Android 빌드에 관한 것으로 향후 기능은 포함하지 않습니다.</string>
+    <string name="legal_support_processing">지원 이메일은 사용자가 보내기로 선택할 때만 전송되며 이메일 제공업체가 배달을 처리합니다. SKYORIGIN은 답변 및 요청 해결에 전송 정보를 사용할 수 있습니다. 비밀번호나 민감한 파일을 포함하지 마세요.</string>
+    <string name="legal_retention_title">보관 및 선택</string>
+    <string name="legal_retention_body">로컬 설정은 초기화하거나 앱 데이터를 삭제할 때까지 보관됩니다. 지원 메시지는 요청 해결 또는 적용되는 의무 이행에 필요한 기간 동안 보관될 수 있습니다. 관련 법률에 따라 지원 정보의 열람, 정정 또는 삭제를 요청하려면 문의하세요.</string>
+    <string name="legal_terms_intro">이 약관은 SKYORIGIN의 현재 CLENOVA Android 빌드 사용에 관한 것입니다. 동의하는 경우에만 앱을 사용하세요.</string>
+    <string name="legal_use_title">책임 있는 사용</string>
+    <string name="legal_use_body">관리 권한이 있는 기기와 파일에만 CLENOVA를 사용하세요. 법률이나 타인의 권리를 침해하지 마세요.</string>
+    <string name="legal_cleanup_body">정리를 승인하기 전에 추천 내용을 검토하고 중요한 파일을 백업하세요. 이 빌드는 미디어를 삭제하지 않습니다.</string>
+    <string name="legal_availability_title">가용성 및 변경</string>
+    <string name="legal_availability_body">기능은 변경되거나 사용 불가할 수 있으며 Android 및 기기 성능에 따라 달라집니다. 저장공간 추정치는 확보 용량을 보장하지 않습니다. 업데이트 시 최신 안내를 확인하세요.</string>
+    <string name="legal_rights_body">이 약관은 관련 법률상 포기할 수 없는 권리나 구제 수단을 제한하지 않습니다. 질문이나 우려 사항은 SKYORIGIN에 문의하세요.</string>
+    <string name="legal_licenses_intro">의존성 고지는 빌드 시 라이브러리 메타데이터에서 생성됩니다. 포함된 에셋에는 별도 고지가 있습니다. 라이선스 원문은 그대로 유지됩니다.</string>
+    <string name="legal_dependency_notices">라이브러리 고지</string>
+    <string name="legal_read_license">라이선스 읽기</string>
 </resources>

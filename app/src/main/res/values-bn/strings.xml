@@ -291,4 +291,19 @@
     <string name="support_copy">বার্তা কপি করুন</string>
     <string name="support_copied">বার্তা কপি হয়েছে</string>
     <string name="support_email_unavailable">ইমেল খোলা যায়নি। বার্তা কপি করে আপনার পছন্দের ইমেল সেবায় পাঠান।</string>
+    <string name="legal_revision">সংস্করণ: ২৬ নভেম্বর ২০২৬</string>
+    <string name="legal_policy_intro">এই বিজ্ঞপ্তি SKYORIGIN-এর বর্তমান CLENOVA Android বিল্ড সম্পর্কে, ভবিষ্যৎ ফিচার সম্পর্কে নয়।</string>
+    <string name="legal_support_processing">আপনি পাঠালে তবেই সহায়তা ইমেল পাঠানো হয়। আপনার ইমেল প্রদানকারী ডেলিভারি করে। SKYORIGIN উত্তর ও সমস্যা সমাধানে পাঠানো তথ্য ব্যবহার করতে পারে। পাসওয়ার্ড বা সংবেদনশীল ফাইল পাঠাবেন না।</string>
+    <string name="legal_retention_title">তথ্য রাখা ও বিকল্প</string>
+    <string name="legal_retention_body">স্থানীয় পছন্দ রিসেট বা অ্যাপ ডেটা সরানো পর্যন্ত থাকে। অনুরোধ সমাধান বা প্রযোজ্য বাধ্যবাধকতা পূরণে সহায়তা বার্তা রাখা হতে পারে। প্রযোজ্য আইন অনুযায়ী সহায়তার তথ্য দেখা, সংশোধন বা মুছার অনুরোধে যোগাযোগ করুন।</string>
+    <string name="legal_terms_intro">এই শর্তগুলো SKYORIGIN-এর বর্তমান CLENOVA Android বিল্ড ব্যবহারের জন্য। সম্মত হলেই অ্যাপ ব্যবহার করুন।</string>
+    <string name="legal_use_title">দায়িত্বশীল ব্যবহার</string>
+    <string name="legal_use_body">শুধু অনুমোদিত ডিভাইস ও ফাইলে CLENOVA ব্যবহার করুন। আইন বা অন্যের অধিকার লঙ্ঘনে ব্যবহার করবেন না।</string>
+    <string name="legal_cleanup_body">পরিষ্কারের অনুমোদনের আগে সুপারিশ দেখুন ও গুরুত্বপূর্ণ ফাইলের ব্যাকআপ রাখুন। এই বিল্ড মিডিয়া মুছে না।</string>
+    <string name="legal_availability_title">উপলব্ধতা ও পরিবর্তন</string>
+    <string name="legal_availability_body">ফিচার বদলাতে পারে, অনুপলব্ধ হতে পারে বা Android ও ডিভাইসের ক্ষমতার ওপর নির্ভর করতে পারে। স্টোরেজ অনুমান প্রকৃত খালি জায়গার নিশ্চয়তা নয়। আপডেটে সর্বশেষ বিজ্ঞপ্তি দেখুন।</string>
+    <string name="legal_rights_body">এই শর্তগুলো প্রযোজ্য আইনে ত্যাগ করা যায় না এমন অধিকার বা প্রতিকার সীমিত করে না। প্রশ্নে SKYORIGIN-এর সঙ্গে যোগাযোগ করুন।</string>
+    <string name="legal_licenses_intro">বিল্ডের সময় লাইব্রেরি মেটাডেটা থেকে নির্ভরতার বিজ্ঞপ্তি তৈরি হয়। অন্তর্ভুক্ত সম্পদের আলাদা বিজ্ঞপ্তি আছে। লাইসেন্স মূল ভাষায় থাকে।</string>
+    <string name="legal_dependency_notices">লাইব্রেরির বিজ্ঞপ্তি</string>
+    <string name="legal_read_license">লাইসেন্স পড়ুন</string>
 </resources>

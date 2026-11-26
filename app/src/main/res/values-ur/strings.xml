@@ -291,4 +291,19 @@
     <string name="support_copy">پیغام کاپی کریں</string>
     <string name="support_copied">پیغام کاپی ہو گیا</string>
     <string name="support_email_unavailable">ای میل نہیں کھل سکی۔ پیغام کاپی کرکے اپنی پسند کی ای میل سروس سے بھیجیں۔</string>
+    <string name="legal_revision">ورژن: 26 نومبر 2026</string>
+    <string name="legal_policy_intro">یہ اطلاع SKYORIGIN کے موجودہ CLENOVA Android بلڈ کے بارے میں ہے، مستقبل کے فیچرز کے بارے میں نہیں۔</string>
+    <string name="legal_support_processing">معاونتی ای میل صرف آپ کے بھیجنے پر جاتی ہے۔ ای میل فراہم کنندہ ترسیل کرتا ہے۔ SKYORIGIN آپ کی بھیجی معلومات جواب اور مسئلہ حل کرنے کے لیے استعمال کر سکتا ہے۔ پاس ورڈ یا حساس فائلیں نہ بھیجیں۔</string>
+    <string name="legal_retention_title">ڈیٹا رکھنا اور اختیارات</string>
+    <string name="legal_retention_body">مقامی ترجیحات ری سیٹ یا ایپ ڈیٹا ہٹانے تک رہتی ہیں۔ معاونتی پیغامات درخواست حل کرنے یا قابل اطلاق ذمہ داریوں کے لیے رکھے جا سکتے ہیں۔ قابل اطلاق قانون کے تحت معاونتی معلومات تک رسائی، اصلاح یا حذف کی درخواست کے لیے رابطہ کریں۔</string>
+    <string name="legal_terms_intro">یہ شرائط SKYORIGIN کے موجودہ CLENOVA Android بلڈ کے استعمال کے لیے ہیں۔ قبول کرنے پر ہی ایپ استعمال کریں۔</string>
+    <string name="legal_use_title">ذمہ دارانہ استعمال</string>
+    <string name="legal_use_body">CLENOVA صرف ان ڈیوائسز اور فائلوں پر استعمال کریں جن کا انتظام کرنے کی اجازت ہے۔ قوانین یا دوسروں کے حقوق کی خلاف ورزی نہ کریں۔</string>
+    <string name="legal_cleanup_body">صفائی منظور کرنے سے پہلے تجاویز دیکھیں اور اہم فائلوں کا بیک اپ رکھیں۔ یہ بلڈ میڈیا حذف نہیں کرتا۔</string>
+    <string name="legal_availability_title">دستیابی اور تبدیلیاں</string>
+    <string name="legal_availability_body">فیچرز بدل سکتے ہیں، دستیاب نہ ہوں یا Android اور ڈیوائس کی صلاحیتوں پر منحصر ہوں۔ اسٹوریج اندازے خالی ہونے والی جگہ کی ضمانت نہیں۔ اپ ڈیٹ پر تازہ اطلاعات دیکھیں۔</string>
+    <string name="legal_rights_body">یہ شرائط قابل اطلاق قانون کے تحت ناقابل ترک حقوق یا قانونی چارہ جوئی کو محدود نہیں کرتیں۔ سوالات کے لیے SKYORIGIN سے رابطہ کریں۔</string>
+    <string name="legal_licenses_intro">ڈپینڈنسی نوٹس بلڈ کے وقت لائبریری میٹا ڈیٹا سے بنتے ہیں۔ شامل اثاثوں کے الگ نوٹس ہیں۔ لائسنس اصل زبان میں رہتے ہیں۔</string>
+    <string name="legal_dependency_notices">لائبریری نوٹس</string>
+    <string name="legal_read_license">لائسنس پڑھیں</string>
 </resources>

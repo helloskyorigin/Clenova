@@ -291,4 +291,19 @@
     <string name="support_copy">Nachricht kopieren</string>
     <string name="support_copied">Nachricht kopiert</string>
     <string name="support_email_unavailable">E-Mail konnte nicht geöffnet werden. Kopiere deine Nachricht und versende sie über deinen bevorzugten E-Mail-Dienst.</string>
+    <string name="legal_revision">Stand: 26. November 2026</string>
+    <string name="legal_policy_intro">Dieser Hinweis beschreibt den aktuellen Android-Build von CLENOVA von SKYORIGIN, nicht zukünftige Funktionen.</string>
+    <string name="legal_support_processing">Support-E-Mails werden nur auf deinen Wunsch versendet. Dein E-Mail-Anbieter übernimmt die Zustellung. SKYORIGIN kann die gesendeten Informationen zur Beantwortung und Lösung deiner Anfrage nutzen. Sende keine Passwörter oder sensiblen Dateien.</string>
+    <string name="legal_retention_title">Aufbewahrung und Wahlmöglichkeiten</string>
+    <string name="legal_retention_body">Lokale Einstellungen bleiben bis zum Zurücksetzen oder Löschen der App-Daten gespeichert. Support-Nachrichten können zur Bearbeitung von Anfragen oder zur Erfüllung geltender Pflichten aufbewahrt werden. Kontaktiere uns für Auskunft, Berichtigung oder Löschung von Support-Daten nach geltendem Recht.</string>
+    <string name="legal_terms_intro">Diese Bedingungen beschreiben die Nutzung des aktuellen Android-Builds von CLENOVA von SKYORIGIN. Nutze die App nur, wenn du ihnen zustimmst.</string>
+    <string name="legal_use_title">Verantwortungsvolle Nutzung</string>
+    <string name="legal_use_body">Nutze CLENOVA nur auf Geräten und Dateien, die du verwalten darfst. Verstoße nicht gegen Gesetze oder Rechte anderer.</string>
+    <string name="legal_cleanup_body">Prüfe Empfehlungen und sichere wichtige Dateien vor einer Freigabe. Dieser Build löscht keine Medien.</string>
+    <string name="legal_availability_title">Verfügbarkeit und Änderungen</string>
+    <string name="legal_availability_body">Funktionen können sich ändern, nicht verfügbar sein oder von Android und dem Gerät abhängen. Schätzungen garantieren keinen Speichergewinn. Prüfe beim Aktualisieren die neuesten Hinweise.</string>
+    <string name="legal_rights_body">Diese Bedingungen beschränken keine Rechte oder Rechtsbehelfe, auf die nach geltendem Recht nicht verzichtet werden kann. Kontaktiere SKYORIGIN bei Fragen.</string>
+    <string name="legal_licenses_intro">Abhängigkeitshinweise werden beim Build aus Bibliotheksmetadaten erzeugt. Enthaltene Ressourcen haben eigene Hinweise. Lizenztexte bleiben in der Originalsprache.</string>
+    <string name="legal_dependency_notices">Bibliothekshinweise</string>
+    <string name="legal_read_license">Lizenz lesen</string>
 </resources>

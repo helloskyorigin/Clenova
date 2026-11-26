@@ -291,4 +291,19 @@
     <string name="support_copy">Copier le message</string>
     <string name="support_copied">Message copié</string>
     <string name="support_email_unavailable">Impossible d’ouvrir la messagerie. Copiez votre message et envoyez-le avec votre service préféré.</string>
+    <string name="legal_revision">Version : 26 novembre 2026</string>
+    <string name="legal_policy_intro">Cette notice décrit la version Android actuelle de CLENOVA par SKYORIGIN, et non les fonctions futures.</string>
+    <string name="legal_support_processing">Les e-mails d’assistance ne partent que si vous choisissez de les envoyer. Votre fournisseur assure la livraison. SKYORIGIN peut utiliser les informations envoyées pour répondre et résoudre votre demande. N’incluez ni mots de passe ni fichiers sensibles.</string>
+    <string name="legal_retention_title">Conservation et choix</string>
+    <string name="legal_retention_body">Les préférences locales restent jusqu’à leur réinitialisation ou à la suppression des données de l’application. Les messages d’assistance peuvent être conservés pour résoudre les demandes ou respecter les obligations applicables. Contactez-nous pour demander l’accès, la rectification ou la suppression des informations d’assistance selon la loi applicable.</string>
+    <string name="legal_terms_intro">Ces conditions décrivent l’utilisation de la version Android actuelle de CLENOVA par SKYORIGIN. Utilisez l’application seulement si vous les acceptez.</string>
+    <string name="legal_use_title">Utilisation responsable</string>
+    <string name="legal_use_body">Utilisez CLENOVA uniquement sur les appareils et fichiers que vous êtes autorisé à gérer. Ne violez ni la loi ni les droits d’autrui.</string>
+    <string name="legal_cleanup_body">Examinez les recommandations et sauvegardez les fichiers importants avant d’approuver le nettoyage. Cette version ne supprime pas de médias.</string>
+    <string name="legal_availability_title">Disponibilité et modifications</string>
+    <string name="legal_availability_body">Les fonctions peuvent changer, être indisponibles ou dépendre d’Android et de l’appareil. Les estimations ne garantissent pas l’espace récupéré. Consultez les dernières notices lors des mises à jour.</string>
+    <string name="legal_rights_body">Ces conditions ne limitent aucun droit ou recours auquel il ne peut être renoncé selon la loi applicable. Contactez SKYORIGIN pour toute question.</string>
+    <string name="legal_licenses_intro">Les notices des dépendances sont générées à partir des métadonnées de compilation. Les ressources intégrées ont des notices distinctes. Les licences restent dans leur langue originale.</string>
+    <string name="legal_dependency_notices">Notices des bibliothèques</string>
+    <string name="legal_read_license">Lire la licence</string>
 </resources>

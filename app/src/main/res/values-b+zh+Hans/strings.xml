@@ -291,4 +291,19 @@
     <string name="support_copy">复制消息</string>
     <string name="support_copied">消息已复制</string>
     <string name="support_email_unavailable">无法打开邮件。请复制消息并使用你喜欢的邮件服务发送。</string>
+    <string name="legal_revision">版本：2026年11月26日</string>
+    <string name="legal_policy_intro">本声明说明 SKYORIGIN 的 CLENOVA Android 当前版本，不涉及未来功能。</string>
+    <string name="legal_support_processing">支持邮件仅在你选择发送时发出，由邮件服务商负责投递。SKYORIGIN 可使用你发送的信息回复并解决请求。请勿包含密码或敏感文件。</string>
+    <string name="legal_retention_title">保留与选择</string>
+    <string name="legal_retention_body">本地偏好保留至重置或删除应用数据。支持消息可按解决请求或履行适用义务所需保留。可联系我们请求访问、更正或删除支持信息，具体受适用法律约束。</string>
+    <string name="legal_terms_intro">本条款适用于 SKYORIGIN 的 CLENOVA Android 当前版本。仅在接受条款时使用。</string>
+    <string name="legal_use_title">负责任的使用</string>
+    <string name="legal_use_body">仅在有权管理的设备和文件上使用 CLENOVA。不得用于违反法律或他人权利。</string>
+    <string name="legal_cleanup_body">批准清理前请检查建议并备份重要文件。本版本不会删除媒体。</string>
+    <string name="legal_availability_title">可用性与变更</string>
+    <string name="legal_availability_body">功能可能变更、不可用或取决于 Android 和设备能力。存储估算不保证实际释放空间。更新时请查看最新声明。</string>
+    <string name="legal_rights_body">本条款不限制适用法律下不可放弃的权利或救济。如有疑问，请联系 SKYORIGIN。</string>
+    <string name="legal_licenses_intro">依赖库声明由构建时的库元数据生成。内置资源有单独声明。许可证保留原文。</string>
+    <string name="legal_dependency_notices">库声明</string>
+    <string name="legal_read_license">阅读许可证</string>
 </resources>
