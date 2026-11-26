@@ -132,6 +132,7 @@ fun ClenovaNavHost(
 
         composable<ClenovaRoute.Clean> {
             CleanScreen(
+                sample = sample,
                 onSmartScan = { onSelectionHaptic(); navController.navigate(ClenovaRoute.SmartScan) { launchSingleTop = true } },
                 onDuplicates = { onSelectionHaptic(); navController.navigate(ClenovaRoute.Duplicates) { launchSingleTop = true } },
                 onCompress = { onSelectionHaptic(); navController.navigate(ClenovaRoute.VideoCompress) { launchSingleTop = true } },

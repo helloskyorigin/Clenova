@@ -2,168 +2,154 @@ package com.clenova.app.feature.clean
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.material.icons.automirrored.rounded.ArrowForward
-import androidx.compose.ui.platform.testTag
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.statusBars
-import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.BurstMode
-import androidx.compose.material.icons.outlined.ContentCopy
-import androidx.compose.material.icons.outlined.FolderZip
-import androidx.compose.material.icons.outlined.Screenshot
-import androidx.compose.material.icons.outlined.Swipe
-import androidx.compose.material.icons.outlined.VideoSettings
-import androidx.compose.material3.Button
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
+import androidx.compose.material.icons.automirrored.outlined.ChevronRight
+import androidx.compose.material.icons.outlined.*
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.clenova.app.core.designsystem.ClenovaScreenHeader
+import androidx.compose.ui.unit.sp
 import com.clenova.app.core.designsystem.ClenovaShapes
 import com.clenova.app.core.designsystem.ClenovaSpacing
-import com.clenova.app.core.designsystem.ClenovaStatusBadge
-import com.clenova.app.core.designsystem.ClenovaSurfaceCard
 import com.clenova.app.core.designsystem.ClenovaThemeTokens
+import com.clenova.app.feature.agent.CleanupDesignPlan
+import com.example.BuildConfig
 import com.example.R
-
-private data class CleanToolStub(
-    val icon: ImageVector,
-    val titleRes: Int,
-    val descriptionRes: Int,
-)
-
-private val plannedCleanTools = listOf(
-    CleanToolStub(Icons.Outlined.ContentCopy, R.string.clean_tool_duplicates_title, R.string.clean_tool_duplicates_desc),
-    CleanToolStub(Icons.Outlined.BurstMode, R.string.clean_tool_similar_title, R.string.clean_tool_similar_desc),
-    CleanToolStub(Icons.Outlined.Screenshot, R.string.clean_tool_screenshots_title, R.string.clean_tool_screenshots_desc),
-    CleanToolStub(Icons.Outlined.FolderZip, R.string.clean_tool_large_files_title, R.string.clean_tool_large_files_desc),
-    CleanToolStub(Icons.Outlined.Swipe, R.string.clean_tool_swipe_clean_title, R.string.clean_tool_swipe_clean_desc),
-    CleanToolStub(Icons.Outlined.VideoSettings, R.string.clean_tool_video_compress_title, R.string.clean_tool_video_compress_desc),
-)
 
 @Composable
 fun CleanScreen(
     modifier: Modifier = Modifier,
+    sample: Boolean = false,
     onSmartScan: () -> Unit,
     onDuplicates: () -> Unit,
     onCompress: () -> Unit,
 ) {
     val colors = ClenovaThemeTokens.colors
-    val scrollState = rememberScrollState()
-
-    Box(
-        modifier = modifier
-            .fillMaxSize()
-            .background(colors.background)
-            .windowInsetsPadding(WindowInsets.statusBars),
-        contentAlignment = Alignment.TopCenter,
-    ) {
-        Column(
-            modifier = Modifier
-                .widthIn(max = 600.dp)
-                .fillMaxSize()
-                .verticalScroll(scrollState)
-                .padding(
-                    start = ClenovaSpacing.screenHorizontal,
-                    end = ClenovaSpacing.screenHorizontal,
-                    top = ClenovaSpacing.md,
-                    bottom = ClenovaSpacing.floatingNavBottomClearance,
-                ),
-            verticalArrangement = Arrangement.spacedBy(ClenovaSpacing.sm),
-        ) {
-            ClenovaScreenHeader(
-                title = stringResource(R.string.clean_title),
-                subtitle = stringResource(R.string.clean_subtitle),
-            )
-
-            Spacer(modifier = Modifier.height(ClenovaSpacing.xs))
-
-            Button(onClick = onSmartScan, modifier = Modifier.fillMaxWidth(), shape = ClenovaShapes.pill) {
-                Text(stringResource(R.string.home_smart_scan))
-            }
-
-            plannedCleanTools.forEach { tool ->
-                ClenovaSurfaceCard {
-                    Row(
-                        modifier = Modifier.fillMaxWidth().then(when (tool.titleRes) { R.string.clean_tool_duplicates_title -> Modifier.testTag("clean_duplicates").clickable(onClick = onDuplicates); R.string.clean_tool_video_compress_title -> Modifier.testTag("clean_compress").clickable(onClick = onCompress); else -> Modifier }),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(ClenovaSpacing.md),
-                    ) {
-                        Box(
-                            modifier = Modifier
-                                .size(42.dp)
-                                .clip(ClenovaShapes.tile)
-                                .background(colors.softBlue),
-                            contentAlignment = Alignment.Center,
-                        ) {
-                            Icon(
-                                imageVector = tool.icon,
-                                contentDescription = null,
-                                tint = colors.primary,
-                                modifier = Modifier.size(22.dp),
-                            )
-                        }
-
-                        Column(modifier = Modifier.weight(1f)) {
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                            ) {
-                                Text(
-                                    text = stringResource(tool.titleRes),
-                                    style = MaterialTheme.typography.titleMedium,
-                                    color = colors.textPrimary,
-                                )
-                                if (tool.titleRes == R.string.clean_tool_duplicates_title || tool.titleRes == R.string.clean_tool_video_compress_title) {
-                                    Icon(Icons.AutoMirrored.Rounded.ArrowForward, null, Modifier.size(18.dp), tint = colors.primary)
-                                } else {
-                                    ClenovaStatusBadge(
-                                        label = stringResource(R.string.clean_badge_planned),
-                                        containerColor = colors.background,
-                                        contentColor = colors.textSecondary,
-                                    )
-                                }
-                            }
-                            Spacer(modifier = Modifier.height(ClenovaSpacing.xxs))
-                            Text(
-                                text = stringResource(tool.descriptionRes),
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = colors.textSecondary,
-                            )
-                        }
-                    }
+    val preview = BuildConfig.DEBUG && sample
+    var dialog by rememberSaveable { mutableStateOf<Int?>(null) }
+    Box(modifier.fillMaxSize().background(colors.background).windowInsetsPadding(WindowInsets.statusBars),
+        contentAlignment = Alignment.TopCenter) {
+        Column(Modifier.widthIn(max = 560.dp).fillMaxSize().verticalScroll(rememberScrollState())
+            .padding(start = 24.dp, end = 24.dp, top = 12.dp, bottom = ClenovaSpacing.floatingNavBottomClearance),
+            verticalArrangement = Arrangement.spacedBy(16.dp)) {
+            Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                Text(stringResource(R.string.clean_title), Modifier.weight(1f),
+                    style = MaterialTheme.typography.headlineMedium.copy(fontSize = 32.sp, fontWeight = FontWeight.SemiBold, letterSpacing = (-.8).sp),
+                    color = colors.textPrimary)
+                IconButton(onClick = { dialog = R.string.clean_history }, modifier = Modifier.testTag("clean_history")) {
+                    Icon(Icons.Outlined.History, stringResource(R.string.clean_history), tint = colors.textPrimary)
                 }
             }
-
-            Spacer(modifier = Modifier.height(ClenovaSpacing.xs))
-
-            Text(
-                text = stringResource(R.string.clean_footer_honesty),
-                style = MaterialTheme.typography.bodySmall,
-                color = colors.textSecondary,
-                modifier = Modifier.padding(horizontal = ClenovaSpacing.xxs),
+            Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(3.dp)) {
+                    Text(if (preview) CleanupDesignPlan.spaceLabel(CleanupDesignPlan.ALL) else "—",
+                        modifier = Modifier.testTag("clean_recoverable"),
+                        style = MaterialTheme.typography.displaySmall.copy(fontSize = 39.sp, lineHeight = 45.sp, fontWeight = FontWeight.SemiBold, letterSpacing = (-1.4).sp),
+                        color = colors.textPrimary)
+                    Text(stringResource(R.string.review_estimated_space), style = MaterialTheme.typography.bodySmall, color = colors.textSecondary)
+                    if (preview) Text(stringResource(R.string.clean_preview), style = MaterialTheme.typography.labelSmall, color = colors.textSecondary)
+                }
+                Button(onClick = onSmartScan, shape = ClenovaShapes.pill,
+                    modifier = Modifier.heightIn(min = 48.dp).testTag("clean_review_all"),
+                    colors = ButtonDefaults.buttonColors(containerColor = colors.primary, contentColor = colors.onPrimary),
+                    contentPadding = PaddingValues(horizontal = 18.dp, vertical = 12.dp)) {
+                    Text(stringResource(if (preview) R.string.clean_review_all else R.string.home_smart_scan))
+                }
+            }
+            HorizontalDivider(color = colors.border)
+            PhotoStrip(
+                title = R.string.clean_tool_duplicates_title,
+                count = if (preview) stringResource(R.string.guard_item_count, DuplicateDesignData.removableIds.size) else null,
+                preview = preview, similar = false, tag = "clean_duplicates", onClick = onDuplicates,
             )
+            if (preview) Text(CleanupDesignPlan.spaceLabel(1) + " · " + stringResource(R.string.review_duplicates_detail),
+                style = MaterialTheme.typography.bodySmall, color = colors.textSecondary)
+            PhotoStrip(
+                title = R.string.clean_tool_similar_title,
+                count = if (preview) stringResource(R.string.scan_similar_count) else null,
+                preview = preview, similar = true, tag = "clean_similar",
+                onClick = { dialog = R.string.clean_tool_similar_title },
+            )
+            HorizontalDivider(color = colors.border)
+            Column {
+                CleanFileRow(Icons.Outlined.Screenshot, R.string.clean_tool_screenshots_title,
+                    if (preview) stringResource(R.string.guard_item_count, 84) else null, "clean_screenshots") { dialog = R.string.clean_tool_screenshots_title }
+                HorizontalDivider(color = colors.border)
+                CleanFileRow(Icons.Outlined.VideoFile, R.string.review_videos,
+                    if (preview) CleanupDesignPlan.spaceLabel(2) else null, "clean_large_videos") { dialog = R.string.review_videos }
+                HorizontalDivider(color = colors.border)
+                CleanFileRow(Icons.Outlined.FolderOpen, R.string.clean_tool_large_files_title,
+                    if (preview) stringResource(R.string.guard_item_count, 8) else null, "clean_large_files") { dialog = R.string.clean_tool_large_files_title }
+                HorizontalDivider(color = colors.border)
+            }
+            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                CleanQuickTool(Icons.Outlined.Swipe, R.string.clean_tool_swipe_clean_title, "clean_swipe", Modifier.weight(1f)) { dialog = R.string.clean_tool_swipe_clean_title }
+                CleanQuickTool(Icons.Outlined.VideoSettings, R.string.clean_tool_video_compress_title, "clean_compress", Modifier.weight(1f), onCompress)
+            }
         }
+    }
+    dialog?.let { title ->
+        AlertDialog(onDismissRequest = { dialog = null },
+            title = { Text(stringResource(title)) },
+            text = { Text(stringResource(if (title == R.string.clean_history) R.string.clean_history_empty else R.string.home_tool_unavailable)) },
+            confirmButton = { TextButton(onClick = { dialog = null }, modifier = Modifier.testTag("clean_dialog_done")) { Text(stringResource(R.string.review_done)) } })
+    }
+}
+
+@Composable
+private fun PhotoStrip(title: Int, count: String?, preview: Boolean, similar: Boolean, tag: String, onClick: () -> Unit) {
+    val colors = ClenovaThemeTokens.colors
+    Column(Modifier.fillMaxWidth().clip(RoundedCornerShape(10.dp)).testTag(tag)
+        .clickable(role = Role.Button, onClick = onClick), verticalArrangement = Arrangement.spacedBy(9.dp)) {
+        Row(Modifier.fillMaxWidth().heightIn(min = 38.dp), verticalAlignment = Alignment.CenterVertically) {
+            Text(stringResource(title), Modifier.weight(1f), style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.SemiBold), color = colors.textPrimary)
+            if (count != null) Text(count, style = MaterialTheme.typography.bodySmall, color = colors.primary)
+            Icon(Icons.AutoMirrored.Outlined.ChevronRight, null, Modifier.size(18.dp), tint = colors.primary)
+        }
+        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+            repeat(3) { index ->
+                Box(Modifier.weight(1f).aspectRatio(1f).clip(RoundedCornerShape(8.dp)).background(colors.surface),
+                    contentAlignment = Alignment.Center) {
+                    if (preview) DuplicateArtwork(if (similar) 1 else 0, Modifier.fillMaxSize(), variant = if (similar) index else 0)
+                    else Icon(Icons.Outlined.Image, null, Modifier.size(25.dp), tint = colors.textSecondary.copy(alpha = .5f))
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun CleanFileRow(icon: ImageVector, title: Int, value: String?, tag: String, onClick: () -> Unit) {
+    val colors = ClenovaThemeTokens.colors
+    Row(Modifier.fillMaxWidth().heightIn(min = 56.dp).clip(RoundedCornerShape(8.dp)).testTag(tag)
+        .clickable(role = Role.Button, onClick = onClick), verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+        Icon(icon, null, Modifier.size(24.dp), tint = colors.textPrimary)
+        Text(stringResource(title), Modifier.weight(1f), style = MaterialTheme.typography.bodyLarge, color = colors.textPrimary)
+        if (value != null) Text(value, style = MaterialTheme.typography.bodySmall, color = colors.textSecondary)
+        Icon(Icons.AutoMirrored.Outlined.ChevronRight, null, Modifier.size(18.dp), tint = colors.textSecondary)
+    }
+}
+
+@Composable
+private fun CleanQuickTool(icon: ImageVector, title: Int, tag: String, modifier: Modifier, onClick: () -> Unit) {
+    val colors = ClenovaThemeTokens.colors
+    Column(modifier.clip(RoundedCornerShape(16.dp)).background(colors.surface).testTag(tag)
+        .clickable(role = Role.Button, onClick = onClick).padding(15.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        Icon(icon, null, Modifier.size(26.dp), tint = colors.primary)
+        Text(stringResource(title), style = MaterialTheme.typography.titleSmall, color = colors.textPrimary)
     }
 }

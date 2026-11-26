@@ -184,7 +184,7 @@ private fun DuplicateTile(group: Int, copy: Int, keep: Boolean, selected: Boolea
 
 /** Deterministic local artwork used only for visual layout review, not device photo thumbnails. */
 @Composable
-private fun DuplicateArtwork(group: Int, modifier: Modifier) {
+internal fun DuplicateArtwork(group: Int, modifier: Modifier, variant: Int = 0) {
     val palettes = listOf(
         listOf(Color(0xFFB8DCE9), Color(0xFF689E92), Color(0xFF285F6D)),
         listOf(Color(0xFFF3D3AD), Color(0xFFBD8673), Color(0xFF795865)),
@@ -194,7 +194,7 @@ private fun DuplicateArtwork(group: Int, modifier: Modifier) {
     val p = palettes[group % palettes.size]
     Canvas(modifier) {
         drawRect(Brush.verticalGradient(listOf(p[0], p[1])))
-        drawCircle(Color(0xFFFDF3D5), radius = size.width * .14f, center = Offset(size.width * .72f, size.height * .22f))
+        drawCircle(Color(0xFFFDF3D5), radius = size.width * .14f, center = Offset(size.width * (.72f - variant * .06f), size.height * (.22f + variant * .025f)))
         drawPath(Path().apply {
             moveTo(0f, size.height * .68f); lineTo(size.width * .29f, size.height * .32f)
             lineTo(size.width * .52f, size.height * .6f); lineTo(size.width * .76f, size.height * .43f)

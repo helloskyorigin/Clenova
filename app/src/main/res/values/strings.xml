@@ -339,4 +339,8 @@
     <string name="legal_licenses_intro">Dependency notices are generated from build-time library metadata. Bundled assets have separate notices. License texts remain in their original language.</string>
     <string name="legal_dependency_notices">Library notices</string>
     <string name="legal_read_license">Read license</string>
+    <string name="clean_history">Cleanup history</string>
+    <string name="clean_history_empty">No completed cleanups yet. Your files have not been changed.</string>
+    <string name="clean_preview">Design preview</string>
+    <string name="clean_review_all">Review all</string>
 </resources>
