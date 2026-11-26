@@ -16,7 +16,8 @@ class DeviceStorageProvider(
     private val context: Context,
 ) {
     suspend fun readInternalStorage(): StorageOverview? = withContext(Dispatchers.IO) {
-        readViaStorageStatsManager() ?: readViaStatFs()
+        // Prefer immediately available filesystem space; stats can include reclaimable cache.
+        readViaStatFs() ?: readViaStorageStatsManager()
     }
 
     private fun readViaStorageStatsManager(): StorageOverview? {

@@ -35,9 +35,9 @@ See [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) for package structure, extens
 Using a local Gradle installation or Android Studio:
 
 ```bash
-gradle :app:assembleDebug
-gradle :app:testDebugUnitTest
-gradle :app:lintDebug
+./gradlew :app:assembleDebug :app:testDebugUnitTest :app:lintDebug
 ```
 
-> Note: `gradle/wrapper/gradle-wrapper.properties` is included. If running via wrapper on a fresh clone without Android Studio, generate the wrapper JAR/scripts once with `gradle wrapper`.
+Use JDK 17 or the JDK required by the configured Android Gradle Plugin, and install the configured SDK. AI Studio signing keys are preserved when present; local debug builds otherwise use Android's default debug key.
+
+See [Scale and reliability contract](docs/SCALABILITY.md). Build and device verification are required before release.

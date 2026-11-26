@@ -46,3 +46,7 @@ com.clenova.app
 - **WorkManager**: Periodic low-overhead storage checks when Autopilot is explicitly enabled by the user.
 - **Media3**: Local video preview and on-device compression pipelines.
 - **On-device ML & Play Billing**: Local photo quality/similarity scoring and optional pro capabilities.
+
+## Foundation hardening
+
+`ClenovaApplication` shares process-scoped repositories; startup does not wait for disk IO. Overlapping storage refreshes coalesce. Cloud backup is disabled. See [SCALABILITY.md](SCALABILITY.md) for scan-engine and approval requirements.
