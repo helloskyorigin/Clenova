@@ -374,4 +374,27 @@
     <string name="guard_real_search">Поиск медиа или альбомов</string>
     <string name="guard_real_album_scope">Защитите эту папку и добавляемые в будущем медиа от очистки CLENOVA.</string>
     <string name="guard_real_visible_count">Защищённые элементы среди доступных медиа</string>
+    <string name="agent_real_welcome">Познакомьтесь с агентом.</string>
+    <string name="agent_real_intro">Умное управление вашим устройством.</string>
+    <string name="agent_real_proactive">Проактивный анализ</string>
+    <string name="agent_real_proactive_body">Находит возможности очистки.</string>
+    <string name="agent_real_storage">Умное управление памятью</string>
+    <string name="agent_real_storage_body">Учитывает вашу цель по свободному месту.</string>
+    <string name="agent_real_guard_body">Учитывает защищённые воспоминания.</string>
+    <string name="agent_real_transparency">Полная прозрачность</string>
+    <string name="agent_real_transparency_body">Просматривайте историю очистки.</string>
+    <string name="agent_real_setup">Настроить агента</string>
+    <string name="agent_real_private">Конфиденциальность и контроль в ваших руках.</string>
+    <string name="agent_real_your">Ваш агент</string>
+    <string name="agent_real_active">Активен</string>
+    <string name="agent_real_checking">Проверяем устройство…</string>
+    <string name="agent_real_first">Ожидание первой проверки.</string>
+    <string name="agent_real_permission">Требуется доступ к медиа.</string>
+    <string name="agent_real_error">Проверка не удалась. Повторите попытку.</string>
+    <string name="agent_real_ready">Перед удалением запустите новую проверку.</string>
+    <string name="agent_real_last">Последняя проверка</string>
+    <string name="agent_real_schedule_note">Проверки запланированы; Android может их задержать.</string>
+    <string name="agent_real_attention">Требует внимания</string>
+    <string name="agent_real_review">Проверить действия</string>
+    <string name="agent_real_check_now">Проверить сейчас</string>
 </resources>

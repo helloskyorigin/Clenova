@@ -374,4 +374,27 @@
     <string name="guard_real_search">Buscar medios o álbumes</string>
     <string name="guard_real_album_scope">Protege esta carpeta y los medios que se añadan en el futuro de la limpieza de CLENOVA.</string>
     <string name="guard_real_visible_count">Elementos protegidos en medios accesibles</string>
+    <string name="agent_real_welcome">Conoce a tu agente.</string>
+    <string name="agent_real_intro">Tu dispositivo, gestionado con inteligencia.</string>
+    <string name="agent_real_proactive">Inteligencia proactiva</string>
+    <string name="agent_real_proactive_body">Encuentra oportunidades de limpieza.</string>
+    <string name="agent_real_storage">Gestión inteligente del almacenamiento</string>
+    <string name="agent_real_storage_body">Trabaja hacia tu objetivo de espacio.</string>
+    <string name="agent_real_guard_body">Respeta tus recuerdos protegidos.</string>
+    <string name="agent_real_transparency">Transparencia total</string>
+    <string name="agent_real_transparency_body">Consulta las acciones de limpieza registradas.</string>
+    <string name="agent_real_setup">Configurar agente</string>
+    <string name="agent_real_private">Privacidad y control en tus manos.</string>
+    <string name="agent_real_your">Tu agente</string>
+    <string name="agent_real_active">Activo</string>
+    <string name="agent_real_checking">Comprobando tu dispositivo…</string>
+    <string name="agent_real_first">Esperando la primera comprobación.</string>
+    <string name="agent_real_permission">Se requiere acceso a medios.</string>
+    <string name="agent_real_error">Falló la comprobación. Inténtalo de nuevo.</string>
+    <string name="agent_real_ready">Escanea de nuevo antes de eliminar nada.</string>
+    <string name="agent_real_last">Última comprobación</string>
+    <string name="agent_real_schedule_note">Las comprobaciones se programan; Android puede retrasarlas.</string>
+    <string name="agent_real_attention">Requiere tu atención</string>
+    <string name="agent_real_review">Revisar acciones</string>
+    <string name="agent_real_check_now">Comprobar ahora</string>
 </resources>

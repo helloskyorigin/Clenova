@@ -143,7 +143,7 @@ fun HomeScreen(
 }
 
 @Composable
-private fun BrandHeader(onOpenSettings: () -> Unit, onOpenPro: () -> Unit) {
+internal fun BrandHeader(onOpenSettings: () -> Unit, onOpenPro: () -> Unit) {
     val colors = ClenovaThemeTokens.colors
     Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
         Image(painterResource(R.drawable.clenova_brand_logo), contentDescription = null,
@@ -232,10 +232,11 @@ private fun StorageOverviewSection(state: StorageState, onRefresh: () -> Unit, s
 @Composable
 private fun AutopilotPanel(status: AutopilotStatus, onOpenAgent: () -> Unit, onOpenAutopilot: () -> Unit, sample: Boolean, sampleAutoOn: Boolean, sampleApprovedMask: Int, onSampleToggle: (Boolean) -> Unit) {
     val colors = ClenovaThemeTokens.colors
-    val awaiting = if (sample) sampleAutoOn else status == AutopilotStatus.AwaitingApproval
+    val awaiting = if (sample) sampleAutoOn else status == AutopilotStatus.AwaitingApproval || status == AutopilotStatus.Active
     val statusLabel = if (sample && sampleAutoOn) R.string.home_sample_monitoring else if (sample) R.string.home_auto_off else when (status) {
         AutopilotStatus.NotConfigured -> R.string.home_auto_off
         AutopilotStatus.Paused -> R.string.home_auto_paused
+        AutopilotStatus.Active -> R.string.home_sample_monitoring
         AutopilotStatus.AwaitingApproval -> R.string.home_auto_pending
     }
     Surface(shape = RoundedCornerShape(28.dp), color = colors.surface, modifier = Modifier.fillMaxWidth()) {
@@ -249,7 +250,7 @@ private fun AutopilotPanel(status: AutopilotStatus, onOpenAgent: () -> Unit, onO
                     }
                 }
                 // The workspace owns activation; a tap must not claim monitoring has started.
-                Switch(checked = awaiting, onCheckedChange = { if (sample && !it) onSampleToggle(false) else onOpenAutopilot() },
+                Switch(checked = awaiting, onCheckedChange = { if (sample && !it) onSampleToggle(false) else if (!sample && status != AutopilotStatus.NotConfigured) onOpenAgent() else onOpenAutopilot() },
                     modifier = Modifier.testTag("home_autopilot_switch"))
             }
             HorizontalDivider(color = colors.border)
@@ -261,13 +262,13 @@ private fun AutopilotPanel(status: AutopilotStatus, onOpenAgent: () -> Unit, onO
                     Text(stringResource(if (sampleApprovedMask != 0) R.string.review_approved else R.string.home_sample_cleanup), style = MaterialTheme.typography.bodyMedium, color = colors.textSecondary)
                 }
             } else {
-                Text(stringResource(if (awaiting) R.string.home_auto_review_title else R.string.home_auto_title),
+                Text(stringResource(if (status == AutopilotStatus.Active) R.string.agent_real_active else if (awaiting) R.string.home_auto_review_title else R.string.home_auto_title),
                     style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.SemiBold, letterSpacing = (-.6).sp),
                     color = colors.textPrimary)
-                Text(stringResource(if (awaiting) R.string.home_auto_review_body else R.string.home_auto_body),
+                Text(stringResource(if (status == AutopilotStatus.Active) R.string.agent_real_schedule_note else if (awaiting) R.string.home_auto_review_body else R.string.home_auto_body),
                     style = MaterialTheme.typography.bodySmall, color = colors.textSecondary)
             }
-            Button(onClick = { if (awaiting) onOpenAgent() else onOpenAutopilot() }, modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp).testTag("open_agent_workspace_button"),
+            Button(onClick = { if (awaiting || (!sample && status == AutopilotStatus.Paused)) onOpenAgent() else onOpenAutopilot() }, modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp).testTag("open_agent_workspace_button"),
                 shape = ClenovaShapes.pill, colors = ButtonDefaults.buttonColors(containerColor = colors.primary, contentColor = colors.onPrimary)) {
                 Text(stringResource(if (awaiting && sample && sampleApprovedMask != 0) R.string.review_view_plan else if (awaiting) R.string.home_auto_review else if (sample) R.string.home_sample_activate else R.string.home_auto_setup), Modifier.weight(1f),
                     style = MaterialTheme.typography.labelLarge, textAlign = androidx.compose.ui.text.style.TextAlign.Center)

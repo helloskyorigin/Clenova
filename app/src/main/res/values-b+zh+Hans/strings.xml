@@ -374,4 +374,27 @@
     <string name="guard_real_search">搜索媒体或相册</string>
     <string name="guard_real_album_scope">保护此文件夹及以后添加的媒体免受 CLENOVA 清理。</string>
     <string name="guard_real_visible_count">可访问媒体中的受保护项目</string>
+    <string name="agent_real_welcome">认识你的助手。</string>
+    <string name="agent_real_intro">智能管理你的设备。</string>
+    <string name="agent_real_proactive">主动智能</string>
+    <string name="agent_real_proactive_body">发现清理机会。</string>
+    <string name="agent_real_storage">智能存储管理</string>
+    <string name="agent_real_storage_body">致力于达到存储目标。</string>
+    <string name="agent_real_guard_body">尊重受保护的回忆。</string>
+    <string name="agent_real_transparency">完全透明</string>
+    <string name="agent_real_transparency_body">查看已记录的清理操作。</string>
+    <string name="agent_real_setup">设置助手</string>
+    <string name="agent_real_private">隐私优先，由你掌控。</string>
+    <string name="agent_real_your">你的助手</string>
+    <string name="agent_real_active">已启用</string>
+    <string name="agent_real_checking">正在检查设备…</string>
+    <string name="agent_real_first">等待首次检查。</string>
+    <string name="agent_real_permission">需要媒体访问权限。</string>
+    <string name="agent_real_error">设备检查失败，请重试。</string>
+    <string name="agent_real_ready">删除前请重新扫描。</string>
+    <string name="agent_real_last">上次检查</string>
+    <string name="agent_real_schedule_note">已安排自动检查；Android 可能延迟。</string>
+    <string name="agent_real_attention">需要你的关注</string>
+    <string name="agent_real_review">查看操作</string>
+    <string name="agent_real_check_now">立即检查</string>
 </resources>

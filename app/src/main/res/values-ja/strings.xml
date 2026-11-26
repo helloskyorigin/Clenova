@@ -374,4 +374,27 @@
     <string name="guard_real_search">メディアやアルバムを検索</string>
     <string name="guard_real_album_scope">このフォルダと今後追加されるメディアを CLENOVA のクリーンアップから保護します。</string>
     <string name="guard_real_visible_count">アクセス可能なメディア内の保護対象</string>
+    <string name="agent_real_welcome">エージェントへようこそ。</string>
+    <string name="agent_real_intro">端末をスマートに管理します。</string>
+    <string name="agent_real_proactive">先回りする分析</string>
+    <string name="agent_real_proactive_body">クリーンアップの機会を発見。</string>
+    <string name="agent_real_storage">スマートな容量管理</string>
+    <string name="agent_real_storage_body">ストレージ目標に向けて動作。</string>
+    <string name="agent_real_guard_body">保護された思い出を尊重します。</string>
+    <string name="agent_real_transparency">透明性</string>
+    <string name="agent_real_transparency_body">記録された操作を確認できます。</string>
+    <string name="agent_real_setup">エージェントを設定</string>
+    <string name="agent_real_private">プライバシーと操作はあなたの手に。</string>
+    <string name="agent_real_your">あなたのエージェント</string>
+    <string name="agent_real_active">有効</string>
+    <string name="agent_real_checking">端末を確認中…</string>
+    <string name="agent_real_first">初回チェックを待機中。</string>
+    <string name="agent_real_permission">メディアへのアクセスが必要です。</string>
+    <string name="agent_real_error">チェックに失敗しました。再試行してください。</string>
+    <string name="agent_real_ready">削除前に再スキャンしてください。</string>
+    <string name="agent_real_last">前回のチェック</string>
+    <string name="agent_real_schedule_note">自動チェックは予定されています。Android により遅れる場合があります。</string>
+    <string name="agent_real_attention">確認が必要です</string>
+    <string name="agent_real_review">操作を確認</string>
+    <string name="agent_real_check_now">今すぐチェック</string>
 </resources>

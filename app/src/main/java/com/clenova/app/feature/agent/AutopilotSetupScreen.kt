@@ -119,9 +119,9 @@ fun AutopilotSetupScreen(
                     modifier = Modifier.fillMaxWidth().heightIn(min = 52.dp).testTag("auto_setup_save"),
                     shape = ClenovaShapes.pill, colors = ButtonDefaults.buttonColors(containerColor = colors.primary, contentColor = colors.onPrimary)) {
                     if (saving) CircularProgressIndicator(Modifier.size(20.dp), strokeWidth = 2.dp)
-                    else Text(stringResource(if (sample) R.string.home_sample_activate else R.string.auto_save_preferences), style = MaterialTheme.typography.labelLarge)
+                    else Text(stringResource(if (sample || preferences.autopilotStatus == com.clenova.app.domain.model.AutopilotStatus.NotConfigured) R.string.home_sample_activate else R.string.auto_save_preferences), style = MaterialTheme.typography.labelLarge)
                 }
-                if (!sample) Text(stringResource(R.string.auto_monitoring_unavailable), color = colors.textSecondary, style = MaterialTheme.typography.bodySmall)
+                if (!sample) Text(stringResource(R.string.agent_real_schedule_note), color = colors.textSecondary, style = MaterialTheme.typography.bodySmall)
             }
         }
     }

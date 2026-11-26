@@ -55,6 +55,7 @@ class ClenovaNavigationRobolectricTest {
             _prefs.value = _prefs.value.copy(storageGoalGb = goalGb, checkIntervalDays = intervalDays)
         }
 
+        override suspend fun setAutopilotEnabled(enabled: Boolean) { _prefs.value = _prefs.value.copy(autopilotStatus = if (enabled) com.clenova.app.domain.model.AutopilotStatus.Active else com.clenova.app.domain.model.AutopilotStatus.Paused) }
         override suspend fun resetPreferences() { _prefs.value = UserPreferences() }
 
         override suspend fun setHapticsEnabled(enabled: Boolean) {
@@ -99,7 +100,7 @@ class ClenovaNavigationRobolectricTest {
         // Navigate to Agent via 3+1 circular button
         composeTestRule.onNodeWithTag("nav_tab_agent").performClick()
         composeTestRule.waitForIdle()
-        composeTestRule.onNodeWithText("Agent Workspace").assertIsDisplayed()
+        composeTestRule.onNodeWithTag("agent_setup").performScrollTo().assertIsDisplayed()
 
         // Return to Home and open Settings
         composeTestRule.onNodeWithTag("nav_tab_home").performClick()

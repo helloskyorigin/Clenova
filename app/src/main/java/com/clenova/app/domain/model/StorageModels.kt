@@ -29,6 +29,7 @@ sealed interface StorageState {
 enum class AutopilotStatus {
     NotConfigured,
     Paused,
+    Active,
     AwaitingApproval,
 }
 

@@ -374,4 +374,27 @@
     <string name="guard_real_search">ابحث عن الوسائط أو الألبومات</string>
     <string name="guard_real_album_scope">احم هذا المجلد والوسائط التي تضاف إليه لاحقاً من تنظيف CLENOVA.</string>
     <string name="guard_real_visible_count">العناصر المحمية في الوسائط المتاحة</string>
+    <string name="agent_real_welcome">تعرّف على وكيلك.</string>
+    <string name="agent_real_intro">إدارة ذكية لجهازك.</string>
+    <string name="agent_real_proactive">ذكاء استباقي</string>
+    <string name="agent_real_proactive_body">يجد فرص التنظيف.</string>
+    <string name="agent_real_storage">إدارة ذكية للتخزين</string>
+    <string name="agent_real_storage_body">يعمل نحو هدف التخزين.</string>
+    <string name="agent_real_guard_body">يحترم الذكريات المحمية.</string>
+    <string name="agent_real_transparency">شفافية كاملة</string>
+    <string name="agent_real_transparency_body">راجع عمليات التنظيف المسجلة.</string>
+    <string name="agent_real_setup">إعداد الوكيل</string>
+    <string name="agent_real_private">خصوصيتك وتحكمك أولاً.</string>
+    <string name="agent_real_your">وكيلك</string>
+    <string name="agent_real_active">نشط</string>
+    <string name="agent_real_checking">جارٍ فحص جهازك…</string>
+    <string name="agent_real_first">بانتظار الفحص الأول.</string>
+    <string name="agent_real_permission">يلزم الوصول إلى الوسائط.</string>
+    <string name="agent_real_error">فشل الفحص. حاول مجدداً.</string>
+    <string name="agent_real_ready">أعد الفحص قبل إزالة أي شيء.</string>
+    <string name="agent_real_last">آخر فحص</string>
+    <string name="agent_real_schedule_note">الفحوصات مجدولة وقد يؤخرها Android.</string>
+    <string name="agent_real_attention">يحتاج إلى انتباهك</string>
+    <string name="agent_real_review">مراجعة الإجراءات</string>
+    <string name="agent_real_check_now">افحص الآن</string>
 </resources>

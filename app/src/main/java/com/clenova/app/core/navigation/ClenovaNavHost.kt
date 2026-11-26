@@ -25,6 +25,16 @@ import com.clenova.app.core.designsystem.ClenovaMotion
 import com.clenova.app.domain.repository.PreferencesRepository
 import com.clenova.app.domain.repository.StorageRepository
 import com.clenova.app.feature.agent.AgentScreen
+import com.clenova.app.data.agent.AgentReportStore
+import com.clenova.app.data.agent.AgentScheduler
+import com.clenova.app.data.preferences.DataStorePreferencesRepository
+import com.clenova.app.domain.model.AutopilotStatus
+import com.clenova.app.data.storage.mediaPermissions
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.ui.platform.LocalContext
+import androidx.work.WorkManager
+import androidx.work.WorkInfo
 import com.clenova.app.feature.clean.CleanScreen
 import com.clenova.app.feature.clean.SmartScanScreen
 import com.clenova.app.data.storage.MediaScanResult
@@ -131,7 +141,8 @@ fun ClenovaNavHost(
                 },
                 onOpenAgent = {
                     onSelectionHaptic()
-                    navController.navigate(ClenovaRoute.CleanupReview) { launchSingleTop = true }
+                    if (sample) navController.navigate(ClenovaRoute.CleanupReview) { launchSingleTop = true }
+                    else navController.navigateTopLevel(ClenovaRoute.Agent)
                 },
                 onOpenStorage = {
                     onSelectionHaptic()
@@ -245,7 +256,38 @@ fun ClenovaNavHost(
         }
 
         composable<ClenovaRoute.Agent> {
-            AgentScreen(onConfigure = { onSelectionHaptic(); navController.navigate(ClenovaRoute.AutopilotSetup) { launchSingleTop = true } })
+            val context = LocalContext.current
+            val prefs by preferencesRepository.userPreferences.collectAsStateWithLifecycle(initialValue = UserPreferences())
+            val reportStore = remember(context) { AgentReportStore(context) }
+            val report by remember(reportStore) { reportStore.observe() }.collectAsStateWithLifecycle(initialValue = reportStore.read())
+            val production = preferencesRepository is DataStorePreferencesRepository
+            val scope = rememberCoroutineScope()
+            var failed by remember { mutableStateOf(false) }
+            val busyFlow = remember(context, production) {
+                if (production) kotlinx.coroutines.flow.combine(
+                    WorkManager.getInstance(context).getWorkInfosForUniqueWorkFlow(AgentScheduler.IMMEDIATE),
+                    WorkManager.getInstance(context).getWorkInfosForUniqueWorkFlow(AgentScheduler.PERIODIC)
+                ) { now, periodic -> now.any { !it.state.isFinished } || periodic.any { it.state == WorkInfo.State.RUNNING } }
+                else kotlinx.coroutines.flow.flowOf(false)
+            }
+            val checking by busyFlow.collectAsStateWithLifecycle(initialValue = false)
+            val permission = rememberLauncherForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) {
+                if (production && prefs.autopilotStatus == AutopilotStatus.Active) AgentScheduler.checkNow(context)
+            }
+            AgentScreen(preferences = prefs, report = report, checking = checking,
+                onConfigure = { onSelectionHaptic(); navController.navigate(ClenovaRoute.AutopilotSetup) { launchSingleTop = true } },
+                onToggle = { enabled -> scope.launch {
+                    failed = false
+                    try { preferencesRepository.setAutopilotEnabled(enabled); onSelectionHaptic() }
+                    catch (e: CancellationException) { throw e }
+                    catch (_: Exception) { failed = true }
+                } },
+                onCheck = { if (production) AgentScheduler.checkNow(context) },
+                onReview = { onSelectionHaptic(); navController.navigate(ClenovaRoute.SmartScan) { launchSingleTop = true } },
+                onHistory = { navController.navigate(ClenovaRoute.CleanupHistory) { launchSingleTop = true } },
+                onSettings = { navController.navigate(ClenovaRoute.Settings) { launchSingleTop = true } },
+                onGuard = { navController.navigateTopLevel(ClenovaRoute.Guard) },
+                onPermission = { permission.launch(mediaPermissions()) }, error = failed)
         }
 
         composable<ClenovaRoute.CleanupReview> {

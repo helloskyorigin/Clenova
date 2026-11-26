@@ -374,4 +374,27 @@
     <string name="guard_real_search">Buscar mídia ou álbuns</string>
     <string name="guard_real_album_scope">Proteja esta pasta e a mídia adicionada no futuro da limpeza do CLENOVA.</string>
     <string name="guard_real_visible_count">Itens protegidos na mídia acessível</string>
+    <string name="agent_real_welcome">Conheça seu agente.</string>
+    <string name="agent_real_intro">Seu dispositivo, gerenciado com inteligência.</string>
+    <string name="agent_real_proactive">Inteligência proativa</string>
+    <string name="agent_real_proactive_body">Encontra oportunidades de limpeza.</string>
+    <string name="agent_real_storage">Gestão inteligente do armazenamento</string>
+    <string name="agent_real_storage_body">Trabalha para sua meta de espaço.</string>
+    <string name="agent_real_guard_body">Respeita suas memórias protegidas.</string>
+    <string name="agent_real_transparency">Transparência total</string>
+    <string name="agent_real_transparency_body">Veja as ações de limpeza registradas.</string>
+    <string name="agent_real_setup">Configurar agente</string>
+    <string name="agent_real_private">Privacidade e controle nas suas mãos.</string>
+    <string name="agent_real_your">Seu agente</string>
+    <string name="agent_real_active">Ativo</string>
+    <string name="agent_real_checking">Verificando seu dispositivo…</string>
+    <string name="agent_real_first">Aguardando a primeira verificação.</string>
+    <string name="agent_real_permission">É necessário acesso à mídia.</string>
+    <string name="agent_real_error">Falha na verificação. Tente novamente.</string>
+    <string name="agent_real_ready">Faça uma nova análise antes de remover algo.</string>
+    <string name="agent_real_last">Última verificação</string>
+    <string name="agent_real_schedule_note">Verificações programadas; o Android pode atrasá-las.</string>
+    <string name="agent_real_attention">Precisa da sua atenção</string>
+    <string name="agent_real_review">Revisar ações</string>
+    <string name="agent_real_check_now">Verificar agora</string>
 </resources>

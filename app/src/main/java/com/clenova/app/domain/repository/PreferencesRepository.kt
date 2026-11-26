@@ -9,5 +9,6 @@ interface PreferencesRepository {
     suspend fun setThemePreference(preference: ThemePreference)
     suspend fun setHapticsEnabled(enabled: Boolean)
     suspend fun setAutopilotPreferences(goalGb: Int, intervalDays: Int)
+    suspend fun setAutopilotEnabled(enabled: Boolean)
     suspend fun resetPreferences()
 }

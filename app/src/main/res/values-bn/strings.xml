@@ -374,4 +374,27 @@
     <string name="guard_real_search">মিডিয়া বা অ্যালবাম খুঁজুন</string>
     <string name="guard_real_album_scope">এই ফোল্ডার এবং ভবিষ্যতে এতে যোগ হওয়া মিডিয়াকে CLENOVA-এর ক্লিনআপ থেকে সুরক্ষিত রাখুন।</string>
     <string name="guard_real_visible_count">অ্যাক্সেসযোগ্য মিডিয়ায় সুরক্ষিত আইটেম</string>
+    <string name="agent_real_welcome">আপনার এজেন্টের সাথে পরিচিত হন।</string>
+    <string name="agent_real_intro">আপনার ডিভাইস, বুদ্ধিমত্তার সাথে পরিচালিত।</string>
+    <string name="agent_real_proactive">সক্রিয় বুদ্ধিমত্তা</string>
+    <string name="agent_real_proactive_body">ক্লিনআপের সুযোগ খুঁজে পায়।</string>
+    <string name="agent_real_storage">স্মার্ট স্টোরেজ ব্যবস্থাপনা</string>
+    <string name="agent_real_storage_body">স্টোরেজ লক্ষ্যের দিকে কাজ করে।</string>
+    <string name="agent_real_guard_body">সুরক্ষিত স্মৃতিকে সম্মান করে।</string>
+    <string name="agent_real_transparency">সম্পূর্ণ স্বচ্ছতা</string>
+    <string name="agent_real_transparency_body">রেকর্ড করা ক্লিনআপ দেখুন।</string>
+    <string name="agent_real_setup">এজেন্ট সেট আপ করুন</string>
+    <string name="agent_real_private">গোপনীয়তা ও নিয়ন্ত্রণ আপনার হাতে।</string>
+    <string name="agent_real_your">আপনার এজেন্ট</string>
+    <string name="agent_real_active">সক্রিয়</string>
+    <string name="agent_real_checking">ডিভাইস পরীক্ষা করছে…</string>
+    <string name="agent_real_first">প্রথম পরীক্ষার অপেক্ষায়।</string>
+    <string name="agent_real_permission">মিডিয়া অ্যাক্সেস প্রয়োজন।</string>
+    <string name="agent_real_error">পরীক্ষা ব্যর্থ। আবার চেষ্টা করুন।</string>
+    <string name="agent_real_ready">কিছু সরানোর আগে নতুন স্ক্যান করুন।</string>
+    <string name="agent_real_last">শেষ পরীক্ষা</string>
+    <string name="agent_real_schedule_note">স্বয়ংক্রিয় পরীক্ষা নির্ধারিত; Android দেরি করতে পারে।</string>
+    <string name="agent_real_attention">আপনার মনোযোগ প্রয়োজন</string>
+    <string name="agent_real_review">কাজ পর্যালোচনা করুন</string>
+    <string name="agent_real_check_now">এখন পরীক্ষা করুন</string>
 </resources>

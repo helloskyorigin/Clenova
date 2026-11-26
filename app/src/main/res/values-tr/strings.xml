@@ -374,4 +374,27 @@
     <string name="guard_real_search">Medya veya albüm ara</string>
     <string name="guard_real_album_scope">Bu klasörü ve daha sonra eklenen medyayı CLENOVA temizliğinden koruyun.</string>
     <string name="guard_real_visible_count">Erişilebilir medyada korunan öğeler</string>
+    <string name="agent_real_welcome">Ajanınızla tanışın.</string>
+    <string name="agent_real_intro">Cihazınız akıllıca yönetilir.</string>
+    <string name="agent_real_proactive">Proaktif zekâ</string>
+    <string name="agent_real_proactive_body">Temizlik fırsatlarını bulur.</string>
+    <string name="agent_real_storage">Akıllı depolama yönetimi</string>
+    <string name="agent_real_storage_body">Depolama hedefinize göre çalışır.</string>
+    <string name="agent_real_guard_body">Korunan anılarınıza saygı duyar.</string>
+    <string name="agent_real_transparency">Tam şeffaflık</string>
+    <string name="agent_real_transparency_body">Kaydedilen temizlik işlemlerini görün.</string>
+    <string name="agent_real_setup">Ajanı kur</string>
+    <string name="agent_real_private">Gizlilik ve kontrol sizde.</string>
+    <string name="agent_real_your">Ajanınız</string>
+    <string name="agent_real_active">Etkin</string>
+    <string name="agent_real_checking">Cihaz kontrol ediliyor…</string>
+    <string name="agent_real_first">İlk kontrol bekleniyor.</string>
+    <string name="agent_real_permission">Medya erişimi gerekli.</string>
+    <string name="agent_real_error">Kontrol başarısız. Tekrar deneyin.</string>
+    <string name="agent_real_ready">Silmeden önce yeniden tarayın.</string>
+    <string name="agent_real_last">Son kontrol</string>
+    <string name="agent_real_schedule_note">Otomatik kontroller planlanır; Android geciktirebilir.</string>
+    <string name="agent_real_attention">Dikkatiniz gerekiyor</string>
+    <string name="agent_real_review">İşlemleri incele</string>
+    <string name="agent_real_check_now">Şimdi kontrol et</string>
 </resources>

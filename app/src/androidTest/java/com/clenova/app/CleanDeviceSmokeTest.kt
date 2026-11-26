@@ -109,16 +109,16 @@ class CleanDeviceSmokeTest {
             assertTrue(result.photos.any { it.uri == shot })
             val duplicates = result.duplicateGroups.first { group -> group.map { it.uri }.containsAll(listOf(dup1, dup2)) }
             val duplicateSelection = setOf(duplicates[1].uri)
-            DuplicateTrash.request(context, result, duplicateSelection).cancel()
+            DuplicateTrash.request(context, result, duplicateSelection)
             val similar = result.similarGroups.first { group -> group.map { it.uri }.containsAll(listOf(near1, near2)) }
-            DuplicateTrash.request(context, result, setOf(similar[1].uri), similar = true).cancel()
+            DuplicateTrash.request(context, result, setOf(similar[1].uri), similar = true)
             assertTrue(result.screenshots.any { it.uri == shot })
-            ScreenshotTrash.request(context, result, setOf(shot)).cancel()
+            ScreenshotTrash.request(context, result, setOf(shot))
             assertTrue(result.largeVideos.any { it.uri == large })
             assertTrue(result.largeFiles.any { it.uri == large })
-            LargeMediaTrash.request(context, result, setOf(large), true).cancel()
-            LargeMediaTrash.request(context, result, setOf(large), false).cancel()
-            SwipeTrash.request(context, result, setOf(shot)).cancel()
+            LargeMediaTrash.request(context, result, setOf(large), true)
+            LargeMediaTrash.request(context, result, setOf(large), false)
+            SwipeTrash.request(context, result, setOf(shot))
             created.forEach(::assertNotTrashed)
             val input = VideoCompression.inspect(context, video)
             val output = withTimeout(120_000) { VideoCompression.encode(context, input, VideoPreset.SMALL) {} }

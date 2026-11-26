@@ -407,4 +407,27 @@
     <string name="guard_real_search">Search media or albums</string>
     <string name="guard_real_album_scope">Protect this folder, including future media added to it, from CLENOVA cleanup.</string>
     <string name="guard_real_visible_count">Protected items in accessible media</string>
+    <string name="agent_real_welcome">Meet your Agent.</string>
+    <string name="agent_real_intro">Your device, intelligently managed.</string>
+    <string name="agent_real_proactive">Proactive intelligence</string>
+    <string name="agent_real_proactive_body">Finds cleanup opportunities.</string>
+    <string name="agent_real_storage">Smart storage management</string>
+    <string name="agent_real_storage_body">Works towards your storage goal.</string>
+    <string name="agent_real_guard_body">Respects protected memories.</string>
+    <string name="agent_real_transparency">Complete transparency</string>
+    <string name="agent_real_transparency_body">Review recorded cleanup actions.</string>
+    <string name="agent_real_setup">Set up Agent</string>
+    <string name="agent_real_private">Private by design. Controlled by you.</string>
+    <string name="agent_real_your">Your Agent</string>
+    <string name="agent_real_active">Active</string>
+    <string name="agent_real_checking">Checking your device…</string>
+    <string name="agent_real_first">Waiting for the first check.</string>
+    <string name="agent_real_permission">Media access is required.</string>
+    <string name="agent_real_error">Device check failed. Try again.</string>
+    <string name="agent_real_ready">Review with a fresh scan before removing anything.</string>
+    <string name="agent_real_last">Last check</string>
+    <string name="agent_real_schedule_note">Automatic checks are scheduled; Android may delay them.</string>
+    <string name="agent_real_attention">Needs your attention</string>
+    <string name="agent_real_review">Review actions</string>
+    <string name="agent_real_check_now">Check now</string>
 </resources>

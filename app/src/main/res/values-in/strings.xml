@@ -374,4 +374,27 @@
     <string name="guard_real_search">Cari media atau album</string>
     <string name="guard_real_album_scope">Lindungi folder ini dan media yang ditambahkan nanti dari pembersihan CLENOVA.</string>
     <string name="guard_real_visible_count">Item terlindungi dalam media yang dapat diakses</string>
+    <string name="agent_real_welcome">Kenali agen Anda.</string>
+    <string name="agent_real_intro">Perangkat Anda, dikelola dengan cerdas.</string>
+    <string name="agent_real_proactive">Kecerdasan proaktif</string>
+    <string name="agent_real_proactive_body">Menemukan peluang pembersihan.</string>
+    <string name="agent_real_storage">Pengelolaan penyimpanan cerdas</string>
+    <string name="agent_real_storage_body">Mendukung target penyimpanan Anda.</string>
+    <string name="agent_real_guard_body">Menghormati kenangan yang dilindungi.</string>
+    <string name="agent_real_transparency">Transparansi penuh</string>
+    <string name="agent_real_transparency_body">Tinjau tindakan pembersihan tercatat.</string>
+    <string name="agent_real_setup">Siapkan agen</string>
+    <string name="agent_real_private">Privasi dan kendali di tangan Anda.</string>
+    <string name="agent_real_your">Agen Anda</string>
+    <string name="agent_real_active">Aktif</string>
+    <string name="agent_real_checking">Memeriksa perangkat…</string>
+    <string name="agent_real_first">Menunggu pemeriksaan pertama.</string>
+    <string name="agent_real_permission">Akses media diperlukan.</string>
+    <string name="agent_real_error">Pemeriksaan gagal. Coba lagi.</string>
+    <string name="agent_real_ready">Pindai ulang sebelum menghapus apa pun.</string>
+    <string name="agent_real_last">Pemeriksaan terakhir</string>
+    <string name="agent_real_schedule_note">Pemeriksaan dijadwalkan; Android dapat menundanya.</string>
+    <string name="agent_real_attention">Perlu perhatian Anda</string>
+    <string name="agent_real_review">Tinjau tindakan</string>
+    <string name="agent_real_check_now">Periksa sekarang</string>
 </resources>

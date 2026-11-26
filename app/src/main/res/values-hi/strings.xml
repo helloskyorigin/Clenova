@@ -374,4 +374,27 @@
     <string name="guard_real_search">मीडिया या एल्बम खोजें</string>
     <string name="guard_real_album_scope">इस फ़ोल्डर और इसमें बाद में जुड़ने वाले मीडिया को CLENOVA की सफाई से सुरक्षित रखें।</string>
     <string name="guard_real_visible_count">उपलब्ध मीडिया में सुरक्षित आइटम</string>
+    <string name="agent_real_welcome">अपने एजेंट से मिलें।</string>
+    <string name="agent_real_intro">आपका डिवाइस, स्मार्ट तरीके से प्रबंधित।</string>
+    <string name="agent_real_proactive">सक्रिय समझ</string>
+    <string name="agent_real_proactive_body">सफाई के अवसर खोजता है।</string>
+    <string name="agent_real_storage">स्मार्ट स्टोरेज प्रबंधन</string>
+    <string name="agent_real_storage_body">आपके स्टोरेज लक्ष्य पर काम करता है।</string>
+    <string name="agent_real_guard_body">सुरक्षित यादों का सम्मान करता है।</string>
+    <string name="agent_real_transparency">पूरी पारदर्शिता</string>
+    <string name="agent_real_transparency_body">सफाई के दर्ज काम देखें।</string>
+    <string name="agent_real_setup">एजेंट सेट करें</string>
+    <string name="agent_real_private">गोपनीयता और नियंत्रण आपके हाथ में।</string>
+    <string name="agent_real_your">आपका एजेंट</string>
+    <string name="agent_real_active">सक्रिय</string>
+    <string name="agent_real_checking">डिवाइस जाँच रहा है…</string>
+    <string name="agent_real_first">पहली जाँच का इंतजार।</string>
+    <string name="agent_real_permission">मीडिया की अनुमति चाहिए।</string>
+    <string name="agent_real_error">जाँच विफल हुई। फिर प्रयास करें।</string>
+    <string name="agent_real_ready">कुछ हटाने से पहले नया स्कैन करें।</string>
+    <string name="agent_real_last">पिछली जाँच</string>
+    <string name="agent_real_schedule_note">स्वचालित जाँच तय हैं; Android देरी कर सकता है।</string>
+    <string name="agent_real_attention">आपका ध्यान चाहिए</string>
+    <string name="agent_real_review">काम की समीक्षा करें</string>
+    <string name="agent_real_check_now">अभी जाँचें</string>
 </resources>

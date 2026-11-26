@@ -374,4 +374,27 @@
     <string name="guard_real_search">میڈیا یا البمز تلاش کریں</string>
     <string name="guard_real_album_scope">اس فولڈر اور بعد میں شامل ہونے والے میڈیا کو CLENOVA کی صفائی سے محفوظ رکھیں۔</string>
     <string name="guard_real_visible_count">دستیاب میڈیا میں محفوظ آئٹمز</string>
+    <string name="agent_real_welcome">اپنے ایجنٹ سے ملیں۔</string>
+    <string name="agent_real_intro">آپ کے ڈیوائس کا ذہین انتظام۔</string>
+    <string name="agent_real_proactive">فعال ذہانت</string>
+    <string name="agent_real_proactive_body">صفائی کے مواقع تلاش کرتا ہے۔</string>
+    <string name="agent_real_storage">ذہین اسٹوریج انتظام</string>
+    <string name="agent_real_storage_body">آپ کے اسٹوریج ہدف کے لیے کام کرتا ہے۔</string>
+    <string name="agent_real_guard_body">محفوظ یادوں کا خیال رکھتا ہے۔</string>
+    <string name="agent_real_transparency">مکمل شفافیت</string>
+    <string name="agent_real_transparency_body">درج شدہ صفائی دیکھیں۔</string>
+    <string name="agent_real_setup">ایجنٹ سیٹ کریں</string>
+    <string name="agent_real_private">رازداری اور کنٹرول آپ کے ہاتھ میں۔</string>
+    <string name="agent_real_your">آپ کا ایجنٹ</string>
+    <string name="agent_real_active">فعال</string>
+    <string name="agent_real_checking">ڈیوائس کی جانچ جاری ہے…</string>
+    <string name="agent_real_first">پہلی جانچ کا انتظار۔</string>
+    <string name="agent_real_permission">میڈیا تک رسائی ضروری ہے۔</string>
+    <string name="agent_real_error">جانچ ناکام ہوئی۔ دوبارہ کوشش کریں۔</string>
+    <string name="agent_real_ready">کچھ ہٹانے سے پہلے نیا اسکین کریں۔</string>
+    <string name="agent_real_last">آخری جانچ</string>
+    <string name="agent_real_schedule_note">خودکار جانچ طے ہے؛ Android تاخیر کر سکتا ہے۔</string>
+    <string name="agent_real_attention">آپ کی توجہ درکار ہے</string>
+    <string name="agent_real_review">کارروائیوں کا جائزہ</string>
+    <string name="agent_real_check_now">ابھی جانچیں</string>
 </resources>

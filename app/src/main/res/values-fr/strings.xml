@@ -374,4 +374,27 @@
     <string name="guard_real_search">Rechercher des médias ou albums</string>
     <string name="guard_real_album_scope">Protégez ce dossier et les médias ajoutés à l’avenir du nettoyage CLENOVA.</string>
     <string name="guard_real_visible_count">Éléments protégés dans les médias accessibles</string>
+    <string name="agent_real_welcome">Rencontrez votre agent.</string>
+    <string name="agent_real_intro">Votre appareil, géré intelligemment.</string>
+    <string name="agent_real_proactive">Intelligence proactive</string>
+    <string name="agent_real_proactive_body">Détecte les possibilités de nettoyage.</string>
+    <string name="agent_real_storage">Gestion intelligente du stockage</string>
+    <string name="agent_real_storage_body">Vise votre objectif de stockage.</string>
+    <string name="agent_real_guard_body">Respecte vos souvenirs protégés.</string>
+    <string name="agent_real_transparency">Transparence totale</string>
+    <string name="agent_real_transparency_body">Consultez les nettoyages enregistrés.</string>
+    <string name="agent_real_setup">Configurer l’agent</string>
+    <string name="agent_real_private">Confidentialité et contrôle entre vos mains.</string>
+    <string name="agent_real_your">Votre agent</string>
+    <string name="agent_real_active">Actif</string>
+    <string name="agent_real_checking">Vérification de votre appareil…</string>
+    <string name="agent_real_first">En attente de la première vérification.</string>
+    <string name="agent_real_permission">Accès aux médias requis.</string>
+    <string name="agent_real_error">Échec de la vérification. Réessayez.</string>
+    <string name="agent_real_ready">Relancez une analyse avant toute suppression.</string>
+    <string name="agent_real_last">Dernière vérification</string>
+    <string name="agent_real_schedule_note">Les vérifications sont planifiées ; Android peut les retarder.</string>
+    <string name="agent_real_attention">Nécessite votre attention</string>
+    <string name="agent_real_review">Examiner les actions</string>
+    <string name="agent_real_check_now">Vérifier maintenant</string>
 </resources>

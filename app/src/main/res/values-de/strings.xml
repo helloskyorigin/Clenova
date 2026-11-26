@@ -374,4 +374,27 @@
     <string name="guard_real_search">Medien oder Alben suchen</string>
     <string name="guard_real_album_scope">Schütze diesen Ordner und künftig hinzugefügte Medien vor der CLENOVA-Bereinigung.</string>
     <string name="guard_real_visible_count">Geschützte Elemente in zugänglichen Medien</string>
+    <string name="agent_real_welcome">Lerne deinen Agenten kennen.</string>
+    <string name="agent_real_intro">Dein Gerät, intelligent verwaltet.</string>
+    <string name="agent_real_proactive">Proaktive Intelligenz</string>
+    <string name="agent_real_proactive_body">Findet Bereinigungsmöglichkeiten.</string>
+    <string name="agent_real_storage">Intelligente Speicherverwaltung</string>
+    <string name="agent_real_storage_body">Berücksichtigt dein Speicherziel.</string>
+    <string name="agent_real_guard_body">Respektiert geschützte Erinnerungen.</string>
+    <string name="agent_real_transparency">Volle Transparenz</string>
+    <string name="agent_real_transparency_body">Sieh aufgezeichnete Bereinigungen ein.</string>
+    <string name="agent_real_setup">Agent einrichten</string>
+    <string name="agent_real_private">Privatsphäre und Kontrolle bleiben bei dir.</string>
+    <string name="agent_real_your">Dein Agent</string>
+    <string name="agent_real_active">Aktiv</string>
+    <string name="agent_real_checking">Gerät wird geprüft…</string>
+    <string name="agent_real_first">Warten auf die erste Prüfung.</string>
+    <string name="agent_real_permission">Medienzugriff erforderlich.</string>
+    <string name="agent_real_error">Prüfung fehlgeschlagen. Erneut versuchen.</string>
+    <string name="agent_real_ready">Vor dem Entfernen erneut scannen.</string>
+    <string name="agent_real_last">Letzte Prüfung</string>
+    <string name="agent_real_schedule_note">Prüfungen sind geplant; Android kann sie verzögern.</string>
+    <string name="agent_real_attention">Benötigt deine Aufmerksamkeit</string>
+    <string name="agent_real_review">Aktionen prüfen</string>
+    <string name="agent_real_check_now">Jetzt prüfen</string>
 </resources>
