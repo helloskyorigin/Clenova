@@ -276,7 +276,7 @@
     <string name="privacy_local_title">Lokale Einstellungen</string>
     <string name="privacy_local_body">Design, Haptik, Autopilot-Einstellungen und Sprache werden auf dem Gerät gespeichert. Kein Konto erforderlich.</string>
     <string name="privacy_files_title">Persönliche Dateien</string>
-    <string name="privacy_files_body">Clenova scannt zugängliche Fotos und Videos mit deiner Erlaubnis auf dem Gerät. Duplikate können mit Zustimmung in den Android-Papierkorb. Memory Guard ist noch nicht verbunden. Keine privaten Medien werden hochgeladen. Ähnliche Fotos können mit deiner Zustimmung ebenfalls in den Papierkorb verschoben werden.</string>
+    <string name="privacy_files_body">Clenova scannt zugängliche Fotos und Videos mit deiner Erlaubnis auf dem Gerät. Duplikate können mit Zustimmung in den Android-Papierkorb. Memory Guard ist noch nicht verbunden. Keine privaten Medien werden hochgeladen. Ähnliche Fotos können mit deiner Zustimmung ebenfalls in den Papierkorb verschoben werden. Screenshots können mit deiner Zustimmung ebenfalls in den Android-Papierkorb verschoben werden.</string>
     <string name="privacy_support_title">Support-Nachrichten</string>
     <string name="privacy_support_body">Kontakt und Problemberichte öffnen deine E-Mail-App. Du entscheidest über den Versand und kannst Diagnosedaten vorher bearbeiten oder entfernen.</string>
     <string name="support_faq_storage">Wie wird der Speicher gemessen?</string>
@@ -332,4 +332,6 @@
     <string name="similar_no_matches">Bei diesem Scan wurden keine ähnlichen Fotos gefunden</string>
     <string name="similar_manual_rule">Ähnliche Fotos sind nicht identisch. Wähle jedes Foto manuell aus. Ein Foto pro Gruppe und Favoriten bleiben geschützt.</string>
     <string name="similar_confirm">Prüfe jedes ausgewählte Foto. Clenova prüft, ob die Dateien unverändert sind, und bittet Android um Zustimmung. Der Papierkorb kann Dateien vorübergehend behalten.</string>
+    <string name="screenshots_no_matches">Bei diesem Scan wurden keine Screenshots gefunden</string>
+    <string name="screenshots_manual_rule">Wähle Screenshots manuell aus. Favoriten, geschützte Kopien und ungeprüfte Dateien sind nicht auswählbar.</string>
 </resources>

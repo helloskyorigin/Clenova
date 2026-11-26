@@ -276,7 +276,7 @@
     <string name="privacy_local_title">Preferencias locales</string>
     <string name="privacy_local_body">El tema, la respuesta háptica, las preferencias de Autopilot y el idioma se guardan en tu dispositivo. No necesitas cuenta.</string>
     <string name="privacy_files_title">Archivos personales</string>
-    <string name="privacy_files_body">Clenova escanea fotos y vídeos accesibles con tu permiso. Las copias duplicadas pueden ir a la papelera de Android con tu aprobación. Memory Guard aún no está conectado. No sube medios personales. También puedes revisar y enviar fotos similares a la papelera con tu aprobación.</string>
+    <string name="privacy_files_body">Clenova escanea fotos y vídeos accesibles con tu permiso. Las copias duplicadas pueden ir a la papelera de Android con tu aprobación. Memory Guard aún no está conectado. No sube medios personales. También puedes revisar y enviar fotos similares a la papelera con tu aprobación. Las capturas también pueden revisarse y enviarse a la papelera de Android con tu aprobación.</string>
     <string name="privacy_support_title">Mensajes de soporte</string>
     <string name="privacy_support_body">El contacto y los informes abren tu aplicación de correo. Tú decides si envías el mensaje y puedes editar o eliminar datos de diagnóstico antes de enviarlo.</string>
     <string name="support_faq_storage">¿Cómo se mide el almacenamiento?</string>
@@ -332,4 +332,6 @@
     <string name="similar_no_matches">No se encontraron fotos similares en este análisis</string>
     <string name="similar_manual_rule">Las fotos similares no son idénticas. Selecciona cada foto manualmente. Se protege una foto por grupo y las favoritas.</string>
     <string name="similar_confirm">Revisa cada foto seleccionada. Clenova comprueba que los archivos no hayan cambiado y solicita autorización a Android. La papelera puede conservarlos temporalmente.</string>
+    <string name="screenshots_no_matches">No se encontraron capturas en este análisis</string>
+    <string name="screenshots_manual_rule">Selecciona las capturas manualmente. No se pueden seleccionar favoritas, copias protegidas ni archivos sin verificar.</string>
 </resources>

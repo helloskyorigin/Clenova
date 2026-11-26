@@ -32,6 +32,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.clenova.app.feature.clean.DuplicatesScreen
+import com.clenova.app.feature.clean.ScreenshotsScreen
 import com.clenova.app.feature.clean.VideoCompressScreen
 import com.clenova.app.feature.guard.GuardScreen
 import com.clenova.app.feature.guard.GuardDesignData
@@ -54,6 +55,7 @@ fun NavDestination?.toClenovaRoute(): ClenovaRoute? = when {
     hasRoute<ClenovaRoute.SmartScan>() -> ClenovaRoute.SmartScan
     hasRoute<ClenovaRoute.Duplicates>() -> ClenovaRoute.Duplicates
     hasRoute<ClenovaRoute.SimilarPhotos>() -> ClenovaRoute.SimilarPhotos
+    hasRoute<ClenovaRoute.Screenshots>() -> ClenovaRoute.Screenshots
     hasRoute<ClenovaRoute.VideoCompress>() -> ClenovaRoute.VideoCompress
     else -> null
 }
@@ -150,6 +152,7 @@ fun ClenovaNavHost(
                 onDuplicates = { onSelectionHaptic(); navController.navigate(ClenovaRoute.Duplicates) { launchSingleTop = true } },
                 onCompress = { onSelectionHaptic(); navController.navigate(ClenovaRoute.VideoCompress) { launchSingleTop = true } },
                 onSimilar = { onSelectionHaptic(); navController.navigate(ClenovaRoute.SimilarPhotos) { launchSingleTop = true } },
+                onScreenshots = { onSelectionHaptic(); navController.navigate(ClenovaRoute.Screenshots) { launchSingleTop = true } },
             )
         }
 
@@ -179,6 +182,12 @@ fun ClenovaNavHost(
                 similar = true,
             )
         }
+        composable<ClenovaRoute.Screenshots> {
+            ScreenshotsScreen(result = scanResult, owner = lifecycleOwner,
+                onBack = { onSelectionHaptic(); navController.popBackStack() },
+                onScan = { onSelectionHaptic(); navController.navigate(ClenovaRoute.SmartScan) { launchSingleTop = true } },
+                onInvalidate = { scanResult = null }, onHaptic = onSelectionHaptic)
+        }
         composable<ClenovaRoute.SmartScan> {
             SmartScanScreen(
                 onBack = { onSelectionHaptic(); navController.popBackStack() },
@@ -187,6 +196,7 @@ fun ClenovaNavHost(
                 activityLifecycleOwner = lifecycleOwner,
                 onDuplicates = { onSelectionHaptic(); navController.navigate(ClenovaRoute.Duplicates) { popUpTo<ClenovaRoute.SmartScan> { inclusive = true }; launchSingleTop = true } },
                 onSimilar = { onSelectionHaptic(); navController.navigate(ClenovaRoute.SimilarPhotos) { popUpTo<ClenovaRoute.SmartScan> { inclusive = true }; launchSingleTop = true } },
+                onScreenshots = { onSelectionHaptic(); navController.navigate(ClenovaRoute.Screenshots) { popUpTo<ClenovaRoute.SmartScan> { inclusive = true }; launchSingleTop = true } },
             )
         }
 

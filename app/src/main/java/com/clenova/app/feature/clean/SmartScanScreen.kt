@@ -49,6 +49,7 @@ internal fun SmartScanScreen(
     onDuplicates: () -> Unit,
     modifier: Modifier = Modifier,
     onSimilar: () -> Unit = {},
+    onScreenshots: () -> Unit = {},
 ) {
     val context = LocalContext.current
     val owner = activityLifecycleOwner
@@ -126,15 +127,15 @@ internal fun SmartScanScreen(
                 when {
                     scanning -> Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(vertical = 40.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(24.dp)) {
                         Box(Modifier.size(176.dp), contentAlignment = Alignment.Center) {
-                            if ((stage == 1 || stage == 3) && total > 0) CircularProgressIndicator(progress = { done.toFloat() / total }, modifier = Modifier.fillMaxSize(), strokeWidth = 7.dp, color = colors.primary)
+                            if ((stage == 1 || stage == 3 || stage == 4) && total > 0) CircularProgressIndicator(progress = { done.toFloat() / total }, modifier = Modifier.fillMaxSize(), strokeWidth = 7.dp, color = colors.primary)
                             else CircularProgressIndicator(Modifier.fillMaxSize(), color = colors.primary, strokeWidth = 7.dp)
                             Icon(Icons.Outlined.CropFree, null, Modifier.size(40.dp), tint = colors.primary)
                         }
                         Text(stringResource(R.string.scan_running_title), style = MaterialTheme.typography.headlineSmall, color = colors.textPrimary)
-                        Text(stringResource(when(stage) { 0 -> R.string.scan_stage_inventory; 1 -> R.string.scan_stage_duplicates; 3 -> R.string.clean_tool_similar_title; else -> R.string.scan_stage_plan }), color = colors.textSecondary)
-                        if ((stage == 1 || stage == 3) && total > 0) Text("$done / $total", color = colors.textSecondary)
+                        Text(stringResource(when(stage) { 0 -> R.string.scan_stage_inventory; 1 -> R.string.scan_stage_duplicates; 3 -> R.string.clean_tool_similar_title; 4 -> R.string.scan_stage_screenshots; else -> R.string.scan_stage_plan }), color = colors.textSecondary)
+                        if ((stage == 1 || stage == 3 || stage == 4) && total > 0) Text("$done / $total", color = colors.textSecondary)
                     }
-                    snapshot != null -> ActualResults(snapshot, onDuplicates, onSimilar)
+                    snapshot != null -> ActualResults(snapshot, onDuplicates, onSimilar, onScreenshots)
                     else -> Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(vertical = 32.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
                         Icon(Icons.Outlined.VerifiedUser, null, Modifier.size(40.dp), tint = colors.primary)
                         Text(stringResource(if (failed) R.string.scan_read_error else R.string.scan_access_title), style = MaterialTheme.typography.headlineSmall, color = colors.textPrimary)
@@ -160,7 +161,7 @@ internal fun SmartScanScreen(
 }
 
 @Composable
-private fun ActualResults(result: MediaScanResult, onDuplicates: () -> Unit, onSimilar: () -> Unit) {
+private fun ActualResults(result: MediaScanResult, onDuplicates: () -> Unit, onSimilar: () -> Unit, onScreenshots: () -> Unit) {
     val colors = ClenovaThemeTokens.colors
     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(vertical = 24.dp), verticalArrangement = Arrangement.spacedBy(18.dp)) {
         Text(stringResource(R.string.scan_complete), style = MaterialTheme.typography.labelMedium, color = colors.success)
@@ -184,6 +185,7 @@ private fun ActualResults(result: MediaScanResult, onDuplicates: () -> Unit, onS
             HorizontalDivider(color = colors.border)
         }
         if (result.duplicateGroups.isNotEmpty()) OutlinedButton(onClick = onDuplicates, modifier = Modifier.fillMaxWidth().testTag("scan_duplicates")) { Text(stringResource(R.string.clean_tool_duplicates_title)) }
+        if (result.screenshots.isNotEmpty()) OutlinedButton(onClick = onScreenshots, modifier = Modifier.fillMaxWidth().testTag("scan_screenshots")) { Text(stringResource(R.string.clean_tool_screenshots_title)) }
         if (result.similarGroups.isNotEmpty()) {
             OutlinedButton(onClick = onSimilar, modifier = Modifier.fillMaxWidth().testTag("scan_similar")) { Text(stringResource(R.string.clean_tool_similar_title)) }
             Text(stringResource(R.string.scan_similar_detail), color = colors.textSecondary, style = MaterialTheme.typography.bodySmall)

@@ -51,6 +51,7 @@ internal fun CleanScreen(
     onDuplicates: () -> Unit,
     onCompress: () -> Unit,
     onSimilar: () -> Unit = {},
+    onScreenshots: () -> Unit = {},
 ) {
     val colors = ClenovaThemeTokens.colors
     val preview = BuildConfig.DEBUG && sample
@@ -106,7 +107,7 @@ internal fun CleanScreen(
             HorizontalDivider(color = colors.border)
             Column {
                 CleanFileRow(Icons.Outlined.Screenshot, R.string.clean_tool_screenshots_title,
-                    result?.let { stringResource(R.string.guard_item_count, it.screenshots.size) } ?: if (preview) stringResource(R.string.guard_item_count, 84) else null, "clean_screenshots") { dialog = R.string.clean_tool_screenshots_title }
+                    result?.let { stringResource(R.string.guard_item_count, it.screenshots.size) } ?: if (preview) stringResource(R.string.guard_item_count, 84) else null, "clean_screenshots", onScreenshots)
                 HorizontalDivider(color = colors.border)
                 CleanFileRow(Icons.Outlined.VideoFile, R.string.review_videos,
                     result?.let { ByteFormatter.format(it.largeVideos.sumOf { video -> video.bytes }) } ?: if (preview) CleanupDesignPlan.spaceLabel(2) else null, "clean_large_videos") { dialog = R.string.review_videos }

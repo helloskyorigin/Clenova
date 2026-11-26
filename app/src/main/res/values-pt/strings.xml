@@ -276,7 +276,7 @@
     <string name="privacy_local_title">Preferências locais</string>
     <string name="privacy_local_body">Tema, resposta tátil, preferências do Autopilot e idioma ficam no dispositivo. Não é preciso criar conta.</string>
     <string name="privacy_files_title">Arquivos pessoais</string>
-    <string name="privacy_files_body">Clenova analisa fotos e vídeos acessíveis no dispositivo com sua permissão. Duplicatas podem ir à lixeira Android com sua aprovação. Memory Guard ainda não está conectado. Nenhuma mídia pessoal é enviada. Fotos semelhantes também podem ser revisadas e enviadas à lixeira com sua aprovação.</string>
+    <string name="privacy_files_body">Clenova analisa fotos e vídeos acessíveis no dispositivo com sua permissão. Duplicatas podem ir à lixeira Android com sua aprovação. Memory Guard ainda não está conectado. Nenhuma mídia pessoal é enviada. Fotos semelhantes também podem ser revisadas e enviadas à lixeira com sua aprovação. Capturas de tela também podem ser revisadas e enviadas à lixeira do Android com sua aprovação.</string>
     <string name="privacy_support_title">Mensagens de suporte</string>
     <string name="privacy_support_body">O contato e os relatórios abrem seu app de e-mail. Você decide se envia e pode editar ou remover detalhes de diagnóstico antes do envio.</string>
     <string name="support_faq_storage">Como o armazenamento é medido?</string>
@@ -332,4 +332,6 @@
     <string name="similar_no_matches">Nenhuma foto semelhante encontrada nesta análise</string>
     <string name="similar_manual_rule">Fotos semelhantes não são idênticas. Selecione cada foto manualmente. Uma foto por grupo e as favoritas são protegidas.</string>
     <string name="similar_confirm">Revise cada foto selecionada. Clenova verifica se os arquivos não mudaram e pede aprovação ao Android. A lixeira pode manter os arquivos temporariamente.</string>
+    <string name="screenshots_no_matches">Nenhuma captura de tela encontrada nesta análise</string>
+    <string name="screenshots_manual_rule">Selecione as capturas manualmente. Favoritas, cópias protegidas e arquivos não verificados não podem ser selecionados.</string>
 </resources>

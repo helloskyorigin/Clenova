@@ -121,7 +121,22 @@ internal class MediaScanner(private val context: Context) {
             onProgress(1, i + 1, candidates.size)
         }
         onProgress(2, 0, 0)
-        val screenshots = items.filter { it.screenshot }
+        val captures = items.filter { it.screenshot }
+        val screenshots = mutableListOf<ScannedMedia>()
+        var screenshotBudget = HASH_BUDGET
+        onProgress(4, 0, captures.size)
+        for ((index, media) in captures.withIndex()) {
+            currentCoroutineContext().ensureActive()
+            var verified = media
+            if (!media.favorite && media.bytes <= screenshotBudget) {
+                screenshotBudget -= media.bytes
+                try { verified = media.copy(verifiedHash = hash(resolver, media)) }
+                catch (_: IOException) { incomplete = true }
+                catch (_: SecurityException) { incomplete = true }
+            } else if (!media.favorite) incomplete = true
+            screenshots.add(verified)
+            onProgress(4, index + 1, captures.size)
+        }
         val largeVideos = items.filter { it.video && it.bytes >= LARGE_VIDEO_BYTES }.sortedByDescending { it.bytes }
         val groups = hashes.values.filter { it.size > 1 }.map { it.sortedWith(compareByDescending<ScannedMedia> { m -> m.favorite }.thenBy { m -> m.uri.toString() }) }
         val exactUris = groups.flatten().map { it.uri }.toSet()

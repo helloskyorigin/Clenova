@@ -50,6 +50,9 @@ sealed interface ClenovaRoute {
     data object SimilarPhotos : ClenovaRoute
 
     @Serializable
+    data object Screenshots : ClenovaRoute
+
+    @Serializable
     data object VideoCompress : ClenovaRoute
 }
 

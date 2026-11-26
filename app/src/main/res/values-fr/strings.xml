@@ -276,7 +276,7 @@
     <string name="privacy_local_title">Préférences locales</string>
     <string name="privacy_local_body">Le thème, le retour haptique, les préférences Autopilot et la langue sont enregistrés sur votre appareil. Aucun compte requis.</string>
     <string name="privacy_files_title">Fichiers personnels</string>
-    <string name="privacy_files_body">Clenova analyse les médias accessibles avec votre autorisation sur l’appareil. Les doublons peuvent être placés dans la corbeille Android avec votre accord. Memory Guard n’est pas encore connecté. Aucun média personnel téléversé. Les photos similaires peuvent aussi être vérifiées et mises à la corbeille avec votre accord.</string>
+    <string name="privacy_files_body">Clenova analyse les médias accessibles avec votre autorisation sur l’appareil. Les doublons peuvent être placés dans la corbeille Android avec votre accord. Memory Guard n’est pas encore connecté. Aucun média personnel téléversé. Les photos similaires peuvent aussi être vérifiées et mises à la corbeille avec votre accord. Les captures peuvent aussi être vérifiées et mises à la corbeille Android avec votre accord.</string>
     <string name="privacy_support_title">Messages d’assistance</string>
     <string name="privacy_support_body">Le contact et les rapports ouvrent votre application de messagerie. Vous choisissez d’envoyer ou non le message et pouvez modifier ou retirer les données de diagnostic avant l’envoi.</string>
     <string name="support_faq_storage">Comment le stockage est-il mesuré ?</string>
@@ -332,4 +332,6 @@
     <string name="similar_no_matches">Aucune photo similaire trouvée lors de cette analyse</string>
     <string name="similar_manual_rule">Des photos similaires ne sont pas identiques. Sélectionnez chaque photo manuellement. Une photo par groupe et les favoris sont protégés.</string>
     <string name="similar_confirm">Vérifiez chaque photo sélectionnée. Clenova vérifie que les fichiers sont inchangés et demande la validation Android. La corbeille peut les conserver temporairement.</string>
+    <string name="screenshots_no_matches">Aucune capture trouvée lors de cette analyse</string>
+    <string name="screenshots_manual_rule">Sélectionnez les captures manuellement. Les favoris, copies protégées et fichiers non vérifiés ne sont pas sélectionnables.</string>
 </resources>
