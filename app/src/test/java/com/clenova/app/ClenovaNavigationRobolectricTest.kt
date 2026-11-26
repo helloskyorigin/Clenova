@@ -108,6 +108,14 @@ class ClenovaNavigationRobolectricTest {
         composeTestRule.onNodeWithText("Settings").assertIsDisplayed()
         composeTestRule.onNodeWithTag("nav_tab_home").assertDoesNotExist()
 
+        // Appearance uses a compact menu, not permanently visible theme chips.
+        composeTestRule.onNodeWithTag("theme_option_dark").assertDoesNotExist()
+        composeTestRule.onNodeWithTag("settings_appearance").performScrollTo().performClick()
+        composeTestRule.onNodeWithTag("theme_option_dark").assertIsDisplayed().performClick()
+        composeTestRule.waitForIdle()
+        composeTestRule.onNodeWithTag("theme_option_dark").assertDoesNotExist()
+        composeTestRule.onNodeWithText("Dark").assertIsDisplayed()
+
         // Back from Settings restores Home and bottom nav
         composeTestRule.onNodeWithTag("settings_back_button").performClick()
         composeTestRule.waitForIdle()

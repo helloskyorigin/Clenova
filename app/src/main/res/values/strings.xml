@@ -246,12 +246,34 @@
 
     <!-- Settings -->
     <string name="settings_title">Settings</string>
+    <string name="settings_general">GENERAL</string>
+    <string name="settings_language">Language</string>
+    <string name="settings_privacy_control">PRIVACY &amp; CONTROL</string>
+    <string name="settings_autopilot">Autopilot preferences</string>
+    <string name="settings_permissions">Permissions</string>
+    <string name="settings_data_privacy">Data &amp; privacy</string>
+    <string name="settings_reset">Reset preferences</string>
+    <string name="settings_support">SUPPORT</string>
+    <string name="settings_help">Help center</string>
+    <string name="settings_contact">Contact us</string>
+    <string name="settings_report">Report a problem</string>
+    <string name="settings_suggest">Suggest a feature</string>
+    <string name="settings_about_section">ABOUT</string>
+    <string name="settings_policy">Privacy policy</string>
+    <string name="settings_terms">Terms of use</string>
+    <string name="settings_licenses">Open-source licenses</string>
+    <string name="settings_about_product">About Clenova</string>
+    <string name="settings_version_short">Version %1$s</string>
+    <string name="settings_by">A product by</string>
+    <string name="settings_copyright">© 2026 SKYORIGIN</string>
+    <string name="settings_action_unavailable">Unable to open</string>
+    <string name="settings_action_unavailable_body">The required app or Android settings screen is unavailable. You can contact %1$s directly.</string>
     <string name="settings_section_preferences">PREFERENCES</string>
     <string name="settings_theme_label">Appearance</string>
     <string name="settings_theme_light">Light</string>
     <string name="settings_theme_dark">Dark</string>
     <string name="settings_theme_system">System</string>
-    <string name="settings_haptics_label">Tactile feedback</string>
+    <string name="settings_haptics_label">Haptic feedback</string>
     <string name="settings_haptics_desc">Subtle haptic response on navigation and primary controls.</string>
     <string name="settings_section_safety">SAFETY &amp; PRIVACY</string>
     <string name="settings_safety_approval_title">Explicit user approval</string>

@@ -1,59 +1,42 @@
 package com.clenova.app.feature.settings
 
-import androidx.compose.foundation.BorderStroke
+import android.content.Intent
+import android.net.Uri
+import android.provider.Settings
+import android.os.Build
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.navigationBars
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.statusBars
-import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Switch
-import androidx.compose.material3.SwitchDefaults
-import androidx.compose.material3.Text
-import androidx.compose.material3.minimumInteractiveComponentSize
-import androidx.compose.runtime.Composable
+import androidx.compose.material.icons.outlined.*
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
-import androidx.compose.ui.semantics.selected
-import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import com.clenova.app.core.designsystem.ClenovaInfoRow
-import com.clenova.app.core.designsystem.ClenovaSectionLabel
+import androidx.compose.ui.unit.sp
 import com.clenova.app.core.designsystem.ClenovaShapes
-import com.clenova.app.core.designsystem.ClenovaSpacing
-import com.clenova.app.core.designsystem.ClenovaSurfaceCard
 import com.clenova.app.core.designsystem.ClenovaThemeTokens
 import com.clenova.app.domain.model.ThemePreference
 import com.clenova.app.domain.model.UserPreferences
 import com.example.BuildConfig
 import com.example.R
+
+private const val SUPPORT_EMAIL = "hello.skyorigin@gmail.com"
 
 @Composable
 fun SettingsScreen(
@@ -61,234 +44,140 @@ fun SettingsScreen(
     onSelectTheme: (ThemePreference) -> Unit,
     onToggleHaptics: (Boolean) -> Unit,
     onNavigateBack: () -> Unit,
+    onOpenAutopilot: () -> Unit,
+    showUnfinishedRows: Boolean = false,
     modifier: Modifier = Modifier,
 ) {
     val colors = ClenovaThemeTokens.colors
-    val scrollState = rememberScrollState()
+    val context = LocalContext.current
+    val showPlanned = BuildConfig.DEBUG && showUnfinishedRows
+    var themeMenu by rememberSaveable { mutableStateOf(false) }
+    var actionFailed by rememberSaveable { mutableStateOf(false) }
+    val themeLabel = when (preferences.themePreference) {
+        ThemePreference.LIGHT -> R.string.settings_theme_light
+        ThemePreference.DARK -> R.string.settings_theme_dark
+        ThemePreference.SYSTEM -> R.string.settings_theme_system
+    }
+    fun email(subject: String, body: String = "") {
+        val uri = Uri.parse("mailto:" + SUPPORT_EMAIL + "?subject=" + Uri.encode(subject) + "&body=" + Uri.encode(body))
+        actionFailed = runCatching { context.startActivity(Intent(Intent.ACTION_SENDTO, uri)) }.isFailure
+    }
 
-    Box(
-        modifier = modifier
-            .fillMaxSize()
-            .background(colors.background)
-            .windowInsetsPadding(WindowInsets.statusBars)
-            .windowInsetsPadding(WindowInsets.navigationBars),
-        contentAlignment = Alignment.TopCenter,
-    ) {
-        Column(
-            modifier = Modifier
-                .widthIn(max = 600.dp)
-                .fillMaxSize()
-                .verticalScroll(scrollState)
-                .padding(
-                    horizontal = ClenovaSpacing.screenHorizontal,
-                    vertical = ClenovaSpacing.md,
-                ),
-            verticalArrangement = Arrangement.spacedBy(ClenovaSpacing.lg),
-        ) {
-            // Focused Top App Bar (floating nav hidden here)
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(ClenovaSpacing.sm),
-            ) {
-                Surface(
-                    shape = CircleShape,
-                    color = colors.surface,
-                    border = BorderStroke(1.dp, colors.border),
-                ) {
-                    IconButton(
-                        onClick = onNavigateBack,
-                        modifier = Modifier
-                            .minimumInteractiveComponentSize()
-                            .testTag("settings_back_button"),
-                    ) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Rounded.ArrowBack,
-                            contentDescription = stringResource(R.string.cd_back_button),
-                            tint = colors.textPrimary,
-                            modifier = Modifier.size(20.dp),
-                        )
-                    }
-                }
-                Text(
-                    text = stringResource(R.string.settings_title),
-                    style = MaterialTheme.typography.headlineSmall,
-                    color = colors.textPrimary,
-                )
+    Box(modifier.fillMaxSize().background(colors.background).windowInsetsPadding(WindowInsets.displayCutout)
+        .navigationBarsPadding(), contentAlignment = Alignment.TopCenter) {
+        Column(Modifier.widthIn(max = 560.dp).fillMaxSize().verticalScroll(rememberScrollState())
+            .padding(horizontal = 24.dp).padding(top = 12.dp, bottom = 28.dp)) {
+            IconButton(onClick = onNavigateBack, modifier = Modifier.testTag("settings_back_button")) {
+                Icon(Icons.AutoMirrored.Rounded.ArrowBack, stringResource(R.string.cd_back_button), tint = colors.textPrimary)
             }
-
-            // Preferences Section
-            Column(verticalArrangement = Arrangement.spacedBy(ClenovaSpacing.xs)) {
-                ClenovaSectionLabel(
-                    text = stringResource(R.string.settings_section_preferences),
-                    modifier = Modifier.padding(horizontal = ClenovaSpacing.xxs),
-                )
-                ClenovaSurfaceCard {
-                    Text(
-                        text = stringResource(R.string.settings_theme_label),
-                        style = MaterialTheme.typography.titleMedium,
-                        color = colors.textPrimary,
-                    )
-                    Spacer(modifier = Modifier.height(ClenovaSpacing.sm))
-
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clip(ClenovaShapes.pill)
-                            .background(colors.background)
-                            .padding(4.dp),
-                        horizontalArrangement = Arrangement.spacedBy(4.dp),
-                    ) {
-                        ThemeOptionChip(
-                            label = stringResource(R.string.settings_theme_light),
-                            selected = preferences.themePreference == ThemePreference.LIGHT,
-                            onClick = { onSelectTheme(ThemePreference.LIGHT) },
-                            testTag = "theme_option_light",
-                            modifier = Modifier.weight(1f),
-                        )
-                        ThemeOptionChip(
-                            label = stringResource(R.string.settings_theme_dark),
-                            selected = preferences.themePreference == ThemePreference.DARK,
-                            onClick = { onSelectTheme(ThemePreference.DARK) },
-                            testTag = "theme_option_dark",
-                            modifier = Modifier.weight(1f),
-                        )
-                        ThemeOptionChip(
-                            label = stringResource(R.string.settings_theme_system),
-                            selected = preferences.themePreference == ThemePreference.SYSTEM,
-                            onClick = { onSelectTheme(ThemePreference.SYSTEM) },
-                            testTag = "theme_option_system",
-                            modifier = Modifier.weight(1f),
-                        )
-                    }
-
-                    Spacer(modifier = Modifier.height(ClenovaSpacing.md))
-                    HorizontalDivider(thickness = 1.dp, color = colors.border)
-                    Spacer(modifier = Modifier.height(ClenovaSpacing.md))
-
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                    ) {
-                        Column(modifier = Modifier.weight(1f)) {
-                            Text(
-                                text = stringResource(R.string.settings_haptics_label),
-                                style = MaterialTheme.typography.titleMedium,
-                                color = colors.textPrimary,
-                            )
-                            Spacer(modifier = Modifier.height(ClenovaSpacing.xxs))
-                            Text(
-                                text = stringResource(R.string.settings_haptics_desc),
-                                style = MaterialTheme.typography.bodySmall,
-                                color = colors.textSecondary,
-                            )
+            Spacer(Modifier.height(8.dp))
+            Text(stringResource(R.string.settings_title), color = colors.textPrimary,
+                style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.SemiBold, fontSize = 32.sp, letterSpacing = (-.8).sp))
+            Row(Modifier.fillMaxWidth().padding(top = 23.dp, bottom = 23.dp), verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(15.dp)) {
+                Image(painterResource(R.drawable.clenova_brand_logo), contentDescription = null,
+                    modifier = Modifier.size(62.dp).clip(RoundedCornerShape(18.dp)))
+                Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(3.dp)) {
+                    Text(stringResource(R.string.home_brand), color = colors.textPrimary,
+                        style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold, letterSpacing = (-.8).sp))
+                    Text(stringResource(R.string.app_tagline), color = colors.textSecondary, style = MaterialTheme.typography.bodySmall)
+                    Text(stringResource(R.string.settings_version_short, BuildConfig.VERSION_NAME), color = colors.textSecondary, style = MaterialTheme.typography.bodySmall)
+                }
+            }
+            SettingsSection(R.string.settings_general) {
+                Box(Modifier.fillMaxWidth()) {
+                    SettingsRow(Icons.Outlined.Brightness6, R.string.settings_theme_label, value = stringResource(themeLabel),
+                        dropdown = true, tag = "settings_appearance", onClick = { themeMenu = true })
+                    DropdownMenu(expanded = themeMenu, onDismissRequest = { themeMenu = false },
+                        modifier = Modifier.widthIn(min = 180.dp).background(colors.surfaceElevated)) {
+                        listOf(
+                            Triple(ThemePreference.LIGHT, R.string.settings_theme_light, "theme_option_light"),
+                            Triple(ThemePreference.DARK, R.string.settings_theme_dark, "theme_option_dark"),
+                            Triple(ThemePreference.SYSTEM, R.string.settings_theme_system, "theme_option_system"),
+                        ).forEach { (option, label, tag) ->
+                            DropdownMenuItem(text = { Text(stringResource(label), color = colors.textPrimary) },
+                                onClick = { themeMenu = false; onSelectTheme(option) },
+                                modifier = Modifier.testTag(tag),
+                                trailingIcon = { if (preferences.themePreference == option) Icon(Icons.Outlined.Check, null, tint = colors.primary) })
                         }
-                        Switch(
-                            checked = preferences.hapticsEnabled,
-                            onCheckedChange = onToggleHaptics,
-                            modifier = Modifier.testTag("settings_haptics_switch"),
-                            colors = SwitchDefaults.colors(
-                                checkedThumbColor = colors.onPrimary,
-                                checkedTrackColor = colors.primary,
-                            ),
-                        )
                     }
                 }
-            }
-
-            // Safety & Privacy Section
-            Column(verticalArrangement = Arrangement.spacedBy(ClenovaSpacing.xs)) {
-                ClenovaSectionLabel(
-                    text = stringResource(R.string.settings_section_safety),
-                    modifier = Modifier.padding(horizontal = ClenovaSpacing.xxs),
-                )
-                ClenovaSurfaceCard {
-                    Text(
-                        text = stringResource(R.string.settings_safety_approval_title),
-                        style = MaterialTheme.typography.titleSmall,
-                        color = colors.textPrimary,
-                    )
-                    Spacer(modifier = Modifier.height(ClenovaSpacing.xxs))
-                    Text(
-                        text = stringResource(R.string.settings_safety_approval_desc),
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = colors.textSecondary,
-                    )
-                    Spacer(modifier = Modifier.height(ClenovaSpacing.md))
-                    HorizontalDivider(thickness = 1.dp, color = colors.border)
-                    Spacer(modifier = Modifier.height(ClenovaSpacing.md))
-                    Text(
-                        text = stringResource(R.string.settings_safety_local_title),
-                        style = MaterialTheme.typography.titleSmall,
-                        color = colors.textPrimary,
-                    )
-                    Spacer(modifier = Modifier.height(ClenovaSpacing.xxs))
-                    Text(
-                        text = stringResource(R.string.settings_safety_local_desc),
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = colors.textSecondary,
-                    )
+                if (showPlanned) SettingsRow(Icons.Outlined.Language, R.string.settings_language, value = "English", dropdown = true)
+                Row(Modifier.fillMaxWidth().heightIn(min = 52.dp), verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(14.dp)) {
+                    Icon(Icons.Outlined.Vibration, null, Modifier.size(22.dp), tint = colors.textPrimary)
+                    Text(stringResource(R.string.settings_haptics_label), Modifier.weight(1f), color = colors.textPrimary, style = MaterialTheme.typography.bodyLarge)
+                    Switch(checked = preferences.hapticsEnabled, onCheckedChange = onToggleHaptics,
+                        modifier = Modifier.testTag("settings_haptics_switch"),
+                        colors = SwitchDefaults.colors(checkedThumbColor = colors.onPrimary, checkedTrackColor = colors.primary))
                 }
             }
-
-            // Application Info Section
-            Column(verticalArrangement = Arrangement.spacedBy(ClenovaSpacing.xs)) {
-                ClenovaSectionLabel(
-                    text = stringResource(R.string.settings_section_about),
-                    modifier = Modifier.padding(horizontal = ClenovaSpacing.xxs),
-                )
-                ClenovaSurfaceCard {
-                    ClenovaInfoRow(
-                        label = stringResource(R.string.settings_about_name_label),
-                        value = stringResource(R.string.app_name),
-                    )
-                    ClenovaInfoRow(
-                        label = stringResource(R.string.settings_about_version_label),
-                        value = stringResource(
-                            R.string.settings_about_version_value,
-                            BuildConfig.VERSION_NAME,
-                        ),
-                    )
-                    ClenovaInfoRow(
-                        label = stringResource(R.string.settings_about_package_label),
-                        value = BuildConfig.APPLICATION_ID,
-                        showDivider = false,
-                    )
+            SettingsSection(R.string.settings_privacy_control) {
+                SettingsRow(Icons.Outlined.Tune, R.string.settings_autopilot, onClick = onOpenAutopilot)
+                SettingsRow(Icons.Outlined.VerifiedUser, R.string.settings_permissions, onClick = {
+                    actionFailed = runCatching { context.startActivity(Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.fromParts("package", context.packageName, null))) }.isFailure
+                })
+                if (showPlanned) {
+                    SettingsRow(Icons.Outlined.Lock, R.string.settings_data_privacy)
+                    SettingsRow(Icons.Outlined.Refresh, R.string.settings_reset)
                 }
+            }
+            SettingsSection(R.string.settings_support) {
+                if (showPlanned) SettingsRow(Icons.Outlined.HelpOutline, R.string.settings_help)
+                SettingsRow(Icons.Outlined.Email, R.string.settings_contact, onClick = { email("Clenova support") })
+                SettingsRow(Icons.Outlined.BugReport, R.string.settings_report, onClick = {
+                    email("Clenova problem report", "Describe the problem here:\n\nApp version: " + BuildConfig.VERSION_NAME + "\nAndroid: " + Build.VERSION.RELEASE + "\nDevice: " + Build.MANUFACTURER + " " + Build.MODEL)
+                })
+                SettingsRow(Icons.Outlined.ChatBubbleOutline, R.string.settings_suggest, onClick = { email("Clenova feature suggestion") })
+            }
+            if (showPlanned) SettingsSection(R.string.settings_about_section) {
+                SettingsRow(Icons.Outlined.Description, R.string.settings_policy)
+                SettingsRow(Icons.Outlined.FactCheck, R.string.settings_terms)
+                SettingsRow(Icons.Outlined.Code, R.string.settings_licenses)
+                SettingsRow(Icons.Outlined.Info, R.string.settings_about_product)
+            }
+            HorizontalDivider(color = colors.border)
+            Column(Modifier.fillMaxWidth().padding(top = 30.dp, bottom = 8.dp), horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(7.dp)) {
+                Text(stringResource(R.string.settings_by), color = colors.textSecondary, style = MaterialTheme.typography.bodySmall)
+                Text("SKYORIGIN", color = colors.textPrimary, style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold, letterSpacing = 3.sp))
+                Text(SUPPORT_EMAIL, color = colors.textSecondary, style = MaterialTheme.typography.bodySmall,
+                    modifier = Modifier.clip(ClenovaShapes.tile).clickable { email("Clenova support") }.padding(4.dp))
+                Text(stringResource(R.string.settings_copyright), color = colors.textSecondary, style = MaterialTheme.typography.labelSmall)
             }
         }
+    }
+    if (actionFailed) AlertDialog(onDismissRequest = { actionFailed = false },
+        title = { Text(stringResource(R.string.settings_action_unavailable)) },
+        text = { Text(stringResource(R.string.settings_action_unavailable_body, SUPPORT_EMAIL)) },
+        confirmButton = { TextButton(onClick = { actionFailed = false }) { Text(stringResource(android.R.string.ok)) } })
+}
+
+@Composable
+private fun SettingsSection(title: Int, content: @Composable ColumnScope.() -> Unit) {
+    val colors = ClenovaThemeTokens.colors
+    Column(Modifier.fillMaxWidth()) {
+        HorizontalDivider(color = colors.border)
+        Text(stringResource(title), Modifier.padding(top = 19.dp, bottom = 7.dp), color = colors.textSecondary,
+            style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Medium, letterSpacing = .8.sp))
+        Column(Modifier.fillMaxWidth().padding(bottom = 12.dp), content = content)
     }
 }
 
 @Composable
-private fun ThemeOptionChip(
-    label: String,
-    selected: Boolean,
-    onClick: () -> Unit,
-    testTag: String,
-    modifier: Modifier = Modifier,
-) {
+private fun SettingsRow(icon: ImageVector, title: Int, value: String? = null, dropdown: Boolean = false,
+    tag: String? = null, onClick: (() -> Unit)? = null) {
     val colors = ClenovaThemeTokens.colors
-    Box(
-        modifier = modifier
-            .minimumInteractiveComponentSize()
-            .clip(ClenovaShapes.pill)
-            .background(if (selected) colors.softBlue else colors.background)
-            .testTag(testTag)
-            .semantics { this.selected = selected }
-            .clickable(role = Role.RadioButton, onClick = onClick)
-            .padding(vertical = 10.dp, horizontal = 8.dp),
-        contentAlignment = Alignment.Center,
-    ) {
-        Text(
-            text = label,
-            style = MaterialTheme.typography.labelLarge.copy(
-                fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Medium,
-            ),
-            color = if (selected) colors.primary else colors.textSecondary,
-            textAlign = TextAlign.Center,
-            maxLines = 1,
-        )
+    val enabled = onClick != null
+    val tint = if (enabled) colors.textPrimary else colors.textSecondary
+    Row(Modifier.fillMaxWidth().heightIn(min = 52.dp).clip(ClenovaShapes.tile)
+        .then(if (tag != null) Modifier.testTag(tag) else Modifier)
+        .clickable(enabled = enabled, role = Role.Button, onClick = { onClick?.invoke() }),
+        verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(14.dp)) {
+        Icon(icon, null, Modifier.size(22.dp), tint = tint)
+        Text(stringResource(title), Modifier.weight(1f), color = tint, style = MaterialTheme.typography.bodyLarge)
+        if (value != null) Text(value, color = colors.textSecondary, style = MaterialTheme.typography.bodySmall)
+        Icon(if (dropdown) Icons.Outlined.KeyboardArrowDown else Icons.Outlined.ChevronRight, null,
+            Modifier.size(19.dp), tint = colors.textSecondary)
     }
 }
