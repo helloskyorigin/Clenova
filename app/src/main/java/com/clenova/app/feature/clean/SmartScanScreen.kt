@@ -56,6 +56,7 @@ private val scanStages = listOf(
 @Composable
 fun SmartScanScreen(
     sample: Boolean,
+    protectedCount: Int = 248,
     onBack: () -> Unit,
     onSelectionHaptic: () -> Unit,
     onDuplicates: () -> Unit,
@@ -85,6 +86,7 @@ fun SmartScanScreen(
     if (reviewing && preview && !scanning) {
         CleanupReviewScreen(
             sample = true,
+            protectedCount = protectedCount,
             approvedMask = approvedMask,
             onBack = { reviewing = false; onSelectionHaptic() },
             onApprove = { mask ->
@@ -122,7 +124,7 @@ fun SmartScanScreen(
                             Text(stringResource(R.string.scan_unavailable_body), style = MaterialTheme.typography.bodyMedium, color = colors.textSecondary)
                         }
                         running -> ScanProgress(progress)
-                        else -> ScanResults(approvedMask, onReview = { reviewing = true; onSelectionHaptic() }, onDuplicates = onDuplicates)
+                        else -> ScanResults(approvedMask, protectedCount, onReview = { reviewing = true; onSelectionHaptic() }, onDuplicates = onDuplicates)
                     }
                 }
                 if (scanning) TextButton(onClick = { cancelPrompt = true }, modifier = Modifier.align(Alignment.CenterHorizontally).padding(bottom = 14.dp)) {
@@ -184,7 +186,7 @@ private fun ScanProgress(progress: Int) {
 }
 
 @Composable
-private fun ScanResults(approvedMask: Int, onReview: () -> Unit, onDuplicates: () -> Unit) {
+private fun ScanResults(approvedMask: Int, protectedCount: Int, onReview: () -> Unit, onDuplicates: () -> Unit) {
     val colors = ClenovaThemeTokens.colors
     Column(Modifier.fillMaxSize()) {
         Column(Modifier.weight(1f).fillMaxWidth().verticalScroll(rememberScrollState()).padding(vertical = 24.dp),
@@ -218,7 +220,7 @@ private fun ScanResults(approvedMask: Int, onReview: () -> Unit, onDuplicates: (
                 Row(Modifier.padding(15.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                     Icon(Icons.Outlined.VerifiedUser, null, Modifier.size(27.dp), tint = colors.success)
                     Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                        Text(stringResource(R.string.review_protected), color = colors.textPrimary, style = MaterialTheme.typography.titleSmall)
+                        Text(stringResource(R.string.guard_excluded_count, protectedCount), color = colors.textPrimary, style = MaterialTheme.typography.titleSmall)
                         Text(stringResource(R.string.review_safety), color = colors.textSecondary, style = MaterialTheme.typography.bodySmall)
                     }
                 }

@@ -221,6 +221,29 @@
     <string name="compress_no_output">No video has been encoded or replaced. Actual output size depends on the source video.</string>
     <string name="compress_cancel_title">Stop compression preview?</string>
 
+    <!-- Memory Guard -->
+    <string name="guard_protection_label">Memory protection</string>
+    <string name="guard_protected_label">Items protected</string>
+    <string name="guard_protected_description">Your important memories stay outside cleanup plans.</string>
+    <string name="guard_add_collection">Add protection</string>
+    <string name="guard_collections">Protected collections</string>
+    <string name="guard_family">Family photos</string>
+    <string name="guard_favorites">Favorite photos</string>
+    <string name="guard_videos">Important videos</string>
+    <string name="guard_documents">Documents</string>
+    <string name="guard_travel">Travel photos</string>
+    <string name="guard_downloads">Important downloads</string>
+    <string name="guard_item_count">%1$d items</string>
+    <string name="guard_excluded_count">%1$d items excluded</string>
+    <string name="guard_remove_collection">Remove protection?</string>
+    <string name="guard_remove_body">Remove %1$s from your protected collections? This does not delete any files.</string>
+    <string name="guard_remove_action">Remove protection</string>
+    <string name="guard_protect_action">Protect selected</string>
+    <string name="guard_no_more">All available collections are selected.</string>
+    <string name="guard_not_ready">File protection rules are not connected yet. Your files have not been changed.</string>
+    <string name="guard_approval_title">Your files, your decision</string>
+    <string name="guard_approval_body">Clenova requires your approval before removing any files.</string>
+
     <!-- Settings -->
     <string name="settings_title">Settings</string>
     <string name="settings_section_preferences">PREFERENCES</string>

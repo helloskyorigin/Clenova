@@ -30,6 +30,7 @@ import com.clenova.app.feature.clean.SmartScanScreen
 import com.clenova.app.feature.clean.DuplicatesScreen
 import com.clenova.app.feature.clean.VideoCompressScreen
 import com.clenova.app.feature.guard.GuardScreen
+import com.clenova.app.feature.guard.GuardDesignData
 import com.clenova.app.feature.home.HomeScreen
 import com.clenova.app.feature.home.HomeViewModel
 import com.clenova.app.feature.storage.StorageDetailsScreen
@@ -76,6 +77,7 @@ fun ClenovaNavHost(
 ) {
     var sampleAutoOn by rememberSaveable { mutableStateOf(true) }
     var sampleApprovedMask by rememberSaveable { mutableStateOf(0) }
+    var sampleGuardMask by rememberSaveable { mutableIntStateOf(GuardDesignData.INITIAL_MASK) }
     val sample = BuildConfig.DEBUG && showSampleHome
     NavHost(
         navController = navController,
@@ -99,6 +101,7 @@ fun ClenovaNavHost(
                 showSampleHome = showSampleHome,
                 sampleAutoOn = sampleAutoOn,
                 sampleApprovedMask = sampleApprovedMask,
+                sampleProtectedCount = GuardDesignData.count(sampleGuardMask),
                 onSampleAutoChange = { sampleAutoOn = it; onSelectionHaptic() },
                 onOpenAutopilot = { onSelectionHaptic(); navController.navigate(ClenovaRoute.AutopilotSetup) { launchSingleTop = true } },
                 onRefreshStorage = {
@@ -150,6 +153,7 @@ fun ClenovaNavHost(
         composable<ClenovaRoute.SmartScan> {
             SmartScanScreen(
                 sample = sample,
+                protectedCount = GuardDesignData.count(sampleGuardMask),
                 onBack = { onSelectionHaptic(); navController.popBackStack() },
                 onSelectionHaptic = onSelectionHaptic,
                 onDuplicates = { onSelectionHaptic(); navController.navigate(ClenovaRoute.Duplicates) { launchSingleTop = true } },
@@ -157,7 +161,9 @@ fun ClenovaNavHost(
         }
 
         composable<ClenovaRoute.Guard> {
-            GuardScreen()
+            GuardScreen(sample = sample, collectionMask = sampleGuardMask,
+                onMaskChange = { if (sample) { sampleGuardMask = it and GuardDesignData.ALL_MASK; sampleApprovedMask = 0 } },
+                onSelectionHaptic = onSelectionHaptic)
         }
 
         composable<ClenovaRoute.Agent> {
@@ -167,6 +173,7 @@ fun ClenovaNavHost(
         composable<ClenovaRoute.CleanupReview> {
             CleanupReviewScreen(
                 sample = sample && sampleAutoOn,
+                protectedCount = GuardDesignData.count(sampleGuardMask),
                 approvedMask = if (sample) sampleApprovedMask else 0,
                 onBack = { onSelectionHaptic(); navController.popBackStack() },
                 onApprove = { selected ->

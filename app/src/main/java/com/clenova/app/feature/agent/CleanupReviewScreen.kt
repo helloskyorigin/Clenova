@@ -32,6 +32,7 @@ import com.example.R
 @Composable
 fun CleanupReviewScreen(
     sample: Boolean,
+    protectedCount: Int = 248,
     approvedMask: Int,
     onBack: () -> Unit,
     onApprove: (Int) -> Unit,
@@ -104,7 +105,7 @@ fun CleanupReviewScreen(
                         Row(Modifier.padding(15.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                             Icon(Icons.Outlined.VerifiedUser, null, Modifier.size(28.dp), tint = colors.success)
                             Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                                Text(stringResource(R.string.review_protected), color = colors.textPrimary, style = MaterialTheme.typography.titleSmall)
+                                Text(stringResource(R.string.guard_excluded_count, protectedCount), color = colors.textPrimary, style = MaterialTheme.typography.titleSmall)
                                 Text(stringResource(R.string.review_safety), color = colors.textSecondary, style = MaterialTheme.typography.bodySmall)
                             }
                         }

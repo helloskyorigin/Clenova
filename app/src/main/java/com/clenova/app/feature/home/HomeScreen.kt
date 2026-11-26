@@ -64,6 +64,7 @@ fun HomeScreen(
     onOpenCompress: () -> Unit,
     sampleAutoOn: Boolean = true,
     sampleApprovedMask: Int = 0,
+    sampleProtectedCount: Int = 248,
     onSampleAutoChange: (Boolean) -> Unit = {},
     modifier: Modifier = Modifier,
     showSampleHome: Boolean = false,
@@ -120,7 +121,7 @@ fun HomeScreen(
                     Icon(Icons.Outlined.VerifiedUser, null, Modifier.size(29.dp), tint = colors.success)
                     Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(3.dp)) {
                         Text(stringResource(R.string.guard_title), style = MaterialTheme.typography.titleMedium, color = colors.textPrimary)
-                        Text(if (sample) stringResource(R.string.home_sample_protected, 248) else stringResource(R.string.home_guard_status), style = MaterialTheme.typography.bodySmall, color = colors.textSecondary)
+                        Text(if (sample) stringResource(R.string.home_sample_protected, sampleProtectedCount) else stringResource(R.string.home_guard_status), style = MaterialTheme.typography.bodySmall, color = colors.textSecondary)
                     }
                     Icon(Icons.AutoMirrored.Rounded.ArrowForward, null, Modifier.size(18.dp), tint = colors.textSecondary)
                 }

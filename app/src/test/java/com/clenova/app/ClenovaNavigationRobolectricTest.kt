@@ -223,6 +223,28 @@ class ClenovaNavigationRobolectricTest {
     }
 
     @Test
+    fun `guard selection updates protected count on home`() {
+        composeTestRule.setContent {
+            ClenovaApp(storageRepository = FakeStorageRepository(), preferencesRepository = FakePreferencesRepository(), showSampleHome = true)
+        }
+        composeTestRule.waitForIdle()
+        composeTestRule.onNodeWithTag("nav_tab_guard").performClick()
+        composeTestRule.waitForIdle()
+        if (com.example.BuildConfig.DEBUG) {
+            composeTestRule.onNodeWithText("248").assertIsDisplayed()
+            composeTestRule.onNodeWithTag("guard_add").performScrollTo().performClick()
+            composeTestRule.onNodeWithTag("guard_pick_16").performClick()
+            composeTestRule.onNodeWithTag("guard_add_confirm").performClick()
+            composeTestRule.onNodeWithText("266").performScrollTo().assertIsDisplayed()
+            composeTestRule.onNodeWithTag("nav_tab_home").performClick()
+            composeTestRule.waitForIdle()
+            composeTestRule.onNodeWithText("266 items protected").performScrollTo().assertIsDisplayed()
+        } else {
+            composeTestRule.onNodeWithText("No protected collections yet").assertIsDisplayed()
+        }
+    }
+
+    @Test
     fun `home displays honest unavailable state when storage cannot be read`() {
         composeTestRule.setContent {
             ClenovaApp(
