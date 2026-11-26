@@ -276,11 +276,11 @@
     <string name="privacy_local_title">Preferencias locales</string>
     <string name="privacy_local_body">El tema, la respuesta háptica, las preferencias de Autopilot y el idioma se guardan en tu dispositivo. No necesitas cuenta.</string>
     <string name="privacy_files_title">Archivos personales</string>
-    <string name="privacy_files_body">Esta versión lee los totales de almacenamiento. Los motores de escaneo, protección y eliminación aún no están conectados. Clenova no sube medios personales.</string>
+    <string name="privacy_files_body">Clenova escanea fotos y vídeos accesibles en tu dispositivo con tu permiso. La protección y eliminación de archivos aún no están conectadas. Clenova no sube medios personales.</string>
     <string name="privacy_support_title">Mensajes de soporte</string>
     <string name="privacy_support_body">El contacto y los informes abren tu aplicación de correo. Tú decides si envías el mensaje y puedes editar o eliminar datos de diagnóstico antes de enviarlo.</string>
     <string name="support_faq_storage">¿Cómo se mide el almacenamiento?</string>
-    <string name="support_faq_storage_body">Clenova lee los totales de almacenamiento del dispositivo. Las categorías multimedia detalladas y la limpieza requieren un motor de escaneo compatible.</string>
+    <string name="support_faq_storage_body">Clenova lee los totales de almacenamiento y escanea fotos y vídeos accesibles con tu permiso. La limpieza aún no está disponible.</string>
     <string name="support_faq_auto_body">Configura el objetivo de espacio libre y la frecuencia en las preferencias de Autopilot. La supervisión en segundo plano aún no está disponible.</string>
     <string name="support_faq_language_body">Abre Idioma en Ajustes y busca o selecciona tu idioma. Elige Idioma del dispositivo para seguir Android.</string>
     <string name="support_search">Buscar ayuda</string>
@@ -310,4 +310,12 @@
     <string name="clean_history_empty">Aún no hay limpiezas completadas. Tus archivos no se han modificado.</string>
     <string name="clean_preview">Vista previa de diseño</string>
     <string name="clean_review_all">Revisar todo</string>
+    <string name="scan_access_title">Escanear tus medios</string>
+    <string name="scan_access_body">Permite el acceso a fotos y vídeos para escanear los medios que elijas. El escaneo se realiza en tu dispositivo y no elimina archivos.</string>
+    <string name="scan_allow_access">Permitir acceso a medios</string>
+    <string name="scan_read_error">No se pudo completar el escaneo</string>
+    <string name="scan_review_space">Espacio para revisar</string>
+    <string name="scan_accessible_count">%1$d elementos multimedia accesibles revisados</string>
+    <string name="scan_partial">Escaneo limitado o incompleto. Algunos medios no se revisaron.</string>
+    <string name="scan_read_only">Las categorías pueden solaparse. Cada archivo se cuenta una vez en el total. Las capturas se identifican por nombre y carpeta; los vídeos grandes son de 100 MB o más. No se ha eliminado nada.</string>
 </resources>

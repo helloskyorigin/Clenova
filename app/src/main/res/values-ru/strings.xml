@@ -276,11 +276,11 @@
     <string name="privacy_local_title">Локальные настройки</string>
     <string name="privacy_local_body">Тема, тактильный отклик, настройки Autopilot и язык хранятся на устройстве. Аккаунт не нужен.</string>
     <string name="privacy_files_title">Личные файлы</string>
-    <string name="privacy_files_body">Эта версия читает общие данные хранилища. Механизмы сканирования, защиты и удаления ещё не подключены. Clenova не загружает личные медиа.</string>
+    <string name="privacy_files_body">Clenova с вашего разрешения сканирует доступные фото и видео на устройстве. Защита и удаление файлов ещё не подключены. Clenova не загружает личные медиа.</string>
     <string name="privacy_support_title">Сообщения в поддержку</string>
     <string name="privacy_support_body">Связь и отчёты открывают почтовое приложение. Вы решаете, отправлять ли письмо, и можете изменить или удалить диагностические данные перед отправкой.</string>
     <string name="support_faq_storage">Как измеряется объём хранилища?</string>
-    <string name="support_faq_storage_body">Clenova считывает общие данные хранилища устройства. Подробные категории медиа и очистка требуют поддерживаемого механизма сканирования.</string>
+    <string name="support_faq_storage_body">Clenova читает общие данные хранилища и с разрешения сканирует доступные фото и видео. Очистка пока недоступна.</string>
     <string name="support_faq_auto_body">Задайте цель свободного места и частоту проверок в настройках Autopilot. Фоновый мониторинг пока недоступен.</string>
     <string name="support_faq_language_body">Откройте Язык в настройках и найдите или выберите язык. Для языка Android выберите язык устройства.</string>
     <string name="support_search">Поиск справки</string>
@@ -310,4 +310,12 @@
     <string name="clean_history_empty">Завершённых очисток пока нет. Ваши файлы не изменены.</string>
     <string name="clean_preview">Предпросмотр дизайна</string>
     <string name="clean_review_all">Проверить всё</string>
+    <string name="scan_access_title">Сканирование медиа</string>
+    <string name="scan_access_body">Разрешите доступ к фото и видео для сканирования выбранных медиа. Сканирование выполняется на устройстве без удаления файлов.</string>
+    <string name="scan_allow_access">Разрешить доступ к медиа</string>
+    <string name="scan_read_error">Не удалось завершить сканирование</string>
+    <string name="scan_review_space">Объём для проверки</string>
+    <string name="scan_accessible_count">Проверено доступных медиа: %1$d</string>
+    <string name="scan_partial">Ограниченное или неполное сканирование. Некоторые медиа не проверены.</string>
+    <string name="scan_read_only">Категории могут пересекаться. Каждый файл учтён один раз в общем объёме. Скриншоты определяются по имени и папке; крупные видео имеют размер от 100 MB. Ничего не удалено.</string>
 </resources>

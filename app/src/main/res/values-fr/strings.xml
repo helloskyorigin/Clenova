@@ -276,11 +276,11 @@
     <string name="privacy_local_title">Préférences locales</string>
     <string name="privacy_local_body">Le thème, le retour haptique, les préférences Autopilot et la langue sont enregistrés sur votre appareil. Aucun compte requis.</string>
     <string name="privacy_files_title">Fichiers personnels</string>
-    <string name="privacy_files_body">Cette version lit les totaux de stockage. Les moteurs d’analyse, de protection et de suppression ne sont pas encore connectés. Clenova ne téléverse aucun média personnel.</string>
+    <string name="privacy_files_body">Clenova analyse les photos et vidéos accessibles sur votre appareil avec votre autorisation. La protection et la suppression ne sont pas encore connectées. Clenova ne téléverse aucun média personnel.</string>
     <string name="privacy_support_title">Messages d’assistance</string>
     <string name="privacy_support_body">Le contact et les rapports ouvrent votre application de messagerie. Vous choisissez d’envoyer ou non le message et pouvez modifier ou retirer les données de diagnostic avant l’envoi.</string>
     <string name="support_faq_storage">Comment le stockage est-il mesuré ?</string>
-    <string name="support_faq_storage_body">Clenova lit les totaux de stockage de l’appareil. Les catégories de médias détaillées et le nettoyage nécessitent un moteur d’analyse compatible.</string>
+    <string name="support_faq_storage_body">Clenova lit le stockage total et analyse les photos et vidéos accessibles avec votre autorisation. Le nettoyage n’est pas encore disponible.</string>
     <string name="support_faq_auto_body">Définissez un objectif d’espace libre et la fréquence dans les préférences Autopilot. La surveillance en arrière-plan n’est pas encore disponible.</string>
     <string name="support_faq_language_body">Ouvrez Langue dans les paramètres, recherchez ou sélectionnez votre langue. Choisissez la langue de l’appareil pour suivre Android.</string>
     <string name="support_search">Rechercher de l’aide</string>
@@ -310,4 +310,12 @@
     <string name="clean_history_empty">Aucun nettoyage terminé. Vos fichiers n’ont pas été modifiés.</string>
     <string name="clean_preview">Aperçu de conception</string>
     <string name="clean_review_all">Tout examiner</string>
+    <string name="scan_access_title">Analyser vos médias</string>
+    <string name="scan_access_body">Autorisez l’accès aux photos et vidéos pour analyser les médias choisis. L’analyse reste sur votre appareil et ne supprime aucun fichier.</string>
+    <string name="scan_allow_access">Autoriser l’accès aux médias</string>
+    <string name="scan_read_error">Impossible de terminer l’analyse</string>
+    <string name="scan_review_space">Espace à examiner</string>
+    <string name="scan_accessible_count">%1$d éléments multimédias accessibles vérifiés</string>
+    <string name="scan_partial">Analyse limitée ou incomplète. Certains médias n’ont pas été vérifiés.</string>
+    <string name="scan_read_only">Les catégories peuvent se chevaucher. Chaque fichier est compté une fois au total. Les captures sont identifiées par nom et dossier ; les grandes vidéos font au moins 100 MB. Rien n’a été supprimé.</string>
 </resources>

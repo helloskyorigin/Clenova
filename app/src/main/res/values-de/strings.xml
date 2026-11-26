@@ -276,11 +276,11 @@
     <string name="privacy_local_title">Lokale Einstellungen</string>
     <string name="privacy_local_body">Design, Haptik, Autopilot-Einstellungen und Sprache werden auf dem Gerät gespeichert. Kein Konto erforderlich.</string>
     <string name="privacy_files_title">Persönliche Dateien</string>
-    <string name="privacy_files_body">Dieser Build liest Gesamtspeicherwerte. Medienscan, Dateischutz und Löschfunktionen sind noch nicht verbunden. Clenova lädt keine persönlichen Medien hoch.</string>
+    <string name="privacy_files_body">Clenova scannt mit deiner Erlaubnis zugängliche Fotos und Videos auf deinem Gerät. Dateischutz und Löschung sind noch nicht verbunden. Clenova lädt keine persönlichen Medien hoch.</string>
     <string name="privacy_support_title">Support-Nachrichten</string>
     <string name="privacy_support_body">Kontakt und Problemberichte öffnen deine E-Mail-App. Du entscheidest über den Versand und kannst Diagnosedaten vorher bearbeiten oder entfernen.</string>
     <string name="support_faq_storage">Wie wird der Speicher gemessen?</string>
-    <string name="support_faq_storage_body">Clenova liest die Gesamtspeicherwerte des Geräts. Detaillierte Medienkategorien und Bereinigung benötigen eine unterstützte Scan-Engine.</string>
+    <string name="support_faq_storage_body">Clenova liest Gesamtspeicherwerte und scannt mit deiner Erlaubnis zugängliche Fotos und Videos. Bereinigung ist noch nicht verfügbar.</string>
     <string name="support_faq_auto_body">Lege Speicherziel und Prüfintervall in den Autopilot-Einstellungen fest. Hintergrundüberwachung ist noch nicht verfügbar.</string>
     <string name="support_faq_language_body">Öffne Sprache in den Einstellungen und suche oder wähle deine Sprache. Wähle Gerätesprache, um Android zu folgen.</string>
     <string name="support_search">Hilfe suchen</string>
@@ -310,4 +310,12 @@
     <string name="clean_history_empty">Noch keine abgeschlossenen Bereinigungen. Deine Dateien wurden nicht geändert.</string>
     <string name="clean_preview">Designvorschau</string>
     <string name="clean_review_all">Alles prüfen</string>
+    <string name="scan_access_title">Medien scannen</string>
+    <string name="scan_access_body">Erlaube Foto- und Videozugriff, um ausgewählte Medien zu scannen. Der Scan bleibt auf dem Gerät und löscht keine Dateien.</string>
+    <string name="scan_allow_access">Medienzugriff erlauben</string>
+    <string name="scan_read_error">Scan konnte nicht abgeschlossen werden</string>
+    <string name="scan_review_space">Zu prüfender Speicher</string>
+    <string name="scan_accessible_count">%1$d zugängliche Medienelemente geprüft</string>
+    <string name="scan_partial">Eingeschränkter oder unvollständiger Scan. Einige Medien wurden nicht geprüft.</string>
+    <string name="scan_read_only">Kategorien können sich überschneiden. Jede Datei zählt in der Summe nur einmal. Screenshots werden anhand von Namen und Ordnern erkannt; große Videos sind mindestens 100 MB groß. Nichts wurde gelöscht.</string>
 </resources>

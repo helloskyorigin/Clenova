@@ -276,11 +276,11 @@
     <string name="privacy_local_title">本地偏好设置</string>
     <string name="privacy_local_body">主题、触感反馈、自动管理偏好和语言保存在设备上。无需账户。</string>
     <string name="privacy_files_title">个人文件</string>
-    <string name="privacy_files_body">此版本读取设备存储总量。媒体扫描、文件保护和删除功能尚未连接。Clenova 不上传个人媒体。</string>
+    <string name="privacy_files_body">Clenova 经你授权在设备上扫描可访问的照片和视频。文件保护和删除尚未连接。Clenova 不上传个人媒体。</string>
     <string name="privacy_support_title">支持消息</string>
     <string name="privacy_support_body">联系和问题报告会打开电子邮件应用。是否发送由你决定，发送前可编辑或删除诊断详情。</string>
     <string name="support_faq_storage">如何测量存储空间？</string>
-    <string name="support_faq_storage_body">Clenova 读取设备存储总量。详细媒体分类和清理需要支持的扫描引擎。</string>
+    <string name="support_faq_storage_body">Clenova 读取设备存储总量，并经授权扫描可访问的照片和视频。清理尚不可用。</string>
     <string name="support_faq_auto_body">在自动管理偏好中设置空闲空间目标和检查频率。后台监控尚不可用。</string>
     <string name="support_faq_language_body">在设置中打开语言，搜索或选择语言。选择设备语言可跟随 Android。</string>
     <string name="support_search">搜索帮助</string>
@@ -310,4 +310,12 @@
     <string name="clean_history_empty">尚无已完成的清理。你的文件没有被更改。</string>
     <string name="clean_preview">设计预览</string>
     <string name="clean_review_all">查看全部</string>
+    <string name="scan_access_title">扫描媒体</string>
+    <string name="scan_access_body">允许照片和视频访问以扫描所选媒体。扫描在设备上进行，不删除文件。</string>
+    <string name="scan_allow_access">允许媒体访问</string>
+    <string name="scan_read_error">无法完成扫描</string>
+    <string name="scan_review_space">待检查空间</string>
+    <string name="scan_accessible_count">已检查 %1$d 个可访问媒体项目</string>
+    <string name="scan_partial">扫描受限或未完成。部分媒体未检查。</string>
+    <string name="scan_read_only">类别可能重叠，总量中每个文件只计一次。截图按名称和文件夹识别，大视频为 100 MB 或以上。未删除任何文件。</string>
 </resources>

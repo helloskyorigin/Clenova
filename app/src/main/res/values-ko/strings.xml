@@ -276,11 +276,11 @@
     <string name="privacy_local_title">로컬 환경설정</string>
     <string name="privacy_local_body">테마, 햅틱, 자동 관리 설정 및 언어는 기기에 저장됩니다. 계정이 필요하지 않습니다.</string>
     <string name="privacy_files_title">개인 파일</string>
-    <string name="privacy_files_body">이 빌드는 기기의 전체 저장공간 정보를 읽습니다. 미디어 스캔, 파일 보호, 삭제 엔진은 아직 연결되지 않았습니다. Clenova는 개인 미디어를 업로드하지 않습니다.</string>
+    <string name="privacy_files_body">Clenova는 사용자의 허가를 받아 기기의 접근 가능한 사진과 동영상을 스캔합니다. 파일 보호 및 삭제 기능은 아직 연결되지 않았습니다. 개인 미디어를 업로드하지 않습니다.</string>
     <string name="privacy_support_title">지원 메시지</string>
     <string name="privacy_support_body">문의 및 문제 신고는 이메일 앱을 엽니다. 전송 여부를 직접 결정하며 전송 전에 진단 정보를 수정하거나 삭제할 수 있습니다.</string>
     <string name="support_faq_storage">저장공간은 어떻게 측정하나요?</string>
-    <string name="support_faq_storage_body">Clenova는 기기의 전체 저장공간을 읽습니다. 세부 미디어 분류와 정리에는 지원되는 스캔 엔진이 필요합니다.</string>
+    <string name="support_faq_storage_body">Clenova는 전체 저장공간을 읽고 사용자의 허가로 접근 가능한 사진과 동영상을 스캔합니다. 정리는 아직 사용할 수 없습니다.</string>
     <string name="support_faq_auto_body">자동 관리 설정에서 여유 공간 목표와 점검 주기를 설정하세요. 백그라운드 모니터링은 아직 사용할 수 없습니다.</string>
     <string name="support_faq_language_body">설정에서 언어를 열고 검색하거나 선택하세요. Android 설정을 따르려면 기기 언어를 선택하세요.</string>
     <string name="support_search">도움말 검색</string>
@@ -310,4 +310,12 @@
     <string name="clean_history_empty">완료된 정리가 없습니다. 파일은 변경되지 않았습니다.</string>
     <string name="clean_preview">디자인 미리보기</string>
     <string name="clean_review_all">모두 검토</string>
+    <string name="scan_access_title">미디어 스캔</string>
+    <string name="scan_access_body">선택한 미디어를 스캔하려면 사진과 동영상 접근을 허용하세요. 스캔은 기기에서 수행되며 파일을 삭제하지 않습니다.</string>
+    <string name="scan_allow_access">미디어 접근 허용</string>
+    <string name="scan_read_error">스캔을 완료하지 못했습니다</string>
+    <string name="scan_review_space">검토할 공간</string>
+    <string name="scan_accessible_count">접근 가능한 미디어 %1$d개 확인</string>
+    <string name="scan_partial">제한되거나 불완전한 스캔입니다. 일부 미디어를 확인하지 않았습니다.</string>
+    <string name="scan_read_only">카테고리는 중복될 수 있습니다. 합계에는 각 파일을 한 번만 계산합니다. 스크린샷은 이름과 폴더로 식별하며 대용량 동영상은 100 MB 이상입니다. 삭제된 파일은 없습니다.</string>
 </resources>

@@ -276,11 +276,11 @@
     <string name="privacy_local_title">स्थानीय प्राथमिकताएँ</string>
     <string name="privacy_local_body">थीम, हैप्टिक्स, ऑटोपायलट प्राथमिकताएँ और भाषा डिवाइस पर सेव हैं। अकाउंट ज़रूरी नहीं है।</string>
     <string name="privacy_files_title">निजी फ़ाइलें</string>
-    <string name="privacy_files_body">यह बिल्ड डिवाइस के स्टोरेज की कुल जानकारी पढ़ता है। मीडिया स्कैन, फ़ाइल सुरक्षा और हटाने वाले इंजन अभी जुड़े नहीं हैं। Clenova निजी मीडिया अपलोड नहीं करता।</string>
+    <string name="privacy_files_body">Clenova आपकी अनुमति से डिवाइस पर उपलब्ध फ़ोटो और वीडियो स्कैन करता है। फ़ाइल सुरक्षा और हटाना अभी जुड़े नहीं हैं। Clenova निजी मीडिया अपलोड नहीं करता।</string>
     <string name="privacy_support_title">सहायता संदेश</string>
     <string name="privacy_support_body">संपर्क और समस्या रिपोर्ट आपका ईमेल ऐप खोलते हैं। संदेश भेजना आपका निर्णय है और भेजने से पहले डायग्नोस्टिक जानकारी बदल या हटा सकते हैं।</string>
     <string name="support_faq_storage">स्टोरेज कैसे मापा जाता है?</string>
-    <string name="support_faq_storage_body">Clenova डिवाइस के स्टोरेज की कुल जानकारी पढ़ता है। मीडिया की विस्तृत श्रेणियों और सफ़ाई के लिए समर्थित स्कैन इंजन चाहिए।</string>
+    <string name="support_faq_storage_body">Clenova डिवाइस स्टोरेज की कुल जानकारी पढ़ता है और आपकी अनुमति से उपलब्ध फ़ोटो और वीडियो स्कैन करता है। सफ़ाई अभी उपलब्ध नहीं है।</string>
     <string name="support_faq_auto_body">ऑटोपायलट प्राथमिकताओं में खाली जगह का लक्ष्य और जाँच की आवृत्ति सेट करें। बैकग्राउंड निगरानी अभी उपलब्ध नहीं है।</string>
     <string name="support_faq_language_body">सेटिंग्स में भाषा खोलें, अपनी भाषा खोजें या चुनें। Android की भाषा के लिए डिवाइस की भाषा चुनें।</string>
     <string name="support_search">सहायता खोजें</string>
@@ -310,4 +310,12 @@
     <string name="clean_history_empty">अभी कोई सफ़ाई पूरी नहीं हुई है। आपकी फ़ाइलें नहीं बदली गई हैं।</string>
     <string name="clean_preview">डिज़ाइन प्रीव्यू</string>
     <string name="clean_review_all">सभी की समीक्षा करें</string>
+    <string name="scan_access_title">मीडिया स्कैन करें</string>
+    <string name="scan_access_body">चुने हुए मीडिया को स्कैन करने के लिए फ़ोटो और वीडियो की अनुमति दें। स्कैन डिवाइस पर होता है और फ़ाइलें नहीं हटाता।</string>
+    <string name="scan_allow_access">मीडिया एक्सेस की अनुमति दें</string>
+    <string name="scan_read_error">स्कैन पूरा नहीं हो सका</string>
+    <string name="scan_review_space">समीक्षा के लिए जगह</string>
+    <string name="scan_accessible_count">%1$d उपलब्ध मीडिया आइटम जाँचे गए</string>
+    <string name="scan_partial">सीमित या अधूरा स्कैन। कुछ मीडिया की जाँच नहीं हुई।</string>
+    <string name="scan_read_only">श्रेणियाँ ओवरलैप कर सकती हैं। कुल में हर फ़ाइल एक बार गिनी जाती है। स्क्रीनशॉट नाम और फ़ोल्डर से पहचाने जाते हैं; बड़े वीडियो 100 MB या अधिक हैं। कुछ भी नहीं हटाया गया।</string>
 </resources>

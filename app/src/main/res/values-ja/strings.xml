@@ -276,11 +276,11 @@
     <string name="privacy_local_title">端末内の設定</string>
     <string name="privacy_local_body">テーマ、触覚、Autopilot の設定、言語は端末に保存されます。アカウントは不要です。</string>
     <string name="privacy_files_title">個人ファイル</string>
-    <string name="privacy_files_body">このビルドは端末の総ストレージ情報を読み取ります。メディアスキャン、保護、削除機能は未接続です。Clenova は個人メディアをアップロードしません。</string>
+    <string name="privacy_files_body">Clenova は許可を得て端末上のアクセス可能な写真と動画をスキャンします。ファイル保護と削除はまだ未接続です。個人メディアはアップロードしません。</string>
     <string name="privacy_support_title">サポートメッセージ</string>
     <string name="privacy_support_body">お問い合わせや問題報告ではメールアプリを開きます。送信するかどうかはあなたが決め、送信前に診断情報を編集・削除できます。</string>
     <string name="support_faq_storage">ストレージ容量はどう測定されますか？</string>
-    <string name="support_faq_storage_body">Clenova は端末の総ストレージ容量を読み取ります。メディアの詳細分類と整理には対応するスキャン機能が必要です。</string>
+    <string name="support_faq_storage_body">Clenova は総ストレージ容量を読み取り、許可を得てアクセス可能な写真と動画をスキャンします。整理機能はまだ利用できません。</string>
     <string name="support_faq_auto_body">自動管理の設定で空き容量の目標とチェック頻度を設定します。バックグラウンド監視はまだ利用できません。</string>
     <string name="support_faq_language_body">設定の言語を開き、検索または選択します。端末の言語を選ぶと Android の設定に従います。</string>
     <string name="support_search">ヘルプを検索</string>
@@ -310,4 +310,12 @@
     <string name="clean_history_empty">完了したクリーンアップはまだありません。ファイルは変更されていません。</string>
     <string name="clean_preview">デザインプレビュー</string>
     <string name="clean_review_all">すべて確認</string>
+    <string name="scan_access_title">メディアをスキャン</string>
+    <string name="scan_access_body">選択したメディアをスキャンするため、写真と動画へのアクセスを許可してください。スキャンは端末内で行い、ファイルは削除しません。</string>
+    <string name="scan_allow_access">メディアへのアクセスを許可</string>
+    <string name="scan_read_error">スキャンを完了できませんでした</string>
+    <string name="scan_review_space">確認対象の容量</string>
+    <string name="scan_accessible_count">アクセス可能なメディア %1$d 件を確認</string>
+    <string name="scan_partial">制限付きまたは未完了のスキャンです。一部のメディアは未確認です。</string>
+    <string name="scan_read_only">カテゴリは重複する場合があります。合計では各ファイルを一度だけ数えます。スクリーンショットは名前とフォルダで識別し、大きな動画は100 MB以上です。削除は行っていません。</string>
 </resources>

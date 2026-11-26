@@ -276,11 +276,11 @@
     <string name="privacy_local_title">التفضيلات المحلية</string>
     <string name="privacy_local_body">يُحفظ المظهر والاستجابة اللمسية وتفضيلات Autopilot واللغة على جهازك. لا يلزم حساب.</string>
     <string name="privacy_files_title">الملفات الشخصية</string>
-    <string name="privacy_files_body">يقرأ هذا الإصدار إجمالي تخزين الجهاز. لم تُربط محركات فحص الوسائط وحماية الملفات والحذف بعد. لا يرفع Clenova الوسائط الشخصية.</string>
+    <string name="privacy_files_body">يفحص Clenova الصور والفيديوهات المتاحة على جهازك بإذنك. لم تُربط حماية الملفات وحذفها بعد. لا يرفع Clenova الوسائط الشخصية.</string>
     <string name="privacy_support_title">رسائل الدعم</string>
     <string name="privacy_support_body">يفتح التواصل وتقارير المشكلات تطبيق البريد. تقرر أنت إرسال الرسالة ويمكنك تعديل تفاصيل التشخيص أو حذفها قبل الإرسال.</string>
     <string name="support_faq_storage">كيف تُقاس مساحة التخزين؟</string>
-    <string name="support_faq_storage_body">يقرأ Clenova إجمالي مساحة تخزين الجهاز. تتطلب فئات الوسائط التفصيلية والتنظيف محرك فحص مدعومًا.</string>
+    <string name="support_faq_storage_body">يقرأ Clenova إجمالي التخزين ويفحص الصور والفيديوهات المتاحة بإذنك. التنظيف غير متاح بعد.</string>
     <string name="support_faq_auto_body">اضبط هدف المساحة الحرة وتكرار الفحص في تفضيلات Autopilot. المراقبة في الخلفية غير متاحة بعد.</string>
     <string name="support_faq_language_body">افتح اللغة في الإعدادات وابحث عن لغتك أو اخترها. اختر لغة الجهاز لمتابعة Android.</string>
     <string name="support_search">البحث في المساعدة</string>
@@ -310,4 +310,12 @@
     <string name="clean_history_empty">لا توجد عمليات تنظيف مكتملة بعد. لم تتغير ملفاتك.</string>
     <string name="clean_preview">معاينة التصميم</string>
     <string name="clean_review_all">مراجعة الكل</string>
+    <string name="scan_access_title">فحص الوسائط</string>
+    <string name="scan_access_body">اسمح بالوصول إلى الصور والفيديوهات لفحص الوسائط التي تختارها. يتم الفحص على جهازك ولا يحذف الملفات.</string>
+    <string name="scan_allow_access">السماح بالوصول إلى الوسائط</string>
+    <string name="scan_read_error">تعذر إكمال الفحص</string>
+    <string name="scan_review_space">المساحة للمراجعة</string>
+    <string name="scan_accessible_count">تم فحص %1$d عنصر وسائط متاح</string>
+    <string name="scan_partial">فحص محدود أو غير مكتمل. لم تُفحص بعض الوسائط.</string>
+    <string name="scan_read_only">قد تتداخل الفئات. يُحسب كل ملف مرة واحدة في الإجمالي. تُحدد لقطات الشاشة بالأسماء والمجلدات، والفيديوهات الكبيرة بحجم 100 MB فأكثر. لم يُحذف شيء.</string>
 </resources>

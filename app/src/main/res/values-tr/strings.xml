@@ -276,11 +276,11 @@
     <string name="privacy_local_title">Yerel tercihler</string>
     <string name="privacy_local_body">Tema, dokunsal geri bildirim, Otopilot tercihleri ve dil cihazda saklanır. Hesap gerekmez.</string>
     <string name="privacy_files_title">Kişisel dosyalar</string>
-    <string name="privacy_files_body">Bu sürüm cihazın toplam depolama bilgilerini okur. Medya tarama, dosya koruma ve silme motorları henüz bağlı değil. Clenova kişisel medya yüklemez.</string>
+    <string name="privacy_files_body">Clenova izninizle cihazdaki erişilebilir fotoğraf ve videoları tarar. Dosya koruma ve silme henüz bağlı değildir. Clenova kişisel medya yüklemez.</string>
     <string name="privacy_support_title">Destek mesajları</string>
     <string name="privacy_support_body">İletişim ve sorun bildirimleri e-posta uygulamanızı açar. Gönderip göndermemeye siz karar verir, tanılama bilgilerini göndermeden önce düzenleyebilir veya kaldırabilirsiniz.</string>
     <string name="support_faq_storage">Depolama nasıl ölçülür?</string>
-    <string name="support_faq_storage_body">Clenova cihazın toplam depolama bilgilerini okur. Ayrıntılı medya kategorileri ve temizlik için desteklenen bir tarama motoru gerekir.</string>
+    <string name="support_faq_storage_body">Clenova toplam depolama bilgilerini okur ve izninizle erişilebilir fotoğraf ve videoları tarar. Temizlik henüz kullanılamıyor.</string>
     <string name="support_faq_auto_body">Otopilot tercihlerinde boş alan hedefini ve kontrol sıklığını ayarlayın. Arka plan izleme henüz kullanılamıyor.</string>
     <string name="support_faq_language_body">Ayarlarda Dil bölümünü açıp dilinizi arayın veya seçin. Android dilini izlemek için Cihaz dili seçeneğini kullanın.</string>
     <string name="support_search">Yardım ara</string>
@@ -310,4 +310,12 @@
     <string name="clean_history_empty">Henüz tamamlanan temizlik yok. Dosyalarınız değiştirilmedi.</string>
     <string name="clean_preview">Tasarım önizlemesi</string>
     <string name="clean_review_all">Tümünü incele</string>
+    <string name="scan_access_title">Medyayı tara</string>
+    <string name="scan_access_body">Seçtiğiniz medyayı taramak için fotoğraf ve video erişimine izin verin. Tarama cihazınızda yapılır ve dosyaları silmez.</string>
+    <string name="scan_allow_access">Medya erişimine izin ver</string>
+    <string name="scan_read_error">Tarama tamamlanamadı</string>
+    <string name="scan_review_space">İncelenecek alan</string>
+    <string name="scan_accessible_count">%1$d erişilebilir medya öğesi kontrol edildi</string>
+    <string name="scan_partial">Sınırlı veya eksik tarama. Bazı medya öğeleri kontrol edilmedi.</string>
+    <string name="scan_read_only">Kategoriler örtüşebilir. Toplamda her dosya bir kez sayılır. Ekran görüntüleri ad ve klasöre göre belirlenir; büyük videolar 100 MB veya üzeridir. Hiçbir şey silinmedi.</string>
 </resources>

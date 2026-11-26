@@ -276,11 +276,11 @@
     <string name="privacy_local_title">স্থানীয় পছন্দ</string>
     <string name="privacy_local_body">থিম, স্পর্শ প্রতিক্রিয়া, অটোপাইলট পছন্দ ও ভাষা ডিভাইসে সংরক্ষিত। অ্যাকাউন্ট দরকার নেই।</string>
     <string name="privacy_files_title">ব্যক্তিগত ফাইল</string>
-    <string name="privacy_files_body">এই বিল্ড স্টোরেজের মোট তথ্য পড়ে। মিডিয়া স্ক্যান, ফাইল সুরক্ষা ও মুছার ইঞ্জিন এখনও যুক্ত নয়। Clenova ব্যক্তিগত মিডিয়া আপলোড করে না।</string>
+    <string name="privacy_files_body">Clenova অনুমতি নিয়ে ডিভাইসের অ্যাক্সেসযোগ্য ছবি ও ভিডিও স্ক্যান করে। ফাইল সুরক্ষা ও মুছা এখনও সংযুক্ত নয়। Clenova ব্যক্তিগত মিডিয়া আপলোড করে না।</string>
     <string name="privacy_support_title">সহায়তা বার্তা</string>
     <string name="privacy_support_body">যোগাযোগ ও সমস্যা রিপোর্ট ইমেল অ্যাপ খুলে। পাঠাবেন কি না আপনি ঠিক করেন এবং পাঠানোর আগে ডায়াগনস্টিক তথ্য বদলাতে বা সরাতে পারেন।</string>
     <string name="support_faq_storage">স্টোরেজ কীভাবে মাপা হয়?</string>
-    <string name="support_faq_storage_body">Clenova ডিভাইসের মোট স্টোরেজ পড়ে। বিস্তারিত মিডিয়া বিভাগ ও পরিষ্কারের জন্য সমর্থিত স্ক্যান ইঞ্জিন দরকার।</string>
+    <string name="support_faq_storage_body">Clenova মোট স্টোরেজ পড়ে ও অনুমতি নিয়ে অ্যাক্সেসযোগ্য ছবি ভিডিও স্ক্যান করে। পরিষ্কার এখনও উপলব্ধ নয়।</string>
     <string name="support_faq_auto_body">অটোপাইলট পছন্দে খালি জায়গার লক্ষ্য ও পরীক্ষার সময়সূচি সেট করুন। ব্যাকগ্রাউন্ড নজরদারি এখনও উপলব্ধ নয়।</string>
     <string name="support_faq_language_body">সেটিংসে ভাষা খুলে খুঁজুন বা বেছে নিন। Android অনুসরণ করতে ডিভাইসের ভাষা নির্বাচন করুন।</string>
     <string name="support_search">সহায়তা খুঁজুন</string>
@@ -310,4 +310,12 @@
     <string name="clean_history_empty">এখনও কোনো পরিষ্কার সম্পন্ন হয়নি। আপনার ফাইল পরিবর্তন করা হয়নি।</string>
     <string name="clean_preview">ডিজাইন প্রিভিউ</string>
     <string name="clean_review_all">সব পর্যালোচনা করুন</string>
+    <string name="scan_access_title">মিডিয়া স্ক্যান করুন</string>
+    <string name="scan_access_body">বেছে নেওয়া মিডিয়া স্ক্যানের জন্য ছবি ও ভিডিও অ্যাক্সেস দিন। স্ক্যান ডিভাইসেই হয়, ফাইল মুছে না।</string>
+    <string name="scan_allow_access">মিডিয়া অ্যাক্সেস দিন</string>
+    <string name="scan_read_error">স্ক্যান সম্পূর্ণ করা যায়নি</string>
+    <string name="scan_review_space">পর্যালোচনার জন্য জায়গা</string>
+    <string name="scan_accessible_count">%1$d অ্যাক্সেসযোগ্য মিডিয়া পরীক্ষা করা হয়েছে</string>
+    <string name="scan_partial">সীমিত বা অসম্পূর্ণ স্ক্যান। কিছু মিডিয়া পরীক্ষা করা হয়নি।</string>
+    <string name="scan_read_only">বিভাগগুলো ওভারল্যাপ করতে পারে। মোটে প্রতিটি ফাইল একবার গণনা হয়। নাম ও ফোল্ডার থেকে স্ক্রিনশট চেনা হয়; বড় ভিডিও 100 MB বা বেশি। কিছুই মোছা হয়নি।</string>
 </resources>

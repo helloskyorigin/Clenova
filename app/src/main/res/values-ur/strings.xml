@@ -276,11 +276,11 @@
     <string name="privacy_local_title">مقامی ترجیحات</string>
     <string name="privacy_local_body">تھیم، لمسی ردعمل، آٹو پائلٹ ترجیحات اور زبان ڈیوائس پر محفوظ ہیں۔ اکاؤنٹ ضروری نہیں۔</string>
     <string name="privacy_files_title">ذاتی فائلیں</string>
-    <string name="privacy_files_body">یہ بلڈ اسٹوریج کی مجموعی معلومات پڑھتا ہے۔ میڈیا اسکین، تحفظ اور حذف کے انجن ابھی منسلک نہیں۔ Clenova ذاتی میڈیا اپ لوڈ نہیں کرتا۔</string>
+    <string name="privacy_files_body">Clenova آپ کی اجازت سے ڈیوائس پر قابل رسائی تصاویر اور ویڈیوز اسکین کرتا ہے۔ فائلوں کا تحفظ اور حذف ابھی منسلک نہیں۔ Clenova ذاتی میڈیا اپ لوڈ نہیں کرتا۔</string>
     <string name="privacy_support_title">معاونت کے پیغامات</string>
     <string name="privacy_support_body">رابطہ اور مسئلے کی رپورٹ آپ کی ای میل ایپ کھولتے ہیں۔ بھیجنا آپ کا فیصلہ ہے اور بھیجنے سے پہلے تشخیصی تفصیلات بدل یا ہٹا سکتے ہیں۔</string>
     <string name="support_faq_storage">اسٹوریج کیسے ناپا جاتا ہے؟</string>
-    <string name="support_faq_storage_body">Clenova ڈیوائس کے اسٹوریج کی مجموعی معلومات پڑھتا ہے۔ تفصیلی میڈیا زمروں اور صفائی کے لیے معاون اسکین انجن ضروری ہے۔</string>
+    <string name="support_faq_storage_body">Clenova اسٹوریج کی مجموعی معلومات پڑھتا ہے اور آپ کی اجازت سے قابل رسائی تصاویر اور ویڈیوز اسکین کرتا ہے۔ صفائی ابھی دستیاب نہیں۔</string>
     <string name="support_faq_auto_body">آٹو پائلٹ ترجیحات میں خالی جگہ کا ہدف اور جانچ کی مدت مقرر کریں۔ پس منظر کی نگرانی ابھی دستیاب نہیں۔</string>
     <string name="support_faq_language_body">ترتیبات میں زبان کھولیں اور اپنی زبان تلاش یا منتخب کریں۔ Android کی زبان کے لیے ڈیوائس کی زبان منتخب کریں۔</string>
     <string name="support_search">مدد تلاش کریں</string>
@@ -310,4 +310,12 @@
     <string name="clean_history_empty">ابھی کوئی صفائی مکمل نہیں ہوئی۔ آپ کی فائلیں تبدیل نہیں ہوئیں۔</string>
     <string name="clean_preview">ڈیزائن پیش نظارہ</string>
     <string name="clean_review_all">سب کا جائزہ لیں</string>
+    <string name="scan_access_title">میڈیا اسکین کریں</string>
+    <string name="scan_access_body">منتخب میڈیا اسکین کرنے کے لیے تصاویر اور ویڈیوز کی اجازت دیں۔ اسکین ڈیوائس پر ہوتا ہے اور فائلیں نہیں مٹاتا۔</string>
+    <string name="scan_allow_access">میڈیا تک رسائی دیں</string>
+    <string name="scan_read_error">اسکین مکمل نہ ہو سکا</string>
+    <string name="scan_review_space">جائزے کے لیے جگہ</string>
+    <string name="scan_accessible_count">%1$d قابل رسائی میڈیا آئٹمز چیک کیے گئے</string>
+    <string name="scan_partial">محدود یا نامکمل اسکین۔ کچھ میڈیا چیک نہیں ہوا۔</string>
+    <string name="scan_read_only">زمرے ایک دوسرے سے مل سکتے ہیں۔ مجموعے میں ہر فائل ایک بار شمار ہوتی ہے۔ اسکرین شاٹس نام اور فولڈر سے پہچانے جاتے ہیں؛ بڑی ویڈیوز 100 MB یا زیادہ ہیں۔ کچھ حذف نہیں ہوا۔</string>
 </resources>

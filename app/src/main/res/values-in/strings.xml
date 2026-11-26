@@ -276,11 +276,11 @@
     <string name="privacy_local_title">Preferensi lokal</string>
     <string name="privacy_local_body">Tema, haptik, preferensi Autopilot, dan bahasa disimpan di perangkat. Tidak perlu akun.</string>
     <string name="privacy_files_title">File pribadi</string>
-    <string name="privacy_files_body">Versi ini membaca total penyimpanan. Mesin pemindaian, perlindungan file, dan penghapusan belum terhubung. Clenova tidak mengunggah media pribadi.</string>
+    <string name="privacy_files_body">Clenova memindai foto dan video yang dapat diakses di perangkat dengan izin Anda. Perlindungan dan penghapusan file belum terhubung. Clenova tidak mengunggah media pribadi.</string>
     <string name="privacy_support_title">Pesan dukungan</string>
     <string name="privacy_support_body">Kontak dan laporan masalah membuka aplikasi email. Anda memutuskan apakah akan mengirim dan dapat mengedit atau menghapus detail diagnostik sebelum mengirim.</string>
     <string name="support_faq_storage">Bagaimana penyimpanan diukur?</string>
-    <string name="support_faq_storage_body">Clenova membaca total penyimpanan perangkat. Kategori media terperinci dan pembersihan memerlukan mesin pemindaian yang didukung.</string>
+    <string name="support_faq_storage_body">Clenova membaca total penyimpanan dan memindai foto serta video yang dapat diakses dengan izin Anda. Pembersihan belum tersedia.</string>
     <string name="support_faq_auto_body">Atur target ruang kosong dan frekuensi di preferensi Autopilot. Pemantauan latar belakang belum tersedia.</string>
     <string name="support_faq_language_body">Buka Bahasa di Pengaturan lalu cari atau pilih bahasa. Pilih Bahasa perangkat untuk mengikuti Android.</string>
     <string name="support_search">Cari bantuan</string>
@@ -310,4 +310,12 @@
     <string name="clean_history_empty">Belum ada pembersihan selesai. File Anda tidak diubah.</string>
     <string name="clean_preview">Pratinjau desain</string>
     <string name="clean_review_all">Tinjau semua</string>
+    <string name="scan_access_title">Pindai media</string>
+    <string name="scan_access_body">Izinkan akses foto dan video untuk memindai media pilihan. Pemindaian dilakukan di perangkat dan tidak menghapus file.</string>
+    <string name="scan_allow_access">Izinkan akses media</string>
+    <string name="scan_read_error">Pemindaian tidak dapat diselesaikan</string>
+    <string name="scan_review_space">Ruang untuk ditinjau</string>
+    <string name="scan_accessible_count">%1$d item media yang dapat diakses diperiksa</string>
+    <string name="scan_partial">Pemindaian terbatas atau tidak lengkap. Sebagian media belum diperiksa.</string>
+    <string name="scan_read_only">Kategori dapat tumpang tindih. Setiap file dihitung sekali dalam total. Tangkapan layar dikenali dari nama dan folder; video besar berukuran 100 MB atau lebih. Tidak ada yang dihapus.</string>
 </resources>
