@@ -188,7 +188,7 @@ class ClenovaNavigationRobolectricTest {
         composeTestRule.waitForIdle()
         composeTestRule.onNodeWithTag("home_smart_scan").performScrollTo().performClick()
         composeTestRule.waitForIdle()
-        composeTestRule.onNodeWithText("Smart Scan is not ready yet").assertIsDisplayed()
+        composeTestRule.onNodeWithTag("scan_allow").assertIsDisplayed()
         composeTestRule.onNodeWithTag("scan_result_total").assertDoesNotExist()
         composeTestRule.onNodeWithTag("nav_tab_home").assertDoesNotExist()
         composeTestRule.onNodeWithTag("scan_back").performClick()
