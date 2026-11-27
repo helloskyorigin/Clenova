@@ -51,7 +51,23 @@ adb shell input keyevent 4
 sleep 1
 tools_dump tools_after_swipe
 grep -F 'Tools, selected' build/home-evidence/tools_after_swipe.xml
-tools_tap build/home-evidence/tools_after_swipe.xml 'Internet Speed Test'
+tools_tap build/home-evidence/tools_after_swipe.xml 'Video Compressor, Reduce video size'
+tools_dump video_compressor
+grep -F 'Video Compressor' build/home-evidence/video_compressor.xml
+grep -F 'Browse files' build/home-evidence/video_compressor.xml
+grep -F 'Compression history' build/home-evidence/video_compressor.xml
+tools_tap build/home-evidence/video_compressor.xml 'Compression history'
+tools_dump video_history
+grep -F 'Compression history' build/home-evidence/video_history.xml
+adb shell input keyevent 4
+sleep 1
+tools_dump video_gallery_return
+grep -F 'Browse files' build/home-evidence/video_gallery_return.xml
+adb shell input keyevent 4
+sleep 1
+tools_dump tools_after_video
+grep -F 'Tools, selected' build/home-evidence/tools_after_video.xml
+tools_tap build/home-evidence/tools_after_video.xml 'Internet Speed Test'
 tools_dump tools_pending
 grep -F 'No action has been performed.' build/home-evidence/tools_pending.xml
 adb shell input keyevent 4
