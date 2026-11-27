@@ -143,6 +143,17 @@ final class SmartMediaScan {
         boolean limited=Build.VERSION.SDK_INT>=33&&!granted(android.Manifest.permission.READ_MEDIA_IMAGES);
         return new Gallery(all,limited||result.partial);
     }
+    /** Video compressor includes all readable videos, including protected videos (copy only). */
+    Gallery videoGallery(){
+        List<Item> all=new ArrayList<>();Result result=new Result();
+        if(!hasVideoAccess(context))throw new SecurityException("Video access required");
+        read(false,all,result,true);
+        for(Item i:all){check();i.protectedItem=explicitlyProtected(i)
+            ||(favorite&&!Boolean.FALSE.equals(i.favorite))
+            ||(recent&&(i.modified<=0||i.modified>=now-ProtectionPolicy.RECENT_WINDOW_MS));}
+        boolean limited=Build.VERSION.SDK_INT>=33&&!granted(android.Manifest.permission.READ_MEDIA_VIDEO);
+        return new Gallery(all,limited||result.partial);
+    }
     // The preview and fresh candidate must refer to the same concrete MediaStore generation.
     static boolean sameGalleryItem(Item old,Item fresh){
         return old!=null&&fresh!=null&&!fresh.protectedItem&&old.generation>=0&&old.generation==fresh.generation
