@@ -67,7 +67,28 @@ adb shell input keyevent 4
 sleep 1
 tools_dump tools_after_video
 grep -F 'Tools, selected' build/home-evidence/tools_after_video.xml
-tools_tap build/home-evidence/tools_after_video.xml 'Internet Speed Test'
+tools_tap build/home-evidence/tools_after_video.xml 'Photo Compressor, Save space effortlessly'
+tools_dump photo_compressor
+grep -F 'Photo Compressor' build/home-evidence/photo_compressor.xml
+grep -F '0 / 100 photos selected' build/home-evidence/photo_compressor.xml
+grep -F 'Photo compression history' build/home-evidence/photo_compressor.xml
+python3 - <<'PY'
+import xml.etree.ElementTree as ET
+nodes=list(ET.parse('build/home-evidence/photo_compressor.xml').iter('node'))
+assert any(n.get('text','').startswith('Continue') and n.get('enabled')=='false' for n in nodes), 'Empty selection must not continue'
+PY
+tools_tap build/home-evidence/photo_compressor.xml 'Photo compression history'
+tools_dump photo_history
+grep -F 'Compression history' build/home-evidence/photo_history.xml
+adb shell input keyevent 4
+sleep 1
+tools_dump photo_gallery_return
+grep -F 'Photo Compressor' build/home-evidence/photo_gallery_return.xml
+adb shell input keyevent 4
+sleep 1
+tools_dump tools_after_photo
+grep -F 'Tools, selected' build/home-evidence/tools_after_photo.xml
+tools_tap build/home-evidence/tools_after_photo.xml 'Internet Speed Test'
 tools_dump tools_pending
 grep -F 'No action has been performed.' build/home-evidence/tools_pending.xml
 adb shell input keyevent 4
