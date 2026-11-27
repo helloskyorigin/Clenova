@@ -165,6 +165,12 @@ public final class MainActivity extends Activity {
             state.putBoolean("cleanup_visible",completionVisible);
         }
     }
+    @Override protected void onStop(){
+        super.onStop();
+        // Do not retain visible media results across backgrounding; selected-photo access may change.
+        if(runningScan!=null){runningScan.cancel();runningScan=null;scanVisible=false;scanReviewVisible=false;scanResult=null;showClean();}
+        else if(scanResult!=null){scanResult=null;if(cleanVisible&&!settingsVisible)showClean();}
+    }
     @Override protected void onDestroy(){
         if(cleanupAnimation!=null){
             cleanupAnimation.removeAllListeners();cleanupAnimation.removeAllUpdateListeners();cleanupAnimation.cancel();
@@ -322,9 +328,11 @@ public final class MainActivity extends Activity {
                 LinearLayout title=row();FrameLayout icon=new FrameLayout(this);icon.setBackground(round(PALE,11));
                 icon.addView(new Glyph(this,item[0],BLUE),new FrameLayout.LayoutParams(dp(21),dp(21),Gravity.CENTER));add(title,icon,dp(36),dp(36));stretch(title);
                 add(title,new Glyph(this,"up",GRAY),dp(15),dp(15));add(tile,title,-1,-2);space(tile,9);
-                add(tile,txt("—",23,INK,700),-1,-2);space(tile,5);add(tile,txt(item[1],14,INK,600),-1,-2);space(tile,4);
-                add(tile,txt("Scan to find",12,GRAY,400),-1,-2);
-                tap(tile,WHITE,18,()->cleanPending(item[1]));tile.setContentDescription(tr(item[1])+", "+tr("Not scanned yet"));
+                int category=new int[]{0,-1,1,2}[pair*2+j];
+                boolean scanned=scanResult!=null&&category>=0&&(category==1?scanResult.videosScanned:scanResult.imagesScanned);
+                add(tile,txt(scanned?scanBytes(scanResult.bytes(category)):"—",23,INK,700),-1,-2);space(tile,5);add(tile,txt(item[1],14,INK,600),-1,-2);space(tile,4);
+                add(tile,txt(scanned?scanResult.groups.get(category).size()+" "+tr("items"):tr("Scan to find"),12,GRAY,400),-1,-2);
+                tap(tile,WHITE,18,()->{if(scanned)showScanResults();else cleanPending(item[1]);});tile.setContentDescription(tr(item[1])+", "+(scanned?scanBytes(scanResult.bytes(category)):tr("Not scanned yet")));
                 tiles.addView(tile,new LinearLayout.LayoutParams(0,-2,1f));
             }
             add(body,tiles,-1,-2);
@@ -415,7 +423,7 @@ public final class MainActivity extends Activity {
         scanVisible=true;scanReviewVisible=false;
         LinearLayout root=scanShell("Scan results",this::cancelSmartScan),body=scanBody(root);
         LinearLayout hero=column();hero.setGravity(Gravity.CENTER_HORIZONTAL);add(hero,new Glyph(this,"selected",BLUE),dp(62),dp(62));space(hero,12);
-        add(hero,centered(scanResult.partial?"Partial scan results":"Scan complete",15,BLUE,600),-1,-2);space(hero,8);
+        add(hero,centered(scanResult.partial||scanResult.limited?"Partial scan results":"Scan complete",15,BLUE,600),-1,-2);space(hero,8);
         add(hero,centered(scanBytes(scanResult.total()),35,INK,700),-1,-2);space(hero,5);add(hero,centered("Potential space to recover",14,GRAY,400),-1,-2);
         space(hero,7);add(hero,centered(scanResult.examined+" "+tr("media items checked"),12,GRAY,400),-1,-2);add(body,hero,-1,-2);space(body,20);
         add(body,txt("Cleanup opportunities",18,INK,700),-1,-2);space(body,10);
@@ -1289,7 +1297,7 @@ public final class MainActivity extends Activity {
         add(body,txt("Device access",14,GRAY,500),-1,-2);space(body,9);
         LinearLayout access=card();pad(access,13,4);
         DevicePermissions.Snapshot snapshot=devicePermissions.snapshot();
-        add(access,permissionRow("images","Photos & videos","Media scanning is not active yet",snapshot.media,this::openAndroidAppSettings),-1,-2);
+        add(access,permissionRow("images","Photos & videos","Optional access for Smart Scan",snapshot.media,this::openAndroidAppSettings),-1,-2);
         thinRule(access);
         add(access,permissionRow("folder","Files & storage","Select files and folders using Android",snapshot.storage,this::openStoragePermissionInfo),-1,-2);
         thinRule(access);

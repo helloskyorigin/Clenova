@@ -5,6 +5,7 @@ import java.util.Map;
 final class AppStrings {
  private static final Map<String,String[]> TEXT=new HashMap<>();
  static {
+  TEXT.put("Optional access for Smart Scan",new String[]{"स्मार्ट स्कैन के लिए वैकल्पिक अनुमति","Acceso opcional para Smart Scan","Accès facultatif pour Smart Scan","Optionaler Zugriff für Smart Scan"});
   TEXT.put("Media access needed",new String[]{"मीडिया की अनुमति चाहिए","Se necesita acceso multimedia","Accès aux médias requis","Medienzugriff erforderlich"});
   TEXT.put("Smart Scan reads only the photos and videos you allow. Nothing is deleted.",new String[]{"स्मार्ट स्कैन सिर्फ आपकी अनुमति वाले फोटो और वीडियो पढ़ता है। कुछ नहीं हटता।","Smart Scan solo lee fotos y vídeos permitidos. No borra nada.","Smart Scan lit uniquement les médias autorisés. Rien n’est supprimé.","Smart Scan liest nur erlaubte Fotos und Videos. Nichts wird gelöscht."});
   TEXT.put("Allow access to photos or videos to scan them. No files were scanned.",new String[]{"स्कैन के लिए फोटो या वीडियो की अनुमति दें। कोई फ़ाइल स्कैन नहीं हुई।","Permite acceso a fotos o vídeos. No se analizó ningún archivo.","Autorisez les photos ou vidéos. Aucun fichier analysé.","Erlaube Foto- oder Videozugriff. Keine Dateien gescannt."});
