@@ -126,13 +126,39 @@ final class SmartMediaScan {
         for(List<Item> group:r.groups)group.sort(Comparator.comparingLong((Item i)->i.bytes).reversed().thenComparing(i->i.name));
         check();return r;
     }
-    private void read(boolean image,List<Item> out,Result r){
+    // Manual Swipe Photos uses metadata only, not duplicate hashing or similar-photo inference.
+    static final class Gallery {
+        final List<Item> items;
+        final boolean partial;
+        Gallery(List<Item> items,boolean partial){this.items=items;this.partial=partial;}
+    }
+    Gallery gallery(){
+        List<Item> all=new ArrayList<>();Result result=new Result();
+        if(!hasPhotoAccess(context))throw new SecurityException("Photo access required");
+        read(true,all,result,true);
+        for(Item i:all){check();i.protectedItem=explicitlyProtected(i)
+            ||(favorite&&!Boolean.FALSE.equals(i.favorite))
+            ||(recent&&(i.modified<=0||i.modified>=now-ProtectionPolicy.RECENT_WINDOW_MS));}
+        all.sort(Comparator.comparingLong((Item i)->i.modified).reversed().thenComparing(i->i.uri.toString()));
+        boolean limited=Build.VERSION.SDK_INT>=33&&!granted(android.Manifest.permission.READ_MEDIA_IMAGES);
+        return new Gallery(all,limited||result.partial);
+    }
+    // The preview and fresh candidate must refer to the same concrete MediaStore generation.
+    static boolean sameGalleryItem(Item old,Item fresh){
+        return old!=null&&fresh!=null&&!fresh.protectedItem&&old.generation>=0&&old.generation==fresh.generation
+            &&old.uri.equals(fresh.uri)&&old.bytes==fresh.bytes&&old.modified==fresh.modified
+            &&Objects.equals(old.name,fresh.name)&&Objects.equals(old.path,fresh.path)
+            &&Objects.equals(old.volume,fresh.volume)&&Objects.equals(old.mime,fresh.mime)
+            &&old.volume!=null&&old.path!=null;
+    }
+    private void read(boolean image,List<Item> out,Result r){read(image,out,r,false);}
+    private void read(boolean image,List<Item> out,Result r,boolean newestFirst){
         Uri base=image?MediaStore.Images.Media.EXTERNAL_CONTENT_URI:MediaStore.Video.Media.EXTERNAL_CONTENT_URI;
         List<String> cols=new ArrayList<>(Arrays.asList("_id","_display_name","_size","date_modified"));
         if(Build.VERSION.SDK_INT>=29){cols.add("relative_path");cols.add("volume_name");}
         if(Build.VERSION.SDK_INT>=30)cols.add("is_favorite");
         if(!image)cols.add("duration");cols.addAll(Arrays.asList("width","height","mime_type"));if(Build.VERSION.SDK_INT>=30)cols.add("generation_modified");
-        try(Cursor c=resolver.query(base,cols.toArray(new String[0]),null,null,"_id ASC",cancel)){
+        try(Cursor c=resolver.query(base,cols.toArray(new String[0]),null,null,newestFirst?"date_modified DESC, _id DESC":"_id ASC",cancel)){
             if(c==null){r.partial=true;r.failed++;return;}
             int read=0;while(c.moveToNext()){
                 check();if(read++>=ROW_LIMIT){r.partial=true;break;}
