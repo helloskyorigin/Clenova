@@ -41,7 +41,7 @@ final class AppManagerEngine {
     private Set<String> protectedPackages(){
         Set<String> names=new HashSet<>();names.add(context.getPackageName());
         for(ResolveInfo r:pm.queryIntentActivities(new Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_HOME),0))if(r.activityInfo!=null)names.add(r.activityInfo.packageName);
-        for(Intent i:new Intent[]{new Intent(Intent.ACTION_DIAL),new Intent(Intent.ACTION_SENDTO,Uri.parse("smsto:")),new Intent(Intent.ACTION_VIEW,Uri.parse("https://example.com"))}){
+        for(Intent i:new Intent[]{new Intent(Intent.ACTION_DIAL),new Intent(Intent.ACTION_SENDTO,Uri.parse("smsto:")),new Intent(Intent.ACTION_VIEW,Uri.parse("https://example.com")).addCategory(Intent.CATEGORY_BROWSABLE)}){
             ResolveInfo r=pm.resolveActivity(i,PackageManager.MATCH_DEFAULT_ONLY);if(r!=null&&r.activityInfo!=null)names.add(r.activityInfo.packageName);
         }
         DevicePolicyManager dpm=context.getSystemService(DevicePolicyManager.class);
@@ -83,8 +83,16 @@ final class AppManagerEngine {
                 r.items.add(new Item(pkg,pm.getApplicationLabel(a).toString(),p.versionName,installer(pkg),p.firstInstallTime,p.lastUpdateTime,version(p),last(used,p,now),app,data,cache,system(a),a.enabled,protectedApp(a,protections),a.uid));
             }catch(PackageManager.NameNotFoundException|RuntimeException e){r.partial=true;}
         }
-        cancel.throwIfCanceled();if(r.usage&&!usageAllowed(context)){r.items.clear();r.usage=false;r.partial=true;}
+        cancel.throwIfCanceled();if(r.usage&&!usageAllowed(context)){return scanWithoutUsage(cancel); }
         return r;
+    }
+    private Result scanWithoutUsage(CancellationSignal cancel){
+        Result r=new Result();r.usage=false;r.partial=true;Set<String> protections=null;
+        try{protections=protectedPackages();}catch(RuntimeException ignored){}
+        int count=0;for(String pkg:launchers()){cancel.throwIfCanceled();if(count++>=LIMIT)break;
+            try{PackageInfo p=pm.getPackageInfo(pkg,0);ApplicationInfo a=p.applicationInfo;if(a==null)continue;r.items.add(new Item(pkg,pm.getApplicationLabel(a).toString(),p.versionName,installer(pkg),p.firstInstallTime,p.lastUpdateTime,version(p),-1,-1,-1,-1,system(a),a.enabled,protectedApp(a,protections),a.uid));}
+            catch(PackageManager.NameNotFoundException|RuntimeException ignored){}
+        }return r;
     }
     Bitmap icon(String pkg){try{Drawable d=pm.getApplicationIcon(pkg);Bitmap b=Bitmap.createBitmap(112,112,Bitmap.Config.ARGB_8888);d.setBounds(0,0,112,112);d.draw(new Canvas(b));return b;}catch(Exception|OutOfMemoryError e){return null;}}
     List<Permission> permissions(Item item)throws Exception{
