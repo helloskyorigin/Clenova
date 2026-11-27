@@ -28,6 +28,14 @@ public final class ReviewPlanTest {
   CleanupPreview partial=new CleanupPreview(p);
   check(partial.total==25 && partial.count==1 && partial.available()==42825 && partial.status(1,25)==-1);
   check(partial.status(0,25)==2);
-  System.out.println("Video, photo and cleanup snapshot checks passed");
+  StoragePreview initial=new StoragePreview(null);
+  check(initial.used()==85200&&initial.available()==42800&&initial.recovered==12400);
+  StoragePreview full=new StoragePreview(cleanup);
+  check(full.amount(0)==25200&&full.amount(1)==18400&&full.amount(2)==13600&&full.amount(3)==3200&&full.amount(4)==20000);
+  check(full.used()==80400&&full.available()==47600&&full.recovered==17200);
+  StoragePreview part=new StoragePreview(partial);
+  check(part.amount(0)==27375&&part.amount(1)==21000&&part.used()==85175&&part.available()==42825&&part.recovered==12425);
+  check(part.used()+part.available()==StoragePreview.CAPACITY);
+  System.out.println("Video, photo, cleanup snapshot and storage checks passed");
  }
 }

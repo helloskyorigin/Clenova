@@ -47,6 +47,7 @@ public final class MainActivity extends Activity {
     private boolean[] videoDraft;
     private CleanupPreview cleanup;
     private boolean cleaning, completed, completionVisible;
+    private boolean storageVisible;
     private ValueAnimator cleanupAnimation;
 
     @Override public void onCreate(Bundle state) {
@@ -64,10 +65,12 @@ public final class MainActivity extends Activity {
             if(state.getBoolean("cleanup_running")){startCleanupAnimation();return;}
             if(completed && state.getBoolean("cleanup_visible")){showCompletion(false);return;}
         }
+        if(state!=null && state.getBoolean("storage_visible")){openStorage();return;}
         setContentView(home());
     }
     @Override protected void onSaveInstanceState(Bundle state){
         super.onSaveInstanceState(state);
+        state.putBoolean("storage_visible",storageVisible);
         if(cleanup!=null){
             state.putDoubleArray("cleanup_amounts",cleanup.amounts());
             state.putInt("cleanup_count",cleanup.count);
@@ -82,9 +85,10 @@ public final class MainActivity extends Activity {
         }
         super.onDestroy();
     }
-    private double previewAvailable(){return completed?cleanup.available():42800;}
-    private double previewRecovered(){return completed?cleanup.lifetimeRecovered():12400;}
-    private double previewUsed(){return completed?cleanup.used():85200;}
+    private StoragePreview storageData(){return new StoragePreview(completed?cleanup:null);}
+    private double previewAvailable(){return storageData().available();}
+    private double previewRecovered(){return storageData().recovered;}
+    private double previewUsed(){return storageData().used();}
     private String gbNumber(double mb){return ReviewPlan.gb(mb).replace(" GB","");}
 
     private int dp(float n) { return Math.round(n * density); }
@@ -200,8 +204,97 @@ public final class MainActivity extends Activity {
         add(card,new StorageBar(this),-1,dp(10)); space(card,9);
         LinearLayout labels=row(); add(labels,txt(ReviewPlan.gb(previewUsed())+" used",12,GRAY,400),-2,-2);
         stretch(labels); add(labels,txt(HomePreviewData.TOTAL,12,GRAY,400),-2,-2);
-        add(card,labels,-1,-2); return card;
+        add(card,labels,-1,-2);
+        card.setContentDescription("Storage details. "+ReviewPlan.gb(previewAvailable())+" available, "+ReviewPlan.gb(previewRecovered())+" recovered.");
+        tap(card,WHITE,22,this::openStorage);return card;
     }
+    private static final int[] STORAGE_COLORS={0xff007aff,0xff65a4ff,0xff99c6ff,0xffb8bfc9,0xffd0d4da,0xffe5e5ea};
+    private void openStorage(){
+        storageVisible=true;setContentView(storageScreen());
+    }
+    private LinearLayout storageScreen(){
+        StoragePreview data=storageData();
+        LinearLayout root=column();root.setBackgroundColor(BG);root.setPadding(dp(18),v(12),dp(18),v(12));
+        FrameLayout header=new FrameLayout(this);
+        header.addView(centered("Storage",17,INK,600),new FrameLayout.LayoutParams(-1,-1));
+        FrameLayout back=new FrameLayout(this);
+        back.addView(new Glyph(this,"back",INK),new FrameLayout.LayoutParams(dp(24),dp(24),Gravity.CENTER));
+        back.setContentDescription("Back to Home");tap(back,WHITE,22,this::showHome);
+        header.addView(back,new FrameLayout.LayoutParams(dp(44),dp(44),Gravity.START|Gravity.CENTER_VERTICAL));
+        add(root,header,-1,dp(44));
+        ScrollView scroll=new ScrollView(this);scroll.setVerticalScrollBarEnabled(false);scroll.setOverScrollMode(View.OVER_SCROLL_NEVER);
+        LinearLayout body=column();body.setPadding(0,v(16),0,v(10));
+        scroll.addView(body,new ScrollView.LayoutParams(-1,-2));root.addView(scroll,new LinearLayout.LayoutParams(-1,0,1f));
+        add(body,txt("Available storage",14,GRAY,400),-1,-2);space(body,6);
+        LinearLayout big=row();big.setBaselineAligned(true);
+        add(big,txt(gbNumber(data.available()),42,INK,700),-2,-2);gap(big,6);
+        add(big,txt("GB",21,GRAY,500),-2,-2);add(body,big,-1,-2);space(body,14);
+        LinearLayout captions=row();add(captions,txt(ReviewPlan.gb(data.used())+" used",13,GRAY,400),-2,-2);
+        stretch(captions);add(captions,txt("128 GB total",13,GRAY,400),-2,-2);add(body,captions,-1,-2);space(body,9);
+        add(body,new BreakdownBar(this,data),-1,dp(13));space(body,20);
+        LinearLayout recovered=card(),line=row();
+        FrameLayout mark=new FrameLayout(this);mark.setBackground(round(0xffe8f6ec,13));
+        mark.addView(new Glyph(this,"up",GREEN),new FrameLayout.LayoutParams(dp(26),dp(26),Gravity.CENTER));
+        add(line,mark,dp(46),dp(46));gap(line,12);
+        LinearLayout values=column();add(values,txt("Recovered by Clenova",12,GRAY,400),-1,-2);space(values,5);
+        add(values,txt(ReviewPlan.gb(data.recovered),26,INK,700),-1,-2);weight(line,values);
+        add(line,new Glyph(this,"sparkles",BLUE),dp(23),dp(23));add(recovered,line,-1,-2);
+        add(body,recovered,-1,-2);space(body,20);
+        add(body,txt("Storage breakdown",14,GRAY,500),-1,-2);space(body,10);
+        LinearLayout breakdown=card();pad(breakdown,14,4);
+        for(int i=0;i<StoragePreview.LABELS.length;i++){
+            LinearLayout entry=row();entry.setPadding(0,v(11),0,v(11));
+            FrameLayout icon=new FrameLayout(this);icon.setBackground(round(0xfff0f4fa,11));
+            icon.addView(new Glyph(this,StoragePreview.ICONS[i],BLUE),new FrameLayout.LayoutParams(dp(22),dp(22),Gravity.CENTER));
+            add(entry,icon,dp(40),dp(40));gap(entry,12);
+            LinearLayout details=column(),labels=row();
+            TextView title=txt(StoragePreview.LABELS[i],14,INK,600);weight(labels,title);gap(labels,6);
+            add(labels,txt(ReviewPlan.gb(data.amount(i)),14,INK,500),-2,-2);
+            add(details,labels,-1,-2);space(details,8);
+            add(details,new CategoryBar(this,data.amount(i),STORAGE_COLORS[i]),-1,dp(4));
+            weight(entry,details);add(breakdown,entry,-1,-2);
+            if(i<StoragePreview.LABELS.length-1)thinRule(breakdown);
+        }
+        add(body,breakdown,-1,-2);space(body,16);
+        LinearLayout privacy=row();privacy.setGravity(Gravity.CENTER);
+        add(privacy,new Glyph(this,"shield",GREEN),dp(16),dp(16));gap(privacy,6);
+        add(privacy,txt("Your Agent is keeping things in check.",12,GRAY,400),-2,-2);add(body,privacy,-1,-2);
+        space(body,8);add(body,centered("Sample storage · No device data accessed",11,GRAY,400),-1,-2);
+        return root;
+    }
+    private final class BreakdownBar extends View {
+        private final Paint paint=new Paint(Paint.ANTI_ALIAS_FLAG);
+        private final StoragePreview data;
+        BreakdownBar(Context context,StoragePreview data){
+            super(context);this.data=data;
+            setContentDescription(ReviewPlan.gb(data.used())+" used, "+ReviewPlan.gb(data.available())+" available");
+        }
+        @Override protected void onDraw(Canvas canvas){
+            super.onDraw(canvas);
+            float gap=dp(3),usable=Math.max(0,getWidth()-gap*5),x=0;
+            for(int i=0;i<6;i++){
+                double amount=i<5?data.amount(i):data.available();
+                float width=(float)(usable*amount/StoragePreview.CAPACITY);
+                paint.setColor(STORAGE_COLORS[i]);
+                canvas.drawRoundRect(new RectF(x,0,x+width,getHeight()),dp(4),dp(4),paint);
+                x+=width+gap;
+            }
+        }
+    }
+    private final class CategoryBar extends View {
+        private final Paint paint=new Paint(Paint.ANTI_ALIAS_FLAG);
+        private final double amount;private final int color;
+        CategoryBar(Context context,double amount,int color){
+            super(context);this.amount=amount;this.color=color;
+            setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_NO);
+        }
+        @Override protected void onDraw(Canvas canvas){
+            super.onDraw(canvas);float radius=getHeight()/2f;
+            paint.setColor(0xfff0f0f3);canvas.drawRoundRect(new RectF(0,0,getWidth(),getHeight()),radius,radius,paint);
+            paint.setColor(color);canvas.drawRoundRect(new RectF(0,0,(float)(getWidth()*amount/StoragePreview.CAPACITY),getHeight()),radius,radius,paint);
+        }
+    }
+
     private LinearLayout metric(String label,String number,boolean arrow) {
         LinearLayout l=column(); add(l,txt(label,12,GRAY,400),-1,-2); space(l,5);
         LinearLayout value=row(); value.setBaselineAligned(true);
@@ -230,6 +323,7 @@ public final class MainActivity extends Activity {
         add(c,approve,-1,dp(51)); return c;
     }
     private void showHome() {
+        storageVisible=false;
         completionVisible=false;
         reviewing = false;
         setContentView(home());
@@ -242,6 +336,7 @@ public final class MainActivity extends Activity {
     }
     @Override public void onBackPressed() {
         if(cleaning)return;
+        if(storageVisible){showHome();return;}
         if(completionVisible){showHome();return;}
         if (videoViewing) leaveVideos(false); else if (similarViewing) leaveSimilar(false); else if (duplicateViewing) leaveDuplicates(false); else if (reviewing) showHome(); else super.onBackPressed();
     }
@@ -1038,6 +1133,9 @@ public final class MainActivity extends Activity {
                 case "back":path(c,15,5,8,12,15,19);break;
                 case "copy": c.drawRoundRect(new RectF(7,7,21,21),3,3,p);path(c,17,3,3,3,3,17);break;
                 case "images": c.drawRoundRect(new RectF(3,4,21,20),3,3,p);c.drawCircle(8,9,1.6f,p);path(c,4,17,10,12,14,16,17,13,21,17);break;
+                case "apps": for(int i=0;i<2;i++)for(int j=0;j<2;j++)c.drawRoundRect(new RectF(3+i*10,3+j*10,10+i*10,10+j*10),2,2,p);break;
+                case "document":path(c,5,2,14,2,20,8,20,22,5,22,5,2);path(c,14,2,14,8,20,8);path(c,8,13,17,13);path(c,8,17,17,17);break;
+                case "phone":c.drawRoundRect(new RectF(6,2,18,22),3,3,p);path(c,10,18,14,18);break;
                 case "video": c.drawRoundRect(new RectF(3,6,16,18),3,3,p);path(c,16,10,21,7,21,17,16,14);break;
                 case "selected": p.setStyle(Paint.Style.FILL);c.drawCircle(12,12,11,p);p.setStyle(Paint.Style.STROKE);p.setColor(Color.WHITE);path(c,7,12,10.5f,15.5f,17,9);break;
                 case "unselected": c.drawCircle(12,12,10,p);break;

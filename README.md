@@ -34,3 +34,6 @@ Agent Picks shows four largest videos; View All shows all 12 sorted by size (260
 
 ## Cleanup progress and completion preview
 Explicit approval snapshots only selected sample items. A 2.8-second simulated progress ring changes to a green success ring and tick. Category statuses and receipt use the snapshot; home storage, recovered total and agent update reflect the completed preview. One simulated cleanup per activity session; summary remains accessible and the same sample items cannot be processed twice. Unselected items remain untouched; no new scan is simulated. State is saved across activity recreation. No device file access or actual deletion. CI includes snapshot tests.
+
+## Storage Details
+Tap Home's storage card to open Storage. Shared sample data drives Home and Storage; the six-part bar includes available space and five storage categories. Only approved photo/video amounts reduce their respective categories after simulated cleanup. Back returns to Home; navigation is restored on activity recreation. No scan or cleaning button, no real storage access. CI includes initial, full and partial storage reconciliation checks.
