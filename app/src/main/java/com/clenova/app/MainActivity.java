@@ -37,6 +37,13 @@ public final class MainActivity extends Activity {
     private boolean reviewing;
     private boolean cleanVisible;
     private static final int REQUEST_SCAN_MEDIA=96;
+    private static final int REQUEST_APP_UNINSTALL=103;
+    private boolean unusedVisible,unusedReview,unusedExternal,unusedUninstallPending;
+    private int unusedGeneration,unusedDays=30,unusedSort,unusedPage;
+    private UnusedAppScan.Result unusedResult;
+    private final java.util.Set<String> unusedSelected=new java.util.LinkedHashSet<>(),unusedKeep=new java.util.HashSet<>();
+    private android.os.CancellationSignal unusedSignal;
+    private android.app.Dialog unusedSheet;
     private static final int PICK_DOWNLOAD_FILES=101, PICK_LARGE_FOLDER=102;
     private boolean largeFilesMode;
     private int largeFileThreshold=0;
@@ -199,6 +206,7 @@ public final class MainActivity extends Activity {
     @Override protected void onStop(){
         super.onStop();
         stopRealVideo();
+        if(unusedVisible){if(unusedExternal||unusedUninstallPending)return;showClean();}
         if(downloadsVisible){if(downloadsPicking||downloadsOpening||downloadsBusy)return;showClean();}
         // Do not retain visible media results across backgrounding; selected-photo access may change.
         if(dupTrashPending)return;
@@ -210,6 +218,7 @@ public final class MainActivity extends Activity {
             cleanupAnimation.removeAllListeners();cleanupAnimation.removeAllUpdateListeners();cleanupAnimation.cancel();
         }
         if(runningScan!=null){runningScan.cancel();runningScan=null;}
+        if(unusedSignal!=null)unusedSignal.cancel();unusedGeneration++;if(unusedSheet!=null)unusedSheet.dismiss();
         if(downloadsSignal!=null)downloadsSignal.cancel();downloadsGeneration++;if(downloadSheet!=null)downloadSheet.dismiss();
         stopRealVideo();dupThumbs.shutdownNow();dupCache.evictAll();
         if(preferencePopup!=null)preferencePopup.dismiss();
@@ -326,6 +335,7 @@ public final class MainActivity extends Activity {
         if(cleanVisible)showClean();else showHome();
     }
     private void showClean(){
+        unusedVisible=false;unusedReview=false;unusedExternal=false;unusedGeneration++;if(unusedSignal!=null){unusedSignal.cancel();unusedSignal=null;}unusedResult=null;unusedSelected.clear();unusedKeep.clear();if(unusedSheet!=null)unusedSheet.dismiss();
         downloadsVisible=false;downloadsReview=false;downloadsGeneration++;if(downloadsSignal!=null){downloadsSignal.cancel();downloadsSignal=null;}if(!downloadsBusy){downloadItems.clear();downloadSelected.clear();downloadKeep.clear();}
         realShotVisible=false;realShotReview=false;realShotPreview=false;shotAfterScan=false;shotSelected.clear();shotKeep.clear();
         stopRealVideo();realVideoVisible=false;realVideoReview=false;realVideoPreview=false;videoAfterScan=false;realVideoSelected.clear();realVideoKeep.clear();
@@ -386,7 +396,7 @@ public final class MainActivity extends Activity {
             LinearLayout line=row();line.setMinimumHeight(dp(63));line.setPadding(0,dp(9),0,dp(9));
             FrameLayout icon=new FrameLayout(this);icon.setBackground(round(PALE,11));icon.addView(new Glyph(this,item[0],BLUE),new FrameLayout.LayoutParams(dp(22),dp(22),Gravity.CENTER));
             add(line,icon,dp(38),dp(38));gap(line,12);LinearLayout labels=column();add(labels,txt(item[1],15,INK,600),-1,-2);space(labels,4);add(labels,txt(item[2],12,GRAY,400),-1,-2);
-            weight(line,labels);gap(line,8);add(line,new Glyph(this,"chevron",GRAY),dp(14),dp(14));tap(line,WHITE,10,()->{if(item[1].equals("Downloads"))openDownloads();else if(item[1].equals("Large files"))openLargeFiles();else cleanPending(item[1]);});add(files,line,-1,-2);
+            weight(line,labels);gap(line,8);add(line,new Glyph(this,"chevron",GRAY),dp(14),dp(14));tap(line,WHITE,10,()->{if(item[1].equals("Downloads"))openDownloads();else if(item[1].equals("Large files"))openLargeFiles();else if(item[1].equals("Unused apps"))openUnusedApps();else cleanPending(item[1]);});add(files,line,-1,-2);
         }
         add(body,files,-1,-2);space(body,17);
         LinearLayout footer=row();footer.setGravity(Gravity.CENTER);
@@ -490,7 +500,7 @@ public final class MainActivity extends Activity {
         }
         add(body,list,-1,-2);space(body,14);
         LinearLayout scope=card();add(scope,txt("Scan coverage",15,INK,600),-1,-2);space(scope,8);
-        add(scope,txt("Downloads and Large files use separate user-selected file access and are not added to Smart Scan totals. Unused apps are not scanned. Similar-photo suggestions require visual review.",13,GRAY,400),-1,-2);
+        add(scope,txt("Downloads and Large files use separate user-selected file access and are not added to Smart Scan totals. Unused apps uses separate optional Usage Access and is not added to media totals. Similar-photo suggestions require visual review.",13,GRAY,400),-1,-2);
         if(scanResult.limited){space(scope,7);add(scope,txt("Limited media access. Only accessible items were checked.",13,GRAY,400),-1,-2);}
         if(scanResult.partial){space(scope,7);add(scope,txt("Some media could not be checked or the scan limit was reached.",13,GRAY,400),-1,-2);}
         space(scope,7);add(scope,txt("Large videos: 100 MiB or more. Screenshots: folder-based detection.",12,GRAY,400),-1,-2);
@@ -1140,6 +1150,112 @@ public final class MainActivity extends Activity {
         },"Clenova-downloads-remove").start();
     }
 
+    private void openUsageSettings(){
+        if(unusedVisible)unusedExternal=true;
+        try{startActivity(new android.content.Intent(android.provider.Settings.ACTION_USAGE_ACCESS_SETTINGS));}
+        catch(RuntimeException e){unusedExternal=false;folderToast("Usage access settings unavailable");}
+    }
+    private void openUnusedApps(){
+        if(cleanScroll!=null){cleanScrollY=cleanScroll.getScrollY();cleanScroll=null;}
+        scanResult=null;unusedVisible=true;unusedReview=false;unusedDays=30;unusedSort=0;unusedPage=0;unusedSelected.clear();unusedKeep.clear();refreshUnusedApps();
+    }
+    private void refreshUnusedApps(){
+        if(unusedSignal!=null)unusedSignal.cancel();unusedSelected.clear();unusedReview=false;unusedPage=0;unusedResult=null;
+        if(!UnusedAppScan.allowed(this)){showUnusedPermission();return;}
+        final android.os.CancellationSignal signal=new android.os.CancellationSignal();unusedSignal=signal;final int generation=++unusedGeneration;
+        LinearLayout root=scanShell("Unused apps",this::showClean),body=scanBody(root);add(body,centered("Checking app usage",20,INK,600),-1,-2);space(body,12);add(body,new android.widget.ProgressBar(this),dp(42),dp(42));space(body,12);add(body,centered("Your apps stay installed during scanning.",13,GRAY,400),-1,-2);setContentView(root);
+        new Thread(()->{try{
+            UnusedAppScan.Result result=new UnusedAppScan(this).run(signal);
+            runOnUiThread(()->{if(generation!=unusedGeneration||isDestroyed()||!unusedVisible)return;unusedSignal=null;unusedResult=result;if(result.allowed)showUnusedApps();else showUnusedPermission();});
+        }catch(Exception e){runOnUiThread(()->{if(generation!=unusedGeneration||isDestroyed()||!unusedVisible)return;unusedSignal=null;showUnusedPermission();folderToast("App usage could not be read");});}},"Clenova-app-usage").start();
+    }
+    private void showUnusedPermission(){
+        unusedVisible=true;unusedReview=false;
+        LinearLayout root=scanShell("Unused apps",this::showClean),body=scanBody(root),hero=card();hero.setGravity(Gravity.CENTER_HORIZONTAL);
+        FrameLayout icon=new FrameLayout(this);icon.setBackground(round(PALE,24));icon.addView(new Glyph(this,"apps",BLUE),new FrameLayout.LayoutParams(dp(40),dp(40),Gravity.CENTER));add(hero,icon,dp(84),dp(84));space(hero,18);
+        add(hero,centered("Usage access required",23,INK,700),-1,-2);space(hero,9);add(hero,centered("Android Usage Access lets Clenova review when apps were last used and their available storage statistics.",14,GRAY,400),-1,-2);space(hero,14);
+        add(hero,centered("Only checked locally when you request a scan. No automatic uninstall.",13,GREEN,500),-1,-2);add(body,hero,-1,-2);space(body,15);
+        scanButton(body,"Open Usage Access settings",true,this::openUsageSettings);space(body,8);scanButton(body,"Check again",false,this::refreshUnusedApps);setContentView(root);
+    }
+    private java.util.List<UnusedAppScan.Item> visibleUnused(){
+        java.util.List<UnusedAppScan.Item> list=new java.util.ArrayList<>();if(unusedResult==null)return list;long now=System.currentTimeMillis();
+        for(UnusedAppScan.Item item:unusedResult.items)if(item.days(now)>=unusedDays)list.add(item);
+        java.util.Comparator<UnusedAppScan.Item> cmp=unusedSort==1?java.util.Comparator.comparingLong((UnusedAppScan.Item i)->i.lastUsed):unusedSort==2?java.util.Comparator.comparing((UnusedAppScan.Item i)->i.name,String.CASE_INSENSITIVE_ORDER):java.util.Comparator.comparingLong((UnusedAppScan.Item i)->i.bytes()).reversed();list.sort(cmp.thenComparing(i->i.pkg));return list;
+    }
+    private String appStorage(long bytes){return bytes<0?tr("Unknown"):scanBytes(bytes);}
+    private String lastUsedLabel(UnusedAppScan.Item item){return item.days(System.currentTimeMillis())+" "+tr("days since last observed use");}
+    private View unusedIcon(UnusedAppScan.Item item,int size){
+        FrameLayout frame=new FrameLayout(this);frame.setBackground(round(PALE,13));
+        if(item.icon!=null){android.widget.ImageView image=new android.widget.ImageView(this);image.setImageBitmap(item.icon);image.setScaleType(android.widget.ImageView.ScaleType.FIT_CENTER);frame.addView(image,new FrameLayout.LayoutParams(dp(size),dp(size),Gravity.CENTER));}
+        else frame.addView(new Glyph(this,"apps",BLUE),new FrameLayout.LayoutParams(dp(25),dp(25),Gravity.CENTER));
+        return frame;
+    }
+    private void unusedFooter(TextView count,TextView amount,TextView action){
+        long total=0;boolean unknown=false;if(unusedResult!=null)for(UnusedAppScan.Item i:unusedResult.items)if(unusedSelected.contains(i.pkg)){if(i.bytes()<0)unknown=true;else total+=i.bytes();}
+        count.setText(unusedSelected.size()+" "+tr("apps selected"));amount.setText(scanBytes(total)+(unknown?" + "+tr("Unknown"):""));action.setEnabled(!unusedSelected.isEmpty());action.setAlpha(unusedSelected.isEmpty()?.45f:1f);
+    }
+    private void showUnusedApps(){
+        if(!UnusedAppScan.allowed(this)||unusedResult==null){showUnusedPermission();return;}
+        unusedVisible=true;unusedReview=false;java.util.List<UnusedAppScan.Item> list=visibleUnused();
+        LinearLayout root=scanShell("Unused apps",this::showClean),body=scanBody(root),hero=card(),summary=row(),labels=column();
+        long total=0;int unknownSize=0;for(UnusedAppScan.Item i:list){if(i.bytes()<0)unknownSize++;else total+=i.bytes();}
+        add(labels,txt("Known storage occupied",13,GRAY,400),-1,-2);space(labels,6);add(labels,txt(scanBytes(total),32,INK,700),-1,-2);space(labels,5);add(labels,txt(list.size()+" "+tr("rarely used apps"),12,GRAY,400),-1,-2);if(unknownSize>0){space(labels,4);add(labels,txt(unknownSize+" "+tr("sizes unavailable"),11,GRAY,400),-1,-2);}weight(summary,labels);gap(summary,8);
+        FrameLayout mark=new FrameLayout(this);mark.setBackground(round(PALE,20));mark.addView(new Glyph(this,"apps",BLUE),new FrameLayout.LayoutParams(dp(36),dp(36),Gravity.CENTER));add(summary,mark,dp(70),dp(70));add(hero,summary,-1,-2);space(hero,12);thinRule(hero);space(hero,10);
+        LinearLayout safe=row();add(safe,new Glyph(this,"shield",GREEN),dp(19),dp(19));gap(safe,7);weight(safe,txt("System apps protected",13,GREEN,600));add(hero,safe,-1,-2);add(body,hero,-1,-2);space(body,12);
+        LinearLayout filters=row();for(int day:new int[]{30,60,90}){if(day!=30)gap(filters,7);TextView chip=centered(day+"+ "+tr("days"),12,unusedDays==day?Color.WHITE:INK,600);tap(chip,unusedDays==day?BLUE:WHITE,20,()->{unusedDays=day;unusedSelected.clear();unusedPage=0;showUnusedApps();});filters.addView(chip,new LinearLayout.LayoutParams(0,dp(44),1f));}add(body,filters,-1,-2);space(body,12);
+        add(body,txt("Only observed usage history is used. Apps with unknown usage are excluded.",12,GRAY,400),-1,-2);space(body,9);
+        LinearLayout heading=row();weight(heading,txt("Rarely used apps",17,INK,600));int eligible=0;for(UnusedAppScan.Item i:list)if(!unusedKeep.contains(i.pkg))eligible++;
+        TextView select=txt(unusedSelected.isEmpty()?"Select all":"Deselect all",12,BLUE,600);tap(select,BG,8,()->{if(!unusedSelected.isEmpty())unusedSelected.clear();else for(UnusedAppScan.Item i:list)if(!unusedKeep.contains(i.pkg))unusedSelected.add(i.pkg);showUnusedApps();});select.setEnabled(eligible>0||!unusedSelected.isEmpty());add(heading,select,-2,dp(44));gap(heading,7);
+        FrameLayout sort=new FrameLayout(this);sort.addView(new Glyph(this,"more",BLUE),new FrameLayout.LayoutParams(dp(20),dp(20),Gravity.CENTER));sort.setContentDescription(tr("Sort apps"));tap(sort,WHITE,18,()->privacyDialog().setTitle(tr("Sort apps")).setSingleChoiceItems(new String[]{tr("Largest first"),tr("Least recently used"),tr("Name")},unusedSort,(d,i)->{unusedSort=i;unusedPage=0;d.dismiss();showUnusedApps();}).setNegativeButton(tr("Cancel"),null).show());add(heading,sort,dp(38),dp(38));add(body,heading,-1,-2);
+        TextView count=txt("",12,GRAY,400),amount=txt("",18,INK,700),review=centered("Review & uninstall",13,Color.WHITE,600);
+        int pages=Math.max(1,(list.size()+14)/15);unusedPage=Math.max(0,Math.min(unusedPage,pages-1));LinearLayout group=card();pad(group,12,6);
+        if(list.isEmpty()){pad(group,16,22);add(group,centered("No rarely used apps found",17,INK,600),-1,-2);space(group,8);add(group,centered("Available Android usage history may be incomplete.",13,GRAY,400),-1,-2);}
+        for(int n=unusedPage*15;n<Math.min(list.size(),(unusedPage+1)*15);n++){UnusedAppScan.Item item=list.get(n);if(n>unusedPage*15)thinRule(group);
+            LinearLayout line=row();line.setMinimumHeight(dp(76));line.setPadding(0,dp(8),0,dp(8));View icon=unusedIcon(item,42);icon.setOnClickListener(v->showUnusedSheet(item));add(line,icon,dp(48),dp(48));gap(line,10);
+            LinearLayout details=column();TextView name=txt(item.name,14,INK,600);name.setMaxLines(1);name.setEllipsize(android.text.TextUtils.TruncateAt.END);add(details,name,-1,-2);space(details,4);add(details,txt(lastUsedLabel(item),11,GRAY,400),-1,-2);space(details,4);add(details,txt(appStorage(item.bytes()),14,INK,600),-1,-2);if(unusedKeep.contains(item.pkg)){space(details,3);add(details,txt("Keep",11,GREEN,500),-1,-2);}tap(details,WHITE,8,()->showUnusedSheet(item));weight(line,details);
+            android.widget.CheckBox check=new android.widget.CheckBox(this);check.setButtonTintList(ColorStateList.valueOf(BLUE));check.setChecked(unusedSelected.contains(item.pkg));check.setEnabled(!unusedKeep.contains(item.pkg));check.setContentDescription(item.name);check.setOnCheckedChangeListener((v,checked)->{if(checked)unusedSelected.add(item.pkg);else unusedSelected.remove(item.pkg);unusedFooter(count,amount,review);});add(line,check,dp(44),dp(44));add(group,line,-1,-2);
+        }add(body,group,-1,-2);space(body,10);
+        if(pages>1){LinearLayout pager=row();TextView prev=centered("Previous",13,BLUE,600),next=centered("Next",13,BLUE,600);tap(prev,WHITE,12,()->{unusedPage--;showUnusedApps();});prev.setEnabled(unusedPage>0);prev.setAlpha(unusedPage>0?1:.4f);tap(next,WHITE,12,()->{unusedPage++;showUnusedApps();});next.setEnabled(unusedPage+1<pages);next.setAlpha(unusedPage+1<pages?1:.4f);weight(pager,prev);weight(pager,centered((unusedPage+1)+" / "+pages,13,GRAY,400));weight(pager,next);add(body,pager,-1,dp(48));}
+        add(body,txt(unusedResult.unknown+" "+tr("apps with unknown usage excluded"),12,GRAY,400),-1,-2);
+        if(unusedResult.partial){space(body,5);add(body,txt("Partial scan results",12,GRAY,500),-1,-2);}space(body,8);scanButton(body,"Refresh",false,this::refreshUnusedApps);
+        LinearLayout footer=row();footer.setBackground(round(WHITE,18));pad(footer,13,10);LinearLayout selected=column();add(selected,count,-1,-2);space(selected,4);add(selected,amount,-1,-2);weight(footer,selected);gap(footer,8);tap(review,BLUE,24,this::showUnusedReview);review.setPadding(dp(12),0,dp(12),0);add(footer,review,-2,dp(46));add(root,footer,-1,-2);space(root,7);add(root,centered("Nothing uninstalled without your approval.",11,GRAY,400),-1,-2);unusedFooter(count,amount,review);setContentView(root);
+    }
+    private void showUnusedSheet(UnusedAppScan.Item item){
+        if(unusedSheet!=null)unusedSheet.dismiss();android.app.Dialog dialog=new android.app.Dialog(this);unusedSheet=dialog;dialog.requestWindowFeature(android.view.Window.FEATURE_NO_TITLE);
+        LinearLayout sheet=column();GradientDrawable bg=new GradientDrawable();bg.setColor(WHITE);float r=dp(26);bg.setCornerRadii(new float[]{r,r,r,r,0,0,0,0});sheet.setBackground(bg);pad(sheet,20,12);
+        FrameLayout handle=new FrameLayout(this);View bar=new View(this);bar.setBackground(round(0xffc7c7cc,4));handle.addView(bar,new FrameLayout.LayoutParams(dp(36),dp(4),Gravity.CENTER));add(sheet,handle,-1,dp(22));space(sheet,7);
+        LinearLayout title=row();add(title,unusedIcon(item,54),dp(64),dp(64));gap(title,12);LinearLayout labels=column();add(labels,txt(item.name,19,INK,700),-1,-2);space(labels,5);add(labels,txt(appStorage(item.bytes())+" · "+lastUsedLabel(item),12,GRAY,400),-1,-2);weight(title,labels);add(sheet,title,-1,-2);space(sheet,12);thinRule(sheet);
+        String dataExcludingCache=item.dataBytes>=0&&item.cacheBytes>=0?appStorage(Math.max(0,item.dataBytes-item.cacheBytes)):tr("Unknown");
+        for(String[] pair:new String[][]{{"App size",appStorage(item.appBytes)},{"User data excluding cache",dataExcludingCache},{"Cache",appStorage(item.cacheBytes)},{"Last observed use",java.text.DateFormat.getDateInstance().format(new java.util.Date(item.lastUsed))}}){LinearLayout line=row();line.setMinimumHeight(dp(42));weight(line,txt(pair[0],13,GRAY,400));add(line,txt(pair[1],13,INK,600),-2,-2);add(sheet,line,-1,-2);}thinRule(sheet);space(sheet,10);
+        scanButton(sheet,"Open app",false,()->{dialog.dismiss();openUnusedTarget(item,false);});space(sheet,5);scanButton(sheet,"App information",false,()->{dialog.dismiss();openUnusedTarget(item,true);});space(sheet,5);
+        scanButton(sheet,unusedKeep.contains(item.pkg)?"Remove keep mark":"Keep this app",false,()->{if(!unusedKeep.remove(item.pkg)){unusedKeep.add(item.pkg);unusedSelected.remove(item.pkg);}dialog.dismiss();showUnusedApps();});space(sheet,5);
+        if(!unusedKeep.contains(item.pkg))scanButton(sheet,unusedSelected.contains(item.pkg)?"Deselect app":"Select for uninstall",true,()->{if(!unusedSelected.remove(item.pkg))unusedSelected.add(item.pkg);dialog.dismiss();showUnusedApps();});
+        space(sheet,6);scanButton(sheet,"Done",false,dialog::dismiss);
+        ScrollView scroll=new ScrollView(this);scroll.addView(sheet,new ScrollView.LayoutParams(-1,-2));dialog.setContentView(scroll);dialog.setOnDismissListener(d->{if(unusedSheet==dialog)unusedSheet=null;});
+        android.view.Window w=dialog.getWindow();if(w!=null){w.setBackgroundDrawableResource(android.R.color.transparent);w.setGravity(Gravity.BOTTOM);w.addFlags(android.view.WindowManager.LayoutParams.FLAG_DIM_BEHIND);}dialog.show();if(w!=null)w.setLayout(-1,Math.min(dp(620),getResources().getDisplayMetrics().heightPixels-dp(40)));
+    }
+    private void openUnusedTarget(UnusedAppScan.Item item,boolean settings){
+        android.content.Intent intent=settings?new android.content.Intent(android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS,android.net.Uri.fromParts("package",item.pkg,null)):getPackageManager().getLaunchIntentForPackage(item.pkg);
+        if(intent==null){folderToast("App unavailable");return;}try{unusedExternal=true;startActivity(intent);}catch(RuntimeException e){unusedExternal=false;folderToast("App unavailable");}
+    }
+    private void showUnusedReview(){
+        if(unusedResult==null||unusedSelected.isEmpty()){showUnusedApps();return;}unusedReview=true;
+        LinearLayout root=scanShell("Review uninstall",this::showUnusedApps),body=scanBody(root);
+        add(body,txt("Review selected apps",22,INK,700),-1,-2);space(body,8);add(body,txt("Uninstalling can permanently remove app data. Review each app and back up important data. Android will ask for confirmation separately.",14,GRAY,400),-1,-2);space(body,12);
+        LinearLayout list=card();int n=0;for(UnusedAppScan.Item item:visibleUnused())if(unusedSelected.contains(item.pkg)&&!unusedKeep.contains(item.pkg)){if(n++>0)thinRule(list);LinearLayout line=row();line.setMinimumHeight(dp(65));add(line,unusedIcon(item,36),dp(42),dp(42));gap(line,9);LinearLayout labels=column();add(labels,txt(item.name,14,INK,600),-1,-2);space(labels,4);add(labels,txt(appStorage(item.bytes()),12,GRAY,400),-1,-2);weight(line,labels);TextView action=centered("Uninstall",12,BLUE,600);tap(action,PALE,14,()->privacyDialog().setTitle(tr("Uninstall app?")).setMessage(item.name+"\n"+tr("App data may be permanently lost. Android will ask you to confirm.")).setNegativeButton(tr("Cancel"),null).setPositiveButton(tr("Continue"),(d,w)->verifyUnusedUninstall(item)).show());add(line,action,dp(88),dp(42));add(list,line,-1,-2);}add(body,list,-1,-2);space(body,12);scanButton(root,"Done",false,this::showUnusedApps);setContentView(root);
+    }
+    private void verifyUnusedUninstall(UnusedAppScan.Item item){
+        if(unusedSignal!=null||unusedUninstallPending||!unusedSelected.contains(item.pkg)||unusedKeep.contains(item.pkg))return;
+        final android.os.CancellationSignal signal=new android.os.CancellationSignal();unusedSignal=signal;final int generation=++unusedGeneration,days=unusedDays;
+        LinearLayout root=scanShell("Review uninstall",()->{signal.cancel();unusedSignal=null;unusedGeneration++;showUnusedReview();}),body=scanBody(root);add(body,centered("Rechecking app eligibility",18,INK,600),-1,-2);space(body,12);add(body,new android.widget.ProgressBar(this),dp(42),dp(42));setContentView(root);
+        new Thread(()->{boolean valid=new UnusedAppScan(this).stillEligible(item,days);
+            runOnUiThread(()->{if(signal.isCanceled()||generation!=unusedGeneration||!unusedVisible||isDestroyed()||isFinishing())return;unusedSignal=null;
+                if(!valid||!unusedSelected.contains(item.pkg)||unusedKeep.contains(item.pkg)){folderToast("App or usage changed. Review again.");refreshUnusedApps();return;}
+                android.content.Intent intent=new android.content.Intent(android.content.Intent.ACTION_DELETE,android.net.Uri.fromParts("package",item.pkg,null));intent.putExtra(android.content.Intent.EXTRA_RETURN_RESULT,true);
+                try{unusedUninstallPending=true;startActivityForResult(intent,REQUEST_APP_UNINSTALL);}catch(RuntimeException e){unusedUninstallPending=false;folderToast("Android uninstall unavailable");showUnusedReview();}
+            });},"Clenova-app-recheck").start();
+    }
+
     private void cleanPending(String label){
         // Main dashboard is implemented first. Never route manual actions to simulated Home cleanup.
         privacyDialog().setTitle(tr(label)).setMessage(tr("This cleaning tool is not available in this preview yet. No files have been scanned or changed.")).setPositiveButton(tr("Done"),null).show();
@@ -1331,6 +1447,7 @@ public final class MainActivity extends Activity {
     }
     @Override protected void onResume(){
         super.onResume();
+        if(unusedExternal){unusedExternal=false;if(unusedVisible&&!unusedUninstallPending)refreshUnusedApps();}
         if(downloadsOpening){downloadsOpening=false;if(downloadsVisible)refreshDownloads();}
         if(permissionsVisible&&devicePermissions!=null)openAppPermissions();
     }
@@ -1973,6 +2090,8 @@ public final class MainActivity extends Activity {
         thinRule(access);
         add(access,permissionRow("folder","Files & storage","Select files and folders using Android",snapshot.storage,this::openStoragePermissionInfo),-1,-2);
         thinRule(access);
+        add(access,permissionRow("apps","Usage access","Optional access for Unused apps",UnusedAppScan.allowed(this)?"Allowed":"Not allowed",this::openUsageSettings),-1,-2);
+        thinRule(access);
         add(access,permissionRow("bell","Notifications","Agent updates and reminders",snapshot.notifications,this::manageNotificationAccess),-1,-2);
         thinRule(access);
         add(access,permissionRow("users","Contacts","Contact cleanup is not active yet",snapshot.contacts,this::openAndroidAppSettings),-1,-2);
@@ -2459,6 +2578,7 @@ public final class MainActivity extends Activity {
     }
     @Override protected void onActivityResult(int requestCode,int resultCode,android.content.Intent data){
         super.onActivityResult(requestCode,resultCode,data);
+        if(requestCode==REQUEST_APP_UNINSTALL){unusedUninstallPending=false;unusedExternal=false;unusedSelected.clear();if(unusedVisible)refreshUnusedApps();folderToast(resultCode==RESULT_OK?"Android uninstall returned success. Refreshing app list.":"Uninstall not confirmed");return;}
         if(requestCode==PICK_LARGE_FOLDER){downloadsPicking=false;if(resultCode==RESULT_OK&&data!=null&&data.getData()!=null&&largeFilesMode)loadLargeFolder(data.getData());else if(downloadsVisible)showDownloads();return;}
         if(requestCode==PICK_DOWNLOAD_FILES){downloadsPicking=false;if(resultCode==RESULT_OK&&data!=null)loadPickedDownloads(data);else if(downloadsVisible)showDownloads();return;}
         if(requestCode==REQUEST_DUP_TRASH||requestCode==REQUEST_SIMILAR_TRASH||requestCode==REQUEST_VIDEO_TRASH||requestCode==REQUEST_SCREENSHOT_TRASH){dupTrashPending=false;scanResult=null;realDupSelected.clear();dupCache.evictAll();showClean();folderToast(resultCode==RESULT_OK?"Android trash request approved. Scan again to refresh.":"Trash request cancelled");return;}
@@ -2737,7 +2857,9 @@ public final class MainActivity extends Activity {
         setContentView(reviewScreen());
     }
     @Override public void onBackPressed() {
-        if(cleaning||downloadsBusy)return;
+        if(cleaning||downloadsBusy||unusedUninstallPending)return;
+        if(unusedReview){if(unusedSignal!=null){unusedSignal.cancel();unusedSignal=null;unusedGeneration++;}showUnusedApps();return;}
+        if(unusedVisible){showClean();return;}
         if(downloadsReview){showDownloads();return;}
         if(downloadsVisible){showClean();return;}
         if(realShotPreview){showRealScreenshots();return;}

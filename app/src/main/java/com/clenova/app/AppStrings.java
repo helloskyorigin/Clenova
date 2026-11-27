@@ -5,6 +5,23 @@ import java.util.Map;
 final class AppStrings {
  private static final Map<String,String[]> TEXT=new HashMap<>();
  static {
+  TEXT.put("Usage access",new String[]{"उपयोग की अनुमति","Acceso de uso","Accès à l’utilisation","Nutzungszugriff"});
+  TEXT.put("Optional access for Unused apps",new String[]{"कम उपयोग वाले ऐप के लिए वैकल्पिक अनुमति","Acceso opcional para apps poco usadas","Accès facultatif aux apps peu utilisées","Optionaler Zugriff für selten genutzte Apps"});
+  TEXT.put("Usage access required",new String[]{"उपयोग की अनुमति चाहिए","Se requiere acceso de uso","Accès à l’utilisation requis","Nutzungszugriff erforderlich"});
+  TEXT.put("Open Usage Access settings",new String[]{"उपयोग अनुमति सेटिंग खोलें","Abrir ajustes de uso","Ouvrir les paramètres d’utilisation","Nutzungszugriff öffnen"});
+  TEXT.put("Checking app usage",new String[]{"ऐप उपयोग जाँच रहे हैं","Comprobando uso","Vérification de l’utilisation","App-Nutzung prüfen"});
+  TEXT.put("Known storage occupied",new String[]{"ज्ञात उपयोग किया स्टोरेज","Espacio ocupado conocido","Stockage occupé connu","Bekannter belegter Speicher"});
+  TEXT.put("rarely used apps",new String[]{"कम उपयोग वाले ऐप","apps poco usadas","apps peu utilisées","selten genutzte Apps"});
+  TEXT.put("Rarely used apps",new String[]{"कम उपयोग वाले ऐप","Apps poco usadas","Apps peu utilisées","Selten genutzte Apps"});
+  TEXT.put("System apps protected",new String[]{"सिस्टम ऐप सुरक्षित हैं","Apps del sistema protegidas","Apps système protégées","System-Apps geschützt"});
+  TEXT.put("days since last observed use",new String[]{"दिन पिछले दर्ज उपयोग से","días desde el último uso observado","jours depuis le dernier usage observé","Tage seit letzter beobachteter Nutzung"});
+  TEXT.put("apps selected",new String[]{"ऐप चुने गए","apps seleccionadas","apps sélectionnées","Apps ausgewählt"});
+  TEXT.put("Review & uninstall",new String[]{"समीक्षा और अनइंस्टॉल","Revisar y desinstalar","Vérifier et désinstaller","Prüfen und deinstallieren"});
+  TEXT.put("Keep this app",new String[]{"यह ऐप रखें","Conservar app","Conserver cette app","App behalten"});
+  TEXT.put("Last observed use",new String[]{"पिछला दर्ज उपयोग","Último uso observado","Dernier usage observé","Letzte beobachtete Nutzung"});
+  TEXT.put("User data excluding cache",new String[]{"कैश के बिना उपयोगकर्ता डेटा","Datos sin caché","Données hors cache","Nutzerdaten ohne Cache"});
+  TEXT.put("Review uninstall",new String[]{"अनइंस्टॉल समीक्षा","Revisar desinstalación","Vérifier la désinstallation","Deinstallation prüfen"});
+  TEXT.put("Rechecking app eligibility",new String[]{"ऐप पात्रता फिर जाँच रहे हैं","Revisando elegibilidad","Nouvelle vérification","App-Eignung erneut prüfen"});
   TEXT.put("Storage occupied",new String[]{"उपयोग किया गया स्टोरेज","Espacio ocupado","Espace occupé","Belegter Speicher"});
   TEXT.put("Choose files",new String[]{"फ़ाइलें चुनें","Elegir archivos","Choisir des fichiers","Dateien auswählen"});
   TEXT.put("Scan selected folder",new String[]{"चुना फ़ोल्डर स्कैन करें","Escanear carpeta elegida","Analyser le dossier choisi","Ausgewählten Ordner scannen"});
