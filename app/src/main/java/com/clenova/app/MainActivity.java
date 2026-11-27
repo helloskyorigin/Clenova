@@ -613,6 +613,7 @@ public final class MainActivity extends Activity {
             if(title.equals("Photo Compressor")){startActivity(new android.content.Intent(this,PhotoCompressorActivity.class));return;}
             if(title.equals("Contacts Cleaner")){startActivity(new android.content.Intent(this,ContactsCleanerActivity.class));return;}
             if(title.equals("App Manager")){startActivity(new android.content.Intent(this,AppManagerActivity.class));return;}
+            if(title.equals("Speaker Cleaner")){startActivity(new android.content.Intent(this,SpeakerCleanerActivity.class));return;}
             privacyDialog().setTitle(tr(title))
                 .setMessage(tr("This tool is not available yet. No action has been performed."))
                 .setPositiveButton(tr("Done"),null).show();
