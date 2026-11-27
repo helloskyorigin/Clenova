@@ -15,3 +15,5 @@ Use Agent menu > Connect AI (private test) in the app. Enter your HTTPS origin e
 This is a private developer relay, not production public authentication. Before public release use per-user or device-attested short-lived authentication, durable rate limiting, quotas, monitoring, privacy/retention review and abuse testing. Scope checks plus prompt and output validation reduce unrelated responses but cannot guarantee perfect semantic filtering. Model output is advisory: no model tool execution. The Android user must tap a review action and separately approve actual cleanup.
 
 No deployment or Groq key is supplied by this repository. Local supported commands work without the relay.
+
+The Android app keeps one local temporary conversation (maximum 48 messages). It expires after 24 hours of inactivity; when the app is closed, expired data is cleared on next launch. New conversation clears the existing one. The relay does not persist chat history. Provider processing and retention terms remain separate.

@@ -33,12 +33,28 @@ grep -F 'Ask Agent...' build/agent-evidence/chat.xml
 if grep -F 'content-desc="Tools"' build/agent-evidence/chat.xml; then exit 1; fi
 tap build/agent-evidence/chat.xml 'Agent menu'
 dump drawer
-grep -F 'Recent conversations' build/agent-evidence/drawer.xml
+grep -F 'Temporary conversation' build/agent-evidence/drawer.xml
+if grep -F 'Recent conversations' build/agent-evidence/drawer.xml; then exit 1; fi
 adb shell input keyevent 4
 sleep 1
 dump restored
-tap build/agent-evidence/restored.xml 'New conversation'
+adb shell am force-stop com.clenova.app
+adb shell am start -W -n com.clenova.app/.MainActivity
+sleep 2
+dump relaunched
+tap build/agent-evidence/relaunched.xml Agent
+dump resumed
+grep -F 'Review duplicates' build/agent-evidence/resumed.xml
+tap build/agent-evidence/resumed.xml 'New conversation'
 dump new
 grep -F 'How can I help?' build/agent-evidence/new.xml
+adb shell am force-stop com.clenova.app
+adb shell am start -W -n com.clenova.app/.MainActivity
+sleep 2
+dump cleared_home
+tap build/agent-evidence/cleared_home.xml Agent
+dump cleared
+grep -F 'How can I help?' build/agent-evidence/cleared.xml
+if grep -F 'Review duplicates' build/agent-evidence/cleared.xml; then exit 1; fi
 adb logcat -d -s AndroidRuntime:E > build/agent-evidence/runtime.log
 if grep -F 'FATAL EXCEPTION' build/agent-evidence/runtime.log; then exit 1; fi

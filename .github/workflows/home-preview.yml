@@ -31,6 +31,10 @@ jobs:
         run: |
           javac -d /tmp/clenova-tests app/src/main/java/com/clenova/app/AgentActions.java tests/AgentActionsTest.java
           java -cp /tmp/clenova-tests com.clenova.app.AgentActionsTest
+      - name: Verify Agent session expiry
+        run: |
+          javac -d /tmp/clenova-tests app/src/main/java/com/clenova/app/AgentSessionPolicy.java tests/AgentSessionPolicyTest.java
+          java -cp /tmp/clenova-tests com.clenova.app.AgentSessionPolicyTest
       - name: Test private relay (mock provider)
         run: node server/relay.test.mjs
       - name: Install required SDK packages

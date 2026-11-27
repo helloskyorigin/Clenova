@@ -42,6 +42,8 @@ public final class MainActivity extends Activity {
     private static final int REQUEST_AGENT_MEDIA=104;
     private AgentChatStore agentChats;
     private AgentChatStore.Chat activeChat;
+    private final android.os.Handler agentSessionHandler=new android.os.Handler(android.os.Looper.getMainLooper());
+    private final Runnable agentExpiry=()->{boolean expired=expireAgentSession();if(expired&&agentVisible&&!settingsVisible){if(agentDrawer!=null)agentDrawer.dismiss();showAgent();}else scheduleAgentExpiry();};
     private SmartMediaScan agentScan;
     private SmartMediaScan.Result agentLiveResult;
     private String agentResultChat="",agentStage="",relayEndpoint="",relayToken="";
@@ -142,7 +144,7 @@ public final class MainActivity extends Activity {
     @Override public void onCreate(Bundle state) {
         super.onCreate(state);
         prefs=new AppPreferences(this);
-        agentChats=new AgentChatStore(this);if(state!=null)activeChat=agentChats.get(state.getString("agent_chat",""));
+        agentChats=new AgentChatStore(this);activeChat=agentChats.current();
         protectedFolders=new ProtectedFolders(this);
         protectedFiles=new ProtectedFiles(this);
         history=new ActivityHistory(this);
@@ -183,7 +185,7 @@ public final class MainActivity extends Activity {
     @Override protected void onSaveInstanceState(Bundle state){
         super.onSaveInstanceState(state);
         state.putBoolean("storage_visible",storageVisible);
-        state.putBoolean("clean_visible",cleanVisible);state.putBoolean("agent_visible",agentVisible);state.putBoolean("agent_shortcut",agentShortcut);if(activeChat!=null)state.putString("agent_chat",activeChat.id);
+        state.putBoolean("clean_visible",cleanVisible);state.putBoolean("agent_visible",agentVisible);state.putBoolean("agent_shortcut",agentShortcut);
         state.putBoolean("large_files_mode",largeFilesMode);state.putBoolean("clutter_mode",clutterMode);
         state.putBoolean("dup_trash_pending",dupTrashPending);
         state.putInt("clean_scroll_y",cleanScroll==null?cleanScrollY:cleanScroll.getScrollY());
@@ -220,7 +222,7 @@ public final class MainActivity extends Activity {
         }
     }
     @Override protected void onStop(){
-        super.onStop();agentForeground=false;agentLiveResult=null;agentResultChat="";
+        super.onStop();agentForeground=false;agentSessionHandler.removeCallbacks(agentExpiry);agentLiveResult=null;agentResultChat="";
         if(agentScan!=null){agentScan.cancel();agentScan=null;appendAgent(false,"Analysis interrupted. Start a fresh review when you return.",-1);}
         if(agentCloudBusy){agentCloudBusy=false;agentGeneration++;appendAgent(false,"Request interrupted. Please send it again.",-1);}
         stopRealVideo();
@@ -232,6 +234,7 @@ public final class MainActivity extends Activity {
         else if(scanResult!=null){scanResult=null;if(cleanVisible&&!settingsVisible)showClean();}
     }
     @Override protected void onDestroy(){
+        agentSessionHandler.removeCallbacks(agentExpiry);
         if(agentScan!=null){agentScan.cancel();agentScan=null;}agentGeneration++;if(agentDrawer!=null)agentDrawer.dismiss();relayToken="";
         if(cleanupAnimation!=null){
             cleanupAnimation.removeAllListeners();cleanupAnimation.removeAllUpdateListeners();cleanupAnimation.cancel();
@@ -363,11 +366,29 @@ public final class MainActivity extends Activity {
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_UNSPECIFIED);
     }
     private boolean agentBusy(){return agentScan!=null||agentCloudBusy||agentPermissionPending;}
+    private boolean expireAgentSession(){
+        if(activeChat==null||agentChats==null||!AgentSessionPolicy.expired(activeChat.lastActivity,System.currentTimeMillis()))return false;
+        clearAgentSession();return true;
+    }
+    private void clearAgentSession(){
+        agentSessionHandler.removeCallbacks(agentExpiry);
+        if(agentScan!=null){agentScan.cancel();agentScan=null;}agentCloudBusy=false;agentGeneration++;agentPermissionPending=false;
+        agentLiveResult=null;agentResultChat="";scanResult=null;agentTaskVisible=false;
+        if(agentChats!=null&&!agentChats.clear())folderToast("Could not clear saved conversation");
+        activeChat=null;
+    }
+    private void scheduleAgentExpiry(){
+        agentSessionHandler.removeCallbacks(agentExpiry);
+        if(agentForeground&&activeChat!=null)agentSessionHandler.postDelayed(agentExpiry,Math.max(1,AgentSessionPolicy.remaining(activeChat.lastActivity,System.currentTimeMillis())));
+    }
     private void appendAgent(boolean user,String message,int action){
-        if(activeChat==null)activeChat=agentChats.create();
-        if(!agentChats.add(activeChat,user,message,action))folderToast("Could not save conversation history");
+        expireAgentSession();
+        if(activeChat==null){if(!user)return;activeChat=agentChats.create();}
+        if(!agentChats.add(activeChat,user,message,action))folderToast("Could not save temporary conversation");
+        scheduleAgentExpiry();
     }
     private void showAgent(){
+        expireAgentSession();scheduleAgentExpiry();
         if(runningScan!=null){runningScan.cancel();runningScan=null;}
         if(downloadsSignal!=null){downloadsSignal.cancel();downloadsSignal=null;}downloadsGeneration++;
         if(unusedSignal!=null){unusedSignal.cancel();unusedSignal=null;}unusedGeneration++;
@@ -437,7 +458,7 @@ public final class MainActivity extends Activity {
     private void leaveAgentForTool(){agentLiveResult=null;agentResultChat="";agentVisible=false;agentTaskVisible=false;agentTaskOrigin=true;showClean();}
     private void openAgentMediaReview(int category){if(agentLiveResult==null)return;scanResult=agentLiveResult;leaveAgentForTool();if(category==0)openRealDuplicates(false);else if(category==1)openRealVideos(false);else if(category==2)openRealScreenshots(false);else openRealSimilar(false);}
     private void submitAgentCommand(String text){
-        if(agentBusy())return;String request=text.trim();if(request.isEmpty())return;int task=AgentActions.route(request);
+        expireAgentSession();if(agentBusy())return;String request=text.trim();if(request.isEmpty())return;int task=AgentActions.route(request);
         if(task>=0){openAgentTask(task,request);return;}
         boolean fresh=activeChat==null;appendAgent(true,request,-1);agentTransition=fresh;agentLiveResult=null;agentResultChat="";
         if(!relayEndpoint.isEmpty()&&!relayToken.isEmpty()){agentCloudBusy=true;final int generation=++agentGeneration;final String endpoint=relayEndpoint,token=relayToken;final org.json.JSONArray context=new org.json.JSONArray();java.util.List<String> prior=new java.util.ArrayList<>();for(int i=activeChat.messages.size()-2;i>=0&&prior.size()<3;i--){AgentChatStore.Message msg=activeChat.messages.get(i);if(msg.user&&msg.text.length()<=600)prior.add(0,msg.text);}for(String item:prior)context.put(item);showAgent();
@@ -445,11 +466,11 @@ public final class MainActivity extends Activity {
         appendAgent(false,"I can help with phone storage, photos, downloads, unused apps and file protection. Other topics aren't supported. Try a supported cleanup request.",-1);showAgent();
     }
     private void openAgentTask(int task,String request){
-        if(agentBusy())return;boolean fresh=activeChat==null;appendAgent(true,request,-1);agentLiveResult=null;agentResultChat="";appendAgent(false,AgentActions.DESCRIPTIONS[task]+" Nothing will be removed without your approval.",task);agentTransition=fresh;showAgent();
+        expireAgentSession();if(agentBusy())return;boolean fresh=activeChat==null;appendAgent(true,request,-1);agentLiveResult=null;agentResultChat="";appendAgent(false,AgentActions.DESCRIPTIONS[task]+" Nothing will be removed without your approval.",task);agentTransition=fresh;showAgent();
     }
     private boolean agentHasAccess(int task){return task==5?SmartMediaScan.hasVideoAccess(this):task==1||task==6||task==7?SmartMediaScan.hasPhotoAccess(this):SmartMediaScan.hasAccess(this);}
     private void startAgentTask(int task){
-        if(agentBusy())return;
+        if(expireAgentSession()){showAgent();return;}if(agentBusy()||activeChat==null)return;
         if(task==0||task==1||task==5||task==6||task==7){agentScanTask=task;if(agentHasAccess(task)){beginAgentScan(task);return;}
             privacyDialog().setTitle(tr("Media access needed")).setMessage(tr("Clenova only scans media you allow. Nothing is removed.")).setNegativeButton(tr("Cancel"),null).setPositiveButton(tr("Continue"),(dialog,w)->{agentPermissionPending=true;
                 if(android.os.Build.VERSION.SDK_INT>=34){String[] requested=task==5?new String[]{android.Manifest.permission.READ_MEDIA_VIDEO,android.Manifest.permission.READ_MEDIA_VISUAL_USER_SELECTED}:task==0?new String[]{android.Manifest.permission.READ_MEDIA_IMAGES,android.Manifest.permission.READ_MEDIA_VIDEO,android.Manifest.permission.READ_MEDIA_VISUAL_USER_SELECTED}:new String[]{android.Manifest.permission.READ_MEDIA_IMAGES,android.Manifest.permission.READ_MEDIA_VISUAL_USER_SELECTED};requestPermissions(requested,REQUEST_AGENT_MEDIA);}
@@ -468,7 +489,7 @@ public final class MainActivity extends Activity {
         }catch(Exception ex){runOnUiThread(()->{if(agentScan!=job||isDestroyed())return;agentScan=null;appendAgent(false,"Analysis could not finish. No files were removed.",-1);showAgent();});}},"Clenova-agent-scan").start();
     }
     private void cancelAgentWork(){if(agentScan!=null){agentScan.cancel();agentScan=null;appendAgent(false,"Analysis cancelled. Nothing was removed.",-1);}if(agentCloudBusy){agentCloudBusy=false;agentGeneration++;appendAgent(false,"Request cancelled.",-1);}if(agentVisible&&!isDestroyed())showAgent();}
-    private void newAgentChat(){if(agentBusy()){folderToast("Cancel the current task first");return;}activeChat=null;agentLiveResult=null;agentResultChat="";agentTransition=true;showAgent();}
+    private void newAgentChat(){if(agentBusy()){folderToast("Cancel the current task first");return;}clearAgentSession();agentTransition=true;showAgent();}
     private void showAgentDrawer(){
         if(agentDrawer!=null)agentDrawer.dismiss();android.app.Dialog dialog=new android.app.Dialog(this);agentDrawer=dialog;dialog.requestWindowFeature(android.view.Window.FEATURE_NO_TITLE);
         LinearLayout layout=column();layout.setBackgroundColor(WHITE);pad(layout,16,16);LinearLayout header=row();weight(header,txt("Agent",25,INK,700));add(header,agentHeaderButton("close","Close",dialog::dismiss),dp(40),dp(40));add(layout,header,-1,-2);space(layout,12);
@@ -476,10 +497,9 @@ public final class MainActivity extends Activity {
         scanButton(layout,"Activity history",false,()->{if(agentBusy())return;dialog.dismiss();restoreAgentWindow();agentShortcut=true;historyFilter=0;historyScrollY=0;openHistory();});
         scanButton(layout,"Agent settings",false,()->{if(agentBusy())return;dialog.dismiss();restoreAgentWindow();agentShortcut=true;openAgentPreferences();});
         scanButton(layout,relayToken.isEmpty()?"Connect AI (private test)":"Disconnect AI",false,()->{if(agentBusy())return;dialog.dismiss();if(!relayToken.isEmpty()){relayEndpoint="";relayToken="";folderToast("AI disconnected");}else configureAgentRelay();});
-        space(layout,12);add(layout,txt("Recent conversations",13,GRAY,600),-1,-2);space(layout,8);
-        ScrollView scroll=new ScrollView(this);LinearLayout list=column();scroll.addView(list,new ScrollView.LayoutParams(-1,-2));layout.addView(scroll,new LinearLayout.LayoutParams(-1,0,1f));
-        if(agentChats.list().isEmpty())add(list,txt("No conversations yet",13,GRAY,400),-1,-2);
-        for(AgentChatStore.Chat chat:agentChats.list()){LinearLayout line=row();TextView title=txt(chat.title(),14,INK,500);title.setMaxLines(2);tap(title,WHITE,8,()->{if(agentBusy())return;dialog.dismiss();activeChat=chat;agentLiveResult=null;agentResultChat="";showAgent();});weight(line,title);FrameLayout delete=agentHeaderButton("trash","Delete conversation",()->{if(agentBusy())return;privacyDialog().setTitle(tr("Delete conversation?")).setNegativeButton(tr("Cancel"),null).setPositiveButton(tr("Delete"),(d,w)->{if(!agentChats.delete(chat))folderToast("Could not save history");if(activeChat==chat)activeChat=null;dialog.dismiss();showAgent();}).show();});add(line,delete,dp(42),dp(42));add(list,line,-1,dp(52));thinRule(list);}
+        space(layout,18);add(layout,txt("Temporary conversation",14,INK,600),-1,-2);space(layout,6);
+        add(layout,txt("Your current chat stays on this device and expires after 24 hours of inactivity. Starting a new chat clears it.",13,GRAY,400),-1,-2);
+        layout.addView(new View(this),new LinearLayout.LayoutParams(1,0,1f));
         space(layout,8);scanButton(layout,"Back to Home",false,()->{if(agentBusy())return;dialog.dismiss();showHome();});
         dialog.setContentView(layout);dialog.setOnDismissListener(v->{if(agentDrawer==dialog)agentDrawer=null;});android.view.Window window=dialog.getWindow();if(window!=null){window.setBackgroundDrawableResource(android.R.color.transparent);window.setGravity(Gravity.START|Gravity.CENTER_VERTICAL);window.addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);}dialog.show();if(window!=null)window.setLayout(Math.min(dp(320),(int)(getResources().getDisplayMetrics().widthPixels*.86)), -1);
     }
@@ -1658,7 +1678,7 @@ public final class MainActivity extends Activity {
         settingsVisible=true;agentPrefsVisible=true;setContentView(agentPreferencesScreen());
     }
     @Override protected void onResume(){
-        super.onResume();agentForeground=true;if(agentVisible&&!settingsVisible&&!agentPermissionPending&&!agentTaskOrigin&&activeChat!=null&&!agentCloudBusy&&agentScan==null)showAgent();
+        super.onResume();agentForeground=true;boolean expired=expireAgentSession();scheduleAgentExpiry();if(agentVisible&&!settingsVisible&&!agentPermissionPending&&!agentTaskOrigin&&(expired||activeChat!=null)&&!agentCloudBusy&&agentScan==null)showAgent();
         if(unusedExternal){unusedExternal=false;if(unusedVisible&&!unusedUninstallPending)refreshUnusedApps();}
         if(downloadsOpening){downloadsOpening=false;if(downloadsVisible)refreshDownloads();}
         if(permissionsVisible&&devicePermissions!=null)openAppPermissions();
@@ -2265,7 +2285,7 @@ public final class MainActivity extends Activity {
             .setNegativeButton(tr("Cancel"),null).setPositiveButton(tr("Reset"),(d,w)->resetClenovaData()).show();
     }
     private void resetClenovaData(){
-        boolean ok=LocalAppData.reset(this);agentChats=new AgentChatStore(this);activeChat=null;agentLiveResult=null;agentResultChat="";relayEndpoint="";relayToken="";agentGeneration++;
+        agentSessionHandler.removeCallbacks(agentExpiry);boolean ok=LocalAppData.reset(this);agentChats=new AgentChatStore(this);activeChat=null;agentLiveResult=null;agentResultChat="";relayEndpoint="";relayToken="";agentGeneration++;
         if(cleanupAnimation!=null){cleanupAnimation.removeAllListeners();cleanupAnimation.removeAllUpdateListeners();cleanupAnimation.cancel();cleanupAnimation=null;}
         cleanup=null;cleanupCategoryCounts=null;cleanupEventId=null;reviewPlan=null;
         duplicateDraft=null;similarDraft=null;videoDraft=null;
@@ -3099,7 +3119,7 @@ public final class MainActivity extends Activity {
         if(settingsVisible || storageVisible){returnToDashboard();return;}
         if(completionVisible){showHome();return;}
         if(agentVisible&&agentBusy()){cancelAgentWork();return;}
-        if(agentTaskVisible||agentVisible&&activeChat!=null){activeChat=null;agentLiveResult=null;agentResultChat="";showAgent();return;}
+        if(agentTaskVisible||agentVisible&&activeChat!=null){showHome();return;}
         if(agentVisible){showHome();return;}
         if(cleanVisible){if(agentTaskOrigin)showAgent();else showHome();return;}
         if (videoViewing) leaveVideos(false); else if (similarViewing) leaveSimilar(false); else if (duplicateViewing) leaveDuplicates(false); else if (reviewing) showHome(); else super.onBackPressed();
