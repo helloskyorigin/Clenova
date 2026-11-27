@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
+source "$(dirname "${BASH_SOURCE[0]}")/onboarding-smoke-helper.sh"
 mkdir -p build/home-evidence
 adb install -r app/build/outputs/apk/debug/app-debug.apk
 adb shell wm size 1080x2400
@@ -7,6 +8,7 @@ adb shell wm density 420
 adb shell am force-stop com.clenova.app
 adb shell am start -W -n com.clenova.app/.MainActivity
 sleep 2
+onboarding_continue home-1
 adb shell uiautomator dump /sdcard/home.xml
 adb pull /sdcard/home.xml build/home-evidence/home.xml
 adb exec-out screencap -p > build/home-evidence/home.png
@@ -166,6 +168,7 @@ adb shell wm density 320
 adb shell am force-stop com.clenova.app
 adb shell am start -W -n com.clenova.app/.MainActivity
 sleep 2
+onboarding_continue home-2
 adb shell uiautomator dump /sdcard/home-compact.xml
 adb pull /sdcard/home-compact.xml build/home-evidence/home-compact.xml
 adb exec-out screencap -p > build/home-evidence/home-compact.png
