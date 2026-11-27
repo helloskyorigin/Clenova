@@ -79,3 +79,6 @@ Settings > Rate Clenova opens an animated native bottom sheet with optional 1–
 
 ## Privacy policy
 Settings > Privacy policy opens the native offline preview policy (v0.1, revised 2026-11-27), with eight readable sections, five languages, privacy summary, selectable policy text, email contact and scroll restoration. Claims describe current preview data storage, picker permissions, simulated cleanup, external services and export destinations. No online policy link yet, per product direction; add only after publishing the real page. Review publisher identity, contact, retention and final data practices before production release.
+
+## Terms of use
+Settings > Terms of use opens a native offline preview terms document (v0.1, revised 2026-11-27) using the shared legal page layout, with eight localized sections, selectable text, support email, and scroll restoration. Explicitly distinguishes simulated cleanup from future real cleanup, no paid features in the preview, and preserves non-excludable consumer rights. No online link until a real page is published. Final publisher identity, jurisdiction, release practices and billing terms require review before public launch.
