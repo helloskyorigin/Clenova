@@ -25,10 +25,10 @@ public final class SpeakerCleanerActivity extends Activity implements SpeakerPla
     @Override public void onCreate(Bundle saved){
         super.onCreate(saved);prefs=new AppPreferences(this);
         dark=prefs.appearance().equals("Dark")||(prefs.appearance().equals("System")&&(getResources().getConfiguration().uiMode&Configuration.UI_MODE_NIGHT_MASK)==Configuration.UI_MODE_NIGHT_YES);
-        bg=dark?0xff141416:0xfff5f5f7;card=dark?0xff242426:0xffffffff;ink=dark?0xfff4f4f6:0xff111111;gray=dark?0xffa2a2aa:0xff86868b;blue=dark?0xff409cff:0xff007aff;pale=dark?0xff19334c:0xffe6f0ff;green=dark?0xff61d883:0xff249d42;red=dark?0xffff6961:0xffe43e35;
+        bg=dark?0xff141416:0xfff5f5f7;card=dark?0xff242426:0xffffffff;ink=dark?0xfff4f4f6:0xff111111;gray=dark?0xffa2a2aa:UiPolish.LIGHT_MUTED;blue=dark?0xff409cff:0xff007aff;pale=dark?0xff19334c:0xffe6f0ff;green=dark?0xff61d883:0xff249d42;red=dark?0xffff6961:0xffe43e35;
         if(saved!=null){selected=saved.getBoolean("deep")?SpeakerTone.Mode.DEEP:SpeakerTone.Mode.QUICK;gain=Math.max(.15f,Math.min(.85f,saved.getFloat("gain",.55f)));}
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,WindowManager.LayoutParams.FLAG_FULLSCREEN);getWindow().setNavigationBarColor(bg);
-        if(Build.VERSION.SDK_INT>=27&&!dark)getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR);
+        if(Build.VERSION.SDK_INT>=27)getWindow().getDecorView().setSystemUiVisibility(dark?0:View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR);
         setVolumeControlStream(AudioManager.STREAM_MUSIC);playback=new SpeakerPlayback(this,this);showHome();
     }
     @Override protected void onSaveInstanceState(Bundle out){super.onSaveInstanceState(out);out.putBoolean("deep",selected==SpeakerTone.Mode.DEEP);out.putFloat("gain",gain);}
@@ -42,7 +42,7 @@ public final class SpeakerCleanerActivity extends Activity implements SpeakerPla
     private void gap(LinearLayout p,int n){add(p,new View(this),dp(n),dp(n));}
     private TextView text(String s,int size,int tint,boolean bold){TextView t=new TextView(this);t.setText(tr(s));t.setTextSize(size);t.setTextColor(tint);t.setIncludeFontPadding(false);t.setTypeface(Typeface.create("sans-serif",bold?Typeface.BOLD:Typeface.NORMAL));return t;}
     private TextView center(String s,int size,int tint,boolean bold){TextView t=text(s,size,tint,bold);t.setGravity(Gravity.CENTER);return t;}
-    private TextView button(String s,int tint,int fill,Runnable action){TextView t=center(s,15,tint,true);t.setBackground(shape(fill,26));t.setPadding(dp(10),dp(8),dp(10),dp(8));t.setClickable(true);t.setFocusable(true);t.setOnClickListener(v->{if(!destroyed&&foreground)action.run();});return t;}
+    private TextView button(String s,int tint,int fill,Runnable action){TextView t=center(s,15,tint,true);t.setBackground(shape(UiPolish.buttonFill(fill,tint),26));t.setPadding(dp(10),dp(8),dp(10),dp(8));t.setClickable(true);t.setFocusable(true);t.setOnClickListener(v->{if(!destroyed&&foreground)action.run();});return t;}
     private LinearLayout block(){LinearLayout l=col();l.setBackground(shape(card,22));l.setPadding(dp(14),dp(12),dp(14),dp(12));return l;}
     private LinearLayout root(){LinearLayout l=col();l.setBackgroundColor(bg);l.setPadding(dp(18),dp(10),dp(18),dp(12));return l;}
     private LinearLayout body(LinearLayout l){ScrollView s=new ScrollView(this);s.setVerticalScrollBarEnabled(false);s.setOverScrollMode(View.OVER_SCROLL_NEVER);LinearLayout b=col();s.addView(b,new ScrollView.LayoutParams(-1,-2));l.addView(s,new LinearLayout.LayoutParams(-1,0,1));return b;}

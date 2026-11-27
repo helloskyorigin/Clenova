@@ -48,10 +48,10 @@ public final class SwipePhotosActivity extends Activity {
         prefs=new AppPreferences(this);
         dark=prefs.appearance().equals("Dark")||(prefs.appearance().equals("System")&&(getResources().getConfiguration().uiMode&Configuration.UI_MODE_NIGHT_MASK)==Configuration.UI_MODE_NIGHT_YES);
         bg=dark?0xff141416:0xfff5f5f7;card=dark?0xff242426:0xffffffff;ink=dark?0xfff4f4f6:0xff111111;
-        muted=dark?0xffa2a2aa:0xff86868b;blue=dark?0xff409cff:0xff007aff;pale=dark?0xff19334c:0xffe6f0ff;red=dark?0xffff6961:0xffff453a;green=dark?0xff61d883:0xff249d42;
+        muted=dark?0xffa2a2aa:UiPolish.LIGHT_MUTED;blue=dark?0xff409cff:0xff007aff;pale=dark?0xff19334c:0xffe6f0ff;red=dark?0xffff6961:0xffff453a;green=dark?0xff61d883:0xff249d42;
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,WindowManager.LayoutParams.FLAG_FULLSCREEN);
         getWindow().setNavigationBarColor(bg);
-        if(Build.VERSION.SDK_INT>=27&&!dark)getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR);
+        if(Build.VERSION.SDK_INT>=27)getWindow().getDecorView().setSystemUiVisibility(dark?0:View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR);
         approvedPending=state!=null&&state.getBoolean("trash_pending");cleanupReceipt=CleanupReceipt.restore(state==null?null:state.getBundle("cleanup_receipt"));
         if(approvedPending){status("Waiting for Android approval",null);return;}
         open();
@@ -151,6 +151,7 @@ public final class SwipePhotosActivity extends Activity {
             LinearLayout info=row();weight(info,label("Modified "+date(current)+(eligible(current)?"":" · Protected / read-only"),12,muted,false));TextView zoom=button("⤢",blue,card,()->showPreview(current));zoom.setContentDescription("Expand photo");add(info,zoom,dp(44),dp(44));add(l,info,-1,dp(44));
             controls=row();controls.setGravity(Gravity.CENTER);removeButton=decisionControl(controls,"×","Remove",red,card,REMOVE);gap(controls,24);decisionControl(controls,"»","Skip",muted,card,SKIP);gap(controls,24);decisionControl(controls,"✓","Keep",0xffffffff,0xff34c759,KEEP);add(l,controls,-1,-2);
             removeButton.setEnabled(false);removeButton.setAlpha(.35f);
+            photo.setOnClickListener(v->{if(previewReady&&!animating)showPreview(current);});photo.setFocusable(true);
             photo.setOnTouchListener((v,event)->gesture(event,current));
         }
         gap(l,10);List<SmartMediaScan.Item> selected=selected();LinearLayout bottom=row();bottom.setPadding(dp(12),dp(9),dp(12),dp(9));bottom.setBackground(rounded(card,20));
@@ -184,19 +185,20 @@ public final class SwipePhotosActivity extends Activity {
         switch(e.getActionMasked()){
             case MotionEvent.ACTION_DOWN:downX=e.getRawX();downY=e.getRawY();dragging=false;return true;
             case MotionEvent.ACTION_MOVE:float dx=e.getRawX()-downX;if(Math.abs(dx)>dp(12)&&Math.abs(dx)>Math.abs(e.getRawY()-downY))dragging=true;if(dragging){photo.setTranslationX(dx*.75f);photo.setRotation(dx/dp(18));photo.setAlpha(Math.max(.5f,1-Math.abs(dx)/(float)Math.max(1,photo.getWidth())));swipeHint.setText(dx>0?"KEEP":eligible(current)?"REMOVE":"PROTECTED");swipeHint.setBackground(rounded(dx>0?0xff249d42:eligible(current)?0xffe23c32:0xff777777,10));swipeHint.setVisibility(View.VISIBLE);}return true;
-            case MotionEvent.ACTION_UP:float delta=e.getRawX()-downX;if(dragging&&Math.abs(delta)>dp(82)){if(delta>0){decide(KEEP);return true;}if(eligible(current)){decide(REMOVE);return true;}toast("This photo is protected or read-only");}else if(!dragging)showPreview(current);
+            case MotionEvent.ACTION_UP:float delta=e.getRawX()-downX;if(dragging&&Math.abs(delta)>dp(82)){if(delta>0){decide(KEEP);return true;}if(eligible(current)){decide(REMOVE);return true;}toast("This photo is protected or read-only");}else if(!dragging)photo.performClick();
                 resetDrag();return true;
             case MotionEvent.ACTION_CANCEL:resetDrag();return true;
             default:return true;
         }
     }
-    private void resetDrag(){if(swipeHint!=null)swipeHint.setVisibility(View.GONE);photo.animate().translationX(0).rotation(0).alpha(1).setDuration(150).start();dragging=false;}
+    private void resetDrag(){if(swipeHint!=null)swipeHint.setVisibility(View.GONE);if(android.animation.ValueAnimator.areAnimatorsEnabled())photo.animate().translationX(0).rotation(0).alpha(1).setDuration(150).start();else{photo.setTranslationX(0);photo.setRotation(0);photo.setAlpha(1);}dragging=false;}
     private void decide(int action){
         if(animating||reviewing||shown==null||loading)return;SmartMediaScan.Item current=shown;
         if(action==REMOVE&&(!previewReady||!eligible(current))){toast("Review an eligible photo first");return;}
         if(action==REMOVE&&selected().size()>=MAX_SELECTION){toast("Review up to 100 selected photos first");resetDrag();return;}
         decisions.put(key(current),action);undo.addLast(current);animating=true;if(swipeHint!=null&&action!=SKIP){swipeHint.setText(action==KEEP?"KEEP":"REMOVE");swipeHint.setBackground(rounded(action==KEEP?0xff249d42:0xffe23c32,10));swipeHint.setVisibility(View.VISIBLE);}photo.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP);
         final int token=imageEpoch;float direction=action==REMOVE?-1:action==KEEP?1:0;
+        if(!android.animation.ValueAnimator.areAnimatorsEnabled()){if(!destroyed&&token==imageEpoch)render();return;}
         photo.animate().translationX(direction*photo.getWidth()).rotation(direction*12).alpha(0).setDuration(160).withEndAction(()->{if(!destroyed&&token==imageEpoch)render();}).start();
     }
     private void undoLast(){if(animating||undo.isEmpty())return;SmartMediaScan.Item last=undo.removeLast();decisions.remove(key(last));month=monthOf(last);render();}

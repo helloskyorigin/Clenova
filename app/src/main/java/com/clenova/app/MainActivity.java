@@ -467,7 +467,7 @@ public final class MainActivity extends Activity {
         BG=dark?0xff141416:0xfff5f5f7;
         WHITE=dark?0xff242426:Color.WHITE;
         INK=dark?0xfff4f4f6:0xff111111;
-        GRAY=dark?0xffa2a2aa:0xff86868b;
+        GRAY=dark?0xffa2a2aa:UiPolish.LIGHT_MUTED;
         BLUE=dark?0xff409cff:0xff007aff;
         PALE=dark?0xff19334c:0xffe6f0ff;
         GREEN=dark?0xff61d883:0xff27984d;
@@ -495,8 +495,8 @@ public final class MainActivity extends Activity {
         shape.setColor(surface(color)); shape.setCornerRadius(dp(radius)); return shape;
     }
     private void tap(View view, int color, float radius, Runnable action) {
-        view.setBackground(new RippleDrawable(ColorStateList.valueOf(0x19000000),
-                round(color,radius), round(WHITE,radius)));
+        view.setBackground(new RippleDrawable(ColorStateList.valueOf(dark?0x26ffffff:0x19000000),
+                round(UiPolish.actionFill(color),radius), round(WHITE,radius)));
         view.setClickable(true); view.setFocusable(true);
         view.setOnClickListener(w -> {
             w.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP);
@@ -617,7 +617,7 @@ public final class MainActivity extends Activity {
         space(root,8);addAgentComposer(root);
         if(activeChat==null){space(root,8);add(root,navigation(),-1,dp(64));}
         root.setFocusableInTouchMode(true);root.requestFocus();setContentView(root);
-        if(agentTransition){agentTransition=false;body.setAlpha(0);body.animate().alpha(1).setDuration(200).start();}
+        if(agentTransition){agentTransition=false;if(ValueAnimator.areAnimatorsEnabled()){body.setAlpha(0);body.animate().alpha(1).setDuration(200).start();}}
     }
     private void showAgentWelcome(LinearLayout body){
         LinearLayout hero=column();hero.setGravity(Gravity.CENTER_HORIZONTAL);add(hero,new AgentOrb(this),dp(146),dp(124));space(hero,8);
@@ -627,7 +627,6 @@ public final class MainActivity extends Activity {
             add(setup,txt("Configure your Agent, or keep using manual requests.",12,GRAY,400),-1,-2);space(setup,10);
             scanButton(setup,"Activate Agent",true,()->showAgentSetup(true,false));add(body,setup,-1,-2);space(body,16);
         }
-        if(prefs.autopilot()){LinearLayout background=card();add(background,txt("Autopilot",14,INK,600),-1,-2);space(background,5);add(background,txt(AutopilotScheduler.status(this,prefs),12,GRAY,400),-1,-2);String breakdown=AutopilotScheduler.breakdown(this,prefs);if(!breakdown.isEmpty()){space(background,5);add(background,txt(breakdown,12,INK,500),-1,-2);}space(background,8);scanButton(background,"Review current media",false,()->openAgentTask(0,"Review current media"));add(body,background,-1,-2);space(body,12);}
         add(body,txt("Suggested for your phone",12,GRAY,500),-1,-2);space(body,9);
         long free=-1,total=-1;try{android.os.StatFs stat=new android.os.StatFs(getFilesDir().getAbsolutePath());free=stat.getAvailableBytes();total=stat.getTotalBytes();}catch(RuntimeException ignored){}
         boolean low=free>=0&&total>0&&free/(double)total<0.15;
@@ -637,6 +636,7 @@ public final class MainActivity extends Activity {
         add(body,agentSuggestion("sparkles",spaceTitle,0),-1,dp(54));space(body,8);
         add(body,agentSuggestion("images",dupTitle,1),-1,dp(54));space(body,8);
         add(body,agentSuggestion("apps",UnusedAppScan.allowed(this)?"Find apps I rarely use":"Review unused apps",2),-1,dp(54));
+        if(prefs.autopilot()){space(body,12);LinearLayout background=card();add(background,txt("Autopilot",14,INK,600),-1,-2);space(background,5);add(background,txt(AutopilotScheduler.status(this,prefs),12,GRAY,400),-1,-2);String breakdown=AutopilotScheduler.breakdown(this,prefs);if(!breakdown.isEmpty()){space(background,5);add(background,txt(breakdown,12,INK,500),-1,-2);}space(background,8);scanButton(background,"Review current media",false,()->openAgentTask(0,"Review current media"));add(body,background,-1,-2);space(body,12);}
     }
     private void addAgentComposer(LinearLayout root){
         LinearLayout composer=row();composer.setBackground(round(WHITE,30));pad(composer,11,5);
@@ -732,7 +732,7 @@ public final class MainActivity extends Activity {
 
     private final class AgentOrb extends View{
         private final Paint paint=new Paint(Paint.ANTI_ALIAS_FLAG);
-        AgentOrb(Context c){super(c);setContentDescription("Agent");}
+        AgentOrb(Context c){super(c);setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_NO);}
         @Override protected void onDraw(Canvas c){
             super.onDraw(c);float scale=Math.min(getWidth()/146f,getHeight()/124f);
             c.save();c.translate((getWidth()-146*scale)/2,(getHeight()-124*scale)/2);c.scale(scale,scale);
@@ -1974,9 +1974,9 @@ public final class MainActivity extends Activity {
         }
         // Overlay the anchor row; do not resize or expand Settings.
         popup.showAsDropDown(anchor,0,-anchor.getHeight(),Gravity.END);
-        menu.setAlpha(0f);menu.setScaleX(.97f);menu.setScaleY(.97f);
-        menu.animate().alpha(1f).scaleX(1f).scaleY(1f).setDuration(140).start();
+        animatePreferenceMenu(menu);
     }
+    private void animatePreferenceMenu(View menu){if(!ValueAnimator.areAnimatorsEnabled())return;menu.setAlpha(0f);menu.setScaleX(.97f);menu.setScaleY(.97f);menu.animate().alpha(1f).scaleX(1f).scaleY(1f).setDuration(140).start();}
     private LinearLayout preferenceOption(String icon,String value,boolean selected){
         LinearLayout line=row();line.setPadding(dp(9),0,dp(9),0);
         if(icon!=null){add(line,new Glyph(this,icon,INK),dp(20),dp(20));gap(line,10);}
@@ -2070,7 +2070,7 @@ public final class MainActivity extends Activity {
         TextView later=centered("Maybe later",14,GRAY,500);
         tap(later,WHITE,20,dialog::dismiss);add(body,later,-1,dp(44));
         // Only the dedicated drag handle intercepts gestures, so star selection and scrolling remain reliable.
-        handle.setContentDescription(tr("Swipe down to dismiss"));
+        handle.setContentDescription(tr("Dismiss"));handle.setFocusable(true);handle.setOnClickListener(v->dialog.dismiss());
         handle.setOnTouchListener(new View.OnTouchListener(){
             float start;boolean dragging;
             public boolean onTouch(View view,android.view.MotionEvent event){
@@ -2083,7 +2083,7 @@ public final class MainActivity extends Activity {
                         dragging=false;
                         if(sheet.getTranslationY()>dp(72)){
                             sheet.animate().translationY(sheet.getHeight()).setDuration(150).withEndAction(dialog::dismiss).start();
-                        }else sheet.animate().translationY(0).setDuration(160).start();
+                        }else if(Math.abs(event.getRawY()-start)<dp(8)){view.performClick();}else sheet.animate().translationY(0).setDuration(160).start();
                         return true;
                     case android.view.MotionEvent.ACTION_CANCEL:
                         dragging=false;sheet.animate().translationY(0).setDuration(160).start();return true;
@@ -2108,6 +2108,7 @@ public final class MainActivity extends Activity {
             if(scroll.getMeasuredHeight()>maxHeight)scroll.getLayoutParams().height=maxHeight;
             scroll.requestLayout();
         }
+        if(!ValueAnimator.areAnimatorsEnabled())return;
         sheet.setAlpha(0f);sheet.post(()->{
             if(!dialog.isShowing())return;
             sheet.setTranslationY(Math.min(sheet.getHeight(),dp(240)));
@@ -2919,7 +2920,7 @@ public final class MainActivity extends Activity {
             tap(option,WHITE,10,()->{historyFilter=index;historyScrollY=0;popup.dismiss();openHistory();});add(menu,option,-1,dp(46));
         }
         popup.showAsDropDown(anchor,0,-anchor.getHeight(),Gravity.END);
-        menu.setAlpha(0f);menu.setScaleX(.97f);menu.setScaleY(.97f);menu.animate().alpha(1f).scaleX(1f).scaleY(1f).setDuration(140).start();
+        animatePreferenceMenu(menu);
     }
 
     private void openProtection(){
@@ -3265,7 +3266,7 @@ public final class MainActivity extends Activity {
             add(menu,option,-1,dp(46));
         }
         popup.showAsDropDown(anchor,0,-anchor.getHeight(),Gravity.END);
-        menu.setAlpha(0f);menu.setScaleX(.97f);menu.setScaleY(.97f);menu.animate().alpha(1f).scaleX(1f).scaleY(1f).setDuration(140).start();
+        animatePreferenceMenu(menu);
     }
 
     private LinearLayout hero() {
@@ -4179,7 +4180,7 @@ public final class MainActivity extends Activity {
             else if(label.equals("Agent"))showAgent();
             else if(label.equals("Tools"))showTools();
         });
-        l.setContentDescription(tr(label)+(active?", selected":"")); return l;
+        l.setSelected(active);l.setContentDescription(tr(label)+(active?", selected":"")); return l;
     }
 
     private final class Gauge extends View {
