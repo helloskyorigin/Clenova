@@ -16,6 +16,8 @@ onboarding_start() {
     adb shell settings put global animator_duration_scale 0
     adb shell am start -W -n com.clenova.app/.MainActivity
     sleep 1
+    adb shell uiautomator dump /sdcard/onboarding-start.xml >/dev/null
+    if adb shell cat /sdcard/onboarding-start.xml | grep -q 'Your storage, at a glance.'; then return 0; fi
     onboarding_continue "$1"
     onboarding_access "$1"
   )
@@ -65,7 +67,7 @@ onboarding_access() {
 import sys, re, xml.etree.ElementTree as ET
 nodes=list(ET.parse(sys.argv[1]).iter('node'))
 texts=[n.get('text','') for n in nodes]
-if 'Agent configured' in texts or 'Manual mode' in texts or any('All under control.' in t for t in texts):
+if 'Your storage, at a glance.' in texts:
     print('DONE'); raise SystemExit
 def choose(predicate):
     for n in nodes:

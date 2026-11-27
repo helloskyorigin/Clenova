@@ -11,7 +11,7 @@ adb shell uiautomator dump /sdcard/home.xml
 adb pull /sdcard/home.xml build/home-evidence/home.xml
 adb exec-out screencap -p > build/home-evidence/home.png
 grep -F 'Agent configured' build/home-evidence/home.xml
-grep -F 'All under control.' build/home-evidence/home.xml
+grep -F 'Your storage, at a glance.' build/home-evidence/home.xml
 grep -F 'Agent' build/home-evidence/home.xml
 grep -F 'Tools' build/home-evidence/home.xml
 # Phase 38: navigate from Home to the Tools landing; check scope and return paths.

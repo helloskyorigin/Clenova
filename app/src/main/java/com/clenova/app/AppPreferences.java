@@ -24,6 +24,8 @@ final class AppPreferences {
     // Activation is an explicit preference, not proof of scheduled work.
     boolean autopilot(){return store.getBoolean("agent_autopilot",false);}
     boolean agentConfigured(){return store.getBoolean("agent_setup_configured",false);}
+    boolean onboardingComplete(){return store.getBoolean("onboarding_complete_v1",false);}
+    boolean finishOnboarding(){return store.edit().putBoolean("onboarding_complete_v1",true).commit();}
     boolean saveAgentSetup(boolean enabled){
         SharedPreferences.Editor edit=store.edit().putBoolean("agent_setup_configured",true).putBoolean("agent_autopilot",enabled);
         if(enabled){
