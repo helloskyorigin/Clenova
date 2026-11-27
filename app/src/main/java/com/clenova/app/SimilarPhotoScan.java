@@ -13,11 +13,12 @@ final class SimilarPhotoScan {
     static final int LIMIT=600, MAX_GROUP=6;
     static final long WINDOW=120000L;
     static final class Signature {
-        final long hash;final int red,green,blue,width,height;final double quality;
-        Signature(long h,int r,int g,int b,int w,int he,double q){hash=h;red=r;green=g;blue=b;width=w;height=he;quality=q;}
+        final long hash;final int red,green,blue,width,height;final double quality;final int pixelFingerprint;
+        Signature(long h,int r,int g,int b,int w,int he,double q,int fp){hash=h;red=r;green=g;blue=b;width=w;height=he;quality=q;pixelFingerprint=fp;}
     }
     static final class Group {
         final List<SmartMediaScan.Item> items=new ArrayList<>();
+        final Map<String,Signature> signatures=new HashMap<>();
         SmartMediaScan.Item best;
     }
     static final class Match {
@@ -47,8 +48,9 @@ final class SimilarPhotoScan {
                 if(left>right)hash|=1L<<(y*8+x);
             }
             double edge=0;for(int y=1;y<31;y++)for(int x=1;x<31;x++){int i=y*32+x;edge+=Math.abs(4*gray[i]-gray[i-1]-gray[i+1]-gray[i-32]-gray[i+32]);}
+            if(edge/900d<4)return null; // Flat images do not provide a reliable visual signature.
             double mean=l/1024d;double quality=edge/900d-0.18*Math.abs(mean-128)+2*Math.log1p((double)width*height/1000000);
-            return new Signature(hash,r/1024,g/1024,b/1024,width,height,quality);
+            return new Signature(hash,r/1024,g/1024,b/1024,width,height,quality,Arrays.hashCode(pixels));
         }finally{if(sample!=null&&sample!=image)sample.recycle();image.recycle();}
     }
     static List<Group> run(ContentResolver resolver,List<SmartMediaScan.Item> input,CancellationSignal cancel,SmartMediaScan.Result result,SmartMediaScan.Progress progress){
@@ -65,7 +67,7 @@ final class SimilarPhotoScan {
             List<Match> cluster=new ArrayList<>();cluster.add(anchor);
             for(int j=i+1;j<matches.size()&&cluster.size()<MAX_GROUP;j++){
                 Match candidate=matches.get(j);if(anchor.item.modified-candidate.item.modified>WINDOW)break;
-                if(used.contains(candidate.item.uri.toString())||candidate.item.modified<=0||!Objects.equals(anchor.item.path,candidate.item.path)||anchor.item.path==null)continue;
+                if(used.contains(candidate.item.uri.toString())||candidate.item.modified<=0||!Objects.equals(anchor.item.path,candidate.item.path)||anchor.item.path==null||!Objects.equals(anchor.item.volume,candidate.item.volume))continue;
                 boolean fits=true;for(Match existing:cluster)if(!close(existing.signature,candidate.signature)){fits=false;break;}
                 if(fits)cluster.add(candidate);
             }
@@ -73,12 +75,13 @@ final class SimilarPhotoScan {
             // Always keep the strongest quality heuristic; existing exclusions remain locked.
             cluster.sort(Comparator.comparingDouble((Match m)->m.signature.quality).reversed().thenComparing(m->m.item.uri.toString()));
             Group group=new Group();group.best=cluster.get(0).item;
-            for(Match m:cluster){used.add(m.item.uri.toString());group.items.add(m.item);}
+            for(Match m:cluster){used.add(m.item.uri.toString());group.items.add(m.item);group.signatures.put(m.item.uri.toString(),m.signature);}
             groups.add(group);
         }
         return groups;
     }
     static boolean candidate(Group g,SmartMediaScan.Item i){return i!=g.best&&!i.protectedItem;}
+    private static boolean sameSignature(Signature a,Signature b){return a!=null&&b!=null&&a.hash==b.hash&&a.pixelFingerprint==b.pixelFingerprint&&a.width==b.width&&a.height==b.height&&a.red==b.red&&a.green==b.green&&a.blue==b.blue;}
     static List<android.net.Uri> verify(SmartMediaScan.Result original,SmartMediaScan.Result fresh,Set<String> selected,Set<String> keep){
         if(selected.isEmpty()||selected.size()>100)return Collections.emptyList();
         List<android.net.Uri> out=new ArrayList<>();Set<String> seen=new HashSet<>();
@@ -89,7 +92,9 @@ final class SimilarPhotoScan {
                 SmartMediaScan.Item target=null,retained=null;
                 for(SmartMediaScan.Item i:current.items){if(i.uri.equals(item.uri))target=i;if(i.uri.equals(g.best.uri))retained=i;}
                 if(target!=null&&retained!=null&&candidate(current,target)&&!selected.contains(retained.uri.toString())
-                    &&target.bytes==item.bytes&&target.modified==item.modified&&retained.bytes==g.best.bytes&&retained.modified==g.best.modified){valid=true;break;}
+                    &&target.bytes==item.bytes&&target.modified==item.modified&&retained.bytes==g.best.bytes&&retained.modified==g.best.modified
+                    &&sameSignature(g.signatures.get(id),current.signatures.get(id))
+                    &&sameSignature(g.signatures.get(g.best.uri.toString()),current.signatures.get(g.best.uri.toString()))){valid=true;break;}
             }
             if(!valid||!seen.add(id))return Collections.emptyList();out.add(item.uri);
         }

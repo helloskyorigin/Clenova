@@ -344,7 +344,7 @@ public final class MainActivity extends Activity {
                 icon.addView(new Glyph(this,item[0],BLUE),new FrameLayout.LayoutParams(dp(21),dp(21),Gravity.CENTER));add(title,icon,dp(36),dp(36));stretch(title);
                 add(title,new Glyph(this,"up",GRAY),dp(15),dp(15));add(tile,title,-1,-2);space(tile,9);
                 int category=new int[]{0,3,1,2}[pair*2+j];
-                boolean scanned=scanResult!=null&&category>=0&&(category==1?scanResult.videosScanned:scanResult.imagesScanned);
+                boolean scanned=scanResult!=null&&category>=0&&(category==1?scanResult.videosScanned:category==3?scanResult.similarScanned:scanResult.imagesScanned);
                 add(tile,txt(scanned?scanBytes(scanResult.bytes(category)):"—",23,INK,700),-1,-2);space(tile,5);add(tile,txt(item[1],14,INK,600),-1,-2);space(tile,4);
                 add(tile,txt(scanned?scanResult.groups.get(category).size()+" "+tr("items"):tr("Scan to find"),12,GRAY,400),-1,-2);
                 tap(tile,WHITE,18,()->{if(category==0){openRealDuplicates(false);}else if(category==3){openRealSimilar(false);}else if(scanned)showScanResults();else cleanPending(item[1]);});tile.setContentDescription(tr(item[1])+", "+(scanned?scanBytes(scanResult.bytes(category)):tr("Not scanned yet")));
@@ -449,7 +449,7 @@ public final class MainActivity extends Activity {
             if(i>0)thinRule(list);final int index=i;LinearLayout line=row();line.setMinimumHeight(dp(65));line.setPadding(0,dp(9),0,dp(9));
             add(line,new Glyph(this,new String[]{"copy","video","screenshot","images"}[i],BLUE),dp(25),dp(25));gap(line,12);
             LinearLayout labels=column();add(labels,txt(SmartMediaScan.LABELS[i],15,INK,600),-1,-2);space(labels,5);
-            boolean scanned=i==1?scanResult.videosScanned:scanResult.imagesScanned;
+            boolean scanned=i==1?scanResult.videosScanned:i==3?scanResult.similarScanned:scanResult.imagesScanned;
             add(labels,txt(scanned?scanResult.groups.get(i).size()+" · "+scanBytes(scanResult.bytes(i)):tr("Not scanned"),12,GRAY,400),-1,-2);weight(line,labels);
             if(i==0||i==3){tap(labels,WHITE,8,()->{if(index==0)openRealDuplicates(true);else openRealSimilar(true);});add(line,new Glyph(this,"chevron",GRAY),dp(14),dp(14));}
             android.widget.CheckBox check=new android.widget.CheckBox(this);check.setButtonTintList(ColorStateList.valueOf(BLUE));check.setChecked(scanSelected[i]);check.setEnabled(!scanResult.groups.get(i).isEmpty());check.setContentDescription(tr(SmartMediaScan.LABELS[i]));check.setOnCheckedChangeListener((v,checked)->{scanSelected[index]=checked;updateScanReview(review);});add(line,check,dp(44),dp(44));add(list,line,-1,-2);
@@ -488,7 +488,7 @@ public final class MainActivity extends Activity {
     }
 
     private void openRealDuplicates(boolean fromResults){
-        dupFromResults=fromResults;dupPage=0;dupAll=false;realDupSelected.clear();
+        dupFromResults=fromResults;dupPage=0;dupAll=false;similarAfterScan=false;realDupSelected.clear();
         if(scanResult!=null&&scanResult.imagesScanned){showRealDuplicates();return;}
         dupAfterScan=true;requestSmartScan();
     }
