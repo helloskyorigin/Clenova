@@ -136,11 +136,22 @@ sleep 1
 tools_dump tools_after_speaker
 grep -F 'Tools, selected' build/home-evidence/tools_after_speaker.xml
 tools_tap build/home-evidence/tools_after_speaker.xml 'Internet Speed Test'
-tools_dump tools_pending
-grep -F 'No action has been performed.' build/home-evidence/tools_pending.xml
+tools_dump internet_speed
+for label in 'Internet Speed Test' 'GO, start speed test' 'DOWNLOAD' 'UPLOAD' 'Speed history'; do
+  grep -F "$label" build/home-evidence/internet_speed.xml
+done
+tools_tap build/home-evidence/internet_speed.xml 'Speed history'
+tools_dump speed_history
+grep -F 'Speed history' build/home-evidence/speed_history.xml
+adb shell input keyevent 4
+sleep 1
+tools_dump speed_return
+grep -F 'Internet Speed Test' build/home-evidence/speed_return.xml
+# Navigation QA deliberately does not generate network test traffic.
 adb shell input keyevent 4
 sleep 1
 tools_dump tools_restored
+grep -F 'Tools, selected' build/home-evidence/tools_restored.xml
 tools_tap build/home-evidence/tools_restored.xml Settings
 tools_dump tools_settings
 tools_tap build/home-evidence/tools_settings.xml 'Back to Tools'
