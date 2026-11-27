@@ -1,6 +1,7 @@
 // Node 20+, run behind an HTTPS reverse proxy. Private development relay only.
 import http from 'node:http';
 import { timingSafeEqual } from 'node:crypto';
+import { pathToFileURL } from 'node:url';
 
 const REFUSAL = 'I can only help with Clenova, phone storage, cleanup and file protection. What would you like to manage on your phone?';
 const ACTIONS = ['storage','duplicates','unused_apps','protection','downloads','large_videos','screenshots','similar_photos','large_files','unnecessary_files'];
@@ -18,6 +19,8 @@ export function plausiblePhoneRequest(message) {
     && !/ignore (all |previous |your )?instructions|system prompt|developer message|jailbreak|reveal.*(key|prompt)|pretend you are/i.test(message);
 }
 export async function answer(message, key, model, fetcher=fetch, context=[]) {
+  if(typeof message!=='string'||!message.trim()||message.length>600)throw new Error('invalid message');
+  if(!Array.isArray(context))context=[];
   const followup=/^(yes|no|why|how|what next|what about that|okay|ok|haan|ha|nahi|kyun|kaise|kitna|ab kya|हाँ|नहीं|कैसे|क्यों|अब क्या)[?!. ]*$/i.test(message.trim());
   const prior=context.filter(x=>typeof x==='string'&&x.length<=600&&plausiblePhoneRequest(x)).slice(-3);
   if(!plausiblePhoneRequest(message)&&!(followup&&prior.length))return {text:REFUSAL,action:-1};
@@ -36,21 +39,26 @@ function auth(req, secret) {
 export function createRelay({key,model,secret,fetcher=fetch}) {
   if(!key||!model||!secret||secret.length<32)throw new Error('Set GROQ_API_KEY, GROQ_MODEL and AGENT_RELAY_TOKEN (32+ chars).');
   let minute=Math.floor(Date.now()/60000),used=0,active=0;
-  return http.createServer(async (req,res)=>{
-    const reply=(code,obj)=>{res.writeHead(code,{'Content-Type':'application/json','Cache-Control':'no-store','X-Content-Type-Options':'nosniff'});res.end(JSON.stringify(obj));};
+  const server=http.createServer({requestTimeout:15000,headersTimeout:10000,maxHeaderSize:8192},async (req,res)=>{
+    const reply=(code,obj)=>{if(res.destroyed||res.writableEnded)return;res.writeHead(code,{'Content-Type':'application/json','Cache-Control':'no-store','X-Content-Type-Options':'nosniff','Connection':'close'});res.end(JSON.stringify(obj));};
     if(req.method!=='POST'||req.url!=='/agent')return reply(404,{error:'Not found'});
     if(!auth(req,secret))return reply(401,{error:'Unauthorized'});
     const now=Math.floor(Date.now()/60000);if(now!==minute){minute=now;used=0;}if(used>=12||active>=2)return reply(429,{error:'Try later'});used++;active++;
     try{
-      if(!String(req.headers['content-type']||'').startsWith('application/json'))return reply(415,{error:'JSON required'});
+      if(String(req.headers['content-type']||'').split(';')[0].trim().toLowerCase()!=='application/json')return reply(415,{error:'JSON required'});
+      const declared=Number(req.headers['content-length']);if(Number.isFinite(declared)&&declared>10000)return reply(413,{error:'Too large'});
+      req.setTimeout(5000,()=>req.destroy());
       const chunks=[];let size=0;for await(const chunk of req){size+=chunk.length;if(size>10000){reply(413,{error:'Too large'});return;}chunks.push(chunk);}
+      req.setTimeout(0);
       let payload;try{payload=JSON.parse(Buffer.concat(chunks).toString('utf8'));}catch{return reply(400,{error:'Invalid JSON'});}
-      if(typeof payload.message!=='string'||!payload.message.trim()||payload.message.length>600)return reply(400,{error:'Invalid message'});
+      if(!payload||typeof payload!=='object'||Array.isArray(payload)||typeof payload.message!=='string'||!payload.message.trim()||payload.message.length>600)return reply(400,{error:'Invalid message'});
       const context=Array.isArray(payload.context)?payload.context.slice(-3).filter(x=>typeof x==='string'&&x.length<=600):[];
       const result=await answer(payload.message.trim(),key,model,fetcher,context);return reply(200,result);
     }catch{return reply(502,{error:'Agent unavailable'});}finally{active--;}
   });
+  server.maxRequestsPerSocket=1;
+  return server;
 }
-if(process.argv[1]&&import.meta.url===new URL('file:'+process.argv[1]).href){
+if(process.argv[1]&&import.meta.url===pathToFileURL(process.argv[1]).href){
   createRelay({key:process.env.GROQ_API_KEY,model:process.env.GROQ_MODEL,secret:process.env.AGENT_RELAY_TOKEN}).listen(Number(process.env.PORT||8080),'127.0.0.1');
 }
