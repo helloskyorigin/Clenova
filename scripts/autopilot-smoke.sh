@@ -6,6 +6,7 @@ job=4410453
 mkdir -p build/autopilot-evidence
 # Home smoke completes onboarding with Agent enabled and media access denied.
 adb shell run-as "$pkg" cat shared_prefs/clenova_preferences.xml | grep -F 'name="agent_autopilot" value="true"'
+adb shell am force-stop "$pkg"
 adb shell pm grant "$pkg" android.permission.READ_MEDIA_IMAGES
 adb shell pm grant "$pkg" android.permission.READ_MEDIA_VIDEO
 adb shell am start -W -n "$pkg/.MainActivity"
