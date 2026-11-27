@@ -280,6 +280,11 @@ public final class MainActivity extends Activity {
         if(state!=null&&state.getBoolean("onboarding_autopilot_visible")){showOnboardingAutopilot();onboardingAutopilot.restoreStoryPosition(state.getFloat("onboarding_story_position",0f));return;}
         if(state!=null&&state.getBoolean("onboarding_unified_visible")){showOnboardingUnified();onboardingUnified.restoreStoryPosition(state.getFloat("onboarding_story_position",0f));return;}
         if(state!=null&&state.getBoolean("onboarding_intro_visible")){showOnboardingIntro();onboardingIntro.restoreStoryPosition(state.getFloat("onboarding_story_position",0f));return;}
+        if(state!=null&&state.getBoolean("tool_agent_pending")&&activeChat!=null){agentPermissionPending=true;agentScanTask=state.getInt("tool_agent_task");showAgent();return;}
+        if(state!=null&&state.getBoolean("tool_scan_pending")){
+            showClean();requestingScan=true;agentTaskOrigin=state.getBoolean("tool_agent_origin");
+            int route=state.getInt("tool_scan_route");dupAfterScan=route==1;videoAfterScan=route==2;similarAfterScan=route==3;shotAfterScan=route==4;return;
+        }
         if(state!=null && state.containsKey("cleanup_amounts")){
             cleanup=new CleanupPreview(state.getDoubleArray("cleanup_amounts"),state.getInt("cleanup_count"));
             completed=state.getBoolean("cleanup_completed");
@@ -328,6 +333,9 @@ public final class MainActivity extends Activity {
         state.putBoolean("clean_visible",cleanVisible);state.putBoolean("agent_visible",agentVisible);state.putBoolean("agent_shortcut",agentShortcut);
         state.putBoolean("large_files_mode",largeFilesMode);state.putBoolean("clutter_mode",clutterMode);
         state.putBoolean("dup_trash_pending",dupTrashPending);
+        state.putBoolean("tool_scan_pending",requestingScan);state.putBoolean("tool_agent_pending",agentPermissionPending);
+        state.putInt("tool_scan_route",videoAfterScan?2:dupAfterScan?1:similarAfterScan?3:shotAfterScan?4:0);
+        state.putInt("tool_agent_task",agentScanTask);state.putBoolean("tool_agent_origin",agentTaskOrigin);
         state.putInt("clean_scroll_y",cleanScroll==null?cleanScrollY:cleanScroll.getScrollY());
         state.putBoolean("settings_visible",settingsVisible);
         state.putBoolean("rating_open",ratingDialog!=null&&ratingDialog.isShowing());
@@ -369,7 +377,7 @@ public final class MainActivity extends Activity {
         if(unusedVisible){if(unusedExternal||unusedUninstallPending)return;showClean();}
         if(downloadsVisible){if(downloadsBusy){if(downloadsSignal!=null)downloadsSignal.cancel();return;}if(downloadsPicking||downloadsOpening)return;showClean();}
         // Do not retain visible media results across backgrounding; selected-photo access may change.
-        if(dupTrashPending||requestingScan)return;
+        if(dupTrashPending||requestingScan||agentPermissionPending)return;
         if(runningScan!=null){runningScan.cancel();runningScan=null;scanVisible=false;scanReviewVisible=false;scanResult=null;showClean();}
         else if(scanResult!=null){scanResult=null;if(cleanVisible&&!settingsVisible)showClean();}
     }
@@ -617,24 +625,29 @@ public final class MainActivity extends Activity {
     private void openAgentTask(int task,String request){
         expireAgentSession();if(agentBusy())return;boolean fresh=activeChat==null;appendAgent(true,request,-1);agentLiveResult=null;agentResultChat="";appendAgent(false,AgentActions.DESCRIPTIONS[task]+" Nothing will be removed without your approval.",task);agentTransition=fresh;showAgent();
     }
-    private boolean agentHasAccess(int task){return task==5?SmartMediaScan.hasVideoAccess(this):task==1||task==6||task==7?SmartMediaScan.hasPhotoAccess(this):SmartMediaScan.hasAccess(this);}
+    private int agentScope(int task){return task==5?ToolAccess.VIDEOS:task==1||task==6||task==7?ToolAccess.PHOTOS:ToolAccess.MEDIA;}
+    private boolean agentHasAccess(int task){return ToolAccess.has(this,agentScope(task));}
     private void startAgentTask(int task){
         if(expireAgentSession()){showAgent();return;}if(agentBusy()||activeChat==null)return;
-        if(task==0||task==1||task==5||task==6||task==7){agentScanTask=task;if(agentHasAccess(task)){beginAgentScan(task);return;}
-            privacyDialog().setTitle(tr("Media access needed")).setMessage(tr("Clenova only scans media you allow. Nothing is removed.")).setNegativeButton(tr("Cancel"),null).setPositiveButton(tr("Continue"),(dialog,w)->{agentPermissionPending=true;
-                if(android.os.Build.VERSION.SDK_INT>=34){String[] requested=task==5?new String[]{android.Manifest.permission.READ_MEDIA_VIDEO,android.Manifest.permission.READ_MEDIA_VISUAL_USER_SELECTED}:task==0?new String[]{android.Manifest.permission.READ_MEDIA_IMAGES,android.Manifest.permission.READ_MEDIA_VIDEO,android.Manifest.permission.READ_MEDIA_VISUAL_USER_SELECTED}:new String[]{android.Manifest.permission.READ_MEDIA_IMAGES,android.Manifest.permission.READ_MEDIA_VISUAL_USER_SELECTED};requestPermissions(requested,REQUEST_AGENT_MEDIA);}
-                else if(android.os.Build.VERSION.SDK_INT>=33){String[] requested=task==5?new String[]{android.Manifest.permission.READ_MEDIA_VIDEO}:task==0?new String[]{android.Manifest.permission.READ_MEDIA_IMAGES,android.Manifest.permission.READ_MEDIA_VIDEO}:new String[]{android.Manifest.permission.READ_MEDIA_IMAGES};requestPermissions(requested,REQUEST_AGENT_MEDIA);}
-                else requestPermissions(new String[]{android.Manifest.permission.READ_EXTERNAL_STORAGE},REQUEST_AGENT_MEDIA);
-            }).show();return;}
+        if(task==0||task==1||task==5||task==6||task==7){
+            agentScanTask=task;if(agentHasAccess(task)){beginAgentScan(task);return;}
+            final int scope=agentScope(task);
+            privacyDialog().setTitle(tr("Media access needed")).setMessage(tr("Clenova only scans media you allow. Nothing is removed."))
+                .setNegativeButton(tr("Cancel"),null).setPositiveButton(tr(ToolAccess.action(this,scope)),(d,w)->{
+                    if(agentBusy()||activeChat==null)return;agentPermissionPending=true;
+                    if(!ToolAccess.launch(this,scope,REQUEST_AGENT_MEDIA)){agentPermissionPending=false;folderToast("Could not open access settings");}
+                }).show();return;
+        }
         if(task==3){agentTaskVisible=false;agentShortcut=true;agentLiveResult=null;scanResult=null;restoreAgentWindow();openProtection();return;}
         leaveAgentForTool();if(task==2)openUnusedApps();else if(task==4)openDownloads();else if(task==8)openLargeFiles();else if(task==9)openClutter();
     }
     private void beginAgentScan(int task){
         if(agentScan!=null||activeChat==null||!agentHasAccess(task))return;agentLiveResult=null;agentResultChat="";agentStage=tr("Reading media library");
+        final int accessAtStart=ToolAccess.mediaMask(this);
         final SmartMediaScan job=new SmartMediaScan(this,prefs,protectedFiles,protectedFolders);agentScan=job;final String chat=activeChat.id;showAgent();
         new Thread(()->{try{SmartMediaScan.Progress callback=(stage,done,total)->{if(done!=total&&done%16!=0)return;runOnUiThread(()->{if(agentScan!=job||isDestroyed()||!agentForeground)return;agentStage=tr(new String[]{"Reading media library","Checking exact duplicates","Classifying media","Comparing similar photos"}[stage]);if(agentProgressText!=null)agentProgressText.setText(agentStage+(total>0?" · "+done+" / "+total:""));if(agentProgressBar!=null){agentProgressBar.setIndeterminate(total<=0);if(total>0){agentProgressBar.setMax(total);agentProgressBar.setProgress(done);}}});};
             SmartMediaScan.Result result=task==5?job.runVideos(callback):task==0?job.run(callback):job.runPhotos(callback);
-            runOnUiThread(()->{if(agentScan!=job||isDestroyed()||activeChat==null||!activeChat.id.equals(chat))return;agentScan=null;if(!agentHasAccess(task)){appendAgent(false,"Media access changed. No results are available.",-1);showAgent();return;}agentLiveResult=result;agentResultChat=chat;scanResult=result;appendAgent(false,"Analysis finished. I checked "+result.examined+" accessible media items. "+(result.partial||result.limited?"Results are partial. ":"")+"Review the candidates below. Nothing has been removed.",-1);showAgent();});
+            runOnUiThread(()->{if(agentScan!=job||isDestroyed()||activeChat==null||!activeChat.id.equals(chat))return;agentScan=null;if(accessAtStart!=ToolAccess.mediaMask(this)||!agentHasAccess(task)){appendAgent(false,"Media access changed. No results are available.",-1);showAgent();return;}agentLiveResult=result;agentResultChat=chat;scanResult=result;appendAgent(false,"Analysis finished. I checked "+result.examined+" accessible media items. "+(result.partial||result.limited?"Results are partial. ":"")+"Review the candidates below. Nothing has been removed.",-1);showAgent();});
         }catch(Exception ex){runOnUiThread(()->{if(agentScan!=job||isDestroyed())return;agentScan=null;appendAgent(false,"Analysis could not finish. No files were removed.",-1);showAgent();});}},"Clenova-agent-scan").start();
     }
     private void cancelAgentWork(){if(agentScan!=null){agentScan.cancel();agentScan=null;appendAgent(false,"Analysis cancelled. Nothing was removed.",-1);}if(agentCloudBusy){agentCloudBusy=false;agentGeneration++;appendAgent(false,"Request cancelled.",-1);}if(agentVisible&&!isDestroyed())showAgent();}
@@ -828,21 +841,29 @@ public final class MainActivity extends Activity {
         if(bytes>=1024)return String.format(java.util.Locale.US,"%.1f KB",bytes/1024d);
         return bytes+" B";
     }
+    private int scanScope(){return videoAfterScan?ToolAccess.VIDEOS:dupAfterScan||similarAfterScan||shotAfterScan?ToolAccess.PHOTOS:ToolAccess.MEDIA;}
+    private void clearScanRequest(){requestingScan=false;dupAfterScan=false;similarAfterScan=false;videoAfterScan=false;shotAfterScan=false;}
     private void requestSmartScan(){
         if(requestingScan||runningScan!=null)return;
-        if(SmartMediaScan.hasAccess(this)&&(!(dupAfterScan||similarAfterScan||shotAfterScan)||SmartMediaScan.hasPhotoAccess(this))&&(!videoAfterScan||SmartMediaScan.hasVideoAccess(this))){startSmartScan();return;}
+        final int scope=scanScope();
+        if(ToolAccess.has(this,scope)){startSmartScan();return;}
         privacyDialog().setTitle(tr("Media access needed"))
-            .setMessage(tr("Smart Scan reads only the photos and videos you allow. Nothing is deleted."))
-            .setNegativeButton(tr("Cancel"),(d,w)->{dupAfterScan=false;similarAfterScan=false;videoAfterScan=false;shotAfterScan=false;if(agentTaskOrigin)showAgent();}).setPositiveButton(tr("Continue"),(d,w)->{
-                requestingScan=true;
-                if(videoAfterScan&&android.os.Build.VERSION.SDK_INT>=34)requestPermissions(new String[]{android.Manifest.permission.READ_MEDIA_VIDEO,android.Manifest.permission.READ_MEDIA_VISUAL_USER_SELECTED},REQUEST_SCAN_MEDIA);
-                else if(videoAfterScan&&android.os.Build.VERSION.SDK_INT>=33)requestPermissions(new String[]{android.Manifest.permission.READ_MEDIA_VIDEO},REQUEST_SCAN_MEDIA);
-                else if(shotAfterScan&&android.os.Build.VERSION.SDK_INT>=34)requestPermissions(new String[]{android.Manifest.permission.READ_MEDIA_IMAGES,android.Manifest.permission.READ_MEDIA_VISUAL_USER_SELECTED},REQUEST_SCAN_MEDIA);
-                else if(shotAfterScan&&android.os.Build.VERSION.SDK_INT>=33)requestPermissions(new String[]{android.Manifest.permission.READ_MEDIA_IMAGES},REQUEST_SCAN_MEDIA);
-                else if(android.os.Build.VERSION.SDK_INT>=34)requestPermissions(new String[]{android.Manifest.permission.READ_MEDIA_IMAGES,android.Manifest.permission.READ_MEDIA_VIDEO,android.Manifest.permission.READ_MEDIA_VISUAL_USER_SELECTED},REQUEST_SCAN_MEDIA);
-                else if(android.os.Build.VERSION.SDK_INT>=33)requestPermissions(new String[]{android.Manifest.permission.READ_MEDIA_IMAGES,android.Manifest.permission.READ_MEDIA_VIDEO},REQUEST_SCAN_MEDIA);
-                else requestPermissions(new String[]{android.Manifest.permission.READ_EXTERNAL_STORAGE},REQUEST_SCAN_MEDIA);
-            }).show();
+            .setMessage(tr(scope==ToolAccess.PHOTOS?"Allow access to photos to use this tool.":scope==ToolAccess.VIDEOS?"Allow access to videos to use this tool.":"Smart Scan reads only the photos and videos you allow. Nothing is deleted."))
+            .setNegativeButton(tr("Cancel"),(d,w)->{clearScanRequest();if(agentTaskOrigin)showAgent();}).setOnCancelListener(d->clearScanRequest())
+            .setPositiveButton(tr(ToolAccess.action(this,scope)),(d,w)->{if(requestingScan||runningScan!=null)return;requestingScan=true;
+                if(!ToolAccess.launch(this,scope,REQUEST_SCAN_MEDIA)){clearScanRequest();folderToast("Could not open access settings");}}).show();
+    }
+    private boolean handleToolPermission(int code){
+        if(code==REQUEST_AGENT_MEDIA){
+            if(!agentPermissionPending)return true;agentPermissionPending=false;
+            if(agentVisible&&activeChat!=null){if(agentHasAccess(agentScanTask))beginAgentScan(agentScanTask);else{appendAgent(false,"Media access was not granted. No files were scanned.",-1);showAgent();}}return true;
+        }
+        if(code==REQUEST_SCAN_MEDIA){
+            if(!requestingScan)return true;requestingScan=false;
+            if(ToolAccess.has(this,scanScope()))startSmartScan();
+            else{clearScanRequest();folderToast("Media access not granted. You can try again anytime.");if(agentTaskOrigin)showAgent();}
+            return true;
+        }return false;
     }
     private LinearLayout scanShell(String title,Runnable back){
         LinearLayout root=column();root.setBackgroundColor(BG);root.setPadding(dp(18),v(12),dp(18),v(12));
@@ -861,7 +882,8 @@ public final class MainActivity extends Activity {
         if(runningScan!=null)return;
         if(cleanScroll!=null){cleanScrollY=cleanScroll.getScrollY();cleanScroll=null;}
         scanVisible=true;scanReviewVisible=false;scanResult=null;
-        final boolean videoOnly=videoAfterScan;
+        final boolean videoOnly=videoAfterScan,photoOnly=dupAfterScan||similarAfterScan||shotAfterScan;
+        final int accessAtStart=ToolAccess.mediaMask(this);
         final SmartMediaScan job=new SmartMediaScan(this,prefs,protectedFiles,protectedFolders);runningScan=job;
         LinearLayout root=scanShell(videoOnly?"Large videos":"Smart Scan",this::cancelSmartScan),body=scanBody(root);
         LinearLayout hero=column();hero.setGravity(Gravity.CENTER_HORIZONTAL);
@@ -884,8 +906,10 @@ public final class MainActivity extends Activity {
                         scanBar.setIndeterminate(total<=0);if(total>0){scanBar.setMax(total);scanBar.setProgress(done);scanProgress.setText(done+" / "+total);}else scanProgress.setText(tr("Scanning"));
                     });
                 };
-                SmartMediaScan.Result result=videoOnly?job.runVideos(callback):job.run(callback);
-                runOnUiThread(()->{if(runningScan!=job||isFinishing()||isDestroyed())return;runningScan=null;scanResult=result;
+                SmartMediaScan.Result result=videoOnly?job.runVideos(callback):photoOnly?job.runPhotos(callback):job.run(callback);
+                runOnUiThread(()->{if(runningScan!=job||isFinishing()||isDestroyed())return;runningScan=null;
+                    if(accessAtStart!=ToolAccess.mediaMask(this)||!ToolAccess.has(this,scanScope())){scanResult=null;showClean();folderToast("Media access changed. Scan again.");return;}
+                    scanResult=result;
                     java.util.Arrays.fill(scanSelected,false);if(dupAfterScan){dupAfterScan=false;showRealDuplicates();}else if(similarAfterScan){similarAfterScan=false;showRealSimilar();}else if(videoAfterScan){videoAfterScan=false;showRealVideos();}else if(shotAfterScan){shotAfterScan=false;showRealScreenshots();}else showScanResults();});
             }catch(Exception e){runOnUiThread(()->{if(runningScan!=job||isFinishing()||isDestroyed())return;runningScan=null;showClean();folderToast("Scan could not finish");});}
         },"Clenova-media-scan").start();
@@ -1939,8 +1963,7 @@ public final class MainActivity extends Activity {
     @Override public void onRequestPermissionsResult(int requestCode,String[] permissions,int[] grantResults){
         super.onRequestPermissionsResult(requestCode,permissions,grantResults);
         if(onboardingAccess!=null&&onboardingAccess.permissionResult(requestCode))return;
-        if(requestCode==REQUEST_AGENT_MEDIA){agentPermissionPending=false;if(agentVisible&&activeChat!=null){if(agentHasAccess(agentScanTask))beginAgentScan(agentScanTask);else{appendAgent(false,"Media access was not granted. No files were scanned.",-1);showAgent();}}return;}
-        if(requestCode==REQUEST_SCAN_MEDIA){requestingScan=false;if(videoAfterScan?SmartMediaScan.hasVideoAccess(this):(shotAfterScan||dupAfterScan||similarAfterScan)?SmartMediaScan.hasPhotoAccess(this):SmartMediaScan.hasAccess(this))startSmartScan();else {dupAfterScan=false;similarAfterScan=false;videoAfterScan=false;shotAfterScan=false;privacyDialog().setTitle(tr("Media access needed")).setMessage(tr("Allow access to photos or videos to scan them. No files were scanned.")).setPositiveButton(tr("Done"),null).show();}return;}
+        if(handleToolPermission(requestCode))return;
         if(requestCode==REQUEST_NOTIFICATION_ACCESS&&permissionsVisible)openAppPermissions();
     }
     private static final String[] RATING_LABELS={"Tap to rate your experience","Very poor","Could be better","It's okay","Pretty good","Love it!"};
@@ -3069,6 +3092,7 @@ public final class MainActivity extends Activity {
     @Override protected void onActivityResult(int requestCode,int resultCode,android.content.Intent data){
         super.onActivityResult(requestCode,resultCode,data);
         if(onboardingAccess!=null&&onboardingAccess.activityResult(requestCode,resultCode,data))return;
+        if(handleToolPermission(requestCode))return;
         if(requestCode==REQUEST_APP_UNINSTALL){unusedUninstallPending=false;unusedExternal=false;unusedSelected.clear();if(agentTaskOrigin&&activeChat!=null)appendAgent(false,resultCode==RESULT_OK?"Android reported uninstall success. Refresh the app list to verify.":"Uninstall not confirmed.",-1);if(unusedVisible)refreshUnusedApps();folderToast(resultCode==RESULT_OK?"Android uninstall returned success. Refreshing app list.":"Uninstall not confirmed");return;}
         if(requestCode==PICK_LARGE_FOLDER){downloadsPicking=false;if(resultCode==RESULT_OK&&data!=null&&data.getData()!=null&&(largeFilesMode||clutterMode))loadLargeFolder(data.getData());else if(downloadsVisible)showDownloads();return;}
         if(requestCode==PICK_DOWNLOAD_FILES){downloadsPicking=false;if(resultCode==RESULT_OK&&data!=null)loadPickedDownloads(data);else if(downloadsVisible)showDownloads();return;}
@@ -3287,6 +3311,7 @@ public final class MainActivity extends Activity {
         if(onboardingAutopilot!=null){onboardingAutopilot.setActive(false);onboardingAutopilot=null;showOnboardingUnified();return;}
         if(onboardingUnified!=null){onboardingUnified.setActive(false);onboardingUnified=null;showOnboardingIntro();return;}
         if(onboardingIntro!=null){onboardingIntro.setActive(false);onboardingIntro=null;finish();return;}
+        if(requestingScan||agentPermissionPending)return;
         if(downloadsBusy){if(downloadsSignal!=null)downloadsSignal.cancel();return;}
         if(cleaning||unusedUninstallPending)return;
         if(unusedReview){if(unusedSignal!=null){unusedSignal.cancel();unusedSignal=null;unusedGeneration++;}showUnusedApps();return;}

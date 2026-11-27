@@ -51,19 +51,14 @@ final class PermissionSetup {
         try{host.startActivityForResult(intent,code);}catch(RuntimeException e){pending=0;message="Android could not open this access setting.";if(step==0)mediaDenied=true;else if(step==1){advance("Not allowed");return;}render();}
     }
     private Intent appSettings(){return new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS,Uri.fromParts("package",host.getPackageName(),null));}
-    private String[] mediaPermissions(){
-        if(Build.VERSION.SDK_INT>=34)return new String[]{Manifest.permission.READ_MEDIA_IMAGES,Manifest.permission.READ_MEDIA_VIDEO,Manifest.permission.READ_MEDIA_VISUAL_USER_SELECTED};
-        if(Build.VERSION.SDK_INT>=33)return new String[]{Manifest.permission.READ_MEDIA_IMAGES,Manifest.permission.READ_MEDIA_VIDEO};
-        return new String[]{Manifest.permission.READ_EXTERNAL_STORAGE};
-    }
+    private String[] mediaPermissions(){return ToolAccess.requestNames(ToolAccess.MEDIA);}
     private void allow(){
         if(busy()||host.isFinishing()||host.isDestroyed())return;
         if(step==0){
             if(hasMedia()){advance(media());return;}
-            String[] names=mediaPermissions();boolean rationale=false;
-            for(String name:names)rationale|=host.shouldShowRequestPermissionRationale(name);
-            if(flags().getBoolean("onboarding_media_requested",false)&&!rationale){external(MEDIA_SETTINGS,appSettings());return;}
-            flags().edit().putBoolean("onboarding_media_requested",true).apply();request(MEDIA,names);
+            String[] names=mediaPermissions();
+            if(ToolAccess.settingsNeeded(host,ToolAccess.MEDIA)){external(MEDIA_SETTINGS,appSettings());return;}
+            ToolAccess.remember(host,names);request(MEDIA,names);
         }else if(step==1){
             if(usableNotifications()){advance(notifications());return;}
             if(Build.VERSION.SDK_INT>=33&&!permissions.granted(Manifest.permission.POST_NOTIFICATIONS)&&(!flags().getBoolean("notifications_requested",false)||host.shouldShowRequestPermissionRationale(Manifest.permission.POST_NOTIFICATIONS))){

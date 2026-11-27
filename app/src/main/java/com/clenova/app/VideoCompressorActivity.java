@@ -31,7 +31,7 @@ public final class VideoCompressorActivity extends Activity {
     private final Map<String,String> galleryVersions=new HashMap<>();
     private AppPreferences prefs;private ActivityHistory history;
     private int bg,card,ink,gray,blue,pale,green,red,phase=GALLERY,page,sort,epoch,thumbEpoch;
-    private boolean dark,busy,limited,encoding,destroyed,foreground,trashPending,sourceRemoved,loadingGallery;
+    private boolean dark,busy,limited,encoding,destroyed,foreground,trashPending,sourceRemoved,loadingGallery,accessPending,refreshGallery;
     private String error="",sourceVersion="";
     private SmartMediaScan galleryJob;
     private SmartMediaScan.Item original;
@@ -106,7 +106,7 @@ public final class VideoCompressorActivity extends Activity {
             final Bitmap result=b;runOnUiThread(()->{if(destroyed||token!=thumbEpoch||!view.isAttachedToWindow()){if(result!=null)result.recycle();return;}if(result!=null)view.setImageBitmap(result);});}));
     }
     private void loadGallery(){
-        if(destroyed)return;cancelThumbs();if(galleryJob!=null)galleryJob.cancel();videos.clear();galleryVersions.clear();page=0;phase=GALLERY;error="";
+        if(destroyed||busy)return;epoch++;cancelThumbs();if(galleryJob!=null)galleryJob.cancel();videos.clear();galleryVersions.clear();page=0;phase=GALLERY;error="";
         if(!SmartMediaScan.hasVideoAccess(this)){limited=false;loadingGallery=false;showGallery();return;}
         loadingGallery=true;showGallery();final int token=++epoch;galleryJob=new SmartMediaScan(this,prefs,new ProtectedFiles(this),new ProtectedFolders(this));final SmartMediaScan scan=galleryJob;
         work=io.submit(()->{try{
@@ -118,16 +118,17 @@ public final class VideoCompressorActivity extends Activity {
     }
     private void sortVideos(){Comparator<SmartMediaScan.Item> comparator=sort==0?Comparator.comparingLong((SmartMediaScan.Item i)->i.bytes).reversed():sort==1?Comparator.comparingLong((SmartMediaScan.Item i)->i.modified).reversed():Comparator.comparingLong((SmartMediaScan.Item i)->i.duration).reversed();videos.sort(comparator.thenComparing(i->i.uri.toString()));}
     private void requestAccess(){
-        String[] p=Build.VERSION.SDK_INT>=34?new String[]{Manifest.permission.READ_MEDIA_VIDEO,Manifest.permission.READ_MEDIA_VISUAL_USER_SELECTED}:Build.VERSION.SDK_INT>=33?new String[]{Manifest.permission.READ_MEDIA_VIDEO}:new String[]{Manifest.permission.READ_EXTERNAL_STORAGE};
-        requestPermissions(p,ACCESS);
+        if(accessPending||busy)return;if(ToolAccess.has(this,ToolAccess.VIDEOS)){loadGallery();return;}
+        accessPending=true;if(!ToolAccess.launch(this,ToolAccess.VIDEOS,ACCESS)){accessPending=false;toast("Could not open access settings");}
     }
-    @Override public void onRequestPermissionsResult(int request,String[] p,int[] results){super.onRequestPermissionsResult(request,p,results);if(request==ACCESS){if(SmartMediaScan.hasVideoAccess(this))loadGallery();else{toast("Video access not granted. Browse files instead.");showGallery();}}}
+    private void accessReturned(){accessPending=false;refreshGallery=false;loadGallery();if(!ToolAccess.has(this,ToolAccess.VIDEOS))toast("Access not granted. Browse files instead.");}
+    @Override public void onRequestPermissionsResult(int code,String[] permissions,int[] results){super.onRequestPermissionsResult(code,permissions,results);if(code==ACCESS)accessReturned();}
     private void browse(){if(busy)return;Intent i=new Intent(Intent.ACTION_OPEN_DOCUMENT);i.setType("video/*");i.addCategory(Intent.CATEGORY_OPENABLE);i.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);try{startActivityForResult(i,PICK);}catch(ActivityNotFoundException e){toast("No file picker available");}}
     private void showGallery(){
         if(destroyed)return;phase=GALLERY;cancelThumbs();LinearLayout l=root();header(l,"Video Compressor",true);LinearLayout b=body(l);
         add(b,text("Save more space.",28,ink,true),-1,-2);gap(b,5);add(b,text("Smaller videos. Same memories.",13,gray,false),-1,-2);gap(b,22);
         LinearLayout section=row();weight(section,text("Your videos",19,ink,true));TextView sorting=button(new String[]{"Largest first","Newest first","Longest first"}[sort]+" ▾",blue,card,()->dialog().setTitle("Sort videos").setSingleChoiceItems(new String[]{"Largest first","Newest first","Longest first"},sort,(d,w)->{sort=w;page=0;sortVideos();d.dismiss();showGallery();}).setNegativeButton("Cancel",null).show());add(section,sorting,-2,dp(40));add(b,section,-1,-2);gap(b,10);
-        if(!SmartMediaScan.hasVideoAccess(this)){LinearLayout notice=block();add(notice,text("Allow video access",17,ink,true),-1,-2);gap(notice,7);add(notice,text("Choose from your gallery or browse a single file without gallery access.",13,gray,false),-1,-2);primary(notice,"Allow video access",this::requestAccess);add(b,notice,-1,-2);}
+        if(!SmartMediaScan.hasVideoAccess(this)){LinearLayout notice=block();add(notice,text("Allow video access",17,ink,true),-1,-2);gap(notice,7);add(notice,text("Choose from your gallery or browse a single file without gallery access.",13,gray,false),-1,-2);primary(notice,ToolAccess.settingsNeeded(this,ToolAccess.VIDEOS)?"Open Android settings":"Allow video access",this::requestAccess);add(b,notice,-1,-2);}
         else if(loadingGallery){LinearLayout c=block();add(c,centered("Loading your videos…",15,gray,false),-1,dp(100));add(b,c,-1,-2);}
         else if(videos.isEmpty()){LinearLayout c=block();add(c,centered(error.isEmpty()?"No accessible videos":error,15,gray,false),-1,dp(75));add(c,button("Refresh gallery",blue,pale,this::loadGallery),-1,dp(44));add(b,c,-1,-2);}
         else{
@@ -245,6 +246,7 @@ public final class VideoCompressorActivity extends Activity {
     }
     @Override protected void onActivityResult(int request,int result,Intent data){
         super.onActivityResult(request,result,data);
+        if(request==ACCESS){accessReturned();return;}
         if(request==PICK&&result==RESULT_OK&&data!=null&&data.getData()!=null){select(data.getData(),null);return;}
         if(request==SAVE&&result==RESULT_OK&&data!=null&&data.getData()!=null){saveTo(data.getData());return;}
         if(request==TRASH){trashPending=false;sourceRemoved=result==RESULT_OK;toast(sourceRemoved?"Android approved moving the original to Trash.":"Original kept. Trash request cancelled.");if(output!=null)showResult();else loadGallery();}
@@ -255,8 +257,10 @@ public final class VideoCompressorActivity extends Activity {
         if(phase==HISTORY){showGallery();return;}if(phase==SETTINGS){source=null;original=null;clearOutput();loadGallery();return;}
         if(phase==RESULT){if(saved!=null){clearOutput();source=null;loadGallery();}else dialog().setTitle("Discard unsaved copy?").setMessage("The original video is unchanged.").setNegativeButton("Stay",null).setPositiveButton("Discard",(d,w)->{clearOutput();showSettings();}).show();return;}finish();
     }
-    @Override protected void onResume(){super.onResume();foreground=true;}
+    @Override protected void onResume(){super.onResume();foreground=true;
+        if(refreshGallery&&!accessPending&&!busy&&!trashPending&&phase==GALLERY){refreshGallery=false;loadGallery();}
+    }
     @Override protected void onPause(){foreground=false;super.onPause();}
-    @Override protected void onStop(){super.onStop();stopPlayer();if(phase==ENCODING&&busy){cancelCompression();if(!isFinishing()){showSettings();toast("Compression cancelled when the app left the foreground");}}}
+    @Override protected void onStop(){super.onStop();stopPlayer();if(phase==ENCODING&&busy){cancelCompression();if(!isFinishing()){showSettings();toast("Compression cancelled when the app left the foreground");}}if(phase==GALLERY&&!busy&&!accessPending&&!trashPending){cancelThumbs();if(galleryJob!=null){galleryJob.cancel();galleryJob=null;}epoch++;loadingGallery=false;videos.clear();galleryVersions.clear();refreshGallery=true;}}
     @Override protected void onDestroy(){destroyed=true;epoch++;cancelThumbs();handler.removeCallbacks(progressTick);if(galleryJob!=null)galleryJob.cancel();if(transformer!=null)try{transformer.cancel();}catch(RuntimeException ignored){}if(work!=null)work.cancel(true);io.shutdownNow();thumbs.shutdownNow();clearOutput();super.onDestroy();}
 }

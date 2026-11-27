@@ -23,6 +23,10 @@ jobs:
           java -cp /tmp/clenova-tests com.clenova.app.FolderExclusionTest
           java -cp /tmp/clenova-tests com.clenova.app.FaqSearchTest
           java -cp /tmp/clenova-tests com.clenova.app.FeedbackDraftTest
+      - name: Verify feature permission routing
+        run: |
+          javac -d /tmp/clenova-tests app/src/main/java/com/clenova/app/AccessDecision.java tests/AccessDecisionTest.java
+          java -cp /tmp/clenova-tests com.clenova.app.AccessDecisionTest
       - name: Verify clutter rules
         run: |
           javac -d /tmp/clenova-tests app/src/main/java/com/clenova/app/ClutterRules.java tests/ClutterRulesTest.java

@@ -88,13 +88,12 @@ public final class SwipePhotosActivity extends Activity {
         TextView title=label("Review your photos",24,ink,true);title.setGravity(Gravity.CENTER);add(body,title,-1,-2);gap(body,10);
         TextView detail=label("Allow photo access to review your gallery. Nothing is uploaded or removed automatically.",15,muted,false);detail.setGravity(Gravity.CENTER);add(body,detail,-1,-2);gap(body,22);
         add(body,button("Allow photo access",0xffffffff,blue,this::askPermission),-1,dp(50));gap(body,10);
-        add(body,button("Open Android settings",blue,card,()->startActivity(new Intent(android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS,Uri.parse("package:"+getPackageName())))),-1,dp(48));
+        add(body,button("Open Android settings",blue,card,()->{if(permissionPending)return;permissionPending=true;if(!ToolAccess.openSettings(this,PHOTO_ACCESS)){permissionPending=false;toast("Android settings unavailable");}}),-1,dp(48));
         l.addView(body,new LinearLayout.LayoutParams(-1,0,1));setContentView(l);
     }
     private void askPermission(){
-        if(permissionPending)return;permissionPending=true;
-        String[] permissions=Build.VERSION.SDK_INT>=34?new String[]{Manifest.permission.READ_MEDIA_IMAGES,Manifest.permission.READ_MEDIA_VISUAL_USER_SELECTED}:Build.VERSION.SDK_INT>=33?new String[]{Manifest.permission.READ_MEDIA_IMAGES}:new String[]{Manifest.permission.READ_EXTERNAL_STORAGE};
-        requestPermissions(permissions,PHOTO_ACCESS);
+        if(permissionPending)return;if(ToolAccess.has(this,ToolAccess.PHOTOS)){load();return;}
+        permissionPending=true;if(!ToolAccess.launch(this,ToolAccess.PHOTOS,PHOTO_ACCESS)){permissionPending=false;toast("Could not open photo access");}
     }
     @Override public void onRequestPermissionsResult(int request,String[] permissions,int[] results){
         super.onRequestPermissionsResult(request,permissions,results);if(request!=PHOTO_ACCESS)return;
@@ -236,7 +235,7 @@ public final class SwipePhotosActivity extends Activity {
         }catch(Exception e){runOnUiThread(()->{if(destroyed||token!=epoch)return;job=null;loading=false;toast("Photos or protection changed. Review again.");load();});}});
     }
     @Override protected void onActivityResult(int request,int result,Intent data){
-        super.onActivityResult(request,result,data);if(request!=TRASH)return;approvedPending=false;reload=false;
+        super.onActivityResult(request,result,data);if(request==PHOTO_ACCESS){permissionPending=false;reload=false;open();return;}if(request!=TRASH)return;approvedPending=false;reload=false;
         toast(result==RESULT_OK?"Android trash request approved. Refreshing gallery.":"Trash request cancelled. No completion claimed.");load();
     }
     private void toast(String s){Toast.makeText(this,tr(s),Toast.LENGTH_SHORT).show();}

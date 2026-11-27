@@ -36,7 +36,7 @@ public final class PhotoCompressorActivity extends Activity {
     private PhotoCompressionEngine.Format format=PhotoCompressionEngine.Format.ORIGINAL;
     private SmartMediaScan scanner;private Future<?> task;
     private int bg,card,ink,gray,blue,pale,green,red,phase=GALLERY,page,sort,epoch,thumbEpoch,batchCount,completedCount;
-    private boolean dark,destroyed,foreground,busy,loading,limited,trashPending;
+    private boolean dark,destroyed,foreground,busy,loading,limited,trashPending,accessPending,refreshGallery;
     private String month="All photos",error="";
     private TextView countLabel,sizeLabel,nextButton,progressTitle,progressDetail,selectAllButton;
     private LinearLayout progressRows;
@@ -87,7 +87,7 @@ public final class PhotoCompressorActivity extends Activity {
         }catch(Exception|OutOfMemoryError ignored){}final Bitmap result=b;runOnUiThread(()->{if(destroyed||token!=thumbEpoch||!view.isAttachedToWindow()){if(result!=null)result.recycle();return;}if(result!=null)view.setImageBitmap(result);});}));
     }
     private void loadGallery(){
-        if(destroyed||busy)return;cancelThumbs();if(scanner!=null)scanner.cancel();gallery.clear();months.clear();page=0;phase=GALLERY;error="";
+        if(destroyed||busy)return;epoch++;cancelThumbs();if(scanner!=null)scanner.cancel();gallery.clear();months.clear();page=0;phase=GALLERY;error="";
         if(!SmartMediaScan.hasPhotoAccess(this)){selected.entrySet().removeIf(e->e.getValue().original!=null);loading=false;limited=false;showGallery();return;}
         loading=true;showGallery();final int token=++epoch;scanner=new SmartMediaScan(this,prefs,new ProtectedFiles(this),new ProtectedFolders(this));final SmartMediaScan scan=scanner;
         task=io.submit(()->{try{
@@ -108,8 +108,12 @@ public final class PhotoCompressorActivity extends Activity {
         Comparator<PhotoCompressionEngine.Source> c=sort==0?Comparator.comparingLong((PhotoCompressionEngine.Source s)->s.original==null?Long.MAX_VALUE:s.original.modified).reversed():Comparator.comparingLong((PhotoCompressionEngine.Source s)->s.bytes).reversed();
         list.sort(c.thenComparing(this::key));return list;
     }
-    private void access(){String[] p=Build.VERSION.SDK_INT>=34?new String[]{Manifest.permission.READ_MEDIA_IMAGES,Manifest.permission.READ_MEDIA_VISUAL_USER_SELECTED}:Build.VERSION.SDK_INT>=33?new String[]{Manifest.permission.READ_MEDIA_IMAGES}:new String[]{Manifest.permission.READ_EXTERNAL_STORAGE};requestPermissions(p,ACCESS);}
-    @Override public void onRequestPermissionsResult(int r,String[] p,int[] results){super.onRequestPermissionsResult(r,p,results);if(r==ACCESS){if(!SmartMediaScan.hasPhotoAccess(this))toast("Photo access not granted. Browse files instead.");loadGallery();}}
+    private void access(){
+        if(accessPending||busy)return;if(ToolAccess.has(this,ToolAccess.PHOTOS)){loadGallery();return;}
+        accessPending=true;if(!ToolAccess.launch(this,ToolAccess.PHOTOS,ACCESS)){accessPending=false;toast("Could not open access settings");}
+    }
+    private void accessReturned(){accessPending=false;refreshGallery=false;loadGallery();if(!ToolAccess.has(this,ToolAccess.PHOTOS))toast("Access not granted. Browse files instead.");}
+    @Override public void onRequestPermissionsResult(int code,String[] permissions,int[] results){super.onRequestPermissionsResult(code,permissions,results);if(code==ACCESS)accessReturned();}
     private void pick(){if(busy)return;if(selected.size()>=MAX){toast("Maximum 100 photos");return;}Intent i=new Intent(Intent.ACTION_OPEN_DOCUMENT);i.setType("image/*");i.addCategory(Intent.CATEGORY_OPENABLE);i.putExtra(Intent.EXTRA_ALLOW_MULTIPLE,true);i.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);try{startActivityForResult(i,PICK);}catch(ActivityNotFoundException e){toast("No file picker available");}}
     private void importPhotos(Intent data){
         LinkedHashSet<Uri> uris=new LinkedHashSet<>();if(data.getData()!=null)uris.add(data.getData());ClipData clips=data.getClipData();if(clips!=null)for(int i=0;i<clips.getItemCount();i++){Uri u=clips.getItemAt(i).getUri();if(u!=null)uris.add(u);}
@@ -120,7 +124,7 @@ public final class PhotoCompressorActivity extends Activity {
     private void showGallery(){
         if(destroyed)return;phase=GALLERY;cancelThumbs();marks.clear();LinearLayout l=root();header(l,"Photo Compressor",true);LinearLayout b=body(l);
         add(b,text("Less space. More memories.",25,ink,true),-1,-2);gap(b,5);add(b,text("Choose 1 to 100 photos to compress.",13,gray,false),-1,-2);gap(b,16);
-        if(!SmartMediaScan.hasPhotoAccess(this)){LinearLayout notice=block();add(notice,text("Allow photo access",16,ink,true),-1,-2);gap(notice,6);add(notice,text("Choose from your gallery or browse selected files.",13,gray,false),-1,-2);primary(notice,"Allow photo access",this::access);add(b,notice,-1,-2);gap(b,10);}
+        if(!SmartMediaScan.hasPhotoAccess(this)){LinearLayout notice=block();add(notice,text("Allow photo access",16,ink,true),-1,-2);gap(notice,6);add(notice,text("Choose from your gallery or browse selected files.",13,gray,false),-1,-2);primary(notice,ToolAccess.settingsNeeded(this,ToolAccess.PHOTOS)?"Open Android settings":"Allow photo access",this::access);add(b,notice,-1,-2);gap(b,10);}
         if(loading){add(b,center("Loading your photos…",13,gray,false),-1,dp(42));}
         if(limited){add(b,text("Limited photo access or gallery coverage",12,gray,false),-1,-2);if(Build.VERSION.SDK_INT>=34){gap(b,5);add(b,button("Manage photo access",blue,pale,this::access),-1,dp(40));}gap(b,8);}
         if(!error.isEmpty()){add(b,text(error,12,red,false),-1,-2);gap(b,8);}
@@ -223,13 +227,16 @@ public final class PhotoCompressorActivity extends Activity {
     private void showHistory(){if(busy)return;phase=HISTORY;cancelThumbs();LinearLayout l=root();header(l,"Compression history",false);LinearLayout b=body(l);int n=0;for(ActivityHistory.Entry e:history.entries())if("photo_compression".equals(e.category)){LinearLayout box=block();add(box,text(e.title,15,ink,true),-1,-2);gap(box,6);add(box,text(e.detail,12,gray,false),-1,-2);gap(box,5);add(box,text(android.text.format.DateFormat.getMediumDateFormat(this).format(new Date(e.timestamp)),12,gray,false),-1,-2);add(b,box,-1,-2);gap(b,9);n++;}if(n==0){LinearLayout box=block();add(box,center("No compressed photos yet",17,ink,true),-1,dp(46));add(box,center("Successful saves appear here.",13,gray,false),-1,dp(40));add(b,box,-1,-2);}foot(l,"History records saved copies, not reclaimed storage.");setContentView(l);}
     private void newBatch(){clearOutputs();selected.clear();month="All photos";preset=PhotoCompressionEngine.Preset.BALANCED;format=PhotoCompressionEngine.Format.ORIGINAL;loadGallery();}
     @Override protected void onActivityResult(int request,int result,Intent data){super.onActivityResult(request,result,data);
+        if(request==ACCESS){accessReturned();return;}
         if(request==PICK&&result==RESULT_OK&&data!=null){importPhotos(data);return;}
         if(request==FOLDER&&result==RESULT_OK&&data!=null&&data.getData()!=null){saveTo(data.getData());return;}
         if(request==TRASH){trashPending=false;if(result==RESULT_OK)for(PhotoCompressionEngine.Output o:outputs)if(pendingTrash.contains(o.source.uri))o.trashed=true;pendingTrash.clear();toast(result==RESULT_OK?"Android approved moving the selected originals to Trash.":"Originals kept.");if(outputs.isEmpty())loadGallery();else showResult();}
     }
     @Override public void onBackPressed(){if(trashPending)return;if(busy){if(phase==ENCODING)confirmCancel();else toast("Current operation is finishing");return;}if(phase==HISTORY||phase==SETTINGS){showGallery();return;}if(phase==RESULT){if(unsaved().isEmpty()){newBatch();return;}dialog().setTitle("Discard unsaved copies?").setMessage("Saved copies and originals stay unchanged.").setNegativeButton("Stay",null).setPositiveButton("Discard",(d,w)->{clearOutputs();showSettings();}).show();return;}finish();}
-    @Override protected void onResume(){super.onResume();foreground=true;}
+    @Override protected void onResume(){super.onResume();foreground=true;
+        if(refreshGallery&&!accessPending&&!busy&&!trashPending&&phase==GALLERY){refreshGallery=false;loadGallery();}
+    }
     @Override protected void onPause(){foreground=false;super.onPause();}
-    @Override protected void onStop(){super.onStop();if(phase==ENCODING&&busy){cancelBatch();if(!isFinishing()){showSettings();toast("Compression cancelled when the app left the foreground");}}}
+    @Override protected void onStop(){super.onStop();if(phase==ENCODING&&busy){cancelBatch();if(!isFinishing()){showSettings();toast("Compression cancelled when the app left the foreground");}}if(phase==GALLERY&&!busy&&!accessPending&&!trashPending){cancelThumbs();if(scanner!=null){scanner.cancel();scanner=null;}epoch++;loading=false;gallery.clear();months.clear();currentFilter=Collections.emptyList();selected.entrySet().removeIf(e->e.getValue().original!=null);refreshGallery=true;}}
     @Override protected void onDestroy(){destroyed=true;epoch++;cancelThumbs();if(scanner!=null)scanner.cancel();if(task!=null)task.cancel(true);io.shutdownNow();thumbnails.shutdownNow();clearOutputs();super.onDestroy();}
 }
