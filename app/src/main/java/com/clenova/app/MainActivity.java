@@ -52,6 +52,9 @@ public final class MainActivity extends Activity {
     private SmartMediaScan.Result agentLiveResult;
     private String agentResultChat="",agentStage="",relayEndpoint="",relayToken="";
     private boolean agentCloudBusy,agentPermissionPending,agentForeground=true,agentTransition;
+    private final java.util.concurrent.ThreadPoolExecutor relayWorker=new java.util.concurrent.ThreadPoolExecutor(1,1,15,java.util.concurrent.TimeUnit.SECONDS,new java.util.concurrent.ArrayBlockingQueue<>(1));
+    private java.util.concurrent.Future<?> relayRequest;
+    private void cancelRelayRequest(){if(relayRequest!=null){relayRequest.cancel(true);relayRequest=null;}relayWorker.purge();}
     private int agentGeneration,agentScanTask;
     private TextView agentProgressText;
     private android.widget.ProgressBar agentProgressBar;
@@ -427,7 +430,7 @@ public final class MainActivity extends Activity {
     @Override protected void onStop(){
         super.onStop();nextThumbGeneration();dupCache.evictAll();overviewHandler.removeCallbacks(finishPreparation);cancelOverview();deviceOverview=null;preparationReady=false;agentForeground=false;agentSessionHandler.removeCallbacks(agentExpiry);agentLiveResult=null;agentResultChat="";
         if(agentScan!=null){agentScan.cancel();agentScan=null;appendAgent(false,"Analysis interrupted. Start a fresh review when you return.",-1);}
-        if(agentCloudBusy){agentCloudBusy=false;agentGeneration++;appendAgent(false,"Request interrupted. Please send it again.",-1);}
+        if(agentCloudBusy){agentCloudBusy=false;agentGeneration++;cancelRelayRequest();appendAgent(false,"Request interrupted. Please send it again.",-1);}
         stopRealVideo();
         if(verifyingCleanup||completionVisible)return;
         if(unusedVisible){if(unusedExternal||unusedUninstallPending)return;showClean();}
@@ -446,7 +449,7 @@ public final class MainActivity extends Activity {
         onboardingAccess=null;
         if(onboardingAgent!=null){onboardingAgent.setActive(false);onboardingAgent=null;}
         agentSessionHandler.removeCallbacks(agentExpiry);
-        if(agentScan!=null){agentScan.cancel();agentScan=null;}agentGeneration++;if(agentDrawer!=null)agentDrawer.dismiss();relayToken="";
+        if(agentScan!=null){agentScan.cancel();agentScan=null;}agentGeneration++;cancelRelayRequest();relayWorker.shutdownNow();if(agentDrawer!=null)agentDrawer.dismiss();relayToken="";
         if(cleanupAnimation!=null){
             cleanupAnimation.removeAllListeners();cleanupAnimation.removeAllUpdateListeners();cleanupAnimation.cancel();
         }
@@ -575,7 +578,7 @@ public final class MainActivity extends Activity {
     }
     private void clearAgentSession(){
         agentSessionHandler.removeCallbacks(agentExpiry);
-        if(agentScan!=null){agentScan.cancel();agentScan=null;}agentCloudBusy=false;agentGeneration++;agentPermissionPending=false;
+        if(agentScan!=null){agentScan.cancel();agentScan=null;}agentCloudBusy=false;agentGeneration++;cancelRelayRequest();agentPermissionPending=false;
         agentLiveResult=null;agentResultChat="";if(agentVisible&&!agentTaskOrigin)scanResult=null;agentTaskVisible=false;
         if(agentChats!=null&&!agentChats.clear())folderToast("Could not clear saved conversation");
         activeChat=null;
@@ -672,7 +675,7 @@ public final class MainActivity extends Activity {
         if(task>=0){openAgentTask(task,request);return;}
         boolean fresh=activeChat==null;appendAgent(true,request,-1);agentTransition=fresh;agentLiveResult=null;agentResultChat="";
         if(!relayEndpoint.isEmpty()&&!relayToken.isEmpty()){agentCloudBusy=true;final int generation=++agentGeneration;final String endpoint=relayEndpoint,token=relayToken;final org.json.JSONArray context=new org.json.JSONArray();java.util.List<String> prior=new java.util.ArrayList<>();for(int i=activeChat.messages.size()-2;i>=0&&prior.size()<3;i--){AgentChatStore.Message msg=activeChat.messages.get(i);if(msg.user&&msg.text.length()<=600)prior.add(0,msg.text);}for(String item:prior)context.put(item);showAgent();
-            new Thread(()->{AgentRelay.Reply reply=null;try{reply=AgentRelay.ask(endpoint,token,request,context);}catch(Exception ignored){}final AgentRelay.Reply response=reply;runOnUiThread(()->{if(isDestroyed()||generation!=agentGeneration||!agentCloudBusy)return;agentCloudBusy=false;appendAgent(false,response==null?"AI connection unavailable. Try again or use a local cleanup request.":response.text,response==null?-1:response.action);if(agentVisible&&agentForeground)showAgent();});},"Clenova-agent-relay").start();return;}
+            relayWorker.allowCoreThreadTimeOut(true);try{relayRequest=relayWorker.submit(()->{AgentRelay.Reply reply=null;try{reply=AgentRelay.ask(endpoint,token,request,context);}catch(Exception ignored){}final AgentRelay.Reply response=reply;runOnUiThread(()->{if(isDestroyed()||generation!=agentGeneration||!agentCloudBusy)return;relayRequest=null;agentCloudBusy=false;appendAgent(false,response==null?"AI connection unavailable. Try again or use a local cleanup request.":response.text,response==null?-1:response.action);if(agentVisible&&agentForeground)showAgent();});});}catch(java.util.concurrent.RejectedExecutionException e){agentCloudBusy=false;appendAgent(false,"AI connection busy. Try again.",-1);showAgent();}return;}
         appendAgent(false,"I can help with phone storage, photos, downloads, unused apps and file protection. Other topics aren't supported. Try a supported cleanup request.",-1);showAgent();
     }
     private void openAgentTask(int task,String request){
@@ -703,7 +706,7 @@ public final class MainActivity extends Activity {
             runOnUiThread(()->{if(agentScan!=job||isDestroyed()||activeChat==null||!activeChat.id.equals(chat))return;agentScan=null;if(accessAtStart!=ToolAccess.mediaMask(this)||!agentHasAccess(task)){appendAgent(false,"Media access changed. No results are available.",-1);showAgent();return;}agentLiveResult=result;agentResultChat=chat;scanResult=result;appendAgent(false,"Analysis finished. I checked "+result.examined+" accessible media items. "+(result.partial||result.limited?"Results are partial. ":"")+"Review the candidates below. Nothing has been removed.",-1);showAgent();});
         }catch(Exception ex){runOnUiThread(()->{if(agentScan!=job||isDestroyed())return;agentScan=null;appendAgent(false,"Analysis could not finish. No files were removed.",-1);showAgent();});}},"Clenova-agent-scan").start();
     }
-    private void cancelAgentWork(){if(agentScan!=null){agentScan.cancel();agentScan=null;appendAgent(false,"Analysis cancelled. Nothing was removed.",-1);}if(agentCloudBusy){agentCloudBusy=false;agentGeneration++;appendAgent(false,"Request cancelled.",-1);}if(agentVisible&&!isDestroyed())showAgent();}
+    private void cancelAgentWork(){if(agentScan!=null){agentScan.cancel();agentScan=null;appendAgent(false,"Analysis cancelled. Nothing was removed.",-1);}if(agentCloudBusy){agentCloudBusy=false;agentGeneration++;cancelRelayRequest();appendAgent(false,"Request cancelled.",-1);}if(agentVisible&&!isDestroyed())showAgent();}
     private void newAgentChat(){if(agentBusy()){folderToast("Cancel the current task first");return;}clearAgentSession();agentTransition=true;showAgent();}
     private void showAgentDrawer(){
         if(agentDrawer!=null)agentDrawer.dismiss();android.app.Dialog dialog=new android.app.Dialog(this);agentDrawer=dialog;dialog.requestWindowFeature(android.view.Window.FEATURE_NO_TITLE);
@@ -2616,7 +2619,7 @@ public final class MainActivity extends Activity {
             .setNegativeButton(tr("Cancel"),null).setPositiveButton(tr("Reset"),(d,w)->resetClenovaData()).show();
     }
     private void resetClenovaData(){
-        cancelOverview();deviceOverview=null;agentSessionHandler.removeCallbacks(agentExpiry);boolean ok=LocalAppData.reset(this);agentChats=new AgentChatStore(this);activeChat=null;agentLiveResult=null;agentResultChat="";relayEndpoint="";relayToken="";agentGeneration++;
+        cancelOverview();deviceOverview=null;agentSessionHandler.removeCallbacks(agentExpiry);cancelRelayRequest();agentCloudBusy=false;boolean ok=LocalAppData.reset(this);agentChats=new AgentChatStore(this);activeChat=null;agentLiveResult=null;agentResultChat="";relayEndpoint="";relayToken="";agentGeneration++;
         if(cleanupAnimation!=null){cleanupAnimation.removeAllListeners();cleanupAnimation.removeAllUpdateListeners();cleanupAnimation.cancel();cleanupAnimation=null;}
         cleanup=null;cleanupCategoryCounts=null;cleanupEventId=null;reviewPlan=null;
         duplicateDraft=null;similarDraft=null;videoDraft=null;

@@ -11,12 +11,14 @@ public final class PreviewWorkTest {
         try{
             p.execute(()->{started.countDown();try{release.await();}catch(InterruptedException e){Thread.currentThread().interrupt();}});
             check(started.await(2,TimeUnit.SECONDS));
+            Future<?> oldest=p.submit(()->{});
             for(int i=0;i<600;i++)p.execute(()->{});
+            check(oldest.isCancelled());
             p.execute(newest::countDown);
             check(p.getQueue().size()==PreviewWork.MAX_PENDING);
             check(p.allowsCoreThreadTimeOut());
             release.countDown();check(newest.await(2,TimeUnit.SECONDS));
         }finally{release.countDown();p.shutdownNow();}
-        System.out.println("PreviewWork: 7 assertions passed");
+        System.out.println("PreviewWork: 8 assertions passed");
     }
 }

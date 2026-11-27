@@ -32,12 +32,13 @@ final class AutopilotScheduler {
                 if(js.getPendingJob(JOB_ID)!=null)clear(c);
                 return false;
             }
-            if(eligible(c,p)==0){if(js.getPendingJob(JOB_ID)!=null||state(c).contains("checked"))clear(c);return false;}
+            int mask=ToolAccess.mediaMask(c);
+            if(eligible(c,p)==0){if(js.getPendingJob(JOB_ID)!=null||state(c).contains("checked")||state(c).contains("failed"))clear(c);return false;}
             long interval=AutopilotPolicy.interval(p.scanDays());
             JobInfo old=js.getPendingJob(JOB_ID);
-            if(old!=null&&old.getIntervalMillis()==interval&&old.getExtras().getString("revision","").equals(revision(c))&&!revision(c).isEmpty())return true;
+            if(old!=null&&old.getIntervalMillis()==interval&&state(c).getInt("scheduled_mask",-1)==mask&&old.getExtras().getString("revision","").equals(revision(c))&&!revision(c).isEmpty())return true;
             clear(c);
-            String revision=revision(c);if(revision.isEmpty())return false;
+            String revision=revision(c);if(revision.isEmpty()||!state(c).edit().putInt("scheduled_mask",mask).commit())return false;
             android.os.PersistableBundle extras=new android.os.PersistableBundle();extras.putString("revision",revision);
             JobInfo info=new JobInfo.Builder(JOB_ID,new ComponentName(c,AutopilotJobService.class))
                 .setPeriodic(interval,Math.min(interval,6L*60*60*1000))

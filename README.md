@@ -1,6 +1,10 @@
-# Clenova — Home design phase
+# Clenova — Android development
 
-Native Android Java prototype. Launches directly into the approved Home screen. Uses sample data only: score 92, 42.8 GB available, 12.4 GB recovered, 4.8 GB proposed recovery. No device permissions or network access. No real scanning, deletion, Agent, billing or other screens yet.
+Current source: native Java Android app with real device overview, permission-scoped media and file review, explicit cleanup approval, local history, Agent and optional private Groq relay, and read-only scheduled Autopilot. No subscription or billing is enabled. Phase 56 focuses on polishing existing screens, branding, resource use and error handling without adding features. Live relay credentials and complete device/runtime verification remain pending. The sections below describe historical implementation milestones; early sample-only descriptions are not the current product status.
+
+## Historical Home design phase
+
+The initial Home prototype used sample storage and cleanup metrics. Those were design fixtures, not actual device measurements.
 
 ## Build
 JDK 17, Android SDK 35, Gradle 8.9 (AGP 8.7.3). Run `./gradlew :app:assembleDebug` from the repository root. Windows: `gradlew.bat :app:assembleDebug`. APK: `app/build/outputs/apk/debug/app-debug.apk`. The repository can be imported into Android Studio.
