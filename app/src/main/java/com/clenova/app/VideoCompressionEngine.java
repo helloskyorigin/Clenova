@@ -93,6 +93,17 @@ final class VideoCompressionEngine {
         if(result==null||uri==null)return false;
         try(InputStream in=c.getContentResolver().openInputStream(uri)){return in!=null&&MessageDigest.isEqual(result.digest,digest(in));}
     }
+    /** A picker save must target a new empty document, not an existing source or alias. */
+    static void verifyNewDestination(Context c,Uri source,Uri destination)throws Exception{
+        if(destination==null||source.equals(destination)||!"content".equals(destination.getScheme()))
+            throw new IOException("Choose a new file");
+        long bytes=-1;
+        try(Cursor cursor=c.getContentResolver().query(destination,new String[]{OpenableColumns.SIZE},null,null,null)){
+            if(cursor!=null&&cursor.moveToFirst()&&!cursor.isNull(0))bytes=cursor.getLong(0);
+        }
+        if(bytes<0)try(android.os.ParcelFileDescriptor fd=c.getContentResolver().openFileDescriptor(destination,"r")){if(fd!=null)bytes=fd.getStatSize();}
+        if(bytes!=0)throw new IOException("Destination must be a new empty document");
+    }
     static void copy(Context c,Output output,Uri destination)throws Exception{
         if(!output.file.isFile()||output.file.length()!=output.meta.bytes)throw new IOException("Temporary output missing");
         long copied=0;try(InputStream in=new FileInputStream(output.file);OutputStream out=c.getContentResolver().openOutputStream(destination,"w")){
