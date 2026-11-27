@@ -53,8 +53,10 @@ final class DeviceOverview {
     private boolean granted(String name){return context.checkSelfPermission(name)==PackageManager.PERMISSION_GRANTED;}
     private boolean full(boolean image){return Build.VERSION.SDK_INT>=33?granted(image?Manifest.permission.READ_MEDIA_IMAGES:Manifest.permission.READ_MEDIA_VIDEO):granted(Manifest.permission.READ_EXTERNAL_STORAGE);}
     private String access(){return new DevicePermissions(context).snapshot().media;}
+    private int accessMask(){return (full(true)?1:0)|(full(false)?2:0)|(Build.VERSION.SDK_INT>=34&&granted(Manifest.permission.READ_MEDIA_VISUAL_USER_SELECTED)?4:0);}
     Snapshot run(Progress progress){
         Snapshot result=new Snapshot();
+        int originalMask=accessMask();
         result.mediaAccess=access();result.limited=!"Allowed".equals(result.mediaAccess);result.agent=prefs.autopilot();
         result.usage=UnusedAppScan.allowed(context);result.folder=new SetupFolderAccess(context).current()!=null;publish(progress,1,result);
         readStorage(result);publish(progress,2,result);
@@ -62,8 +64,9 @@ final class DeviceOverview {
         result.videos=readMedia(false);publish(progress,4,result);
         result.apps=launcherCount();
         // Selected access may change even while the Activity is alive. Discard aggregates on change.
-        if(!result.mediaAccess.equals(access())||!SmartMediaScan.hasPhotoAccess(context))result.photos=Media.unavailable();
-        if(!result.mediaAccess.equals(access())||!SmartMediaScan.hasVideoAccess(context))result.videos=Media.unavailable();
+        boolean changed=originalMask!=accessMask()||!result.mediaAccess.equals(access());
+        if(changed||!SmartMediaScan.hasPhotoAccess(context))result.photos=Media.unavailable();
+        if(changed||!SmartMediaScan.hasVideoAccess(context))result.videos=Media.unavailable();
         result.mediaAccess=access();result.limited=!"Allowed".equals(result.mediaAccess);
         readStorage(result);result.checked=System.currentTimeMillis();result.finished=true;publish(progress,5,result);return new Snapshot(result);
     }

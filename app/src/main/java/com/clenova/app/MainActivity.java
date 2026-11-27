@@ -159,7 +159,8 @@ public final class MainActivity extends Activity {
     private final Runnable finishPreparation=()->{
         if(preparingPhone==null||!preparationReady||isFinishing()||isDestroyed())return;
         if(!prefs.finishOnboarding()){preparationReady=false;preparingPhone.error("Could not save setup. Try again.");return;}
-        preparingPhone=null;preparationReady=false;applyPalette();showHome();
+        preparingPhone=null;preparationReady=false;applyPalette();
+        renderingOverview=true;try{showHome();}finally{renderingOverview=false;}
     };
     private final android.os.Handler splashHandler=new android.os.Handler(android.os.Looper.getMainLooper());
     private long splashDeadline;
@@ -1915,7 +1916,8 @@ public final class MainActivity extends Activity {
     private void openAgentPreferences(){
         settingsVisible=true;agentPrefsVisible=true;setContentView(agentPreferencesScreen());
     }
-    @Override protected void onPause(){splashHandler.removeCallbacks(finishSplash);if(onboardingIntro!=null)onboardingIntro.setActive(false);if(onboardingUnified!=null)onboardingUnified.setActive(false);if(onboardingAutopilot!=null)onboardingAutopilot.setActive(false);if(onboardingAgent!=null)onboardingAgent.setActive(false);super.onPause();}
+    @Override protected void onPause(){splashHandler.removeCallbacks(finishSplash);if(onboardingIntro!=null)onboardingIntro.setActive(false);if(onboardingUnified!=null)onboardingUnified.setActive(false);if(onboardingAutopilot!=null)onboardingAutopilot.setActive(false);if(onboardingAgent!=null)onboardingAgent.setActive(false);
+        overviewHandler.removeCallbacks(finishPreparation);cancelOverview();deviceOverview=null;preparationReady=false;super.onPause();}
     @Override protected void onResume(){
         super.onResume();
         if(onboardingIntro!=null)onboardingIntro.setActive(true);
@@ -3218,11 +3220,11 @@ public final class MainActivity extends Activity {
         add(body,new OverviewBar(this,data),-1,dp(13));space(body,20);
         add(body,txt("Storage overview",18,INK,600),-1,-2);space(body,10);
         LinearLayout breakdown=card();pad(breakdown,14,4);
-        overviewRow(breakdown,"images","Photos",data.photos.size(),data.photos.items(),()->openRealDuplicates(false));
-        thinRule(breakdown);overviewRow(breakdown,"video","Videos",data.videos.size(),data.videos.items(),()->openRealVideos(false));
+        overviewRow(breakdown,"images","Photos",data.photos.size(),data.photos.items(),()->{showClean();openRealDuplicates(false);});
+        thinRule(breakdown);overviewRow(breakdown,"video","Videos",data.videos.size(),data.videos.items(),()->{showClean();openRealVideos(false);});
         thinRule(breakdown);overviewRow(breakdown,"apps","Visible apps",data.apps<0?"Unavailable":data.apps+" apps",data.usage?"Usage access enabled":"Usage access optional",()->startActivity(new android.content.Intent(this,AppManagerActivity.class)));
         thinRule(breakdown);overviewRow(breakdown,"document","Other used storage",DeviceOverview.format(data.other()),"Includes apps, system and unclassified data",null);
-        thinRule(breakdown);overviewRow(breakdown,"folder","File access",data.folder?"Selected folder":"Picker only","Review files when you choose",this::openLargeFiles);
+        thinRule(breakdown);overviewRow(breakdown,"folder","File access",data.folder?"Selected folder":"Picker only","Review files when you choose",()->{showClean();openLargeFiles();});
         add(body,breakdown,-1,-2);space(body,16);
         add(body,txt("Internal data volume. Photo and video sizes include accessible primary-volume items only. Other used includes everything not measured separately. App count is launcher-visible; it is not an app storage total.",12,GRAY,400),-1,-2);space(body,9);
         add(body,txt(!data.finished?"Refreshing device overview…":data.partial()?"Limited overview · Some data is unavailable or not fully counted.":"Read from your device · Nothing changed.",12,GRAY,400),-1,-2);
@@ -3256,7 +3258,7 @@ public final class MainActivity extends Activity {
         LinearLayout copy=column();
         add(copy,txt(prefs.autopilot()?"Your Agent is ready":"Make your Agent yours",16,INK,600),-1,-2);space(copy,5);
         DeviceOverview.Snapshot data=overview();
-        String info=data.finished?(data.photos.available?data.photos.count+" photos": "Photos unavailable")+" · "+(data.videos.available?data.videos.count+" videos":"Videos unavailable"):"Preparing your device overview";
+        String info=data.finished?(data.photos.available?(data.photos.partial?"At least ":"")+data.photos.count+" photos": "Photos unavailable")+" · "+(data.videos.available?(data.videos.partial?"At least ":"")+data.videos.count+" videos":"Videos unavailable"):"Preparing your device overview";
         add(copy,txt(info,13,GRAY,400),-1,-2);weight(top,copy);add(c,top,-1,-2);space(c,13);
         scanButton(c,"Smart Scan",true,()->{showClean();requestSmartScan();});space(c,8);
         scanButton(c,prefs.autopilot()?"Open Agent":"Activate Agent",false,()->{if(prefs.autopilot())showAgent();else showAgentSetup(true,false);});
