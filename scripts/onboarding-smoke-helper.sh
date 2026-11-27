@@ -17,6 +17,7 @@ onboarding_start() {
     adb shell am start -W -n com.clenova.app/.MainActivity
     sleep 1
     onboarding_continue "$1"
+    onboarding_access "$1"
   )
 }
 onboarding_continue() {
@@ -51,4 +52,41 @@ PY
     adb shell input tap $xy
     sleep 1
   done
+}
+
+# Follow the real permission setup on the API 34 emulator. No app-only bypass.
+onboarding_access() {
+  local name="$1" iteration xml="build/onboarding-evidence/$1-access.xml" action
+  for iteration in $(seq 1 24); do
+    adb shell uiautomator dump /sdcard/onboarding-access.xml >/dev/null
+    adb pull /sdcard/onboarding-access.xml "$xml" >/dev/null
+    adb exec-out screencap -p > "build/onboarding-evidence/$name-access-$iteration.png"
+    action="$(python3 - "$xml" <<'PY'
+import sys, re, xml.etree.ElementTree as ET
+nodes=list(ET.parse(sys.argv[1]).iter('node'))
+texts=[n.get('text','') for n in nodes]
+if 'Autopilot active' in texts or any('All under control.' in t for t in texts):
+    print('DONE'); raise SystemExit
+def choose(predicate):
+    for n in nodes:
+        if predicate(n) and n.get('enabled')=='true' and n.get('clickable')=='true':
+            a,b,c,d=map(int,re.findall(r'\d+',n.get('bounds','')))
+            if c>a and d>b:
+                print((a+c)//2,(b+d)//2); return True
+    return False
+if choose(lambda n:n.get('resource-id','').endswith('/permission_deny_button') or n.get('text','').lower() in ("don't allow","deny")): raise SystemExit
+if choose(lambda n:n.get('text')=='Continue without media'): raise SystemExit
+if 'App usage' in texts or 'File access' in texts:
+    if choose(lambda n:n.get('text')=='Not now'): raise SystemExit
+if choose(lambda n:n.get('text') in ('Allow','Continue')): raise SystemExit
+# Repeated denied notifications may lead to Android settings.
+if any(n.get('package')=='com.android.settings' for n in nodes):
+    print('BACK'); raise SystemExit
+print('WAIT')
+PY
+)"
+    case "$action" in DONE) return 0;; BACK) adb shell input keyevent 4;; WAIT) :;; *) adb shell input tap $action;; esac
+    sleep 1
+  done
+  echo "Permission setup did not reach Home" >&2; return 1
 }

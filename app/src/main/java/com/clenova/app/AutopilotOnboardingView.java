@@ -49,7 +49,7 @@ final class AutopilotOnboardingView extends OnboardingStoryView {
         button.setPadding(dp(16),dp(15),dp(16),dp(15));button.setStateListAnimator(null);
         button.setBackground(new RippleDrawable(ColorStateList.valueOf(0x33ffffff),shape(BLUE,100),shape(Color.WHITE,100)));
         button.setOnClickListener(v->advanceStory());append(copy,button,30);
-        configureStory(14000L,.96f,false,stage::setTime,next);
+        configureStory(14000L,.96f,true,stage::setTime,next);
     }
     private int dp(float x){return Math.round(x*getResources().getDisplayMetrics().density);}
     private static Typeface font(int weight){return Build.VERSION.SDK_INT>=28?Typeface.create(Typeface.DEFAULT,weight,false):Typeface.create(weight>=500?"sans-serif-medium":"sans-serif",Typeface.NORMAL);}

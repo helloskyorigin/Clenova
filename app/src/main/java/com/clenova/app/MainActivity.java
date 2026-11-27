@@ -147,6 +147,7 @@ public final class MainActivity extends Activity {
     private AgentOnboardingView onboardingIntro;
     private UnifiedOnboardingView onboardingUnified;
     private AutopilotOnboardingView onboardingAutopilot;
+    private PermissionSetup onboardingAccess;
     private final android.os.Handler splashHandler=new android.os.Handler(android.os.Looper.getMainLooper());
     private long splashDeadline;
     private final Runnable finishSplash=()->{if(launchSplash==null||isFinishing()||isDestroyed())return;launchSplash=null;showOnboardingIntro();};
@@ -176,10 +177,20 @@ public final class MainActivity extends Activity {
         if(android.os.Build.VERSION.SDK_INT>=27)getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR);
         onboardingAutopilot=new AutopilotOnboardingView(this,()->{
             if(onboardingAutopilot==null||isFinishing()||isDestroyed())return;
-            // Temporary destination until the actual permissions and setup gate is built.
-            onboardingAutopilot.setActive(false);onboardingAutopilot=null;applyPalette();setContentView(home());
+            onboardingAutopilot.setActive(false);onboardingAutopilot=null;showOnboardingAccess(null);
         });
         setContentView(onboardingAutopilot);onboardingAutopilot.playEntrance();onboardingAutopilot.setActive(true);
+    }
+
+    private void showOnboardingAccess(Bundle state){
+        getWindow().setNavigationBarColor(AgentOnboardingView.BACKGROUND);
+        if(android.os.Build.VERSION.SDK_INT>=27)getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR);
+        onboardingAccess=new PermissionSetup(this,state,()->{
+            if(onboardingAccess==null||isFinishing()||isDestroyed())return;
+            // Agent setup and initial data preparation are the next integration phases.
+            onboardingAccess=null;applyPalette();setContentView(home());
+        });
+        setContentView(onboardingAccess.view());
     }
 
     @Override public void onCreate(Bundle state) {
@@ -200,6 +211,7 @@ public final class MainActivity extends Activity {
         getWindow().getDecorView().setSystemUiVisibility(dark||android.os.Build.VERSION.SDK_INT<27?0:View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR);
         int height = getResources().getConfiguration().screenHeightDp;
         compact = height < 740 ? .88f : 1f;
+        if(state!=null&&state.getBoolean("onboarding_access_visible")){showOnboardingAccess(state);return;}
         if(state!=null&&state.getBoolean("onboarding_autopilot_visible")){showOnboardingAutopilot();onboardingAutopilot.restoreStoryPosition(state.getFloat("onboarding_story_position",0f));return;}
         if(state!=null&&state.getBoolean("onboarding_unified_visible")){showOnboardingUnified();onboardingUnified.restoreStoryPosition(state.getFloat("onboarding_story_position",0f));return;}
         if(state!=null&&state.getBoolean("onboarding_intro_visible")){showOnboardingIntro();onboardingIntro.restoreStoryPosition(state.getFloat("onboarding_story_position",0f));return;}
@@ -237,6 +249,8 @@ public final class MainActivity extends Activity {
         state.putBoolean("onboarding_intro_visible",onboardingIntro!=null||launchSplash!=null);
         state.putBoolean("onboarding_unified_visible",onboardingUnified!=null);
         state.putBoolean("onboarding_autopilot_visible",onboardingAutopilot!=null);
+        state.putBoolean("onboarding_access_visible",onboardingAccess!=null);
+        if(onboardingAccess!=null)onboardingAccess.save(state);
         if(onboardingIntro!=null)state.putFloat("onboarding_story_position",onboardingIntro.storyPosition());
         else if(onboardingUnified!=null)state.putFloat("onboarding_story_position",onboardingUnified.storyPosition());
         else if(onboardingAutopilot!=null)state.putFloat("onboarding_story_position",onboardingAutopilot.storyPosition());
@@ -296,6 +310,7 @@ public final class MainActivity extends Activity {
         if(onboardingIntro!=null){onboardingIntro.setActive(false);onboardingIntro=null;}
         if(onboardingUnified!=null){onboardingUnified.setActive(false);onboardingUnified=null;}
         if(onboardingAutopilot!=null){onboardingAutopilot.setActive(false);onboardingAutopilot=null;}
+        onboardingAccess=null;
         agentSessionHandler.removeCallbacks(agentExpiry);
         if(agentScan!=null){agentScan.cancel();agentScan=null;}agentGeneration++;if(agentDrawer!=null)agentDrawer.dismiss();relayToken="";
         if(cleanupAnimation!=null){
@@ -1350,6 +1365,17 @@ public final class MainActivity extends Activity {
     }
     private void pickLargeFolder(){
         if(downloadsBusy||downloadsPicking)return;
+        android.net.Uri saved=new SetupFolderAccess(this).current();
+        if(saved!=null){
+            privacyDialog().setTitle("Scan a folder").setItems(new String[]{"Use saved folder","Choose another folder"},(dialog,which)->{
+                if(which==0){android.net.Uri fresh=new SetupFolderAccess(this).current();if(fresh!=null)loadLargeFolder(fresh);else chooseLargeFolder();}
+                else chooseLargeFolder();
+            }).setNegativeButton("Cancel",null).show();return;
+        }
+        chooseLargeFolder();
+    }
+    private void chooseLargeFolder(){
+        if(downloadsBusy||downloadsPicking)return;
         android.content.Intent intent=new android.content.Intent(android.content.Intent.ACTION_OPEN_DOCUMENT_TREE);
         intent.addFlags(android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION);
         try{downloadsPicking=true;startActivityForResult(intent,PICK_LARGE_FOLDER);}catch(RuntimeException e){downloadsPicking=false;folderToast("File picker unavailable");}
@@ -1824,6 +1850,7 @@ public final class MainActivity extends Activity {
         if(onboardingIntro!=null)onboardingIntro.setActive(true);
         if(onboardingUnified!=null)onboardingUnified.setActive(true);
         if(onboardingAutopilot!=null)onboardingAutopilot.setActive(true);
+        if(onboardingAccess!=null)onboardingAccess.refresh();
         if(launchSplash!=null){
             if(splashDeadline==0){splashDeadline=android.os.SystemClock.elapsedRealtime()+(android.animation.ValueAnimator.areAnimatorsEnabled()?700:0);launchSplash.reveal();}
             splashHandler.removeCallbacks(finishSplash);splashHandler.postDelayed(finishSplash,Math.max(0,splashDeadline-android.os.SystemClock.elapsedRealtime()));
@@ -1835,6 +1862,7 @@ public final class MainActivity extends Activity {
     }
     @Override public void onRequestPermissionsResult(int requestCode,String[] permissions,int[] grantResults){
         super.onRequestPermissionsResult(requestCode,permissions,grantResults);
+        if(onboardingAccess!=null&&onboardingAccess.permissionResult(requestCode))return;
         if(requestCode==REQUEST_AGENT_MEDIA){agentPermissionPending=false;if(agentVisible&&activeChat!=null){if(agentHasAccess(agentScanTask))beginAgentScan(agentScanTask);else{appendAgent(false,"Media access was not granted. No files were scanned.",-1);showAgent();}}return;}
         if(requestCode==REQUEST_SCAN_MEDIA){requestingScan=false;if(videoAfterScan?SmartMediaScan.hasVideoAccess(this):(shotAfterScan||dupAfterScan||similarAfterScan)?SmartMediaScan.hasPhotoAccess(this):SmartMediaScan.hasAccess(this))startSmartScan();else {dupAfterScan=false;similarAfterScan=false;videoAfterScan=false;shotAfterScan=false;privacyDialog().setTitle(tr("Media access needed")).setMessage(tr("Allow access to photos or videos to scan them. No files were scanned.")).setPositiveButton(tr("Done"),null).show();}return;}
         if(requestCode==REQUEST_NOTIFICATION_ACCESS&&permissionsVisible)openAppPermissions();
@@ -2469,7 +2497,7 @@ public final class MainActivity extends Activity {
         add(body,txt("Device access",14,GRAY,500),-1,-2);space(body,9);
         LinearLayout access=card();pad(access,13,4);
         DevicePermissions.Snapshot snapshot=devicePermissions.snapshot();
-        add(access,permissionRow("images","Photos & videos","Optional access for Smart Scan",snapshot.media,this::openAndroidAppSettings),-1,-2);
+        add(access,permissionRow("images","Photos & videos","Access for photo and video cleaning",snapshot.media,this::openAndroidAppSettings),-1,-2);
         thinRule(access);
         add(access,permissionRow("folder","Files & storage","Select files and folders using Android",snapshot.storage,this::openStoragePermissionInfo),-1,-2);
         thinRule(access);
@@ -2477,7 +2505,7 @@ public final class MainActivity extends Activity {
         thinRule(access);
         add(access,permissionRow("bell","Notifications","Agent updates and reminders",snapshot.notifications,this::manageNotificationAccess),-1,-2);
         thinRule(access);
-        add(access,permissionRow("users","Contacts","Contact cleanup is not active yet",snapshot.contacts,this::openAndroidAppSettings),-1,-2);
+        add(access,permissionRow("users","Contacts","Requested when using Contacts Cleaner",snapshot.contacts,this::openAndroidAppSettings),-1,-2);
         add(body,access,-1,-2);space(body,22);
         add(body,txt("Agent access",14,GRAY,500),-1,-2);space(body,9);
         LinearLayout agent=card();pad(agent,13,4);
@@ -2964,6 +2992,7 @@ public final class MainActivity extends Activity {
     }
     @Override protected void onActivityResult(int requestCode,int resultCode,android.content.Intent data){
         super.onActivityResult(requestCode,resultCode,data);
+        if(onboardingAccess!=null&&onboardingAccess.activityResult(requestCode,resultCode,data))return;
         if(requestCode==REQUEST_APP_UNINSTALL){unusedUninstallPending=false;unusedExternal=false;unusedSelected.clear();if(agentTaskOrigin&&activeChat!=null)appendAgent(false,resultCode==RESULT_OK?"Android reported uninstall success. Refresh the app list to verify.":"Uninstall not confirmed.",-1);if(unusedVisible)refreshUnusedApps();folderToast(resultCode==RESULT_OK?"Android uninstall returned success. Refreshing app list.":"Uninstall not confirmed");return;}
         if(requestCode==PICK_LARGE_FOLDER){downloadsPicking=false;if(resultCode==RESULT_OK&&data!=null&&data.getData()!=null&&(largeFilesMode||clutterMode))loadLargeFolder(data.getData());else if(downloadsVisible)showDownloads();return;}
         if(requestCode==PICK_DOWNLOAD_FILES){downloadsPicking=false;if(resultCode==RESULT_OK&&data!=null)loadPickedDownloads(data);else if(downloadsVisible)showDownloads();return;}
@@ -3246,6 +3275,7 @@ public final class MainActivity extends Activity {
     }
     @Override public void onBackPressed() {
         if(launchSplash!=null){splashHandler.removeCallbacks(finishSplash);launchSplash=null;finish();return;}
+        if(onboardingAccess!=null){if(onboardingAccess.busy())return;onboardingAccess=null;showOnboardingAutopilot();return;}
         if(onboardingAutopilot!=null){onboardingAutopilot.setActive(false);onboardingAutopilot=null;showOnboardingUnified();return;}
         if(onboardingUnified!=null){onboardingUnified.setActive(false);onboardingUnified=null;showOnboardingIntro();return;}
         if(onboardingIntro!=null){onboardingIntro.setActive(false);onboardingIntro=null;finish();return;}

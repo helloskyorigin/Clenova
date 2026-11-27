@@ -38,7 +38,7 @@ final class DevicePermissions {
     }
     private String storage(){
         if(Build.VERSION.SDK_INT>=30&&Environment.isExternalStorageManager())return "Allowed";
-        return "Picker only";
+        return new SetupFolderAccess(context).current()!=null?"Selected folder":"Picker only";
     }
     private String notifications(){
         NotificationManager manager=context.getSystemService(NotificationManager.class);
