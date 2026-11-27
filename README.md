@@ -76,3 +76,6 @@ Settings > Send feedback provides four selectable categories, multiline input ca
 
 ## Rate Clenova
 Settings > Rate Clenova opens an animated native bottom sheet with optional 1–5 star selection, accessible star labels, a drag handle for swipe-down dismissal, Maybe later, outside/back dismissal, and rotation restoration. All users including those selecting zero or low stars have the same Google Play action. Opens the current application ID listing through the Play Store app, with browser fallback. No stars are submitted or stored as a public review by Clenova; the user rates independently in Google Play. A public listing must exist for the destination to work; publishing remains separate. No in-app review API or network permissions added.
+
+## Privacy policy
+Settings > Privacy policy opens the native offline preview policy (v0.1, revised 2026-11-27), with eight readable sections, five languages, privacy summary, selectable policy text, email contact and scroll restoration. Claims describe current preview data storage, picker permissions, simulated cleanup, external services and export destinations. No online policy link yet, per product direction; add only after publishing the real page. Review publisher identity, contact, retention and final data practices before production release.

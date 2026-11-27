@@ -1,0 +1,18 @@
+package com.clenova.app;
+
+/** Offline policy for the current preview only; review before public release. */
+final class PrivacyPolicy {
+    static final String VERSION="0.1";
+    static final String REVISION_DATE="2026-11-27";
+    static final String[][] SECTIONS={
+        {"Information we store","Clenova stores local preferences, agent and notification settings, selected protection exclusions and activity records. Exclusions may contain file or folder identifiers, names, locations, type and size when available. History can include names, timestamps and sample cleanup metrics. No account is required."},
+        {"How information is used","Settings are used to remember your choices, show your local activity and display sample cleanup recommendations. Protection selections are saved for future cleanup functionality. This preview does not perform real background scans or delete personal files."},
+        {"Device permissions","The current app requests notification access only. Android's file and folder picker lets you select specific exclusions; it does not give Clenova unrestricted storage access. You can manage or revoke system permissions in Android settings."},
+        {"Storage, security and retention","App records are saved in private Android app storage. Automatic app backup is disabled in the current manifest. Records remain until you clear them, reset the relevant app data or uninstall the app. Clenova has no automatic upload, advertising or analytics integration in this preview. Device security also depends on your Android settings."},
+        {"Your choices and data controls","Settings > Privacy & data lets you view local data size, export activity history as JSON, clear history or reset local preferences, exclusions and history. Reset does not delete your personal files, revoke Android permissions or remove exported copies. You control where exports are saved."},
+        {"External services and sharing","If you choose to send support or feedback email, your email app handles the draft and delivery. Support drafts include app and Android versions; feedback lets you opt out of those details. Your message is received only if you send it. Google Play, email apps and chosen document providers operate under their own privacy terms. A chosen export provider may store a copy in the cloud."},
+        {"Changes to this policy","This policy describes the current preview build. We will update the policy before introducing new data practices or publishing the production app. Check the version and revision date shown above."},
+        {"Contact us","For privacy questions or requests about information you have sent to us, contact the configured Clenova support email below. Do not send sensitive files or passwords."}
+    };
+    private PrivacyPolicy(){}
+}

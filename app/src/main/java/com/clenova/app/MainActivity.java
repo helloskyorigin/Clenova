@@ -47,7 +47,9 @@ public final class MainActivity extends Activity {
     private boolean[] videoDraft;
     private CleanupPreview cleanup;
     private boolean cleaning, completed, completionVisible;
-    private boolean storageVisible, settingsVisible, agentPrefsVisible, protectionVisible, foldersVisible, filesVisible, historyVisible, permissionsVisible, privacyVisible, helpVisible, feedbackVisible;
+    private boolean storageVisible, settingsVisible, agentPrefsVisible, protectionVisible, foldersVisible, filesVisible, historyVisible, permissionsVisible, privacyVisible, helpVisible, feedbackVisible, policyVisible;
+    private ScrollView policyScroll;
+    private int policyScrollY;
     private int feedbackCategory=0;
     private String feedbackText="";
     private boolean feedbackAppInfo=true;
@@ -96,6 +98,7 @@ public final class MainActivity extends Activity {
             if(state.getBoolean("cleanup_running")){startCleanupAnimation();return;}
             if(completed && state.getBoolean("cleanup_visible")){showCompletion(false);return;}
         }
+        if(state!=null && state.getBoolean("policy_visible")){policyScrollY=state.getInt("policy_scroll_y");openPrivacyPolicy();return;}
         if(state!=null && state.getBoolean("feedback_visible")){feedbackCategory=FeedbackDraft.category(state.getInt("feedback_category"));feedbackText=state.getString("feedback_text","");feedbackAppInfo=state.getBoolean("feedback_app_info",true);openFeedback();return;}
         if(state!=null && state.getBoolean("help_visible")){helpQuery=state.getString("help_query","");expandedFaq=state.getInt("expanded_faq",-1);openHelpSupport();return;}
         if(state!=null && state.getBoolean("privacy_visible")){openPrivacyData();return;}
@@ -123,6 +126,8 @@ public final class MainActivity extends Activity {
         state.putBoolean("permissions_visible",permissionsVisible);
         state.putBoolean("privacy_visible",privacyVisible);
         state.putBoolean("help_visible",helpVisible);
+        state.putBoolean("policy_visible",policyVisible);
+        if(policyVisible)state.putInt("policy_scroll_y",policyScroll==null?policyScrollY:policyScroll.getScrollY());
         if(feedbackVisible){state.putBoolean("feedback_visible",true);state.putInt("feedback_category",feedbackCategory);state.putString("feedback_text",feedbackText);state.putBoolean("feedback_app_info",feedbackAppInfo);}
         state.putString("help_query",helpQuery);
         state.putInt("expanded_faq",expandedFaq);
@@ -267,7 +272,7 @@ public final class MainActivity extends Activity {
         add(l,settings,dp(44),dp(44)); return l;
     }
     private void openSettings(){
-        feedbackVisible=false;helpVisible=false;hideHelpKeyboard();permissionsVisible=false;privacyVisible=false;
+        policyVisible=false;policyScroll=null;feedbackVisible=false;helpVisible=false;hideHelpKeyboard();permissionsVisible=false;privacyVisible=false;
         historyDetailId=null;historyScroll=null;historyScrollY=0;historyVisible=false;filesVisible=false;foldersVisible=false;protectionVisible=false;agentPrefsVisible=false;settingsVisible=true;setContentView(settingsScreen());
     }
     private LinearLayout settingsScreen(){
@@ -327,6 +332,7 @@ public final class MainActivity extends Activity {
             else if(item[1].equals("Help & support"))tap(line,WHITE,0,()->{helpQuery="";expandedFaq=-1;openHelpSupport();});
             else if(item[1].equals("Send feedback"))tap(line,WHITE,0,this::openFeedback);
             else if(item[1].equals("Rate Clenova"))tap(line,WHITE,0,()->{ratingStars=0;showRatingSheet();});
+            else if(item[1].equals("Privacy policy"))tap(line,WHITE,0,()->{policyScrollY=0;openPrivacyPolicy();});
             add(group,line,-1,-2);
             if(i<items.length-1){
                 View divider=new View(this);divider.setBackgroundColor(surface(0xffeeeef0));
@@ -545,6 +551,68 @@ public final class MainActivity extends Activity {
             dialog.dismiss();
         }catch(android.content.ActivityNotFoundException|SecurityException e){
             folderToast("Google Play is unavailable");
+        }
+    }
+
+    private void openPrivacyPolicy(){
+        policyVisible=true;settingsVisible=true;setContentView(privacyPolicyScreen());
+        final ScrollView scroll=policyScroll;
+        if(scroll!=null)scroll.post(()->scroll.scrollTo(0,policyScrollY));
+    }
+    private LinearLayout privacyPolicyScreen(){
+        LinearLayout root=column();root.setBackgroundColor(BG);root.setPadding(dp(18),v(12),dp(18),v(12));
+        FrameLayout header=new FrameLayout(this);
+        header.addView(centered("Privacy policy",17,INK,600),new FrameLayout.LayoutParams(-1,-1));
+        FrameLayout back=new FrameLayout(this);
+        back.addView(new Glyph(this,"back",INK),new FrameLayout.LayoutParams(dp(24),dp(24),Gravity.CENTER));
+        back.setContentDescription(tr("Back to Settings"));tap(back,WHITE,22,this::openSettings);
+        header.addView(back,new FrameLayout.LayoutParams(dp(44),dp(44),Gravity.START|Gravity.CENTER_VERTICAL));add(root,header,-1,dp(44));
+        ScrollView scroll=new ScrollView(this);policyScroll=scroll;scroll.setVerticalScrollBarEnabled(false);scroll.setOverScrollMode(View.OVER_SCROLL_NEVER);
+        LinearLayout body=column();body.setPadding(0,v(18),0,v(12));scroll.addView(body,new ScrollView.LayoutParams(-1,-2));
+        root.addView(scroll,new LinearLayout.LayoutParams(-1,0,1f));
+        LinearLayout hero=column();hero.setGravity(Gravity.CENTER_HORIZONTAL);
+        FrameLayout mark=new FrameLayout(this);mark.setBackground(round(PALE,20));
+        mark.addView(new Glyph(this,"shield",BLUE),new FrameLayout.LayoutParams(dp(35),dp(35),Gravity.CENTER));
+        add(hero,mark,dp(68),dp(68));space(hero,13);
+        add(hero,centered("Your privacy matters.",25,INK,700),-1,-2);space(hero,7);
+        add(hero,centered("Transparency in everything we do.",14,GRAY,400),-1,-2);
+        add(body,hero,-1,-2);space(body,21);
+        LinearLayout summary=card();pad(summary,15,7);
+        for(String label:new String[]{"Personal files are not uploaded automatically","Local data controls","Approval first"}){
+            LinearLayout line=row();line.setMinimumHeight(dp(43));line.setPadding(0,dp(8),0,dp(8));
+            add(line,new Glyph(this,"check",GREEN),dp(22),dp(22));gap(line,11);weight(line,txt(label,14,INK,500));add(summary,line,-1,-2);
+        }
+        add(body,summary,-1,-2);space(body,20);
+        add(body,txt("Privacy policy",15,INK,600),-1,-2);space(body,6);
+        java.time.LocalDate revision=java.time.LocalDate.parse(PrivacyPolicy.REVISION_DATE);
+        String date=revision.format(java.time.format.DateTimeFormatter.ofLocalizedDate(java.time.format.FormatStyle.MEDIUM).withLocale(java.util.Locale.forLanguageTag(prefs.language())));
+        add(body,txt(tr("Preview policy")+" · "+tr("Version")+" "+PrivacyPolicy.VERSION+"\n"+tr("Last revised")+": "+date,12,GRAY,400),-1,-2);space(body,10);
+        LinearLayout document=card();pad(document,16,15);
+        for(int i=0;i<PrivacyPolicy.SECTIONS.length;i++){
+            if(i>0){space(document,17);thinRule(document);space(document,17);}
+            LinearLayout heading=row();add(heading,txt(String.format(java.util.Locale.ROOT,"%02d",i+1),13,BLUE,600),-2,-2);gap(heading,10);
+            weight(heading,txt(PrivacyPolicy.SECTIONS[i][0],16,INK,600));add(document,heading,-1,-2);space(document,9);
+            TextView paragraph=txt(PrivacyPolicy.SECTIONS[i][1],14,INK,400);paragraph.setLineSpacing(dp(5),1f);
+            paragraph.setTextIsSelectable(true);add(document,paragraph,-1,-2);
+        }
+        space(document,13);TextView contact=txt(SUPPORT_EMAIL,14,BLUE,600);
+        contact.setPaintFlags(contact.getPaintFlags()|Paint.UNDERLINE_TEXT_FLAG);contact.setMinHeight(dp(44));contact.setGravity(Gravity.CENTER_VERTICAL);
+        tap(contact,WHITE,10,this::openPrivacyContact);add(document,contact,-1,-2);
+        add(body,document,-1,-2);space(body,21);
+        LinearLayout footer=row();footer.setGravity(Gravity.CENTER);add(footer,new Glyph(this,"lock",GRAY),dp(16),dp(16));gap(footer,7);
+        add(footer,txt("Built with privacy in mind.",12,GRAY,400),-2,-2);add(body,footer,-1,-2);
+        // Online policy intentionally omitted until an actual published URL is supplied.
+        return root;
+    }
+    private void openPrivacyContact(){
+        android.net.Uri uri=android.net.Uri.parse("mailto:"+SUPPORT_EMAIL+"?subject="+android.net.Uri.encode("Clenova privacy inquiry"));
+        try{startActivity(new android.content.Intent(android.content.Intent.ACTION_SENDTO,uri));}
+        catch(android.content.ActivityNotFoundException|SecurityException e){
+            privacyDialog().setTitle(tr("No email app available")).setMessage(SUPPORT_EMAIL)
+                .setNegativeButton(tr("Cancel"),null).setPositiveButton(tr("Copy email"),(d,w)->{
+                    android.content.ClipboardManager clipboard=getSystemService(android.content.ClipboardManager.class);
+                    if(clipboard!=null){clipboard.setPrimaryClip(android.content.ClipData.newPlainText("Privacy contact",SUPPORT_EMAIL));folderToast("Email copied");}
+                }).show();
         }
     }
 
@@ -1652,7 +1720,7 @@ public final class MainActivity extends Activity {
         add(c,approve,-1,dp(51)); return c;
     }
     private void showHome() {
-        feedbackVisible=false;helpVisible=false;permissionsVisible=false;privacyVisible=false;
+        policyVisible=false;policyScroll=null;feedbackVisible=false;helpVisible=false;permissionsVisible=false;privacyVisible=false;
         storageVisible=false;
         settingsVisible=false;agentPrefsVisible=false;protectionVisible=false;foldersVisible=false;filesVisible=false;historyVisible=false;
         completionVisible=false;
@@ -1671,6 +1739,7 @@ public final class MainActivity extends Activity {
     }
     @Override public void onBackPressed() {
         if(cleaning)return;
+        if(policyVisible){openSettings();return;}
         if(feedbackVisible){leaveFeedback();return;}
         if(helpVisible||privacyVisible||permissionsVisible){openSettings();return;}
         if(historyVisible&&historyDetailId!=null){openHistory();return;}
