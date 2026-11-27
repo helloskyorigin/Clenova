@@ -332,7 +332,7 @@ public final class MainActivity extends Activity {
         LinearLayout top=row();LinearLayout copy=column();
         LinearLayout kicker=row();add(kicker,new Glyph(this,"sparkles",BLUE),dp(15),dp(15));gap(kicker,5);weight(kicker,txt("SMART CLEANUP",11,BLUE,600));add(copy,kicker,-1,-2);space(copy,11);
         add(copy,txt(scanResult==null?"—":scanBytes(scanResult.total()),35,INK,700),-1,-2);space(copy,5);add(copy,txt("Space you could recover",13,GRAY,400),-1,-2);
-        space(copy,5);add(copy,txt(scanResult==null?"Not scanned yet":"Last scan · Review candidates",12,GRAY,500),-1,-2);weight(top,copy);gap(top,10);
+        space(copy,5);add(copy,txt(scanResult==null?"Not scanned yet":scanResult.limited||scanResult.partial?"Partial scan results":"Last scan · Review candidates",12,GRAY,500),-1,-2);weight(top,copy);gap(top,10);
         FrameLayout ring=new FrameLayout(this);ring.addView(new CleanScanMark(this),new FrameLayout.LayoutParams(-1,-1));add(top,ring,dp(92),dp(92));add(hero,top,-1,-2);space(hero,17);
         LinearLayout scan=row();scan.setGravity(Gravity.CENTER);add(scan,new Glyph(this,"scan",Color.WHITE),dp(21),dp(21));gap(scan,8);add(scan,txt("Smart Scan",16,Color.WHITE,600),-2,-2);
         tap(scan,BLUE,26,()->{dupAfterScan=false;similarAfterScan=false;videoAfterScan=false;requestSmartScan();});add(hero,scan,-1,dp(50));
@@ -386,7 +386,9 @@ public final class MainActivity extends Activity {
             .setMessage(tr("Smart Scan reads only the photos and videos you allow. Nothing is deleted."))
             .setNegativeButton(tr("Cancel"),null).setPositiveButton(tr("Continue"),(d,w)->{
                 requestingScan=true;
-                if(android.os.Build.VERSION.SDK_INT>=34)requestPermissions(new String[]{android.Manifest.permission.READ_MEDIA_IMAGES,android.Manifest.permission.READ_MEDIA_VIDEO,android.Manifest.permission.READ_MEDIA_VISUAL_USER_SELECTED},REQUEST_SCAN_MEDIA);
+                if(videoAfterScan&&android.os.Build.VERSION.SDK_INT>=34)requestPermissions(new String[]{android.Manifest.permission.READ_MEDIA_VIDEO,android.Manifest.permission.READ_MEDIA_VISUAL_USER_SELECTED},REQUEST_SCAN_MEDIA);
+                else if(videoAfterScan&&android.os.Build.VERSION.SDK_INT>=33)requestPermissions(new String[]{android.Manifest.permission.READ_MEDIA_VIDEO},REQUEST_SCAN_MEDIA);
+                else if(android.os.Build.VERSION.SDK_INT>=34)requestPermissions(new String[]{android.Manifest.permission.READ_MEDIA_IMAGES,android.Manifest.permission.READ_MEDIA_VIDEO,android.Manifest.permission.READ_MEDIA_VISUAL_USER_SELECTED},REQUEST_SCAN_MEDIA);
                 else if(android.os.Build.VERSION.SDK_INT>=33)requestPermissions(new String[]{android.Manifest.permission.READ_MEDIA_IMAGES,android.Manifest.permission.READ_MEDIA_VIDEO},REQUEST_SCAN_MEDIA);
                 else requestPermissions(new String[]{android.Manifest.permission.READ_EXTERNAL_STORAGE},REQUEST_SCAN_MEDIA);
             }).show();
@@ -415,11 +417,11 @@ public final class MainActivity extends Activity {
         FrameLayout ring=new FrameLayout(this);ring.addView(new CleanScanMark(this),new FrameLayout.LayoutParams(-1,-1));add(hero,ring,dp(164),dp(164));space(hero,18);
         scanProgress=centered("Scanning",23,INK,700);add(hero,scanProgress,-1,-2);space(hero,8);
         add(hero,centered("Finding what you don't need.",18,INK,600),-1,-2);space(hero,6);
-        add(hero,centered("Analyzing accessible photos and videos.",13,GRAY,400),-1,-2);add(body,hero,-1,-2);space(body,20);
+        add(hero,centered(videoOnly?"Analyzing accessible videos.":"Analyzing accessible photos and videos.",13,GRAY,400),-1,-2);add(body,hero,-1,-2);space(body,20);
         LinearLayout status=card();scanStatus=txt("Reading media library",15,INK,600);add(status,scanStatus,-1,-2);space(status,13);
         scanBar=new android.widget.ProgressBar(this,null,android.R.attr.progressBarStyleHorizontal);
         scanBar.setIndeterminate(true);scanBar.setIndeterminateTintList(ColorStateList.valueOf(BLUE));scanBar.setProgressTintList(ColorStateList.valueOf(BLUE));add(status,scanBar,-1,dp(8));space(status,12);
-        add(status,txt("Duplicate photos · Similar photos · Large videos · Screenshots",12,GRAY,400),-1,-2);add(body,status,-1,-2);space(body,16);
+        add(status,txt(videoOnly?"Large videos":"Duplicate photos · Similar photos · Large videos · Screenshots",12,GRAY,400),-1,-2);add(body,status,-1,-2);space(body,16);
         add(body,centered("Your files are safe during scanning.",12,GREEN,500),-1,-2);
         scanButton(root,"Cancel scan",false,this::cancelSmartScan);setContentView(root);
         new Thread(()->{
@@ -783,7 +785,8 @@ public final class MainActivity extends Activity {
         LinearLayout heading=row();weight(heading,txt("Your videos",18,INK,600));
         TextView select=txt(realVideoSelected.isEmpty()?(videos.size()>100?"Select 100":"Select all"):"Deselect all",13,BLUE,600);
         tap(select,BG,8,()->{if(!realVideoSelected.isEmpty())realVideoSelected.clear();else for(SmartMediaScan.Item i:videos){if(realVideoSelected.size()>=VideoApproval.MAX_BATCH)break;if(!realVideoKeep.contains(i.uri.toString()))realVideoSelected.add(i.uri.toString());}showRealVideos();});add(heading,select,-2,dp(44));add(body,heading,-1,-2);
-        String[] sorting={"Largest first","Longest first","Newest first"};TextView sort=centered(sorting[realVideoSort]+"  ▾",14,BLUE,600);
+        String[] sorting={"Largest first","Longest first","Newest first"};TextView sort=centered(tr(sorting[realVideoSort])+"  ▾",14,BLUE,600);
+        sort.setContentDescription(tr("Sort videos")+", "+tr(sorting[realVideoSort]));
         tap(sort,WHITE,12,()->privacyDialog().setTitle(tr("Sort videos")).setSingleChoiceItems(new String[]{tr(sorting[0]),tr(sorting[1]),tr(sorting[2])},realVideoSort,(d,i)->{realVideoSort=i;realVideoPage=0;d.dismiss();showRealVideos();}).setNegativeButton(tr("Cancel"),null).show());add(body,sort,-1,dp(44));space(body,11);
         TextView count=txt("",12,GRAY,400),amount=txt("",22,INK,700),review=centered("Review & clean",14,Color.WHITE,600);
         int pages=Math.max(1,(videos.size()+14)/15);realVideoPage=Math.max(0,Math.min(realVideoPage,pages-1));
@@ -1042,7 +1045,7 @@ public final class MainActivity extends Activity {
     }
     @Override public void onRequestPermissionsResult(int requestCode,String[] permissions,int[] grantResults){
         super.onRequestPermissionsResult(requestCode,permissions,grantResults);
-        if(requestCode==REQUEST_SCAN_MEDIA){requestingScan=false;if(SmartMediaScan.hasAccess(this))startSmartScan();else {dupAfterScan=false;similarAfterScan=false;videoAfterScan=false;privacyDialog().setTitle(tr("Media access needed")).setMessage(tr("Allow access to photos or videos to scan them. No files were scanned.")).setPositiveButton(tr("Done"),null).show();}return;}
+        if(requestCode==REQUEST_SCAN_MEDIA){requestingScan=false;if(videoAfterScan?SmartMediaScan.hasVideoAccess(this):SmartMediaScan.hasAccess(this))startSmartScan();else {dupAfterScan=false;similarAfterScan=false;videoAfterScan=false;privacyDialog().setTitle(tr("Media access needed")).setMessage(tr("Allow access to photos or videos to scan them. No files were scanned.")).setPositiveButton(tr("Done"),null).show();}return;}
         if(requestCode==REQUEST_NOTIFICATION_ACCESS&&permissionsVisible)openAppPermissions();
     }
     private static final String[] RATING_LABELS={"Tap to rate your experience","Very poor","Could be better","It's okay","Pretty good","Love it!"};

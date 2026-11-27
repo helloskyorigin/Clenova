@@ -5,6 +5,7 @@ import java.util.Map;
 final class AppStrings {
  private static final Map<String,String[]> TEXT=new HashMap<>();
  static {
+  TEXT.put("Analyzing accessible videos.",new String[]{"उपलब्ध वीडियो जाँचे जा रहे हैं।","Analizando vídeos accesibles.","Analyse des vidéos accessibles.","Zugängliche Videos werden geprüft."});
   TEXT.put("large videos found",new String[]{"बड़े वीडियो मिले","vídeos grandes encontrados","grandes vidéos trouvées","große Videos gefunden"});
   TEXT.put("Videos at least 100 MiB · Protected items excluded",new String[]{"कम से कम 100 MiB के वीडियो · सुरक्षित आइटम अलग","Vídeos de al menos 100 MiB · protegidos excluidos","Vidéos d’au moins 100 Mio · éléments protégés exclus","Videos ab 100 MiB · geschützte Elemente ausgeschlossen"});
   TEXT.put("Your videos",new String[]{"आपके वीडियो","Tus vídeos","Vos vidéos","Deine Videos"});
