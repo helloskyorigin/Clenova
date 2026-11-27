@@ -66,12 +66,14 @@ final class SmartMediaScan {
             if(++done%128==0||done==all.size())progress.update(2,done,all.size());}
         r.groups.get(VIDEOS).sort(Comparator.comparingLong((Item i)->i.bytes).reversed().thenComparing(i->i.name));check();return r;
     }
-    Result run(Progress progress)throws Exception{
+    Result run(Progress progress)throws Exception{return run(progress,false);}
+    Result runPhotos(Progress progress)throws Exception{return run(progress,true);}
+    private Result run(Progress progress,boolean photoOnly)throws Exception{
         Result r=new Result();List<Item> all=new ArrayList<>();
         boolean selected=Build.VERSION.SDK_INT>=34&&granted(android.Manifest.permission.READ_MEDIA_VISUAL_USER_SELECTED);
         boolean photos=Build.VERSION.SDK_INT>=33?granted(android.Manifest.permission.READ_MEDIA_IMAGES):hasAccess(context);
         boolean videos=Build.VERSION.SDK_INT>=33?granted(android.Manifest.permission.READ_MEDIA_VIDEO):hasAccess(context);
-        r.limited=!photos||!videos;r.imagesScanned=photos||selected;r.videosScanned=videos||selected;
+        r.limited=!photos||!photoOnly&&!videos;r.imagesScanned=photos||selected;r.videosScanned=!photoOnly&&(videos||selected);
         progress.update(0,0,0);
         if(r.imagesScanned)read(true,all,r);if(r.videosScanned)read(false,all,r);
         r.examined=all.size();check();

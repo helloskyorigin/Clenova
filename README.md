@@ -126,3 +126,5 @@ Minimal Agent tab, local storage-pressure and available foreground scan suggesti
 
 ## Agent conversation — Phase 36
 Welcome transforms to chat with two-line drawer, new conversation, bounded local history and delete, pinned composer and hidden navbar. Real inline media scan, progress/cancel and review cards, existing approved native cleanup screens. Results are session-only, history is text only; native approvals are not counted as recovered bytes. Local supported commands work offline. Optional explicit private HTTPS Groq relay with no hardcoded secrets, scoped JSON responses, allowlisted review-only actions, timeouts and rate limits; deployment, live provider and device verification pending. See server/README.md. No production authentication yet.
+
+Phase 36 follow-up: scoped photo-only permission requests and scans, 17 local routing regression cases including Hindi/Hinglish, explicit opt-in bounded prior typed context, history reset, Agent emulator smoke script, and CI smoke execution even when lint fails (lint still fails the job).

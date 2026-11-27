@@ -17,11 +17,13 @@ export function plausiblePhoneRequest(message) {
   return /\b(phone|android|clenova|storage|space|cleanup|clean|cache|duplicate|photos?|videos?|screenshots?|downloads?|files?|apps?|uninstall|protect|protection|permission|memory|mobile|junk|gb|mb)\b|फ़ोन|फोन|स्टोरेज|फोटो|फ़ाइल|ऐप|मोबाइल|साफ|जगह/i.test(message)
     && !/ignore (all |previous |your )?instructions|system prompt|developer message|jailbreak|reveal.*(key|prompt)|pretend you are/i.test(message);
 }
-export async function answer(message, key, model, fetcher=fetch) {
-  if(!plausiblePhoneRequest(message))return {text:REFUSAL,action:-1};
+export async function answer(message, key, model, fetcher=fetch, context=[]) {
+  const followup=/^(yes|no|why|how|what next|what about that|okay|ok|haan|ha|nahi|kyun|kaise|kitna|ab kya|हाँ|नहीं|कैसे|क्यों|अब क्या)[?!. ]*$/i.test(message.trim());
+  const prior=context.filter(x=>typeof x==='string'&&x.length<=600&&plausiblePhoneRequest(x)).slice(-3);
+  if(!plausiblePhoneRequest(message)&&!(followup&&prior.length))return {text:REFUSAL,action:-1};
   const response=await fetcher('https://api.groq.com/openai/v1/chat/completions',{
     method:'POST',headers:{Authorization:'Bearer '+key,'Content-Type':'application/json'},
-    body:JSON.stringify({model,messages:[{role:'system',content:SYSTEM},{role:'user',content:message}],temperature:0.2,max_completion_tokens:700,response_format:{type:'json_object'}}),signal:AbortSignal.timeout(17000)
+    body:JSON.stringify({model,messages:[{role:'system',content:SYSTEM},...prior.map(content=>({role:'user',content})),{role:'user',content:message}],temperature:0.2,max_completion_tokens:700,response_format:{type:'json_object'}}),signal:AbortSignal.timeout(17000)
   });
   if(!response.ok)throw new Error('provider unavailable');
   const result=await response.json();
@@ -41,10 +43,11 @@ export function createRelay({key,model,secret,fetcher=fetch}) {
     const now=Math.floor(Date.now()/60000);if(now!==minute){minute=now;used=0;}if(used>=12||active>=2)return reply(429,{error:'Try later'});used++;active++;
     try{
       if(!String(req.headers['content-type']||'').startsWith('application/json'))return reply(415,{error:'JSON required'});
-      let data='';for await(const chunk of req){data+=chunk.toString('utf8');if(Buffer.byteLength(data)>4096){reply(413,{error:'Too large'});return;}}
-      let payload;try{payload=JSON.parse(data);}catch{return reply(400,{error:'Invalid JSON'});}
+      const chunks=[];let size=0;for await(const chunk of req){size+=chunk.length;if(size>10000){reply(413,{error:'Too large'});return;}chunks.push(chunk);}
+      let payload;try{payload=JSON.parse(Buffer.concat(chunks).toString('utf8'));}catch{return reply(400,{error:'Invalid JSON'});}
       if(typeof payload.message!=='string'||!payload.message.trim()||payload.message.length>600)return reply(400,{error:'Invalid message'});
-      const result=await answer(payload.message.trim(),key,model,fetcher);return reply(200,result);
+      const context=Array.isArray(payload.context)?payload.context.slice(-3).filter(x=>typeof x==='string'&&x.length<=600):[];
+      const result=await answer(payload.message.trim(),key,model,fetcher,context);return reply(200,result);
     }catch{return reply(502,{error:'Agent unavailable'});}finally{active--;}
   });
 }

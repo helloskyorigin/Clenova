@@ -434,14 +434,14 @@ public final class MainActivity extends Activity {
         for(int i=0;i<4;i++){final int category=i;boolean scanned=i==1?result.videosScanned:i==3?result.similarScanned:result.imagesScanned;if(!scanned)continue;thinRule(card);LinearLayout line=row();line.setMinimumHeight(dp(53));add(line,new Glyph(this,new String[]{"copy","video","screenshot","images"}[i],BLUE),dp(22),dp(22));gap(line,10);weight(line,txt(SmartMediaScan.LABELS[i],14,INK,500));add(line,txt(scanBytes(result.bytes(i)),12,GRAY,600),-2,-2);gap(line,7);add(line,new Glyph(this,"chevron",GRAY),dp(14),dp(14));tap(line,WHITE,10,()->openAgentMediaReview(category));add(card,line,-1,-2);}
         space(card,10);scanButton(card,"Review cleanup",true,()->{scanResult=result;leaveAgentForTool();showScanResults();});space(card,7);add(card,txt("Nothing removed. Review each file before approving.",12,GREEN,500),-1,-2);add(body,card,-1,-2);
     }
-    private void leaveAgentForTool(){agentVisible=false;agentTaskVisible=false;agentTaskOrigin=true;showClean();}
+    private void leaveAgentForTool(){agentLiveResult=null;agentResultChat="";agentVisible=false;agentTaskVisible=false;agentTaskOrigin=true;showClean();}
     private void openAgentMediaReview(int category){if(agentLiveResult==null)return;scanResult=agentLiveResult;leaveAgentForTool();if(category==0)openRealDuplicates(false);else if(category==1)openRealVideos(false);else if(category==2)openRealScreenshots(false);else openRealSimilar(false);}
     private void submitAgentCommand(String text){
         if(agentBusy())return;String request=text.trim();if(request.isEmpty())return;int task=AgentActions.route(request);
         if(task>=0){openAgentTask(task,request);return;}
         boolean fresh=activeChat==null;appendAgent(true,request,-1);agentTransition=fresh;agentLiveResult=null;agentResultChat="";
-        if(!relayEndpoint.isEmpty()&&!relayToken.isEmpty()){agentCloudBusy=true;final int generation=++agentGeneration;final String endpoint=relayEndpoint,token=relayToken;showAgent();
-            new Thread(()->{AgentRelay.Reply reply=null;try{reply=AgentRelay.ask(endpoint,token,request);}catch(Exception ignored){}final AgentRelay.Reply response=reply;runOnUiThread(()->{if(isDestroyed()||generation!=agentGeneration||!agentCloudBusy)return;agentCloudBusy=false;appendAgent(false,response==null?"AI connection unavailable. Try again or use a local cleanup request.":response.text,response==null?-1:response.action);if(agentVisible&&agentForeground)showAgent();});},"Clenova-agent-relay").start();return;}
+        if(!relayEndpoint.isEmpty()&&!relayToken.isEmpty()){agentCloudBusy=true;final int generation=++agentGeneration;final String endpoint=relayEndpoint,token=relayToken;final org.json.JSONArray context=new org.json.JSONArray();java.util.List<String> prior=new java.util.ArrayList<>();for(int i=activeChat.messages.size()-2;i>=0&&prior.size()<3;i--){AgentChatStore.Message msg=activeChat.messages.get(i);if(msg.user&&msg.text.length()<=600)prior.add(0,msg.text);}for(String item:prior)context.put(item);showAgent();
+            new Thread(()->{AgentRelay.Reply reply=null;try{reply=AgentRelay.ask(endpoint,token,request,context);}catch(Exception ignored){}final AgentRelay.Reply response=reply;runOnUiThread(()->{if(isDestroyed()||generation!=agentGeneration||!agentCloudBusy)return;agentCloudBusy=false;appendAgent(false,response==null?"AI connection unavailable. Try again or use a local cleanup request.":response.text,response==null?-1:response.action);if(agentVisible&&agentForeground)showAgent();});},"Clenova-agent-relay").start();return;}
         appendAgent(false,"I can help with phone storage, photos, downloads, unused apps and file protection. Other topics aren't supported. Try a supported cleanup request.",-1);showAgent();
     }
     private void openAgentTask(int task,String request){
@@ -452,8 +452,8 @@ public final class MainActivity extends Activity {
         if(agentBusy())return;
         if(task==0||task==1||task==5||task==6||task==7){agentScanTask=task;if(agentHasAccess(task)){beginAgentScan(task);return;}
             privacyDialog().setTitle(tr("Media access needed")).setMessage(tr("Clenova only scans media you allow. Nothing is removed.")).setNegativeButton(tr("Cancel"),null).setPositiveButton(tr("Continue"),(dialog,w)->{agentPermissionPending=true;
-                if(android.os.Build.VERSION.SDK_INT>=34)requestPermissions(new String[]{android.Manifest.permission.READ_MEDIA_IMAGES,android.Manifest.permission.READ_MEDIA_VIDEO,android.Manifest.permission.READ_MEDIA_VISUAL_USER_SELECTED},REQUEST_AGENT_MEDIA);
-                else if(android.os.Build.VERSION.SDK_INT>=33)requestPermissions(new String[]{android.Manifest.permission.READ_MEDIA_IMAGES,android.Manifest.permission.READ_MEDIA_VIDEO},REQUEST_AGENT_MEDIA);
+                if(android.os.Build.VERSION.SDK_INT>=34){String[] requested=task==5?new String[]{android.Manifest.permission.READ_MEDIA_VIDEO,android.Manifest.permission.READ_MEDIA_VISUAL_USER_SELECTED}:task==0?new String[]{android.Manifest.permission.READ_MEDIA_IMAGES,android.Manifest.permission.READ_MEDIA_VIDEO,android.Manifest.permission.READ_MEDIA_VISUAL_USER_SELECTED}:new String[]{android.Manifest.permission.READ_MEDIA_IMAGES,android.Manifest.permission.READ_MEDIA_VISUAL_USER_SELECTED};requestPermissions(requested,REQUEST_AGENT_MEDIA);}
+                else if(android.os.Build.VERSION.SDK_INT>=33){String[] requested=task==5?new String[]{android.Manifest.permission.READ_MEDIA_VIDEO}:task==0?new String[]{android.Manifest.permission.READ_MEDIA_IMAGES,android.Manifest.permission.READ_MEDIA_VIDEO}:new String[]{android.Manifest.permission.READ_MEDIA_IMAGES};requestPermissions(requested,REQUEST_AGENT_MEDIA);}
                 else requestPermissions(new String[]{android.Manifest.permission.READ_EXTERNAL_STORAGE},REQUEST_AGENT_MEDIA);
             }).show();return;}
         if(task==3){agentTaskVisible=false;agentShortcut=true;agentLiveResult=null;scanResult=null;restoreAgentWindow();openProtection();return;}
@@ -463,7 +463,7 @@ public final class MainActivity extends Activity {
         if(agentScan!=null||activeChat==null||!agentHasAccess(task))return;agentLiveResult=null;agentResultChat="";agentStage=tr("Reading media library");
         final SmartMediaScan job=new SmartMediaScan(this,prefs,protectedFiles,protectedFolders);agentScan=job;final String chat=activeChat.id;showAgent();
         new Thread(()->{try{SmartMediaScan.Progress callback=(stage,done,total)->{if(done!=total&&done%16!=0)return;runOnUiThread(()->{if(agentScan!=job||isDestroyed()||!agentForeground)return;agentStage=tr(new String[]{"Reading media library","Checking exact duplicates","Classifying media","Comparing similar photos"}[stage]);if(agentProgressText!=null)agentProgressText.setText(agentStage+(total>0?" · "+done+" / "+total:""));if(agentProgressBar!=null){agentProgressBar.setIndeterminate(total<=0);if(total>0){agentProgressBar.setMax(total);agentProgressBar.setProgress(done);}}});};
-            SmartMediaScan.Result result=task==5?job.runVideos(callback):job.run(callback);
+            SmartMediaScan.Result result=task==5?job.runVideos(callback):task==0?job.run(callback):job.runPhotos(callback);
             runOnUiThread(()->{if(agentScan!=job||isDestroyed()||activeChat==null||!activeChat.id.equals(chat))return;agentScan=null;if(!agentHasAccess(task)){appendAgent(false,"Media access changed. No results are available.",-1);showAgent();return;}agentLiveResult=result;agentResultChat=chat;scanResult=result;appendAgent(false,"Analysis finished. I checked "+result.examined+" accessible media items. "+(result.partial||result.limited?"Results are partial. ":"")+"Review the candidates below. Nothing has been removed.",-1);showAgent();});
         }catch(Exception ex){runOnUiThread(()->{if(agentScan!=job||isDestroyed())return;agentScan=null;appendAgent(false,"Analysis could not finish. No files were removed.",-1);showAgent();});}},"Clenova-agent-scan").start();
     }
@@ -484,7 +484,7 @@ public final class MainActivity extends Activity {
         dialog.setContentView(layout);dialog.setOnDismissListener(v->{if(agentDrawer==dialog)agentDrawer=null;});android.view.Window window=dialog.getWindow();if(window!=null){window.setBackgroundDrawableResource(android.R.color.transparent);window.setGravity(Gravity.START|Gravity.CENTER_VERTICAL);window.addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);}dialog.show();if(window!=null)window.setLayout(Math.min(dp(320),(int)(getResources().getDisplayMetrics().widthPixels*.86)), -1);
     }
     private void configureAgentRelay(){
-        LinearLayout body=column();pad(body,18,12);add(body,txt("Private developer test only. Your typed request will be sent to your HTTPS relay and Groq. No photos, file lists or scan results are sent automatically. Do not enter sensitive information. Connection is cleared when the app restarts.",13,GRAY,400),-1,-2);space(body,10);
+        LinearLayout body=column();pad(body,18,12);add(body,txt("Private developer test only. Your typed request and up to 3 previous typed messages in this conversation will be sent to your HTTPS relay and Groq. No photos, file lists or scan results are sent automatically. Do not enter sensitive information. Connection is cleared when the app restarts.",13,GRAY,400),-1,-2);space(body,10);
         android.widget.EditText endpoint=new android.widget.EditText(this);endpoint.setSingleLine();endpoint.setHint("https://your-relay.example/agent");endpoint.setInputType(android.text.InputType.TYPE_CLASS_TEXT|android.text.InputType.TYPE_TEXT_VARIATION_URI);add(body,endpoint,-1,-2);
         android.widget.EditText token=new android.widget.EditText(this);token.setSingleLine();token.setHint("Private relay token (not Groq API key)");token.setInputType(android.text.InputType.TYPE_CLASS_TEXT|android.text.InputType.TYPE_TEXT_VARIATION_PASSWORD);add(body,token,-1,-2);
         privacyDialog().setTitle("Connect AI").setView(body).setNegativeButton(tr("Cancel"),null).setPositiveButton("Connect & consent",(d,w)->{String url=endpoint.getText().toString().trim(),secret=token.getText().toString().trim();if(!AgentRelay.validEndpoint(url)||secret.length()<32){folderToast("Valid HTTPS endpoint and private token required");return;}relayEndpoint=url;relayToken=secret;folderToast("AI relay configured. Connection checked on next request.");}).show();
@@ -1500,7 +1500,7 @@ public final class MainActivity extends Activity {
     }
     private void openSettings(){
         restoreAgentWindow();
-        if(agentVisible&&agentShortcut){agentShortcut=false;scanResult=null;showAgent();return;}
+        if(agentVisible&&agentShortcut){agentShortcut=false;scanResult=null;agentLiveResult=null;agentResultChat="";showAgent();return;}
         scanResult=null; // protection rules may change in settings; re-scan before recommending again.
         if(cleanScroll!=null){cleanScrollY=cleanScroll.getScrollY();cleanScroll=null;}
         aboutVisible=false;aboutScroll=null;policyVisible=false;termsVisible=false;policyScroll=null;feedbackVisible=false;helpVisible=false;hideHelpKeyboard();permissionsVisible=false;privacyVisible=false;
@@ -2265,7 +2265,7 @@ public final class MainActivity extends Activity {
             .setNegativeButton(tr("Cancel"),null).setPositiveButton(tr("Reset"),(d,w)->resetClenovaData()).show();
     }
     private void resetClenovaData(){
-        boolean ok=LocalAppData.reset(this);
+        boolean ok=LocalAppData.reset(this);agentChats=new AgentChatStore(this);activeChat=null;agentLiveResult=null;agentResultChat="";relayEndpoint="";relayToken="";agentGeneration++;
         if(cleanupAnimation!=null){cleanupAnimation.removeAllListeners();cleanupAnimation.removeAllUpdateListeners();cleanupAnimation.cancel();cleanupAnimation=null;}
         cleanup=null;cleanupCategoryCounts=null;cleanupEventId=null;reviewPlan=null;
         duplicateDraft=null;similarDraft=null;videoDraft=null;
@@ -3973,7 +3973,7 @@ public final class MainActivity extends Activity {
                 case "unselected": c.drawCircle(12,12,10,p);break;
                 case "right":path(c,4,12,20,12);path(c,14,6,20,12,14,18);break;
                 case "agent_menu":path(c,3,8,21,8);path(c,3,15,15,15);break;
-                case "new_chat":path(c,12,4,12,20);path(c,4,12,20,12);break;
+                case "new_chat":path(c,14,4,4,4,4,20,20,20,20,11);path(c,11,13,13,8,19,2,22,5,16,11,11,13);break;
                 case "arrow_up":path(c,12,20,12,4);path(c,5,11,12,4,19,11);break;
                 case "up":path(c,6,18,18,6);path(c,10,6,18,6,18,14);break;
                 case "shield":path(c,12,2,21,6,20,14,17,19,12,22,7,19,4,14,3,6,12,2);path(c,8,12,11,15,16,9);break;

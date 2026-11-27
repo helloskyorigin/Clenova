@@ -11,4 +11,6 @@ assert.equal((await answer('tell a joke','key','model',fetcher)).action,-1);
 assert.equal(called,0);
 assert.equal((await answer('help with storage','key','model',fetcher)).action,0);
 assert.equal(called,1);
-console.log('Relay scope and mocked provider tests passed');
+assert.equal((await answer('kaise?','key','model',fetcher,['phone storage kaise clear kare'])).action,0);
+assert.equal((await answer('write homework','key','model',fetcher,['phone storage'])).action,-1);
+console.log('Relay scope, follow-up and mocked provider tests passed');

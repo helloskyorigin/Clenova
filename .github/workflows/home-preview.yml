@@ -41,7 +41,9 @@ jobs:
           "$SDKMANAGER" --version
           "$SDKMANAGER" "platforms;android-35" "build-tools;35.0.0"
       - uses: gradle/actions/setup-gradle@v4
-      - run: bash ./gradlew :app:assembleDebug
+      - name: Assemble debug APK
+        id: apk
+        run: bash ./gradlew :app:assembleDebug
       - uses: actions/upload-artifact@v4
         with:
           name: Clenova-debug
@@ -56,17 +58,19 @@ jobs:
             app/build/reports/lint-results-debug.*
             app/build/intermediates/lint_intermediate_text_report/debug/lintReportDebug/
       - name: Enable KVM access
+        if: ${{ !cancelled() && steps.apk.outcome == 'success' }}
         run: |
           echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
           sudo udevadm control --reload-rules
           sudo udevadm trigger --name-match=kvm
-      - name: Home and Clean smoke test and screenshots
+      - name: Home, Agent and Clean smoke test and screenshots
+        if: ${{ !cancelled() && steps.apk.outcome == 'success' }}
         uses: reactivecircus/android-emulator-runner@v2
         with:
           api-level: 34
           arch: x86_64
           disable-animations: true
-          script: bash scripts/home-smoke.sh && bash scripts/clean-smoke.sh
+          script: bash scripts/home-smoke.sh && bash scripts/agent-smoke.sh && bash scripts/clean-smoke.sh
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -74,3 +78,4 @@ jobs:
           path: |
             build/home-evidence/
             build/clean-evidence/
+            build/agent-evidence/
