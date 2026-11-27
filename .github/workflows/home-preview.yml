@@ -39,6 +39,10 @@ jobs:
         run: |
           javac -d /tmp/clenova-tests app/src/main/java/com/clenova/app/SpeakerTone.java tests/SpeakerToneTest.java
           java -cp /tmp/clenova-tests com.clenova.app.SpeakerToneTest
+      - name: Verify Internet Speed Test measurement math
+        run: |
+          javac -d /tmp/clenova-tests app/src/main/java/com/clenova/app/SpeedTestMath.java tests/SpeedTestMathTest.java
+          java -cp /tmp/clenova-tests com.clenova.app.SpeedTestMathTest
       - name: Test private relay (mock provider)
         run: node server/relay.test.mjs
       - name: Install required SDK packages
