@@ -13,6 +13,7 @@ import org.json.JSONException;
 /** Local event journal. Records observed app actions only. */
 final class ActivityHistory {
     private final SharedPreferences store;
+    private static final Object JOURNAL_LOCK=new Object();
     static final class Entry {
         final String id,category,title,detail;
         final long timestamp;
@@ -40,7 +41,7 @@ final class ActivityHistory {
     }
     ActivityHistory(Context context){store=context.getSharedPreferences("clenova_activity_history",Context.MODE_PRIVATE);}
     private JSONArray read() throws JSONException{return new JSONArray(store.getString("events","[]"));}
-    synchronized List<Entry> entries(){
+    List<Entry> entries(){synchronized(JOURNAL_LOCK){
         List<Entry> out=new ArrayList<>();
         try{
             JSONArray data=read();
@@ -50,22 +51,22 @@ final class ActivityHistory {
         }catch(JSONException ignored){}
         out.sort(Comparator.comparingLong((Entry e)->e.timestamp).reversed());
         return out;
-    }
-    synchronized boolean clear(){return store.edit().remove("events").commit();}
-    synchronized String exportJson() throws JSONException{
+    }}
+    boolean clear(){synchronized(JOURNAL_LOCK){return store.edit().remove("events").commit();}}
+    String exportJson() throws JSONException{synchronized(JOURNAL_LOCK){
         JSONObject result=new JSONObject();
         result.put("schemaVersion",1);result.put("exportedAt",System.currentTimeMillis());
         result.put("events",read());return result.toString(2);
-    }
-    synchronized Entry find(String id){
+    }}
+    Entry find(String id){synchronized(JOURNAL_LOCK){
         if(id==null)return null;
         for(Entry e:entries())if(id.equals(e.id))return e;
         return null;
-    }
-    synchronized boolean add(String id,String category,String title,String detail,double mb,int count,boolean preview){
+    }}
+    boolean add(String id,String category,String title,String detail,double mb,int count,boolean preview){synchronized(JOURNAL_LOCK){
         return add(id,category,title,detail,mb,count,preview,null,null);
-    }
-    synchronized boolean add(String id,String category,String title,String detail,double mb,int count,boolean preview,double[] amounts,int[] counts){
+    }}
+    boolean add(String id,String category,String title,String detail,double mb,int count,boolean preview,double[] amounts,int[] counts){synchronized(JOURNAL_LOCK){
         try{
             JSONArray data=read();
             String eventId=id==null?UUID.randomUUID().toString():id;
@@ -81,5 +82,5 @@ final class ActivityHistory {
             data.put(e);
             return store.edit().putString("events",data.toString()).commit();
         }catch(JSONException ex){return false;}
-    }
+    }}
 }

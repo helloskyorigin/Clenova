@@ -88,6 +88,8 @@ public final class MainActivity extends Activity {
     private int realSimilarPage;
     private final java.util.Set<String> realSimilarSelected=new java.util.LinkedHashSet<>(), realSimilarKeep=new java.util.HashSet<>();
     private boolean realDupVisible,realDupReview,dupAfterScan,dupFromResults,dupAll,dupTrashPending;
+    private CleanupReceipt cleanupReceipt;
+    private boolean verifyingCleanup;
     private int dupPage;
     private volatile int dupThumbGeneration;
     private final java.util.Set<String> realDupSelected=new java.util.LinkedHashSet<>();
@@ -318,6 +320,8 @@ public final class MainActivity extends Activity {
         getWindow().getDecorView().setSystemUiVisibility(dark||android.os.Build.VERSION.SDK_INT<27?0:View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR);
         int height = getResources().getConfiguration().screenHeightDp;
         compact = height < 740 ? .88f : 1f;
+        if(state!=null)cleanupReceipt=CleanupReceipt.restore(state.getBundle("cleanup_receipt"));
+        if(dupTrashPending){LinearLayout root=scanShell("Waiting for Android",()->{}),body=scanBody(root);add(body,centered("Waiting for your approval",20,INK,600),-1,-2);setContentView(root);return;}
         if(state!=null&&state.getBoolean("preparing_phone_visible")){showPreparingPhone();return;}
         if(state!=null&&state.getBoolean("onboarding_agent_visible")){showAgentSetup(state.getBoolean("agent_setup_from_tab"),state.getBoolean("agent_setup_confirmed"));return;}
         if(state!=null&&state.getBoolean("onboarding_access_visible")){showOnboardingAccess(state);return;}
@@ -377,6 +381,7 @@ public final class MainActivity extends Activity {
         state.putBoolean("clean_visible",cleanVisible);state.putBoolean("agent_visible",agentVisible);state.putBoolean("agent_shortcut",agentShortcut);
         state.putBoolean("large_files_mode",largeFilesMode);state.putBoolean("clutter_mode",clutterMode);
         state.putBoolean("dup_trash_pending",dupTrashPending);
+        if(cleanupReceipt!=null)state.putBundle("cleanup_receipt",cleanupReceipt.save());
         state.putBoolean("tool_scan_pending",requestingScan);state.putBoolean("tool_agent_pending",agentPermissionPending);
         state.putInt("tool_scan_route",videoAfterScan?2:dupAfterScan?1:similarAfterScan?3:shotAfterScan?4:0);
         state.putInt("tool_agent_task",agentScanTask);state.putBoolean("tool_agent_origin",agentTaskOrigin);
@@ -421,7 +426,7 @@ public final class MainActivity extends Activity {
         if(unusedVisible){if(unusedExternal||unusedUninstallPending)return;showClean();}
         if(downloadsVisible){if(downloadsBusy){if(downloadsSignal!=null)downloadsSignal.cancel();return;}if(downloadsPicking||downloadsOpening)return;showClean();}
         // Do not retain visible media results across backgrounding; selected-photo access may change.
-        if(dupTrashPending||requestingScan||agentPermissionPending)return;
+        if(dupTrashPending||verifyingCleanup||requestingScan||agentPermissionPending)return;
         if(runningScan!=null){runningScan.cancel();runningScan=null;scanVisible=false;scanReviewVisible=false;scanResult=null;showClean();}
         else if(scanResult!=null){scanResult=null;if(cleanVisible&&!settingsVisible)showClean();}
     }
@@ -954,6 +959,7 @@ public final class MainActivity extends Activity {
                 runOnUiThread(()->{if(runningScan!=job||isFinishing()||isDestroyed())return;runningScan=null;
                     if(accessAtStart!=ToolAccess.mediaMask(this)||!ToolAccess.has(this,scanScope())){scanResult=null;showClean();folderToast("Media access changed. Scan again.");return;}
                     scanResult=result;
+                    if(result.examined>0||result.imagesScanned||result.videosScanned)recordHistory(null,"scan","Media scan finished",(result.limited||result.partial?"Partial coverage · ":"")+"Accessible media checked. No files removed.",0,result.examined,false);
                     java.util.Arrays.fill(scanSelected,false);if(dupAfterScan){dupAfterScan=false;showRealDuplicates();}else if(similarAfterScan){similarAfterScan=false;showRealSimilar();}else if(videoAfterScan){videoAfterScan=false;showRealVideos();}else if(shotAfterScan){shotAfterScan=false;showRealScreenshots();}else showScanResults();});
             }catch(Exception e){runOnUiThread(()->{if(runningScan!=job||isFinishing()||isDestroyed())return;runningScan=null;showClean();folderToast("Scan could not finish");});}
         },"Clenova-media-scan").start();
@@ -1153,14 +1159,14 @@ public final class MainActivity extends Activity {
         scanButton(root,"Cancel",false,()->{job.cancel();runningScan=null;showRealDuplicates();});setContentView(root);
         new Thread(()->{
             try{
-                SmartMediaScan.Result fresh=job.run((stage,done,total)->{});java.util.List<android.net.Uri> approved=DuplicateApproval.verified(before,fresh,selected);
+                SmartMediaScan.Result fresh=job.runPhotos((stage,done,total)->{});java.util.List<android.net.Uri> approved=DuplicateApproval.verified(before,fresh,selected);
                 runOnUiThread(()->{
                     if(runningScan!=job||isDestroyed()||isFinishing())return;runningScan=null;
                     if(approved.isEmpty()){java.util.Arrays.fill(scanSelected,false);dupCache.evictAll();scanResult=fresh;realDupSelected.clear();showRealDuplicates();folderToast("Files or protection changed. Review again.");return;}
                     try{
                         android.app.PendingIntent pending=android.provider.MediaStore.createTrashRequest(getContentResolver(),approved,true);
-                        dupTrashPending=true;startIntentSenderForResult(pending.getIntentSender(),REQUEST_DUP_TRASH,null,0,0,0);
-                    }catch(Exception e){dupTrashPending=false;showRealDuplicates();folderToast("Could not open Android trash approval");}
+                        cleanupReceipt=CleanupReceipt.capture(this,"Duplicate photos",approved,fresh.groups.get(0));dupTrashPending=true;startIntentSenderForResult(pending.getIntentSender(),REQUEST_DUP_TRASH,null,0,0,0);
+                    }catch(Exception e){dupTrashPending=false;cleanupReceipt=null;showRealDuplicates();folderToast("Could not open Android trash approval");}
                 });
             }catch(Exception e){runOnUiThread(()->{if(runningScan!=job||isDestroyed())return;runningScan=null;showRealDuplicates();folderToast("Safety recheck failed");});}
         },"Clenova-duplicate-recheck").start();
@@ -1253,11 +1259,11 @@ public final class MainActivity extends Activity {
         Runnable cancel=()->{job.cancel();runningScan=null;showRealSimilar();};LinearLayout root=scanShell("Review cleanup",cancel),body=scanBody(root);
         add(body,centered("Rechecking similar photos",20,INK,600),-1,-2);space(body,12);add(body,new android.widget.ProgressBar(this),dp(42),dp(42));scanButton(root,"Cancel",false,cancel);setContentView(root);
         new Thread(()->{try{
-            SmartMediaScan.Result fresh=job.run((stage,done,total)->{});java.util.List<android.net.Uri> approved=SimilarPhotoScan.verify(before,fresh,selected,keep);
+            SmartMediaScan.Result fresh=job.runPhotos((stage,done,total)->{});java.util.List<android.net.Uri> approved=SimilarPhotoScan.verify(before,fresh,selected,keep);
             runOnUiThread(()->{if(runningScan!=job||isDestroyed()||isFinishing())return;runningScan=null;
                 if(approved.isEmpty()){java.util.Arrays.fill(scanSelected,false);dupCache.evictAll();scanResult=fresh;realSimilarSelected.clear();showRealSimilar();folderToast("Files or protection changed. Review again.");return;}
-                try{android.app.PendingIntent pending=android.provider.MediaStore.createTrashRequest(getContentResolver(),approved,true);dupTrashPending=true;startIntentSenderForResult(pending.getIntentSender(),REQUEST_SIMILAR_TRASH,null,0,0,0);}
-                catch(Exception e){dupTrashPending=false;showRealSimilar();folderToast("Could not open Android trash approval");}
+                try{android.app.PendingIntent pending=android.provider.MediaStore.createTrashRequest(getContentResolver(),approved,true);cleanupReceipt=CleanupReceipt.capture(this,"Similar photos",approved,fresh.groups.get(3));dupTrashPending=true;startIntentSenderForResult(pending.getIntentSender(),REQUEST_SIMILAR_TRASH,null,0,0,0);}
+                catch(Exception e){dupTrashPending=false;cleanupReceipt=null;showRealSimilar();folderToast("Could not open Android trash approval");}
             });
         }catch(Exception e){runOnUiThread(()->{if(runningScan!=job||isDestroyed())return;runningScan=null;showRealSimilar();folderToast("Safety recheck failed");});}},"Clenova-similar-recheck").start();
     }
@@ -1364,8 +1370,8 @@ public final class MainActivity extends Activity {
             SmartMediaScan.Result fresh=job.runVideos((stage,done,total)->{});java.util.List<android.net.Uri> approved=VideoApproval.verify(before,fresh,selected,keep);
             runOnUiThread(()->{if(runningScan!=job||isDestroyed()||isFinishing())return;runningScan=null;
                 if(approved.isEmpty()){java.util.Arrays.fill(scanSelected,false);dupCache.evictAll();scanResult=fresh;realVideoSelected.clear();showRealVideos();folderToast("Files or protection changed. Review again.");return;}
-                try{android.app.PendingIntent pending=android.provider.MediaStore.createTrashRequest(getContentResolver(),approved,true);dupTrashPending=true;startIntentSenderForResult(pending.getIntentSender(),REQUEST_VIDEO_TRASH,null,0,0,0);}
-                catch(Exception e){dupTrashPending=false;showRealVideos();folderToast("Could not open Android trash approval");}
+                try{android.app.PendingIntent pending=android.provider.MediaStore.createTrashRequest(getContentResolver(),approved,true);cleanupReceipt=CleanupReceipt.capture(this,"Large videos",approved,fresh.groups.get(1));dupTrashPending=true;startIntentSenderForResult(pending.getIntentSender(),REQUEST_VIDEO_TRASH,null,0,0,0);}
+                catch(Exception e){dupTrashPending=false;cleanupReceipt=null;showRealVideos();folderToast("Could not open Android trash approval");}
             });
         }catch(Exception e){runOnUiThread(()->{if(runningScan!=job||isDestroyed())return;runningScan=null;showRealVideos();folderToast("Safety recheck failed");});}},"Clenova-video-recheck").start();
     }
@@ -1476,11 +1482,11 @@ public final class MainActivity extends Activity {
         final SmartMediaScan job=new SmartMediaScan(this,prefs,protectedFiles,protectedFolders);runningScan=job;
         Runnable cancel=()->{job.cancel();runningScan=null;showRealScreenshots();};LinearLayout root=scanShell("Review cleanup",cancel),body=scanBody(root);add(body,centered("Rechecking screenshot safety",20,INK,600),-1,-2);space(body,12);add(body,new android.widget.ProgressBar(this),dp(42),dp(42));scanButton(root,"Cancel",false,cancel);setContentView(root);
         new Thread(()->{try{
-            SmartMediaScan.Result fresh=job.run((stage,done,total)->{});java.util.List<android.net.Uri> approved=ScreenshotApproval.verify(before,fresh,selected,keep);
+            SmartMediaScan.Result fresh=job.runPhotos((stage,done,total)->{});java.util.List<android.net.Uri> approved=ScreenshotApproval.verify(before,fresh,selected,keep);
             runOnUiThread(()->{if(runningScan!=job||isDestroyed()||isFinishing())return;runningScan=null;
                 if(approved.isEmpty()){java.util.Arrays.fill(scanSelected,false);dupCache.evictAll();scanResult=fresh;shotSelected.clear();showRealScreenshots();folderToast("Files or protection changed. Review again.");return;}
-                try{android.app.PendingIntent pending=android.provider.MediaStore.createTrashRequest(getContentResolver(),approved,true);dupTrashPending=true;startIntentSenderForResult(pending.getIntentSender(),REQUEST_SCREENSHOT_TRASH,null,0,0,0);}
-                catch(Exception e){dupTrashPending=false;showRealScreenshots();folderToast("Could not open Android trash approval");}
+                try{android.app.PendingIntent pending=android.provider.MediaStore.createTrashRequest(getContentResolver(),approved,true);cleanupReceipt=CleanupReceipt.capture(this,"Screenshots",approved,fresh.groups.get(2));dupTrashPending=true;startIntentSenderForResult(pending.getIntentSender(),REQUEST_SCREENSHOT_TRASH,null,0,0,0);}
+                catch(Exception e){dupTrashPending=false;cleanupReceipt=null;showRealScreenshots();folderToast("Could not open Android trash approval");}
             });
         }catch(Exception e){runOnUiThread(()->{if(runningScan!=job||isDestroyed())return;runningScan=null;showRealScreenshots();folderToast("Safety recheck failed");});}},"Clenova-screenshot-recheck").start();
     }
@@ -1648,7 +1654,9 @@ public final class MainActivity extends Activity {
         final DownloadFiles engine=downloadEngine();final android.os.CancellationSignal removalSignal=new android.os.CancellationSignal();downloadsSignal=removalSignal;
         downloadsBusy=true;LinearLayout root=scanShell("Removing files",removalSignal::cancel),body=scanBody(root);add(body,centered("Checking and removing approved files",18,INK,600),-1,-2);space(body,12);add(body,new android.widget.ProgressBar(this),dp(40),dp(40));space(body,12);scanButton(body,"Cancel remaining",false,removalSignal::cancel);setContentView(root);
         new Thread(()->{int[] result;try{result=engine.remove(selected,removalSignal);}catch(Exception e){result=new int[]{0,selected.size()};}final int removed=result[0],failed=result[1];
-            runOnUiThread(()->{if(isDestroyed())return;downloadsBusy=false;downloadsSignal=null;downloadSelected.clear();if(agentTaskOrigin&&activeChat!=null)appendAgent(false,removed+" files removed by the document provider; "+failed+" not removed. Recovered storage has not been measured.",-1);refreshDownloads();folderToast(removed+" "+tr("files removed")+" · "+failed+" "+tr("not removed"));});
+            final String detail=removed+" removals reported by the document provider; "+failed+" not removed. Recovered storage has not been measured.";
+            final boolean logged=removed==0||history.add(null,"cleanup","Document removal reported",detail,0,removed,false);
+            runOnUiThread(()->{if(isDestroyed())return;downloadsBusy=false;downloadsSignal=null;downloadSelected.clear();downloadItems.clear();deviceOverview=null;if(agentTaskOrigin&&activeChat!=null)appendAgent(false,detail,-1);showCleanupOutcome(removed==0?"No removals reported":failed==0?"File cleanup complete":"File cleanup partial",detail,removed,0,removed>0&&failed==0,logged);});
         },"Clenova-downloads-remove").start();
     }
 
@@ -2720,8 +2728,8 @@ public final class MainActivity extends Activity {
         historyDetailId=null;settingsVisible=true;historyVisible=true;setContentView(historyScreen());
         if(historyScroll!=null){final ScrollView scroll=historyScroll;scroll.post(()->scroll.scrollTo(0,historyScrollY));}
     }
-    private static final String[] HISTORY_FILTERS={"All activity","Scans","Cleanups","Protection"};
-    private static final String[] HISTORY_CATEGORIES={"","scan","cleanup","protection"};
+    private static final String[] HISTORY_FILTERS={"All activity","Scans","Cleanups","Protection","Tools"};
+    private static final String[] HISTORY_CATEGORIES={"","scan","cleanup","protection","tools"};
     private LinearLayout historyScreen(){
         LinearLayout root=column();root.setBackgroundColor(BG);root.setPadding(dp(18),v(12),dp(18),v(12));
         FrameLayout header=new FrameLayout(this);
@@ -2738,17 +2746,17 @@ public final class MainActivity extends Activity {
         mark.addView(new Glyph(this,"history",BLUE),new FrameLayout.LayoutParams(dp(32),dp(32),Gravity.CENTER));
         add(hero,mark,dp(64),dp(64));space(hero,13);
         add(hero,centered("Always in the loop.",24,INK,700),-1,-2);space(hero,7);
-        add(hero,centered("See what your Agent has been up to.",14,GRAY,400),-1,-2);add(body,hero,-1,-2);space(body,22);
+        add(hero,centered("Your cleaning and tool activity, in one place.",14,GRAY,400),-1,-2);add(body,hero,-1,-2);space(body,22);
         java.util.List<ActivityHistory.Entry> all=history.entries();
-        double mb=0;long items=0;
-        for(ActivityHistory.Entry entry:all)if(entry.preview&&entry.title.equals("Cleanup preview completed")){mb+=entry.mb;items+=entry.count;}
+        long items=0,events=0;
+        for(ActivityHistory.Entry entry:all)if(!entry.preview){events++;if(entry.category.equals("cleanup")||entry.category.equals("app_manager"))items+=entry.count;}
         LinearLayout stats=card(),metrics=row(),left=column(),right=column();
-        add(left,txt("Preview recovery",12,GRAY,400),-1,-2);space(left,6);
-        add(left,txt(mb==0?"0 GB":ReviewPlan.gb(mb),25,INK,700),-1,-2);weight(metrics,left);
+        add(left,txt("Recorded activity",12,GRAY,400),-1,-2);space(left,6);
+        add(left,txt(Long.toString(events),25,INK,700),-1,-2);weight(metrics,left);
         View rule=new View(this);rule.setBackgroundColor(surface(0xffe5e5ea));add(metrics,rule,dp(1),dp(44));gap(metrics,12);
-        add(right,txt("Preview items",12,GRAY,400),-1,-2);space(right,6);
+        add(right,txt("Cleanup items",12,GRAY,400),-1,-2);space(right,6);
         add(right,txt(Long.toString(items),25,INK,700),-1,-2);weight(metrics,right);add(stats,metrics,-1,-2);
-        space(stats,10);add(stats,txt("Simulation totals · No real files deleted",11,GRAY,400),-1,-2);
+        space(stats,10);add(stats,txt("Recorded outcomes · Not reclaimed storage",11,GRAY,400),-1,-2);
         add(body,stats,-1,-2);space(body,20);
         if(historyFilter<0||historyFilter>=HISTORY_FILTERS.length)historyFilter=0;
         LinearLayout filters=row();weight(filters,txt("Activity",14,GRAY,500));
@@ -2760,7 +2768,9 @@ public final class MainActivity extends Activity {
         java.time.format.DateTimeFormatter dateFormat=java.time.format.DateTimeFormatter.ofLocalizedDate(java.time.format.FormatStyle.MEDIUM).withLocale(java.util.Locale.forLanguageTag(prefs.language()));
         LinearLayout group=null;
         for(ActivityHistory.Entry entry:all){
-            if(historyFilter!=0&&!HISTORY_CATEGORIES[historyFilter].equals(entry.category))continue;
+            if(entry.preview)continue;
+            if(historyFilter==4){if(entry.category.equals("scan")||entry.category.equals("cleanup")||entry.category.equals("protection"))continue;}
+            else if(historyFilter!=0&&!HISTORY_CATEGORIES[historyFilter].equals(entry.category))continue;
             java.time.LocalDate date=java.time.Instant.ofEpochMilli(entry.timestamp).atZone(java.time.ZoneId.systemDefault()).toLocalDate();
             if(!date.equals(previous)){
                 if(group!=null){add(body,group,-1,-2);space(body,18);}
@@ -2784,7 +2794,7 @@ public final class MainActivity extends Activity {
     }
     private LinearLayout historyRow(ActivityHistory.Entry entry){
         LinearLayout line=row();line.setPadding(0,dp(12),0,dp(12));
-        boolean done=entry.title.equals("Cleanup preview completed");
+        boolean done=!entry.preview&&entry.category.equals("cleanup")&&entry.count>0;
         String icon=done?"check":entry.category.equals("scan")?"sparkles":entry.category.equals("photo_compression")?"images":entry.category.equals("compression")?"video":entry.category.equals("contacts")?"users":entry.category.equals("app_manager")?"apps":"shield";
         FrameLayout mark=new FrameLayout(this);mark.setBackground(round(done?0xffe8f6ec:PALE,12));
         mark.addView(new Glyph(this,icon,done?GREEN:BLUE),new FrameLayout.LayoutParams(dp(24),dp(24),Gravity.CENTER));
@@ -2844,7 +2854,9 @@ public final class MainActivity extends Activity {
         TextView pill=centered(status,12,entry.preview?BLUE:removed?GRAY:GREEN,600);
         pill.setBackground(round(entry.preview||removed?PALE:0xffe8f6ec,18));pill.setPadding(dp(14),dp(7),dp(14),dp(7));
         add(hero,pill,-2,-2);add(body,hero,-1,-2);space(body,24);
-        if(cleanupActivity||scan){
+        if(!entry.preview&&(cleanupActivity||scan)){
+            LinearLayout actual=card();add(actual,txt(scan?"Media items examined":"Recorded cleanup items",13,GRAY,500),-1,-2);space(actual,8);add(actual,txt(Integer.toString(entry.count),34,INK,700),-1,-2);space(actual,10);add(actual,txt(entry.detail,14,GRAY,400),-1,-2);space(actual,8);add(actual,txt("No amount of recovered storage is assumed.",12,GRAY,400),-1,-2);add(body,actual,-1,-2);
+        }else if(cleanupActivity||scan){
             LinearLayout summary=card();summary.setGravity(Gravity.CENTER_HORIZONTAL);pad(summary,16,20);
             add(summary,centered(done?"Preview recovery":approved?"Approved preview size":"Sample opportunities",13,GRAY,400),-1,-2);space(summary,9);
             add(summary,centered(entry.mb==0?"0 GB":ReviewPlan.gb(entry.mb),36,INK,700),-1,-2);space(summary,7);
@@ -3140,7 +3152,7 @@ public final class MainActivity extends Activity {
         if(requestCode==REQUEST_APP_UNINSTALL){unusedUninstallPending=false;unusedExternal=false;unusedSelected.clear();if(agentTaskOrigin&&activeChat!=null)appendAgent(false,resultCode==RESULT_OK?"Android reported uninstall success. Refresh the app list to verify.":"Uninstall not confirmed.",-1);if(unusedVisible)refreshUnusedApps();folderToast(resultCode==RESULT_OK?"Android uninstall returned success. Refreshing app list.":"Uninstall not confirmed");return;}
         if(requestCode==PICK_LARGE_FOLDER){downloadsPicking=false;if(resultCode==RESULT_OK&&data!=null&&data.getData()!=null&&(largeFilesMode||clutterMode))loadLargeFolder(data.getData());else if(downloadsVisible)showDownloads();return;}
         if(requestCode==PICK_DOWNLOAD_FILES){downloadsPicking=false;if(resultCode==RESULT_OK&&data!=null)loadPickedDownloads(data);else if(downloadsVisible)showDownloads();return;}
-        if(requestCode==REQUEST_DUP_TRASH||requestCode==REQUEST_SIMILAR_TRASH||requestCode==REQUEST_VIDEO_TRASH||requestCode==REQUEST_SCREENSHOT_TRASH){dupTrashPending=false;scanResult=null;agentLiveResult=null;realDupSelected.clear();dupCache.evictAll();if(agentTaskOrigin&&activeChat!=null){appendAgent(false,resultCode==RESULT_OK?"Android trash request approved. Scan again to verify remaining candidates.":"Trash request cancelled. No completion claimed.",-1);showAgent();}else showClean();folderToast(resultCode==RESULT_OK?"Android trash request approved. Scan again to refresh.":"Trash request cancelled");return;}
+        if(requestCode==REQUEST_DUP_TRASH||requestCode==REQUEST_SIMILAR_TRASH||requestCode==REQUEST_VIDEO_TRASH||requestCode==REQUEST_SCREENSHOT_TRASH){finishMediaCleanup(resultCode==RESULT_OK);return;}
         if(requestCode==EXPORT_ACTIVITY_HISTORY){if(resultCode==RESULT_OK&&data!=null&&data.getData()!=null)writeHistoryExport(data.getData());return;}
         if(requestCode==PICK_PROTECTED_FILES){if(resultCode==RESULT_OK&&data!=null)handleProtectedFiles(data);return;}
         if(requestCode!=PICK_PROTECTED_FOLDER||resultCode!=RESULT_OK||data==null||data.getData()==null)return;
@@ -3332,6 +3344,30 @@ public final class MainActivity extends Activity {
         scanButton(c,prefs.autopilot()?"Open Agent":"Activate Agent",false,()->{if(prefs.autopilot())showAgent();else showAgentSetup(true,false);});
         return c;
     }
+    private void finishMediaCleanup(boolean approved){
+        final CleanupReceipt receipt=cleanupReceipt;cleanupReceipt=null;dupTrashPending=false;verifyingCleanup=true;
+        scanResult=null;agentLiveResult=null;realDupSelected.clear();realSimilarSelected.clear();realVideoSelected.clear();shotSelected.clear();dupCache.evictAll();
+        LinearLayout root=scanShell("Cleanup result",()->{}),body=scanBody(root);add(body,centered("Checking cleanup result",22,INK,600),-1,-2);space(body,14);add(body,new android.widget.ProgressBar(this),dp(44),dp(44));setContentView(root);
+        CleanupReceipt.verifyAsync(this,receipt,approved,result->{
+            verifyingCleanup=false;deviceOverview=null;
+            if(agentTaskOrigin&&activeChat!=null)appendAgent(false,result.detail(),-1);
+            showCleanupOutcome(result.title(),result.detail(),result.count(),result.bytes,result.complete(),result.logged);
+        });
+    }
+    private void showCleanupOutcome(String title,String detail,int count,long bytes,boolean complete,boolean logged){
+        completionVisible=true;scanVisible=false;scanReviewVisible=false;realDupVisible=false;realSimilarVisible=false;realVideoVisible=false;realShotVisible=false;
+        realDupReview=false;realSimilarReview=false;realVideoReview=false;realShotReview=false;downloadsVisible=false;downloadsReview=false;
+        LinearLayout root=scanShell("Cleanup result",this::leaveCleanupOutcome),body=scanBody(root);
+        LinearLayout hero=column();hero.setGravity(Gravity.CENTER_HORIZONTAL);FrameLayout mark=new FrameLayout(this);mark.setBackground(round(complete?surface(0xffe8f6ec):PALE,42));
+        mark.addView(new Glyph(this,complete?"selected":"shield",complete?GREEN:BLUE),new FrameLayout.LayoutParams(dp(46),dp(46),Gravity.CENTER));add(hero,mark,dp(84),dp(84));space(hero,18);
+        add(hero,centered(title,27,INK,700),-1,-2);space(hero,10);add(hero,centered(detail,14,GRAY,400),-1,-2);add(body,hero,-1,-2);space(body,22);
+        LinearLayout result=card();add(result,txt("Recorded items",13,GRAY,500),-1,-2);space(result,6);add(result,txt(Integer.toString(count),34,INK,700),-1,-2);
+        if(bytes>0){space(result,10);add(result,txt("Original file size · "+scanBytes(bytes),14,INK,500),-1,-2);}
+        space(result,8);add(result,txt("Actual available storage is refreshed on Home. No recovery amount is assumed.",12,GRAY,400),-1,-2);add(body,result,-1,-2);
+        if(!logged){space(body,12);add(body,txt("Activity could not be saved.",12,GRAY,400),-1,-2);}
+        scanButton(root,"Back to Home",true,this::showHome);space(root,8);scanButton(root,agentTaskOrigin?"Back to Agent":"Continue cleaning",false,this::leaveCleanupOutcome);setContentView(root);
+    }
+    private void leaveCleanupOutcome(){completionVisible=false;if(agentTaskOrigin)showAgent();else showClean();}
     private void showHome() {
         toolsVisible=false;toolsScroll=null;toolsScrollY=0;
         if(agentBusy())cancelAgentWork();agentVisible=false;agentTaskVisible=false;agentTaskOrigin=false;agentShortcut=false;restoreAgentWindow();
@@ -3357,7 +3393,7 @@ public final class MainActivity extends Activity {
         if(onboardingIntro!=null){onboardingIntro.setActive(false);onboardingIntro=null;finish();return;}
         if(requestingScan||agentPermissionPending)return;
         if(downloadsBusy){if(downloadsSignal!=null)downloadsSignal.cancel();return;}
-        if(cleaning||unusedUninstallPending)return;
+        if(cleaning||unusedUninstallPending||dupTrashPending||verifyingCleanup)return;
         if(unusedReview){if(unusedSignal!=null){unusedSignal.cancel();unusedSignal=null;unusedGeneration++;}showUnusedApps();return;}
         if(unusedVisible){if(agentTaskOrigin)showAgent();else showClean();return;}
         if(downloadsReview){showDownloads();return;}
@@ -3382,7 +3418,7 @@ public final class MainActivity extends Activity {
         if(filesVisible || foldersVisible){openProtection();return;}
         if(protectionVisible || agentPrefsVisible){openSettings();return;}
         if(settingsVisible || storageVisible){returnToDashboard();return;}
-        if(completionVisible){showHome();return;}
+        if(completionVisible){leaveCleanupOutcome();return;}
         if(toolsVisible){showHome();return;}
         if(agentVisible&&agentBusy()){cancelAgentWork();return;}
         if(agentTaskVisible||agentVisible&&activeChat!=null){showHome();return;}
