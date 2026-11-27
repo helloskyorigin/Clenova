@@ -85,7 +85,6 @@ final class AgentOnboardingView extends ScrollView {
         track.addView(progress,new FrameLayout.LayoutParams(-1,-1));
         LinearLayout.LayoutParams trackLp=new LinearLayout.LayoutParams(-1,dp(5));trackLp.topMargin=dp(13);
         result.addView(track,trackLp);append(stage,result,22);moments[4]=result;
-        TextView demo=label("Illustrative Agent session",10,0xff898993,400);append(stage,demo,8);
 
         TextView heading=label("Meet your personal\nphone agent.",29,INK,650);
         heading.setGravity(Gravity.CENTER);heading.setLetterSpacing(-.037f);heading.setLineSpacing(dp(1),1);

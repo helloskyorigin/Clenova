@@ -1,23 +1,28 @@
 #!/usr/bin/env bash
-# Temporary Phase 47 navigation: verify the actual onboarding CTA before entering Home.
+# Navigate both introductions and collect actual device evidence.
 onboarding_continue() {
-  local name="${1:-onboarding}" xy
+  local name="${1:-onboarding}" xy stage heading cta
   mkdir -p build/onboarding-evidence
-  adb shell uiautomator dump /sdcard/onboarding-qa.xml >/dev/null
-  adb pull /sdcard/onboarding-qa.xml "build/onboarding-evidence/$name.xml" >/dev/null
-  adb exec-out screencap -p > "build/onboarding-evidence/$name.png"
-  xy="$(python3 - "build/onboarding-evidence/$name.xml" <<'PY'
+  for stage in 01 02; do
+    if [[ "$stage" == "01" ]]; then heading="Meet your personal"; cta="Get Started"; else heading="One Agent."; cta="Continue"; fi
+    adb shell uiautomator dump /sdcard/onboarding-qa.xml >/dev/null
+    adb pull /sdcard/onboarding-qa.xml "build/onboarding-evidence/$name-$stage.xml" >/dev/null
+    adb exec-out screencap -p > "build/onboarding-evidence/$name-$stage.png"
+    xy="$(python3 - "build/onboarding-evidence/$name-$stage.xml" "$heading" "$cta" <<'PY'
 import sys, re, xml.etree.ElementTree as ET
 nodes=list(ET.parse(sys.argv[1]).iter('node'))
-assert any('Meet your personal' in n.get('text','') for n in nodes), 'Onboarding heading missing'
-assert any('Illustrative Agent session' in n.get('text','') for n in nodes), 'Illustrative label missing'
-matches=[n for n in nodes if n.get('text')=='Get Started' and n.get('clickable')=='true' and n.get('enabled')=='true']
-assert matches, 'Get Started must be available immediately'
+assert any(sys.argv[2] in n.get('text','') for n in nodes), 'Onboarding heading missing'
+for n in nodes:
+    for attr in ('text','content-desc'):
+        assert not re.search(r'\b(demo|sample|test|illustrative)\b', n.get(attr,''),re.I), 'Development label in onboarding'
+matches=[n for n in nodes if n.get('text')==sys.argv[3] and n.get('clickable')=='true' and n.get('enabled')=='true']
+assert matches, 'CTA must be available immediately'
 a,b,c,d=map(int,re.findall(r'\d+',matches[0].get('bounds')))
 assert c>a and d>b, 'CTA not visible'
 print((a+c)//2,(b+d)//2)
 PY
 )"
-  adb shell input tap $xy
-  sleep 1
+    adb shell input tap $xy
+    sleep 1
+  done
 }

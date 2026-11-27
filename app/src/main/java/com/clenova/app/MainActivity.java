@@ -145,6 +145,7 @@ public final class MainActivity extends Activity {
     private boolean dark;
     private LaunchSplashView launchSplash;
     private AgentOnboardingView onboardingIntro;
+    private UnifiedOnboardingView onboardingUnified;
     private final android.os.Handler splashHandler=new android.os.Handler(android.os.Looper.getMainLooper());
     private long splashDeadline;
     private final Runnable finishSplash=()->{if(launchSplash==null||isFinishing()||isDestroyed())return;launchSplash=null;showOnboardingIntro();};
@@ -154,10 +155,20 @@ public final class MainActivity extends Activity {
         if(android.os.Build.VERSION.SDK_INT>=27)getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR);
         onboardingIntro=new AgentOnboardingView(this,()->{
             if(onboardingIntro==null||isFinishing()||isDestroyed())return;
-            // Temporary development route only. Final onboarding gate will replace this callback.
-            onboardingIntro.setActive(false);onboardingIntro=null;applyPalette();setContentView(home());
+            onboardingIntro.setActive(false);onboardingIntro=null;showOnboardingUnified();
         });
         setContentView(onboardingIntro);onboardingIntro.setActive(true);
+    }
+
+    private void showOnboardingUnified(){
+        getWindow().setNavigationBarColor(AgentOnboardingView.BACKGROUND);
+        if(android.os.Build.VERSION.SDK_INT>=27)getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR);
+        onboardingUnified=new UnifiedOnboardingView(this,()->{
+            if(onboardingUnified==null||isFinishing()||isDestroyed())return;
+            // Until the third introduction and setup gate are connected.
+            onboardingUnified.setActive(false);onboardingUnified=null;applyPalette();setContentView(home());
+        });
+        setContentView(onboardingUnified);onboardingUnified.setActive(true);
     }
 
     @Override public void onCreate(Bundle state) {
@@ -178,6 +189,7 @@ public final class MainActivity extends Activity {
         getWindow().getDecorView().setSystemUiVisibility(dark||android.os.Build.VERSION.SDK_INT<27?0:View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR);
         int height = getResources().getConfiguration().screenHeightDp;
         compact = height < 740 ? .88f : 1f;
+        if(state!=null&&state.getBoolean("onboarding_unified_visible")){showOnboardingUnified();return;}
         if(state!=null&&state.getBoolean("onboarding_intro_visible")){showOnboardingIntro();return;}
         if(state!=null && state.containsKey("cleanup_amounts")){
             cleanup=new CleanupPreview(state.getDoubleArray("cleanup_amounts"),state.getInt("cleanup_count"));
@@ -211,6 +223,7 @@ public final class MainActivity extends Activity {
     @Override protected void onSaveInstanceState(Bundle state){
         super.onSaveInstanceState(state);
         state.putBoolean("onboarding_intro_visible",onboardingIntro!=null||launchSplash!=null);
+        state.putBoolean("onboarding_unified_visible",onboardingUnified!=null);
         state.putBoolean("storage_visible",storageVisible);
         state.putBoolean("tools_visible",toolsVisible);
         state.putInt("tools_scroll_y",toolsScroll==null?toolsScrollY:toolsScroll.getScrollY());
@@ -265,6 +278,7 @@ public final class MainActivity extends Activity {
     @Override protected void onDestroy(){
         splashHandler.removeCallbacks(finishSplash);launchSplash=null;
         if(onboardingIntro!=null){onboardingIntro.setActive(false);onboardingIntro=null;}
+        if(onboardingUnified!=null){onboardingUnified.setActive(false);onboardingUnified=null;}
         agentSessionHandler.removeCallbacks(agentExpiry);
         if(agentScan!=null){agentScan.cancel();agentScan=null;}agentGeneration++;if(agentDrawer!=null)agentDrawer.dismiss();relayToken="";
         if(cleanupAnimation!=null){
@@ -1787,10 +1801,11 @@ public final class MainActivity extends Activity {
     private void openAgentPreferences(){
         settingsVisible=true;agentPrefsVisible=true;setContentView(agentPreferencesScreen());
     }
-    @Override protected void onPause(){splashHandler.removeCallbacks(finishSplash);if(onboardingIntro!=null)onboardingIntro.setActive(false);super.onPause();}
+    @Override protected void onPause(){splashHandler.removeCallbacks(finishSplash);if(onboardingIntro!=null)onboardingIntro.setActive(false);if(onboardingUnified!=null)onboardingUnified.setActive(false);super.onPause();}
     @Override protected void onResume(){
         super.onResume();
         if(onboardingIntro!=null)onboardingIntro.setActive(true);
+        if(onboardingUnified!=null)onboardingUnified.setActive(true);
         if(launchSplash!=null){
             if(splashDeadline==0){splashDeadline=android.os.SystemClock.elapsedRealtime()+(android.animation.ValueAnimator.areAnimatorsEnabled()?700:0);launchSplash.reveal();}
             splashHandler.removeCallbacks(finishSplash);splashHandler.postDelayed(finishSplash,Math.max(0,splashDeadline-android.os.SystemClock.elapsedRealtime()));
@@ -3213,6 +3228,7 @@ public final class MainActivity extends Activity {
     }
     @Override public void onBackPressed() {
         if(launchSplash!=null){splashHandler.removeCallbacks(finishSplash);launchSplash=null;finish();return;}
+        if(onboardingUnified!=null){onboardingUnified.setActive(false);onboardingUnified=null;showOnboardingIntro();return;}
         if(onboardingIntro!=null){onboardingIntro.setActive(false);onboardingIntro=null;finish();return;}
         if(downloadsBusy){if(downloadsSignal!=null)downloadsSignal.cancel();return;}
         if(cleaning||unusedUninstallPending)return;
