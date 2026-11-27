@@ -26,7 +26,7 @@ final class AppPreferences {
     String languageName(){for(int i=0;i<LANG_CODES.length;i++)if(LANG_CODES[i].equals(language()))return LANG_NAMES[i];return LANG_NAMES[0];}
     void setLanguage(String code){for(String value:LANG_CODES)if(value.equals(code)){store.edit().putString("language",code).apply();return;}throw new IllegalArgumentException();}
     boolean notificationEnabled(int i){return store.getBoolean(NOTIFICATION_KEYS[i],true);}
-    void setNotification(int i,boolean enabled){store.edit().putBoolean(NOTIFICATION_KEYS[i],enabled).apply();if(!enabled&&manager!=null)manager.cancelAll();}
+    void setNotification(int i,boolean enabled){store.edit().putBoolean(NOTIFICATION_KEYS[i],enabled).apply();if(!enabled&&manager!=null)manager.cancel(NOTIFICATION_KEYS[i],i);}
     boolean systemNotificationsAllowed(){return manager!=null&&manager.areNotificationsEnabled();}
     boolean canNotify(int i){return notificationEnabled(i)&&systemNotificationsAllowed()&&manager.getNotificationChannel(NOTIFICATION_KEYS[i])!=null&&manager.getNotificationChannel(NOTIFICATION_KEYS[i]).getImportance()!=NotificationManager.IMPORTANCE_NONE;}
 }

@@ -19,8 +19,9 @@ jobs:
       - uses: gradle/actions/setup-gradle@v4
       - name: Verify sample selection logic
         run: |
-          javac -d /tmp/clenova-tests app/src/main/java/com/clenova/app/ReviewPlan.java app/src/main/java/com/clenova/app/CleanupPreview.java app/src/main/java/com/clenova/app/StoragePreview.java tests/ReviewPlanTest.java
+          javac -d /tmp/clenova-tests app/src/main/java/com/clenova/app/ReviewPlan.java app/src/main/java/com/clenova/app/CleanupPreview.java app/src/main/java/com/clenova/app/StoragePreview.java tests/ReviewPlanTest.java app/src/main/java/com/clenova/app/AppStrings.java tests/AppStringsTest.java
           java -cp /tmp/clenova-tests com.clenova.app.ReviewPlanTest
+          java -cp /tmp/clenova-tests com.clenova.app.AppStringsTest
       - run: ./gradlew :app:assembleDebug :app:lintDebug
       - uses: actions/upload-artifact@v4
         with:
