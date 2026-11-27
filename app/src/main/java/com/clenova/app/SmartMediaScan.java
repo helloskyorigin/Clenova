@@ -108,8 +108,9 @@ final class SmartMediaScan {
             else if(!allocated.contains(i.uri.toString())){
                 if(!i.image&&i.bytes>=LARGE_VIDEO){allocated.add(i.uri.toString());r.groups.get(VIDEOS).add(i);}
                 else if(i.image&&isScreenshot(i)){
-                    // Best-shot status is unknown for non-identical photos. Fail closed if enabled.
-                    if(best)r.protectedCount++;else{allocated.add(i.uri.toString());r.groups.get(SCREENSHOTS).add(i);}
+                    // Screenshot review is manual; best-shot protection applies to similar-photo groups.
+                    // Exact-match group members remain reserved for the duplicate workflow.
+                    if(!exactMembers.contains(i.uri.toString())){allocated.add(i.uri.toString());r.groups.get(SCREENSHOTS).add(i); }
                 }
             }
             if(++classified%128==0||classified==all.size())progress.update(2,classified,all.size());
@@ -128,7 +129,7 @@ final class SmartMediaScan {
         List<String> cols=new ArrayList<>(Arrays.asList("_id","_display_name","_size","date_modified"));
         if(Build.VERSION.SDK_INT>=29){cols.add("relative_path");cols.add("volume_name");}
         if(Build.VERSION.SDK_INT>=30)cols.add("is_favorite");
-        if(!image){cols.addAll(Arrays.asList("duration","width","height","mime_type"));if(Build.VERSION.SDK_INT>=30)cols.add("generation_modified");}
+        if(!image)cols.add("duration");cols.addAll(Arrays.asList("width","height","mime_type"));if(Build.VERSION.SDK_INT>=30)cols.add("generation_modified");
         try(Cursor c=resolver.query(base,cols.toArray(new String[0]),null,null,"_id ASC",cancel)){
             if(c==null){r.partial=true;r.failed++;return;}
             int read=0;while(c.moveToNext()){
@@ -140,7 +141,7 @@ final class SmartMediaScan {
                 Uri collection=base;
                 if(Build.VERSION.SDK_INT>=29&&volume!=null)collection=image?MediaStore.Images.Media.getContentUri(volume):MediaStore.Video.Media.getContentUri(volume);
                 Item item=new Item(ContentUris.withAppendedId(collection,c.getLong(0)),name,path,volume,bytes,c.getLong(3)*1000L,image,fav);
-                if(!image){int d=c.getColumnIndex("duration"),w=c.getColumnIndex("width"),h=c.getColumnIndex("height"),m=c.getColumnIndex("mime_type"),g=c.getColumnIndex("generation_modified");
+                {int d=c.getColumnIndex("duration"),w=c.getColumnIndex("width"),h=c.getColumnIndex("height"),m=c.getColumnIndex("mime_type"),g=c.getColumnIndex("generation_modified");
                     if(d>=0&&!c.isNull(d))item.duration=c.getLong(d);if(w>=0&&!c.isNull(w))item.width=c.getInt(w);if(h>=0&&!c.isNull(h))item.height=c.getInt(h);if(m>=0&&!c.isNull(m))item.mime=c.getString(m);if(g>=0&&!c.isNull(g))item.generation=c.getLong(g);}
                 out.add(item);
             }

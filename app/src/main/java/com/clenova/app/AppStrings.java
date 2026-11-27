@@ -5,6 +5,26 @@ import java.util.Map;
 final class AppStrings {
  private static final Map<String,String[]> TEXT=new HashMap<>();
  static {
+  TEXT.put("Screenshot storage",new String[]{"स्क्रीनशॉट स्टोरेज","Almacenamiento de capturas","Stockage des captures","Screenshot-Speicher"});
+  TEXT.put("screenshots available for review",new String[]{"स्क्रीनशॉट समीक्षा के लिए","capturas para revisar","captures à examiner","Screenshots zur Prüfung"});
+  TEXT.put("Protected items excluded",new String[]{"सुरक्षित आइटम अलग","Elementos protegidos excluidos","Éléments protégés exclus","Geschützte Elemente ausgeschlossen"});
+  TEXT.put("Screenshots may contain important information. Review before selecting.",new String[]{"स्क्रीनशॉट में ज़रूरी जानकारी हो सकती है। चुनने से पहले देखें।","Las capturas pueden contener información importante. Revísalas antes de seleccionar.","Les captures peuvent contenir des informations importantes. Vérifiez-les avant de sélectionner.","Screenshots können wichtige Informationen enthalten. Vor Auswahl prüfen."});
+  TEXT.put("Older than 30d",new String[]{"30 दिन से पुराने","Más de 30 días","Plus de 30 j","Älter als 30 T."});
+  TEXT.put("Older than 90d",new String[]{"90 दिन से पुराने","Más de 90 días","Plus de 90 j","Älter als 90 T."});
+  TEXT.put("Your screenshots",new String[]{"आपके स्क्रीनशॉट","Tus capturas","Vos captures","Deine Screenshots"});
+  TEXT.put("Oldest first",new String[]{"पुराने पहले","Más antiguos primero","Les plus anciens","Älteste zuerst"});
+  TEXT.put("Sort screenshots",new String[]{"स्क्रीनशॉट क्रम","Ordenar capturas","Trier les captures","Screenshots sortieren"});
+  TEXT.put("No screenshots to review",new String[]{"समीक्षा के लिए स्क्रीनशॉट नहीं","Sin capturas para revisar","Aucune capture à examiner","Keine Screenshots zur Prüfung"});
+  TEXT.put("Sorted by size",new String[]{"आकार के अनुसार","Por tamaño","Par taille","Nach Größe"});
+  TEXT.put("screenshots selected",new String[]{"स्क्रीनशॉट चुने गए","capturas seleccionadas","captures sélectionnées","Screenshots ausgewählt"});
+  TEXT.put("Screenshot preview",new String[]{"स्क्रीनशॉट देखें","Vista de captura","Aperçu de capture","Screenshot ansehen"});
+  TEXT.put("Keep screenshot",new String[]{"स्क्रीनशॉट रखें","Conservar captura","Conserver la capture","Screenshot behalten"});
+  TEXT.put("Deselect screenshot",new String[]{"चयन हटाएँ","Deseleccionar captura","Désélectionner la capture","Screenshot abwählen"});
+  TEXT.put("Zoom out",new String[]{"ज़ूम घटाएँ","Alejar","Dézoomer","Verkleinern"});
+  TEXT.put("Reset zoom",new String[]{"ज़ूम रीसेट","Restablecer zoom","Réinitialiser le zoom","Zoom zurücksetzen"});
+  TEXT.put("Zoom in",new String[]{"ज़ूम बढ़ाएँ","Acercar","Zoomer","Vergrößern"});
+  TEXT.put("Keep what's important. Clear the rest.",new String[]{"ज़रूरी रखें। बाकी साफ़ करें।","Conserva lo importante. Limpia el resto.","Gardez l’essentiel. Nettoyez le reste.","Wichtiges behalten. Rest aufräumen."});
+  TEXT.put("Rechecking screenshot safety",new String[]{"स्क्रीनशॉट सुरक्षा फिर जाँच रहे हैं","Verificando seguridad de capturas","Vérification de la sécurité des captures","Screenshot-Sicherheit erneut prüfen"});
   TEXT.put("Analyzing accessible videos.",new String[]{"उपलब्ध वीडियो जाँचे जा रहे हैं।","Analizando vídeos accesibles.","Analyse des vidéos accessibles.","Zugängliche Videos werden geprüft."});
   TEXT.put("large videos found",new String[]{"बड़े वीडियो मिले","vídeos grandes encontrados","grandes vidéos trouvées","große Videos gefunden"});
   TEXT.put("Videos at least 100 MiB · Protected items excluded",new String[]{"कम से कम 100 MiB के वीडियो · सुरक्षित आइटम अलग","Vídeos de al menos 100 MiB · protegidos excluidos","Vidéos d’au moins 100 Mio · éléments protégés exclus","Videos ab 100 MiB · geschützte Elemente ausgeschlossen"});
