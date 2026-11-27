@@ -614,6 +614,7 @@ public final class MainActivity extends Activity {
             if(title.equals("Contacts Cleaner")){startActivity(new android.content.Intent(this,ContactsCleanerActivity.class));return;}
             if(title.equals("App Manager")){startActivity(new android.content.Intent(this,AppManagerActivity.class));return;}
             if(title.equals("Speaker Cleaner")){startActivity(new android.content.Intent(this,SpeakerCleanerActivity.class));return;}
+            if(title.equals("Internet Speed Test")){startActivity(new android.content.Intent(this,InternetSpeedActivity.class));return;}
             privacyDialog().setTitle(tr(title))
                 .setMessage(tr("This tool is not available yet. No action has been performed."))
                 .setPositiveButton(tr("Done"),null).show();
