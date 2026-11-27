@@ -31,7 +31,7 @@ public final class PhotoCompressorActivity extends Activity {
     private final Map<String,TextView> marks=new HashMap<>();
     private final Map<String,String> months=new HashMap<>();
     private List<PhotoCompressionEngine.Source> currentFilter=Collections.emptyList();
-    private AppPreferences prefs;private ActivityHistory history;
+    private AppPreferences prefs;private ActivityHistory history;private CleanupReceipt cleanupReceipt;
     private PhotoCompressionEngine.Preset preset=PhotoCompressionEngine.Preset.BALANCED;
     private PhotoCompressionEngine.Format format=PhotoCompressionEngine.Format.ORIGINAL;
     private SmartMediaScan scanner;private Future<?> task;
@@ -50,10 +50,10 @@ public final class PhotoCompressorActivity extends Activity {
         if(Build.VERSION.SDK_INT>=27&&!dark)getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR);
         File[] stale=getCacheDir().listFiles((d,n)->n.startsWith("clenova-photo-"));
         if(stale!=null)for(File f:stale)if(System.currentTimeMillis()-f.lastModified()>24L*60*60*1000)f.delete();
-        trashPending=state!=null&&state.getBoolean("trash_pending");
+        trashPending=state!=null&&state.getBoolean("trash_pending");cleanupReceipt=CleanupReceipt.restore(state==null?null:state.getBundle("cleanup_receipt"));
         if(trashPending){status("Waiting for Android approval");return;}loadGallery();
     }
-    @Override protected void onSaveInstanceState(Bundle b){super.onSaveInstanceState(b);b.putBoolean("trash_pending",trashPending);}
+    @Override protected void onSaveInstanceState(Bundle b){super.onSaveInstanceState(b);b.putBoolean("trash_pending",trashPending);if(cleanupReceipt!=null)b.putBundle("cleanup_receipt",cleanupReceipt.save());}
     private int dp(float n){return Math.round(n*getResources().getDisplayMetrics().density);}
     private String tr(String s){return AppStrings.translate(prefs.language(),s);}
     private GradientDrawable shape(int color,int radius){GradientDrawable d=new GradientDrawable();d.setColor(color);d.setCornerRadius(dp(radius));return d;}
@@ -220,7 +220,7 @@ public final class PhotoCompressorActivity extends Activity {
             for(PhotoCompressionEngine.Output o:chosen){SmartMediaScan.Item old=o.source.original,now=current.get(o.source.uri.toString());if(old==null||old.volume==null||!o.source.version.equals(MediaStore.getVersion(this,old.volume))||!SmartMediaScan.sameGalleryItem(old,now)||!PhotoCompressionEngine.matches(this,o)||!MessageDigest.isEqual(o.inputHash,PhotoCompressionEngine.hash(this,o.source.uri)))continue;approved.add(old.uri);}
         }catch(Exception e){approved.clear();}
         if(approved.size()==chosen.size())try{SmartMediaScan.Gallery last=new SmartMediaScan(this,prefs,new ProtectedFiles(this),new ProtectedFolders(this)).gallery();Map<String,SmartMediaScan.Item> finalItems=new HashMap<>();for(SmartMediaScan.Item i:last.items)finalItems.put(i.uri.toString(),i);for(PhotoCompressionEngine.Output o:chosen)if(!SmartMediaScan.sameGalleryItem(o.source.original,finalItems.get(o.source.uri.toString()))||!o.source.version.equals(MediaStore.getVersion(this,o.source.original.volume)))throw new IOException("Original changed");}catch(Exception e){approved.clear();}
-        final List<Uri> verified=approved;runOnUiThread(()->{if(destroyed||token!=epoch)return;busy=false;if(!foreground||verified.size()!=chosen.size()||!SmartMediaScan.hasPhotoAccess(this)){showResult();toast("Originals kept: a copy, source or protection changed.");return;}try{PendingIntent request=MediaStore.createTrashRequest(getContentResolver(),verified,true);pendingTrash.clear();pendingTrash.addAll(verified);trashPending=true;startIntentSenderForResult(request.getIntentSender(),TRASH,null,0,0,0);}catch(Exception e){trashPending=false;pendingTrash.clear();showResult();toast("Android Trash approval unavailable");}});
+        final List<Uri> verified=approved;runOnUiThread(()->{if(destroyed||token!=epoch)return;busy=false;if(!foreground||verified.size()!=chosen.size()||!SmartMediaScan.hasPhotoAccess(this)){showResult();toast("Originals kept: a copy, source or protection changed.");return;}try{PendingIntent request=MediaStore.createTrashRequest(getContentResolver(),verified,true);pendingTrash.clear();pendingTrash.addAll(verified);List<SmartMediaScan.Item> originals=new ArrayList<>();for(PhotoCompressionEngine.Output o:chosen)originals.add(o.source.original);cleanupReceipt=CleanupReceipt.capture(this,"Compressed photo originals",verified,originals);trashPending=true;startIntentSenderForResult(request.getIntentSender(),TRASH,null,0,0,0);}catch(Exception e){trashPending=false;cleanupReceipt=null;pendingTrash.clear();showResult();toast("Android Trash approval unavailable");}});
         });
     }
     private void share(){ArrayList<Uri> uris=new ArrayList<>();for(PhotoCompressionEngine.Output o:outputs)if(o.saved!=null)uris.add(o.saved);if(uris.isEmpty())return;Intent i=new Intent(uris.size()==1?Intent.ACTION_SEND:Intent.ACTION_SEND_MULTIPLE);i.setType("image/*");if(uris.size()==1)i.putExtra(Intent.EXTRA_STREAM,uris.get(0));else i.putParcelableArrayListExtra(Intent.EXTRA_STREAM,uris);ClipData clip=ClipData.newRawUri("Compressed photo",uris.get(0));for(int n=1;n<uris.size();n++)clip.addItem(new ClipData.Item(uris.get(n)));i.setClipData(clip);i.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);try{startActivity(Intent.createChooser(i,"Share compressed photos"));}catch(ActivityNotFoundException e){toast("No sharing app available");}}
@@ -230,7 +230,8 @@ public final class PhotoCompressorActivity extends Activity {
         if(request==ACCESS){accessReturned();return;}
         if(request==PICK&&result==RESULT_OK&&data!=null){importPhotos(data);return;}
         if(request==FOLDER&&result==RESULT_OK&&data!=null&&data.getData()!=null){saveTo(data.getData());return;}
-        if(request==TRASH){trashPending=false;if(result==RESULT_OK)for(PhotoCompressionEngine.Output o:outputs)if(pendingTrash.contains(o.source.uri))o.trashed=true;pendingTrash.clear();toast(result==RESULT_OK?"Android approved moving the selected originals to Trash.":"Originals kept.");if(outputs.isEmpty())loadGallery();else showResult();}
+        if(request==TRASH){final CleanupReceipt receipt=cleanupReceipt;cleanupReceipt=null;trashPending=false;busy=true;status("Checking cleanup result…");
+            CleanupReceipt.verifyAsync(this,receipt,result==RESULT_OK,verified->{busy=false;for(PhotoCompressionEngine.Output o:outputs)if(verified.confirmed.contains(o.source.uri.toString()))o.trashed=true;pendingTrash.clear();toast(verified.detail()+(verified.logged?"":" History could not be saved."));if(outputs.isEmpty())loadGallery();else showResult();});}
     }
     @Override public void onBackPressed(){if(trashPending)return;if(busy){if(phase==ENCODING)confirmCancel();else toast("Current operation is finishing");return;}if(phase==HISTORY||phase==SETTINGS){showGallery();return;}if(phase==RESULT){if(unsaved().isEmpty()){newBatch();return;}dialog().setTitle("Discard unsaved copies?").setMessage("Saved copies and originals stay unchanged.").setNegativeButton("Stay",null).setPositiveButton("Discard",(d,w)->{clearOutputs();showSettings();}).show();return;}finish();}
     @Override protected void onResume(){super.onResume();foreground=true;

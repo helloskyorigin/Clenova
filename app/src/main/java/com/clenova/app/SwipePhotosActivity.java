@@ -36,6 +36,7 @@ public final class SwipePhotosActivity extends Activity {
     private AppPreferences prefs;
     private ImageView photo;
     private TextView photoStatus, removeButton;
+    private CleanupReceipt cleanupReceipt;
     private LinearLayout controls;
     private SmartMediaScan.Item shown;
     private float downX,downY;
@@ -51,11 +52,11 @@ public final class SwipePhotosActivity extends Activity {
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,WindowManager.LayoutParams.FLAG_FULLSCREEN);
         getWindow().setNavigationBarColor(bg);
         if(Build.VERSION.SDK_INT>=27&&!dark)getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR);
-        approvedPending=state!=null&&state.getBoolean("trash_pending");
+        approvedPending=state!=null&&state.getBoolean("trash_pending");cleanupReceipt=CleanupReceipt.restore(state==null?null:state.getBundle("cleanup_receipt"));
         if(approvedPending){status("Waiting for Android approval",null);return;}
         open();
     }
-    @Override protected void onSaveInstanceState(Bundle state){super.onSaveInstanceState(state);state.putBoolean("trash_pending",approvedPending);}
+    @Override protected void onSaveInstanceState(Bundle state){super.onSaveInstanceState(state);state.putBoolean("trash_pending",approvedPending);if(cleanupReceipt!=null)state.putBundle("cleanup_receipt",cleanupReceipt.save());}
     private void open(){if(SmartMediaScan.hasPhotoAccess(this))load();else accessScreen();}
     private String tr(String s){return AppStrings.translate(prefs.language(),s);}
     private GradientDrawable rounded(int c,int radius){GradientDrawable d=new GradientDrawable();d.setColor(c);d.setCornerRadius(dp(radius));return d;}
@@ -229,14 +230,14 @@ public final class SwipePhotosActivity extends Activity {
             ArrayList<Uri> uris=new ArrayList<>();
             for(SmartMediaScan.Item i:request){String version=i.volume==null?"":versions.getOrDefault(i.volume,"");if(version.isEmpty()||!version.equals(MediaStore.getVersion(this,i.volume))||!SmartMediaScan.sameGalleryItem(i,map.get(key(i))))throw new IllegalStateException("Selection changed");uris.add(i.uri);}
             runOnUiThread(()->{if(destroyed||token!=epoch)return;job=null;loading=false;if(!resumed){clear();reload=true;return;}if(!SmartMediaScan.hasPhotoAccess(this)){clear();accessScreen();return;}
-                try{PendingIntent intent=MediaStore.createTrashRequest(getContentResolver(),uris,true);approvedPending=true;startIntentSenderForResult(intent.getIntentSender(),TRASH,null,0,0,0);}
-                catch(Exception e){approvedPending=false;toast("Android could not open trash approval");review();}
+                try{PendingIntent intent=MediaStore.createTrashRequest(getContentResolver(),uris,true);cleanupReceipt=CleanupReceipt.capture(this,"Swipe photos",uris,request);approvedPending=true;startIntentSenderForResult(intent.getIntentSender(),TRASH,null,0,0,0);}
+                catch(Exception e){approvedPending=false;cleanupReceipt=null;toast("Android could not open trash approval");review();}
             });
         }catch(Exception e){runOnUiThread(()->{if(destroyed||token!=epoch)return;job=null;loading=false;toast("Photos or protection changed. Review again.");load();});}});
     }
     @Override protected void onActivityResult(int request,int result,Intent data){
-        super.onActivityResult(request,result,data);if(request==PHOTO_ACCESS){permissionPending=false;reload=false;open();return;}if(request!=TRASH)return;approvedPending=false;reload=false;
-        toast(result==RESULT_OK?"Android trash request approved. Refreshing gallery.":"Trash request cancelled. No completion claimed.");load();
+        super.onActivityResult(request,result,data);if(request==PHOTO_ACCESS){permissionPending=false;reload=false;open();return;}if(request!=TRASH)return;reload=false;final CleanupReceipt receipt=cleanupReceipt;cleanupReceipt=null;approvedPending=false;loading=true;status("Checking cleanup result…",null);
+        CleanupReceipt.verifyAsync(this,receipt,result==RESULT_OK,verified->{loading=false;toast(verified.detail()+(verified.logged?"":" History could not be saved."));if(resumed)load();else{clear();reload=true;}});
     }
     private void toast(String s){Toast.makeText(this,tr(s),Toast.LENGTH_SHORT).show();}
     @Override public void onBackPressed(){

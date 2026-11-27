@@ -90,6 +90,7 @@ public final class MainActivity extends Activity {
     private boolean realDupVisible,realDupReview,dupAfterScan,dupFromResults,dupAll,dupTrashPending;
     private CleanupReceipt cleanupReceipt;
     private boolean verifyingCleanup;
+    private String pendingUninstallPackage="",pendingUninstallName="",pendingUninstallId="";
     private int dupPage;
     private volatile int dupThumbGeneration;
     private final java.util.Set<String> realDupSelected=new java.util.LinkedHashSet<>();
@@ -320,8 +321,10 @@ public final class MainActivity extends Activity {
         getWindow().getDecorView().setSystemUiVisibility(dark||android.os.Build.VERSION.SDK_INT<27?0:View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR);
         int height = getResources().getConfiguration().screenHeightDp;
         compact = height < 740 ? .88f : 1f;
-        if(state!=null)cleanupReceipt=CleanupReceipt.restore(state.getBundle("cleanup_receipt"));
-        if(dupTrashPending){LinearLayout root=scanShell("Waiting for Android",()->{}),body=scanBody(root);add(body,centered("Waiting for your approval",20,INK,600),-1,-2);setContentView(root);return;}
+        if(state!=null){cleanupReceipt=CleanupReceipt.restore(state.getBundle("cleanup_receipt"));unusedUninstallPending=state.getBoolean("unused_uninstall_pending");
+            pendingUninstallPackage=state.getString("uninstall_pkg","");pendingUninstallName=state.getString("uninstall_name","");pendingUninstallId=state.getString("uninstall_id","");
+            if(dupTrashPending||unusedUninstallPending)agentTaskOrigin=state.getBoolean("cleanup_agent_origin");}
+        if(dupTrashPending||unusedUninstallPending){LinearLayout root=scanShell("Waiting for Android",()->{}),body=scanBody(root);add(body,centered("Waiting for your approval",20,INK,600),-1,-2);setContentView(root);return;}
         if(state!=null&&state.getBoolean("preparing_phone_visible")){showPreparingPhone();return;}
         if(state!=null&&state.getBoolean("onboarding_agent_visible")){showAgentSetup(state.getBoolean("agent_setup_from_tab"),state.getBoolean("agent_setup_confirmed"));return;}
         if(state!=null&&state.getBoolean("onboarding_access_visible")){showOnboardingAccess(state);return;}
@@ -382,6 +385,8 @@ public final class MainActivity extends Activity {
         state.putBoolean("large_files_mode",largeFilesMode);state.putBoolean("clutter_mode",clutterMode);
         state.putBoolean("dup_trash_pending",dupTrashPending);
         if(cleanupReceipt!=null)state.putBundle("cleanup_receipt",cleanupReceipt.save());
+        state.putBoolean("unused_uninstall_pending",unusedUninstallPending);
+        state.putString("uninstall_pkg",pendingUninstallPackage);state.putString("uninstall_name",pendingUninstallName);state.putString("uninstall_id",pendingUninstallId);state.putBoolean("cleanup_agent_origin",agentTaskOrigin);
         state.putBoolean("tool_scan_pending",requestingScan);state.putBoolean("tool_agent_pending",agentPermissionPending);
         state.putInt("tool_scan_route",videoAfterScan?2:dupAfterScan?1:similarAfterScan?3:shotAfterScan?4:0);
         state.putInt("tool_agent_task",agentScanTask);state.putBoolean("tool_agent_origin",agentTaskOrigin);
@@ -423,6 +428,7 @@ public final class MainActivity extends Activity {
         if(agentScan!=null){agentScan.cancel();agentScan=null;appendAgent(false,"Analysis interrupted. Start a fresh review when you return.",-1);}
         if(agentCloudBusy){agentCloudBusy=false;agentGeneration++;appendAgent(false,"Request interrupted. Please send it again.",-1);}
         stopRealVideo();
+        if(verifyingCleanup||completionVisible)return;
         if(unusedVisible){if(unusedExternal||unusedUninstallPending)return;showClean();}
         if(downloadsVisible){if(downloadsBusy){if(downloadsSignal!=null)downloadsSignal.cancel();return;}if(downloadsPicking||downloadsOpening)return;showClean();}
         // Do not retain visible media results across backgrounding; selected-photo access may change.
@@ -1762,7 +1768,7 @@ public final class MainActivity extends Activity {
             runOnUiThread(()->{if(signal.isCanceled()||generation!=unusedGeneration||!unusedVisible||isDestroyed()||isFinishing())return;unusedSignal=null;
                 if(!valid||!unusedSelected.contains(item.pkg)||unusedKeep.contains(item.pkg)){folderToast("App or usage changed. Review again.");refreshUnusedApps();return;}
                 android.content.Intent intent=new android.content.Intent(android.content.Intent.ACTION_DELETE,android.net.Uri.fromParts("package",item.pkg,null));intent.putExtra(android.content.Intent.EXTRA_RETURN_RESULT,true);
-                try{unusedUninstallPending=true;startActivityForResult(intent,REQUEST_APP_UNINSTALL);}catch(RuntimeException e){unusedUninstallPending=false;folderToast("Android uninstall unavailable");showUnusedReview();}
+                try{unusedUninstallPending=true;pendingUninstallPackage=item.pkg;pendingUninstallName=item.name;pendingUninstallId=java.util.UUID.randomUUID().toString();startActivityForResult(intent,REQUEST_APP_UNINSTALL);}catch(RuntimeException e){unusedUninstallPending=false;pendingUninstallPackage="";pendingUninstallName="";pendingUninstallId="";folderToast("Android uninstall unavailable");showUnusedReview();}
             });},"Clenova-app-recheck").start();
     }
 
@@ -2007,7 +2013,7 @@ public final class MainActivity extends Activity {
             if(splashDeadline==0){splashDeadline=android.os.SystemClock.elapsedRealtime()+(android.animation.ValueAnimator.areAnimatorsEnabled()?700:0);launchSplash.reveal();}
             splashHandler.removeCallbacks(finishSplash);splashHandler.postDelayed(finishSplash,Math.max(0,splashDeadline-android.os.SystemClock.elapsedRealtime()));
         }
-        agentForeground=true;boolean expired=expireAgentSession();scheduleAgentExpiry();if(agentVisible&&!settingsVisible&&!agentPermissionPending&&!agentTaskOrigin&&(expired||activeChat!=null)&&!agentCloudBusy&&agentScan==null)showAgent();
+        agentForeground=true;boolean expired=expireAgentSession();scheduleAgentExpiry();if(agentVisible&&!settingsVisible&&!agentPermissionPending&&!agentTaskOrigin&&!verifyingCleanup&&!completionVisible&&(expired||activeChat!=null)&&!agentCloudBusy&&agentScan==null)showAgent();
         if(unusedExternal){unusedExternal=false;if(unusedVisible&&!unusedUninstallPending)refreshUnusedApps();}
         if(downloadsOpening){downloadsOpening=false;if(downloadsVisible)refreshDownloads();}
         if(permissionsVisible&&devicePermissions!=null)openAppPermissions();
@@ -3149,7 +3155,7 @@ public final class MainActivity extends Activity {
         super.onActivityResult(requestCode,resultCode,data);
         if(onboardingAccess!=null&&onboardingAccess.activityResult(requestCode,resultCode,data))return;
         if(handleToolPermission(requestCode))return;
-        if(requestCode==REQUEST_APP_UNINSTALL){unusedUninstallPending=false;unusedExternal=false;unusedSelected.clear();if(agentTaskOrigin&&activeChat!=null)appendAgent(false,resultCode==RESULT_OK?"Android reported uninstall success. Refresh the app list to verify.":"Uninstall not confirmed.",-1);if(unusedVisible)refreshUnusedApps();folderToast(resultCode==RESULT_OK?"Android uninstall returned success. Refreshing app list.":"Uninstall not confirmed");return;}
+        if(requestCode==REQUEST_APP_UNINSTALL){finishUnusedUninstall(resultCode==RESULT_OK);return;}
         if(requestCode==PICK_LARGE_FOLDER){downloadsPicking=false;if(resultCode==RESULT_OK&&data!=null&&data.getData()!=null&&(largeFilesMode||clutterMode))loadLargeFolder(data.getData());else if(downloadsVisible)showDownloads();return;}
         if(requestCode==PICK_DOWNLOAD_FILES){downloadsPicking=false;if(resultCode==RESULT_OK&&data!=null)loadPickedDownloads(data);else if(downloadsVisible)showDownloads();return;}
         if(requestCode==REQUEST_DUP_TRASH||requestCode==REQUEST_SIMILAR_TRASH||requestCode==REQUEST_VIDEO_TRASH||requestCode==REQUEST_SCREENSHOT_TRASH){finishMediaCleanup(resultCode==RESULT_OK);return;}
@@ -3343,6 +3349,18 @@ public final class MainActivity extends Activity {
         scanButton(c,"Smart Scan",true,()->{showClean();requestSmartScan();});space(c,8);
         scanButton(c,prefs.autopilot()?"Open Agent":"Activate Agent",false,()->{if(prefs.autopilot())showAgent();else showAgentSetup(true,false);});
         return c;
+    }
+    private void finishUnusedUninstall(boolean approved){
+        final String pkg=pendingUninstallPackage,name=pendingUninstallName,id=pendingUninstallId;pendingUninstallPackage="";pendingUninstallName="";pendingUninstallId="";
+        unusedUninstallPending=false;unusedExternal=false;unusedSelected.clear();verifyingCleanup=true;unusedVisible=false;unusedReview=false;unusedResult=null;
+        LinearLayout root=scanShell("Uninstall result",()->{}),body=scanBody(root);add(body,centered("Checking uninstall result",20,INK,600),-1,-2);setContentView(root);
+        final ActivityHistory journal=history;
+        new Thread(()->{
+            boolean absent=false;if(approved&&!pkg.isEmpty())for(int i=0;i<5;i++){if(new AppManagerEngine(this).confirmedAbsent(pkg)){absent=true;break;}try{Thread.sleep(250);}catch(InterruptedException e){break;}}
+            final boolean confirmed=absent;final String detail=confirmed?name+" · Android approved and app no longer visible. Storage recovery not measured.":approved?"Android reported success but removal could not be verified.":"Uninstall not confirmed.";
+            final boolean logged=!confirmed||journal.add(id,"app_manager","App uninstalled",detail,0,1,false);
+            runOnUiThread(()->{if(isDestroyed()||isFinishing())return;verifyingCleanup=false;deviceOverview=null;if(agentTaskOrigin&&activeChat!=null)appendAgent(false,detail,-1);showCleanupOutcome(confirmed?"Uninstall complete":"Uninstall not verified",detail,confirmed?1:0,0,confirmed,logged);});
+        },"Clenova-uninstall-receipt").start();
     }
     private void finishMediaCleanup(boolean approved){
         final CleanupReceipt receipt=cleanupReceipt;cleanupReceipt=null;dupTrashPending=false;verifyingCleanup=true;

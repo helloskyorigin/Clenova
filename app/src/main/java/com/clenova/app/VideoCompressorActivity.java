@@ -29,7 +29,7 @@ public final class VideoCompressorActivity extends Activity {
     private final List<SmartMediaScan.Item> videos=new ArrayList<>();
     private final List<Future<?>> thumbnailJobs=new ArrayList<>();
     private final Map<String,String> galleryVersions=new HashMap<>();
-    private AppPreferences prefs;private ActivityHistory history;
+    private AppPreferences prefs;private ActivityHistory history;private CleanupReceipt cleanupReceipt;
     private int bg,card,ink,gray,blue,pale,green,red,phase=GALLERY,page,sort,epoch,thumbEpoch;
     private boolean dark,busy,limited,encoding,destroyed,foreground,trashPending,sourceRemoved,loadingGallery,accessPending,refreshGallery;
     private String error="",sourceVersion="";
@@ -62,14 +62,14 @@ public final class VideoCompressorActivity extends Activity {
         blue=dark?0xff409cff:0xff007aff;pale=dark?0xff19334c:0xffe6f0ff;green=dark?0xff61d883:0xff249d42;red=dark?0xffff6961:0xffe43e35;
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,WindowManager.LayoutParams.FLAG_FULLSCREEN);getWindow().setNavigationBarColor(bg);
         if(Build.VERSION.SDK_INT>=27&&!dark)getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR);
-        trashPending=state!=null&&state.getBoolean("trash_pending");
+        trashPending=state!=null&&state.getBoolean("trash_pending");cleanupReceipt=CleanupReceipt.restore(state==null?null:state.getBundle("cleanup_receipt"));
         // Only remove stale compressor-owned cache files, never personal files.
         File[] stale=getCacheDir().listFiles((dir,name)->name.startsWith("clenova-compress-")&&name.endsWith(".mp4"));
         if(stale!=null)for(File f:stale)if(System.currentTimeMillis()-f.lastModified()>24L*60*60*1000)f.delete();
         if(trashPending){status("Waiting for Android approval");return;}
         loadGallery();
     }
-    @Override protected void onSaveInstanceState(Bundle b){super.onSaveInstanceState(b);b.putBoolean("trash_pending",trashPending);}
+    @Override protected void onSaveInstanceState(Bundle b){super.onSaveInstanceState(b);b.putBoolean("trash_pending",trashPending);if(cleanupReceipt!=null)b.putBundle("cleanup_receipt",cleanupReceipt.save());}
     private int dp(float n){return Math.round(n*getResources().getDisplayMetrics().density);}
     private String tr(String s){return AppStrings.translate(prefs.language(),s);}
     private GradientDrawable shape(int color,int radius){GradientDrawable d=new GradientDrawable();d.setColor(color);d.setCornerRadius(dp(radius));return d;}
@@ -236,7 +236,7 @@ public final class VideoCompressorActivity extends Activity {
             if(!VideoCompressionEngine.matches(this,copy,result)||!SmartMediaScan.hasVideoAccess(this)||old==null||old.volume==null||version.isEmpty()||!version.equals(MediaStore.getVersion(this,old.volume)))throw new IOException("Copy or source changed");
             SmartMediaScan fresh=new SmartMediaScan(this,prefs,new ProtectedFiles(this),new ProtectedFolders(this));SmartMediaScan.Item match=null;for(SmartMediaScan.Item item:fresh.videoGallery().items)if(item.uri.equals(old.uri)){match=item;break;}
             if(!SmartMediaScan.sameGalleryItem(old,match)||!version.equals(MediaStore.getVersion(this,old.volume))||old.bytes!=source.bytes)throw new IOException("Original changed");
-            runOnUiThread(()->{if(destroyed||token!=epoch)return;busy=false;if(!foreground||!SmartMediaScan.hasVideoAccess(this)){showResult();toast("Original kept");return;}try{PendingIntent intent=MediaStore.createTrashRequest(getContentResolver(),Collections.singletonList(old.uri),true);trashPending=true;startIntentSenderForResult(intent.getIntentSender(),TRASH,null,0,0,0);}catch(Exception e){trashPending=false;showResult();toast("Could not request Android Trash approval");}});
+            runOnUiThread(()->{if(destroyed||token!=epoch)return;busy=false;if(!foreground||!SmartMediaScan.hasVideoAccess(this)){showResult();toast("Original kept");return;}try{PendingIntent intent=MediaStore.createTrashRequest(getContentResolver(),Collections.singletonList(old.uri),true);cleanupReceipt=CleanupReceipt.capture(this,"Compressed video original",Collections.singletonList(old.uri),Collections.singletonList(old));trashPending=true;startIntentSenderForResult(intent.getIntentSender(),TRASH,null,0,0,0);}catch(Exception e){trashPending=false;cleanupReceipt=null;showResult();toast("Could not request Android Trash approval");}});
         }catch(Exception e){runOnUiThread(()->{if(destroyed||token!=epoch)return;busy=false;showResult();toast("Original kept: copy, access or protection changed.");});}});
     }
     private void showHistory(){
@@ -249,7 +249,8 @@ public final class VideoCompressorActivity extends Activity {
         if(request==ACCESS){accessReturned();return;}
         if(request==PICK&&result==RESULT_OK&&data!=null&&data.getData()!=null){select(data.getData(),null);return;}
         if(request==SAVE&&result==RESULT_OK&&data!=null&&data.getData()!=null){saveTo(data.getData());return;}
-        if(request==TRASH){trashPending=false;sourceRemoved=result==RESULT_OK;toast(sourceRemoved?"Android approved moving the original to Trash.":"Original kept. Trash request cancelled.");if(output!=null)showResult();else loadGallery();}
+        if(request==TRASH){final CleanupReceipt receipt=cleanupReceipt;cleanupReceipt=null;trashPending=false;busy=true;status("Checking cleanup result…");
+            CleanupReceipt.verifyAsync(this,receipt,result==RESULT_OK,verified->{busy=false;sourceRemoved=verified.complete();toast(verified.detail()+(verified.logged?"":" History could not be saved."));if(output!=null)showResult();else loadGallery();});}
     }
     private void clearOutput(){stopPlayer();if(temp!=null){temp.delete();temp=null;}output=null;saved=null;savedLocal=false;sourceRemoved=false;outputReviewed=false;}
     @Override public void onBackPressed(){
