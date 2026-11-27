@@ -73,11 +73,11 @@ final class ProtectedFiles {
             all.add(key);
             if(!store.edit().putStringSet("files",all).putString("meta:"+key,meta.toString()).commit())throw new IllegalStateException("Save failed");
         }catch(org.json.JSONException e){throw new IllegalStateException(e);}
-        return true;
+        AutopilotScheduler.changed(context,new AppPreferences(context));return true;
     }
     synchronized boolean remove(String key){
         HashSet<String> all=keys();all.remove(key);
-        return store.edit().putStringSet("files",all).remove("meta:"+key).commit();
+        boolean ok=store.edit().putStringSet("files",all).remove("meta:"+key).commit();if(ok)AutopilotScheduler.changed(context,new AppPreferences(context));return ok;
     }
     /** Future scanner must resolve alternate provider aliases to this same identity first. */
     synchronized boolean excludes(Uri uri){

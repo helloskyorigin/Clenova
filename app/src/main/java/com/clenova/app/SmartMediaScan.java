@@ -66,14 +66,18 @@ final class SmartMediaScan {
             if(++done%128==0||done==all.size())progress.update(2,done,all.size());}
         r.groups.get(VIDEOS).sort(Comparator.comparingLong((Item i)->i.bytes).reversed().thenComparing(i->i.name));check();return r;
     }
-    Result run(Progress progress)throws Exception{return run(progress,false);}
-    Result runPhotos(Progress progress)throws Exception{return run(progress,true);}
-    private Result run(Progress progress,boolean photoOnly)throws Exception{
+    Result run(Progress progress)throws Exception{return run(progress,true,true,true,true,true);}
+    Result runPhotos(Progress progress)throws Exception{return run(progress,true,false,true,true,true);}
+    Result runScheduled(Progress progress,boolean photos,boolean videos,boolean exact,boolean similar)throws Exception{
+        return run(progress,photos,videos,exact,similar,false);
+    }
+    private Result run(Progress progress,boolean includePhotos,boolean includeVideos,boolean exactEnabled,boolean similarEnabled,boolean foreground)throws Exception{
         Result r=new Result();List<Item> all=new ArrayList<>();
         boolean selected=Build.VERSION.SDK_INT>=34&&granted(android.Manifest.permission.READ_MEDIA_VISUAL_USER_SELECTED);
         boolean photos=Build.VERSION.SDK_INT>=33?granted(android.Manifest.permission.READ_MEDIA_IMAGES):hasAccess(context);
         boolean videos=Build.VERSION.SDK_INT>=33?granted(android.Manifest.permission.READ_MEDIA_VIDEO):hasAccess(context);
-        r.limited=!photos||!photoOnly&&!videos;r.imagesScanned=photos||selected;r.videosScanned=!photoOnly&&(videos||selected);
+        r.limited=(includePhotos&&!photos)||(includeVideos&&!videos);
+        r.imagesScanned=includePhotos&&(photos||foreground&&selected);r.videosScanned=includeVideos&&(videos||foreground&&selected);
         progress.update(0,0,0);
         if(r.imagesScanned)read(true,all,r);if(r.videosScanned)read(false,all,r);
         r.examined=all.size();check();
@@ -81,7 +85,7 @@ final class SmartMediaScan {
             i.protectedItem=explicitlyProtected(i)||(favorite&&!Boolean.FALSE.equals(i.favorite))||(recent&&(i.modified<=0||i.modified>=now-ProtectionPolicy.RECENT_WINDOW_MS));
             if(i.image)bySize.computeIfAbsent(i.bytes,k->new ArrayList<>()).add(i);
         }
-        List<Item> hashItems=new ArrayList<>();for(List<Item> batch:bySize.values())if(batch.size()>1)hashItems.addAll(batch);
+        List<Item> hashItems=new ArrayList<>();for(List<Item> batch:bySize.values())if(batch.size()>1&&(exactEnabled||similarEnabled))hashItems.addAll(batch);
         hashItems.sort(Comparator.comparingLong((Item i)->i.bytes).thenComparing(i->i.uri.toString()));
         Map<String,List<Item>> exact=new HashMap<>();long remaining=HASH_BUDGET;int done=0;
         progress.update(1,0,hashItems.size());
@@ -109,7 +113,7 @@ final class SmartMediaScan {
             if(i.protectedItem){r.protectedCount++;}
             else if(!allocated.contains(i.uri.toString())){
                 if(!i.image&&i.bytes>=LARGE_VIDEO){allocated.add(i.uri.toString());r.groups.get(VIDEOS).add(i);}
-                else if(i.image&&isScreenshot(i)){
+                else if(foreground&&i.image&&isScreenshot(i)){
                     // Screenshot review is manual; best-shot protection applies to similar-photo groups.
                     // Exact-match group members remain reserved for the duplicate workflow.
                     if(!exactMembers.contains(i.uri.toString())&&(!r.partial||bySize.get(i.bytes).size()==1)){allocated.add(i.uri.toString());r.groups.get(SCREENSHOTS).add(i); }
@@ -117,7 +121,7 @@ final class SmartMediaScan {
             }
             if(++classified%128==0||classified==all.size())progress.update(2,classified,all.size());
         }
-        if(r.imagesScanned){
+        if(r.imagesScanned&&similarEnabled){
             List<Item> visual=new ArrayList<>();for(Item i:all)if(i.image&&!exactMembers.contains(i.uri.toString())&&(!r.partial||bySize.get(i.bytes).size()==1)&&!isScreenshot(i)&&!allocated.contains(i.uri.toString())&&i.path!=null&&i.modified>0)visual.add(i);
             r.similarScanned=true;r.similarGroups.addAll(SimilarPhotoScan.run(resolver,visual,cancel,r,progress));
             for(SimilarPhotoScan.Group g:r.similarGroups)for(Item i:g.items)if(SimilarPhotoScan.candidate(g,i)&&allocated.add(i.uri.toString()))r.groups.get(SIMILAR).add(i);

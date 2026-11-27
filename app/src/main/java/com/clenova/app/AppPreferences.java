@@ -12,8 +12,10 @@ final class AppPreferences {
     static final String[] NOTIFICATION_KEYS={"agent_updates","cleanup_reminders","storage_alerts"};
     static final String[] NOTIFICATION_LABELS={"Agent updates","Cleanup reminders","Storage alerts"};
     private final SharedPreferences store;
+    private final Context context;
     private final NotificationManager manager;
     AppPreferences(Context context){
+        this.context=context.getApplicationContext();
         store=context.getSharedPreferences("clenova_preferences",Context.MODE_PRIVATE);
         manager=context.getSystemService(NotificationManager.class);
         if(manager!=null)for(int i=0;i<NOTIFICATION_KEYS.length;i++){
@@ -25,7 +27,7 @@ final class AppPreferences {
     boolean autopilot(){return store.getBoolean("agent_autopilot",false);}
     boolean agentConfigured(){return store.getBoolean("agent_setup_configured",false);}
     boolean onboardingComplete(){return store.getBoolean("onboarding_complete_v1",false);}
-    boolean finishOnboarding(){return store.edit().putBoolean("onboarding_complete_v1",true).commit();}
+    boolean finishOnboarding(){boolean ok=store.edit().putBoolean("onboarding_complete_v1",true).commit();if(ok)AutopilotScheduler.reconcile(context,this);return ok;}
     boolean saveAgentSetup(boolean enabled){
         SharedPreferences.Editor edit=store.edit().putBoolean("agent_setup_configured",true).putBoolean("agent_autopilot",enabled);
         if(enabled){
@@ -34,13 +36,13 @@ final class AppPreferences {
             for(String key:DISCOVERY_KEYS)if(!store.contains(key))edit.putBoolean(key,true);
             for(String key:PROTECTION_KEYS)if(!store.contains(key))edit.putBoolean(key,true);
         }
-        return edit.commit();
+        boolean ok=edit.commit();if(ok)AutopilotScheduler.changed(context,this);return ok;
     }
     void setAutopilot(boolean enabled){saveAgentSetup(enabled);}
     int scanDays(){int days=store.getInt("agent_scan_days",1);return days==3||days==7?days:1;}
-    void setScanDays(int days){if(days!=1&&days!=3&&days!=7)throw new IllegalArgumentException("Invalid interval");store.edit().putInt("agent_scan_days",days).apply();}
+    void setScanDays(int days){if(days!=1&&days!=3&&days!=7)throw new IllegalArgumentException("Invalid interval");if(days!=scanDays()&&store.edit().putInt("agent_scan_days",days).commit())AutopilotScheduler.changed(context,this);}
     boolean discovery(int index){return store.getBoolean(DISCOVERY_KEYS[index],true);}
-    void setDiscovery(int index,boolean enabled){store.edit().putBoolean(DISCOVERY_KEYS[index],enabled).apply();}
+    void setDiscovery(int index,boolean enabled){if(enabled!=discovery(index)&&store.edit().putBoolean(DISCOVERY_KEYS[index],enabled).commit())AutopilotScheduler.changed(context,this);}
     int recommendedMb(){
         if(!autopilot())return 0;
         int total=0;for(int i=0;i<ReviewPlan.MB.length;i++)if(discovery(i))total+=ReviewPlan.MB[i];
@@ -48,7 +50,7 @@ final class AppPreferences {
     }
     private static final String[] PROTECTION_KEYS={"protect_favorites","protect_recent","protect_documents","protect_best_shots"};
     boolean protection(int index){return store.getBoolean(PROTECTION_KEYS[index],true);}
-    void setProtection(int index,boolean enabled){store.edit().putBoolean(PROTECTION_KEYS[index],enabled).apply();}
+    void setProtection(int index,boolean enabled){if(enabled!=protection(index)&&store.edit().putBoolean(PROTECTION_KEYS[index],enabled).commit())AutopilotScheduler.changed(context,this);}
     ProtectionPolicy protectionPolicy(){return new ProtectionPolicy(protection(0),protection(1),protection(2),protection(3));}
     String appearance(){String value=store.getString("appearance","System");return value.equals("Dark")||value.equals("Light")?value:"System";}
     void setAppearance(String value){if(!value.equals("Light")&&!value.equals("Dark")&&!value.equals("System"))throw new IllegalArgumentException();store.edit().putString("appearance",value).apply();}

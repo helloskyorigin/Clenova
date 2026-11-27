@@ -627,6 +627,7 @@ public final class MainActivity extends Activity {
             add(setup,txt("Configure your Agent, or keep using manual requests.",12,GRAY,400),-1,-2);space(setup,10);
             scanButton(setup,"Activate Agent",true,()->showAgentSetup(true,false));add(body,setup,-1,-2);space(body,16);
         }
+        if(prefs.autopilot()){LinearLayout background=card();add(background,txt("Autopilot",14,INK,600),-1,-2);space(background,5);add(background,txt(AutopilotScheduler.status(this,prefs),12,GRAY,400),-1,-2);space(background,8);scanButton(background,"Review current media",false,()->openAgentTask(0,"Review current media"));add(body,background,-1,-2);space(body,12);}
         add(body,txt("Suggested for your phone",12,GRAY,500),-1,-2);space(body,9);
         long free=-1,total=-1;try{android.os.StatFs stat=new android.os.StatFs(getFilesDir().getAbsolutePath());free=stat.getAvailableBytes();total=stat.getTotalBytes();}catch(RuntimeException ignored){}
         boolean low=free>=0&&total>0&&free/(double)total<0.15;
@@ -1989,7 +1990,7 @@ public final class MainActivity extends Activity {
         LinearLayout card=card();LinearLayout top=row();
         add(top,new Glyph(this,"bot",BLUE),dp(30),dp(30));gap(top,12);
         LinearLayout info=column();
-        add(info,txt(prefs.autopilot()?"No sample recommendations":"Autopilot paused",16,INK,600),-1,-2);space(info,5);
+        add(info,txt(prefs.autopilot()?AutopilotScheduler.status(this,prefs):"Autopilot paused",16,INK,600),-1,-2);space(info,5);
         add(info,txt(prefs.autopilot()?"Manage discovery preferences":"You can resume anytime.",13,GRAY,400),-1,-2);weight(top,info);
         add(card,top,-1,-2);space(card,14);
         TextView manage=centered("Agent preferences",15,BLUE,600);
@@ -2001,7 +2002,7 @@ public final class MainActivity extends Activity {
     @Override protected void onPause(){splashHandler.removeCallbacks(finishSplash);if(onboardingIntro!=null)onboardingIntro.setActive(false);if(onboardingUnified!=null)onboardingUnified.setActive(false);if(onboardingAutopilot!=null)onboardingAutopilot.setActive(false);if(onboardingAgent!=null)onboardingAgent.setActive(false);
         overviewForeground=false;stopOverviewObserver();overviewHandler.removeCallbacks(finishPreparation);cancelOverview();deviceOverview=null;preparationReady=false;super.onPause();}
     @Override protected void onResume(){
-        super.onResume();overviewForeground=true;observeOverview();
+        super.onResume();AutopilotScheduler.reconcile(this,prefs);overviewForeground=true;observeOverview();
         if(onboardingIntro!=null)onboardingIntro.setActive(true);
         if(onboardingUnified!=null)onboardingUnified.setActive(true);
         if(onboardingAutopilot!=null)onboardingAutopilot.setActive(true);
@@ -3210,7 +3211,7 @@ public final class MainActivity extends Activity {
         add(hero,centered("Choose how Clenova works for you.",14,GRAY,400),-1,-2);add(body,hero,-1,-2);space(body,22);
         add(body,txt("Autopilot",14,GRAY,500),-1,-2);space(body,9);
         LinearLayout auto=card();pad(auto,13,5);
-        LinearLayout enabled=agentToggle("sparkles","AI Autopilot","Save Agent mode for cleanup recommendations",prefs.autopilot(),prefs::setAutopilot);
+        LinearLayout enabled=agentToggle("sparkles","AI Autopilot","Read-only scheduled media discovery",prefs.autopilot(),prefs::setAutopilot);
         add(auto,enabled,-1,-2);thinRule(auto);
         LinearLayout frequency=row();frequency.setMinimumHeight(dp(54));frequency.setPadding(0,dp(7),0,dp(7));
         add(frequency,new Glyph(this,"clock",BLUE),dp(23),dp(23));gap(frequency,12);
@@ -3237,7 +3238,7 @@ public final class MainActivity extends Activity {
         add(line,new Glyph(this,"lock",GREEN),dp(20),dp(20));add(safety,line,-1,-2);
         safety.setContentDescription(tr("Approval required")+", "+tr("Nothing deleted without your permission."));
         add(body,safety,-1,-2);space(body,10);
-        add(body,centered("On-demand scanning available · Scheduled scanning not active",11,GRAY,400),-1,-2);
+        add(body,centered("Checks run while charging when Android permits. Unnecessary files require manual review.",11,GRAY,400),-1,-2);
         return root;
     }
     private LinearLayout agentToggle(String icon,String name,String subtitle,boolean initial,java.util.function.Consumer<Boolean> change){
@@ -3345,7 +3346,7 @@ public final class MainActivity extends Activity {
         add(copy,txt(prefs.autopilot()?"Your Agent is ready":"Make your Agent yours",16,INK,600),-1,-2);space(copy,5);
         DeviceOverview.Snapshot data=overview();
         String info=data.finished?(data.photos.available?(data.photos.partial?"At least ":"")+data.photos.count+" photos": "Photos unavailable")+" · "+(data.videos.available?(data.videos.partial?"At least ":"")+data.videos.count+" videos":"Videos unavailable"):"Preparing your device overview";
-        add(copy,txt(info,13,GRAY,400),-1,-2);weight(top,copy);add(c,top,-1,-2);space(c,13);
+        add(copy,txt(info,13,GRAY,400),-1,-2);if(prefs.autopilot()){space(copy,5);add(copy,txt(AutopilotScheduler.status(this,prefs),12,GRAY,400),-1,-2);}weight(top,copy);add(c,top,-1,-2);space(c,13);
         scanButton(c,"Smart Scan",true,()->{showClean();requestSmartScan();});space(c,8);
         scanButton(c,prefs.autopilot()?"Open Agent":"Activate Agent",false,()->{if(prefs.autopilot())showAgent();else showAgentSetup(true,false);});
         return c;

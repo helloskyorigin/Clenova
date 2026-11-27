@@ -62,7 +62,7 @@ final class AgentSetupView extends ScrollView {
         heading=label("Meet your new\neveryday Agent.",29,0xff111111,650);heading.setLetterSpacing(-.037f);append(root,heading,22);
         description=label("Less managing. More living.\nLet your Agent handle the details.",13,GRAY,400);description.setLineSpacing(dp(3),1);append(root,description,17);
         TextView protection=label("✓  Nothing changes without your approval.",11,GREEN,500);append(root,protection,19);
-        notice=label("On-demand scans available. Scheduled scans aren't active yet.",11,GRAY,400);append(root,notice,9);
+        notice=label("Background media checks run while charging after setup, with full access.",11,GRAY,400);append(root,notice,9);
         primary=button("Activate Agent",true);append(root,primary,19);
         skip=button("Not now",false);append(root,skip,4);
         primary.setOnClickListener(v->activateOrContinue());skip.setOnClickListener(v->selectManual());
@@ -97,7 +97,7 @@ final class AgentSetupView extends ScrollView {
         heading.setText("Your Agent.\nReady for you.");description.setText("Your preferences are set.\nYou stay in control.");
         // This is a saved mode and an available on-demand agent, not a completed scan.
         details[0].setText("Discovery preferences saved");details[1].setText("On-demand reviews available");details[2].setText("Approval is always required");
-        notice.setText("Scheduled scanning is not active yet.");
+        notice.setText("Background checks depend on Android scheduling and media access.");
         primary.setText("Continue");primary.setEnabled(true);skip.setVisibility(INVISIBLE);skip.setEnabled(false);
         for(int i=0;i<3;i++){TextView check=checks[i];check.animate().cancel();check.setVisibility(VISIBLE);
             if(animate&&!reduce()){check.setScaleX(.6f);check.setScaleY(.6f);check.setAlpha(0);check.animate().scaleX(1).scaleY(1).alpha(1).setStartDelay(i*180L).setDuration(300).setInterpolator(new DecelerateInterpolator()).start();}

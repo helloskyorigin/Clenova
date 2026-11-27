@@ -8,7 +8,7 @@ import java.io.File;
 
 /** Only app-owned settings and journal stores are reset; user files never touched. */
 final class LocalAppData {
-    private static final String[] STORES={"clenova_preferences","clenova_folder_exclusions","clenova_file_exclusions","clenova_activity_history","clenova_permission_requests","clenova_agent_chats","clenova_speed_history","clenova_setup_folder"};
+    private static final String[] STORES={"clenova_preferences","clenova_folder_exclusions","clenova_file_exclusions","clenova_activity_history","clenova_permission_requests","clenova_agent_chats","clenova_speed_history","clenova_setup_folder","clenova_autopilot"};
     static final class Size{
         final long bytes;final boolean complete;
         Size(long bytes,boolean complete){this.bytes=bytes;this.complete=complete;}
@@ -31,6 +31,7 @@ final class LocalAppData {
         }catch(RuntimeException ignored){return new Size(-1,false);}
     }
     static boolean reset(Context context){
+        AutopilotScheduler.clear(context);
         boolean ok=true;
         try{new SetupFolderAccess(context).clear();}catch(RuntimeException e){ok=false;}
         for(String name:STORES){

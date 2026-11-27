@@ -63,11 +63,11 @@ final class ProtectedFolders {
             keys.add(key);
             if(!store.edit().putStringSet("trees",keys).putString("meta:"+key,meta.toString()).commit())throw new IllegalStateException("Save failed");
         }catch(org.json.JSONException e){throw new IllegalStateException(e);}
-        return true;
+        AutopilotScheduler.changed(context,new AppPreferences(context));return true;
     }
     boolean remove(String key){
         HashSet<String> keys=new HashSet<>(store.getStringSet("trees",java.util.Collections.emptySet()));
-        keys.remove(key);return store.edit().putStringSet("trees",keys).remove("meta:"+key).commit();
+        keys.remove(key);boolean ok=store.edit().putStringSet("trees",keys).remove("meta:"+key).commit();if(ok)AutopilotScheduler.changed(context,new AppPreferences(context));return ok;
     }
     /** For future scanner candidates with external-storage document IDs.
      * Opaque provider IDs are exact-match only; a future scanner must resolve ancestry separately.
