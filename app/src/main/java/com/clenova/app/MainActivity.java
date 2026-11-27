@@ -608,7 +608,7 @@ public final class MainActivity extends Activity {
         if(detailed){space(copy,4);add(copy,txt(subtitle,12,GRAY,400),-1,-2);}
         weight(line,copy);gap(line,8);add(line,new Glyph(this,"chevron",GRAY),dp(14),dp(14));
         tap(line,WHITE,12,()->{
-            if(title.equals("Swipe Photos")){startActivity(new Intent(this,SwipePhotosActivity.class));return;}
+            if(title.equals("Swipe Photos")){startActivity(new android.content.Intent(this,SwipePhotosActivity.class));return;}
             privacyDialog().setTitle(tr(title))
                 .setMessage(tr("This tool is not available yet. No action has been performed."))
                 .setPositiveButton(tr("Done"),null).show();
