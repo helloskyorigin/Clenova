@@ -47,7 +47,10 @@ public final class MainActivity extends Activity {
     private boolean[] videoDraft;
     private CleanupPreview cleanup;
     private boolean cleaning, completed, completionVisible;
-    private boolean storageVisible, settingsVisible, agentPrefsVisible, protectionVisible, foldersVisible, filesVisible, historyVisible, permissionsVisible, privacyVisible, helpVisible, feedbackVisible, policyVisible, termsVisible;
+    private boolean storageVisible, settingsVisible, agentPrefsVisible, protectionVisible, foldersVisible, filesVisible, historyVisible, permissionsVisible, privacyVisible, helpVisible, feedbackVisible, policyVisible, termsVisible, aboutVisible;
+    private ScrollView aboutScroll;
+    private int aboutScrollY;
+    private static final String PUBLIC_LISTING_URL=""; // Set only after publication.
     private ScrollView policyScroll;
     private int policyScrollY;
     private int feedbackCategory=0;
@@ -98,6 +101,7 @@ public final class MainActivity extends Activity {
             if(state.getBoolean("cleanup_running")){startCleanupAnimation();return;}
             if(completed && state.getBoolean("cleanup_visible")){showCompletion(false);return;}
         }
+        if(state!=null && state.getBoolean("about_visible")){aboutScrollY=state.getInt("about_scroll_y");openAbout();return;}
         if(state!=null && state.getBoolean("terms_visible")){policyScrollY=state.getInt("policy_scroll_y");openTerms();return;}
         if(state!=null && state.getBoolean("policy_visible")){policyScrollY=state.getInt("policy_scroll_y");openPrivacyPolicy();return;}
         if(state!=null && state.getBoolean("feedback_visible")){feedbackCategory=FeedbackDraft.category(state.getInt("feedback_category"));feedbackText=state.getString("feedback_text","");feedbackAppInfo=state.getBoolean("feedback_app_info",true);openFeedback();return;}
@@ -129,6 +133,8 @@ public final class MainActivity extends Activity {
         state.putBoolean("help_visible",helpVisible);
         state.putBoolean("policy_visible",policyVisible);
         state.putBoolean("terms_visible",termsVisible);
+        state.putBoolean("about_visible",aboutVisible);
+        if(aboutVisible)state.putInt("about_scroll_y",aboutScroll==null?aboutScrollY:aboutScroll.getScrollY());
         if(policyVisible||termsVisible)state.putInt("policy_scroll_y",policyScroll==null?policyScrollY:policyScroll.getScrollY());
         if(feedbackVisible){state.putBoolean("feedback_visible",true);state.putInt("feedback_category",feedbackCategory);state.putString("feedback_text",feedbackText);state.putBoolean("feedback_app_info",feedbackAppInfo);}
         state.putString("help_query",helpQuery);
@@ -274,7 +280,7 @@ public final class MainActivity extends Activity {
         add(l,settings,dp(44),dp(44)); return l;
     }
     private void openSettings(){
-        policyVisible=false;termsVisible=false;policyScroll=null;feedbackVisible=false;helpVisible=false;hideHelpKeyboard();permissionsVisible=false;privacyVisible=false;
+        aboutVisible=false;aboutScroll=null;policyVisible=false;termsVisible=false;policyScroll=null;feedbackVisible=false;helpVisible=false;hideHelpKeyboard();permissionsVisible=false;privacyVisible=false;
         historyDetailId=null;historyScroll=null;historyScrollY=0;historyVisible=false;filesVisible=false;foldersVisible=false;protectionVisible=false;agentPrefsVisible=false;settingsVisible=true;setContentView(settingsScreen());
     }
     private LinearLayout settingsScreen(){
@@ -309,7 +315,8 @@ public final class MainActivity extends Activity {
         });
         space(body,8);
         add(body,centered("Clenova",19,INK,700),-1,-2);space(body,5);
-        add(body,centered("Version 1.0.0",12,GRAY,400),-1,-2);space(body,5);
+        add(body,centered(tr("Version")+" "+supportAppVersion(),12,GRAY,400),-1,-2);space(body,5);
+        add(body,centered("By Skyorigin",12,GRAY,500),-1,-2);space(body,5);
         add(body,centered("Your phone. On autopilot.",12,GRAY,400),-1,-2);
         return root;
     }
@@ -336,6 +343,7 @@ public final class MainActivity extends Activity {
             else if(item[1].equals("Rate Clenova"))tap(line,WHITE,0,()->{ratingStars=0;showRatingSheet();});
             else if(item[1].equals("Privacy policy"))tap(line,WHITE,0,()->{policyScrollY=0;openPrivacyPolicy();});
             else if(item[1].equals("Terms of use"))tap(line,WHITE,0,()->{policyScrollY=0;openTerms();});
+            else if(item[1].equals("About Clenova"))tap(line,WHITE,0,()->{aboutScrollY=0;openAbout();});
             add(group,line,-1,-2);
             if(i<items.length-1){
                 View divider=new View(this);divider.setBackgroundColor(surface(0xffeeeef0));
@@ -555,6 +563,84 @@ public final class MainActivity extends Activity {
         }catch(android.content.ActivityNotFoundException|SecurityException e){
             folderToast("Google Play is unavailable");
         }
+    }
+
+    private void openAbout(){
+        aboutVisible=true;settingsVisible=true;setContentView(aboutScreen());
+        final ScrollView scroll=aboutScroll;
+        if(scroll!=null)scroll.post(()->scroll.scrollTo(0,aboutScrollY));
+    }
+    private LinearLayout aboutScreen(){
+        LinearLayout root=column();root.setBackgroundColor(BG);root.setPadding(dp(18),v(12),dp(18),v(12));
+        FrameLayout header=new FrameLayout(this);
+        header.addView(centered("About Clenova",17,INK,600),new FrameLayout.LayoutParams(-1,-1));
+        FrameLayout back=new FrameLayout(this);
+        back.addView(new Glyph(this,"back",INK),new FrameLayout.LayoutParams(dp(24),dp(24),Gravity.CENTER));
+        back.setContentDescription(tr("Back to Settings"));tap(back,WHITE,22,this::openSettings);
+        header.addView(back,new FrameLayout.LayoutParams(dp(44),dp(44),Gravity.START|Gravity.CENTER_VERTICAL));add(root,header,-1,dp(44));
+        ScrollView scroll=new ScrollView(this);aboutScroll=scroll;scroll.setVerticalScrollBarEnabled(false);scroll.setOverScrollMode(View.OVER_SCROLL_NEVER);
+        LinearLayout body=column();body.setPadding(0,v(20),0,v(16));scroll.addView(body,new ScrollView.LayoutParams(-1,-2));
+        root.addView(scroll,new LinearLayout.LayoutParams(-1,0,1f));
+        LinearLayout hero=column();hero.setGravity(Gravity.CENTER_HORIZONTAL);
+        FrameLayout mark=new FrameLayout(this);mark.setBackground(round(BLUE,24));
+        // Use the existing in-app brand glyph until the final logo asset is added to the project.
+        mark.addView(new Glyph(this,"sparkles",Color.WHITE),new FrameLayout.LayoutParams(dp(50),dp(50),Gravity.CENTER));
+        mark.setContentDescription("Clenova");add(hero,mark,dp(92),dp(92));space(hero,16);
+        add(hero,centered("Clenova",30,INK,700),-1,-2);space(hero,6);
+        add(hero,centered("Your phone. On autopilot.",14,GRAY,400),-1,-2);space(hero,8);
+        add(hero,centered("By Skyorigin",13,BLUE,600),-1,-2);space(hero,13);
+        String version=supportAppVersion();
+        TextView chip=centered(tr("Version")+" "+version,12,BLUE,600);
+        chip.setBackground(round(PALE,18));chip.setPadding(dp(14),dp(8),dp(14),dp(8));add(hero,chip,-2,-2);
+        add(body,hero,-1,-2);space(body,24);
+        LinearLayout intro=card();add(intro,txt("A smarter phone experience.",19,INK,700),-1,-2);space(intro,9);
+        TextView message=txt("Clenova is built to make phone management effortless, intelligent and personal. Less clutter, more space, and complete control over what matters to you.",14,GRAY,400);
+        message.setLineSpacing(dp(4),1f);add(intro,message,-1,-2);
+        if(PUBLIC_LISTING_URL.isEmpty()){space(intro,9);add(intro,txt("Preview build · Cleanup and scanning are simulated or not active yet.",12,GRAY,400),-1,-2);}
+        add(body,intro,-1,-2);space(body,15);
+        LinearLayout principles=card();pad(principles,14,5);
+        add(principles,aboutPrinciple("shield","Privacy by design"),-1,-2);thinRule(principles);
+        add(principles,aboutPrinciple("bot","Intelligent assistance"),-1,-2);thinRule(principles);
+        add(principles,aboutPrinciple("fingerprint","Always in your control"),-1,-2);
+        add(body,principles,-1,-2);space(body,18);
+        LinearLayout actions=card();pad(actions,13,4);
+        add(actions,aboutAction("refresh","Check for updates",PUBLIC_LISTING_URL.isEmpty()?"Preview build":null,this::checkClenovaUpdates),-1,-2);thinRule(actions);
+        add(actions,aboutAction("share","Share Clenova",null,this::shareClenova),-1,-2);thinRule(actions);
+        add(actions,aboutAction("mail","Contact us",null,this::openSupportEmail),-1,-2);
+        add(body,actions,-1,-2);space(body,24);
+        add(body,centered("Designed for a better digital life.",12,GRAY,400),-1,-2);space(body,7);
+        add(body,centered("© 2026 Skyorigin",13,INK,500),-1,-2);
+        return root;
+    }
+    private LinearLayout aboutPrinciple(String icon,String label){
+        LinearLayout line=row();line.setMinimumHeight(dp(51));line.setPadding(0,dp(8),0,dp(8));
+        add(line,new Glyph(this,icon,BLUE),dp(23),dp(23));gap(line,12);weight(line,txt(label,15,INK,500));return line;
+    }
+    private LinearLayout aboutAction(String icon,String label,String subtitle,Runnable action){
+        LinearLayout line=row();line.setMinimumHeight(dp(55));line.setPadding(0,dp(8),0,dp(8));
+        add(line,new Glyph(this,icon,BLUE),dp(23),dp(23));gap(line,12);
+        LinearLayout labels=column();add(labels,txt(label,15,INK,500),-1,-2);
+        if(subtitle!=null){space(labels,4);add(labels,txt(subtitle,12,GRAY,400),-1,-2);}
+        weight(line,labels);gap(line,8);add(line,new Glyph(this,"chevron",GRAY),dp(14),dp(14));
+        tap(line,WHITE,10,action);line.setContentDescription(tr(label)+(subtitle==null?"":", "+tr(subtitle)));return line;
+    }
+    private void checkClenovaUpdates(){
+        if(PUBLIC_LISTING_URL.isEmpty()){
+            privacyDialog().setTitle(tr("Check for updates"))
+                .setMessage(tr("Clenova is currently a preview. Public updates will be available after launch.")+"\n\n"+tr("Version")+" "+supportAppVersion())
+                .setPositiveButton(tr("Done"),null).show();return;
+        }
+        try{startActivity(new android.content.Intent(android.content.Intent.ACTION_VIEW,android.net.Uri.parse(PUBLIC_LISTING_URL)));}
+        catch(android.content.ActivityNotFoundException|SecurityException e){folderToast("Google Play is unavailable");}
+    }
+    private void shareClenova(){
+        String message="Clenova — Your phone. On autopilot.\nBy Skyorigin.";
+        if(PUBLIC_LISTING_URL.isEmpty())message+="\n"+tr("Currently in preview. Public download is not available yet.");
+        else message+="\n"+PUBLIC_LISTING_URL;
+        android.content.Intent share=new android.content.Intent(android.content.Intent.ACTION_SEND);
+        share.setType("text/plain");share.putExtra(android.content.Intent.EXTRA_TEXT,message);
+        try{startActivity(android.content.Intent.createChooser(share,tr("Share Clenova")));}
+        catch(android.content.ActivityNotFoundException|SecurityException e){folderToast("Sharing unavailable");}
     }
 
     private void openPrivacyPolicy(){
@@ -1731,7 +1817,7 @@ public final class MainActivity extends Activity {
         add(c,approve,-1,dp(51)); return c;
     }
     private void showHome() {
-        policyVisible=false;termsVisible=false;policyScroll=null;feedbackVisible=false;helpVisible=false;permissionsVisible=false;privacyVisible=false;
+        aboutVisible=false;aboutScroll=null;policyVisible=false;termsVisible=false;policyScroll=null;feedbackVisible=false;helpVisible=false;permissionsVisible=false;privacyVisible=false;
         storageVisible=false;
         settingsVisible=false;agentPrefsVisible=false;protectionVisible=false;foldersVisible=false;filesVisible=false;historyVisible=false;
         completionVisible=false;
@@ -1750,7 +1836,7 @@ public final class MainActivity extends Activity {
     }
     @Override public void onBackPressed() {
         if(cleaning)return;
-        if(policyVisible||termsVisible){openSettings();return;}
+        if(aboutVisible||policyVisible||termsVisible){openSettings();return;}
         if(feedbackVisible){leaveFeedback();return;}
         if(helpVisible||privacyVisible||permissionsVisible){openSettings();return;}
         if(historyVisible&&historyDetailId!=null){openHistory();return;}
@@ -2586,6 +2672,10 @@ public final class MainActivity extends Activity {
                 case "lightbulb":c.drawArc(new RectF(5,2,19,16),155,230,false,p);path(c,6,11,9,16,9,18,15,18,15,16,18,11);path(c,10,21,14,21);break;
                 case "bug":c.drawRoundRect(new RectF(7,7,17,21),5,5,p);c.drawArc(new RectF(9,2,15,9),180,180,false,p);path(c,12,9,12,21);path(c,3,7,7,11);path(c,17,11,21,7);path(c,3,14,7,14);path(c,17,14,21,14);path(c,3,21,7,17);path(c,17,17,21,21);break;
                 case "send":path(c,3,3,22,12,3,21,7,12,3,3);path(c,7,12,22,12);break;
+                case "refresh":c.drawArc(new RectF(3,3,21,21),-75,290,false,p);path(c,21,4,21,10,15,10);break;
+                case "share":c.drawCircle(5,12,2.5f,p);c.drawCircle(19,5,2.5f,p);c.drawCircle(19,19,2.5f,p);path(c,7.5f,10.8f,16.5f,6.2f);path(c,7.5f,13.2f,16.5f,17.8f);break;
+                case "mail":c.drawRoundRect(new RectF(3,5,21,19),2,2,p);path(c,3,7,12,13,21,7);break;
+                case "fingerprint":c.drawArc(new RectF(3,2,21,20),190,205,false,p);c.drawArc(new RectF(6,5,18,17),180,190,false,p);c.drawArc(new RectF(9,8,15,14),180,180,false,p);path(c,12,11,12,16,10,21);path(c,16,13,16,18,14,22);path(c,6,12,6,16,4,19);break;
                 case "folder":path(c,3,5,10,5,12,8,21,8,21,20,3,20,3,5);break;
                 case "folder_lock":path(c,3,18,3,5,10,5,12,8,21,8,21,12);
                     path(c,3,18,10,18);c.drawRoundRect(new RectF(13,15,22,22),2,2,p);c.drawArc(new RectF(15,10,20,18),180,180,false,p);break;

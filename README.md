@@ -82,3 +82,6 @@ Settings > Privacy policy opens the native offline preview policy (v0.1, revised
 
 ## Terms of use
 Settings > Terms of use opens a native offline preview terms document (v0.1, revised 2026-11-27) using the shared legal page layout, with eight localized sections, selectable text, support email, and scroll restoration. Explicitly distinguishes simulated cleanup from future real cleanup, no paid features in the preview, and preserves non-excludable consumer rights. No online link until a real page is published. Final publisher identity, jurisdiction, release practices and billing terms require review before public launch.
+
+## About Clenova
+Native About page with By Skyorigin branding, existing blue sparkle glyph (final logo asset not yet in repository), actual installed version, localized purpose and preview disclosure, share-sheet text without an unpublished URL, update information dialog until a real public listing is configured, and native support email. Settings footer also uses the installed version rather than a placeholder and displays By Skyorigin. Light/dark palette and scroll restoration included. Set PUBLIC_LISTING_URL only after publication; the app does not claim to check for updates in preview. All Settings groups now have implemented navigation, subject to build/device validation and future real scan/billing integration.
