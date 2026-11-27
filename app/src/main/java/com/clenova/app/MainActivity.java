@@ -42,6 +42,9 @@ public final class MainActivity extends Activity {
     private boolean similarViewing;
     private int similarTab;
     private boolean[] similarDraft;
+    private boolean videoViewing;
+    private int videoTab;
+    private boolean[] videoDraft;
 
     @Override public void onCreate(Bundle state) {
         super.onCreate(state);
@@ -206,7 +209,7 @@ public final class MainActivity extends Activity {
         setContentView(reviewScreen());
     }
     @Override public void onBackPressed() {
-        if (similarViewing) leaveSimilar(false); else if (duplicateViewing) leaveDuplicates(false); else if (reviewing) showHome(); else super.onBackPressed();
+        if (videoViewing) leaveVideos(false); else if (similarViewing) leaveSimilar(false); else if (duplicateViewing) leaveDuplicates(false); else if (reviewing) showHome(); else super.onBackPressed();
     }
     private LinearLayout reviewScreen() {
         LinearLayout root = column(); root.setBackgroundColor(BG);
@@ -248,14 +251,14 @@ public final class MainActivity extends Activity {
             add(category,mark,dp(44),dp(44)); gap(category,12);
             LinearLayout info=column();
             add(info,txt(ReviewPlan.NAMES[i],16,INK,600),-1,-2); space(info,4);
-            add(info,txt(i==0 && reviewPlan.isSelected(0)?ReviewPlan.selectedCount(reviewPlan.draftCopies())+" extra copies selected":i==1 && reviewPlan.isSelected(1)?ReviewPlan.selectedCount(reviewPlan.draftSimilar())+" photos selected":ReviewPlan.DETAILS[i],13,GRAY,400),-1,-2); space(info,5);
+            add(info,txt(i==0 && reviewPlan.isSelected(0)?ReviewPlan.selectedCount(reviewPlan.draftCopies())+" extra copies selected":i==1 && reviewPlan.isSelected(1)?ReviewPlan.selectedCount(reviewPlan.draftSimilar())+" photos selected":i==2 && reviewPlan.isSelected(2)?ReviewPlan.selectedCount(reviewPlan.draftVideos())+" videos selected":ReviewPlan.DETAILS[i],13,GRAY,400),-1,-2); space(info,5);
             TextView review=txt("Review items",13,BLUE,600);
             review.setMinHeight(dp(32)); review.setGravity(Gravity.CENTER_VERTICAL);
             review.setContentDescription("Review items: "+ReviewPlan.NAMES[i]);
             tap(review,WHITE,8,()->reviewCategory(index));
             add(info,review,-1,-2); weight(category,info); gap(category,8);
             LinearLayout right=column(); right.setGravity(Gravity.END|Gravity.CENTER_VERTICAL);
-            add(right,txt(ReviewPlan.gb(i<2 && reviewPlan.isSelected(i)?reviewPlan.categoryMb(i):ReviewPlan.MB[i]),15,INK,600),-2,-2);
+            add(right,txt(ReviewPlan.gb(reviewPlan.isSelected(i)?reviewPlan.categoryMb(i):ReviewPlan.MB[i]),15,INK,600),-2,-2);
             FrameLayout choice=new FrameLayout(this);
             choice.addView(new Glyph(this,reviewPlan.isSelected(i)?"selected":"unselected",
                     reviewPlan.isSelected(i)?BLUE:0xffc7c7cc),
@@ -292,18 +295,165 @@ public final class MainActivity extends Activity {
         space(root,6);add(root,footer,-1,-2);return root;
     }
     private void reviewCategory(int index) {
-        if(index==0){openDuplicates();return;}
-        if(index==1){openSimilar();return;}
-        new AlertDialog.Builder(this).setTitle(ReviewPlan.NAMES[index])
-                .setMessage("Sample category: "+ReviewPlan.DETAILS[index]+" · "+
-                        ReviewPlan.gb(ReviewPlan.MB[index])+
-                        ". Individual file review will be built next. No device files are accessed in this preview.")
-                .setNegativeButton("Cancel",null)
-                .setPositiveButton(reviewPlan.isSelected(index)?"Deselect":"Select for preview",(d,w)->{
-                    reviewPlan.setSelected(index,!reviewPlan.isSelected(index));
-                    setContentView(reviewScreen());
-                }).show();
+        if(index==0)openDuplicates();
+        else if(index==1)openSimilar();
+        else if(index==2)openVideos();
     }
+    private void openVideos(){
+        videoDraft=reviewPlan.draftVideos();videoViewing=true;videoTab=0;
+        setContentView(videoScreen(0));
+    }
+    private void leaveVideos(boolean confirm){
+        if(confirm)reviewPlan.confirmVideos(videoDraft);
+        videoViewing=false;videoDraft=null;setContentView(reviewScreen());
+    }
+    private LinearLayout videoScreen(int offset){
+        LinearLayout root=column();root.setBackgroundColor(BG);
+        root.setPadding(dp(18),v(12),dp(18),v(12));
+        FrameLayout header=new FrameLayout(this);
+        header.addView(centered("Large videos",17,INK,600),new FrameLayout.LayoutParams(-1,-1));
+        FrameLayout back=new FrameLayout(this);
+        back.addView(new Glyph(this,"back",INK),new FrameLayout.LayoutParams(dp(24),dp(24),Gravity.CENTER));
+        back.setContentDescription("Back to Review cleanup");
+        tap(back,WHITE,22,()->leaveVideos(false));
+        header.addView(back,new FrameLayout.LayoutParams(dp(44),dp(44),Gravity.START|Gravity.CENTER_VERTICAL));
+        add(root,header,-1,dp(44));space(root,14);
+        int count=ReviewPlan.selectedCount(videoDraft);
+        String amount=ReviewPlan.gb(ReviewPlan.videoMb(videoDraft));
+        add(root,txt(amount,36,INK,700),-1,-2);space(root,5);
+        LinearLayout status=row();add(status,new Glyph(this,"sparkles",BLUE),dp(16),dp(16));gap(status,5);
+        add(status,txt("12 videos recommended",14,BLUE,500),-2,-2);add(root,status,-1,-2);space(root,16);
+        LinearLayout tabs=row();tabs.setBackground(round(0xffe7e7ec,14));
+        tabs.setPadding(dp(3),dp(3),dp(3),dp(3));
+        String[] labels={"Agent Picks","View All"};
+        for(int i=0;i<2;i++){
+            final int tab=i;
+            TextView label=centered(labels[i],14,videoTab==i?INK:GRAY,600);
+            tap(label,videoTab==i?WHITE:0xffe7e7ec,11,()->{videoTab=tab;setContentView(videoScreen(0));});
+            label.setSelected(videoTab==i);tabs.addView(label,new LinearLayout.LayoutParams(0,dp(39),1f));
+        }
+        add(root,tabs,-1,-2);space(root,12);
+        LinearLayout options=row();
+        add(options,txt(videoTab==0?"Largest videos":"All 12 videos",14,GRAY,500),-2,-2);stretch(options);
+        ScrollView scroll=new ScrollView(this);scroll.setVerticalScrollBarEnabled(false);scroll.setOverScrollMode(View.OVER_SCROLL_NEVER);
+        TextView all=txt(videoTab==0?"View all":count==12?"Deselect all":"Select all",14,BLUE,600);
+        all.setGravity(Gravity.CENTER_VERTICAL);
+        tap(all,BG,8,()->{
+            if(videoTab==0){videoTab=1;setContentView(videoScreen(0));}
+            else{java.util.Arrays.fill(videoDraft,count!=12);setContentView(videoScreen(scroll.getScrollY()));}
+        });
+        add(options,all,-2,dp(40));add(root,options,-1,-2);
+        LinearLayout body=column();body.setPadding(0,0,0,v(10));
+        scroll.addView(body,new ScrollView.LayoutParams(-1,-2));
+        root.addView(scroll,new LinearLayout.LayoutParams(-1,0,1f));
+        int limit=videoTab==0?4:ReviewPlan.VIDEO_MB.length;
+        for(int first=0;first<limit;first+=2){
+            LinearLayout gallery=row();gallery.setGravity(Gravity.TOP);
+            for(int i=first;i<Math.min(first+2,limit);i++){
+                LinearLayout tile=videoTile(i,scroll);
+                LinearLayout.LayoutParams lp=new LinearLayout.LayoutParams(0,-2,1f);
+                if(i>first)lp.leftMargin=dp(10);
+                gallery.addView(tile,lp);
+            }
+            add(body,gallery,-1,-2);if(first+2<limit)space(body,14);
+        }
+        if(offset>0)scroll.post(()->scroll.scrollTo(0,offset));
+        space(root,8);thinRule(root);space(root,12);
+        LinearLayout total=row();add(total,txt(count+" videos selected",14,GRAY,500),-2,-2);stretch(total);
+        add(total,txt(amount,21,INK,700),-2,-2);add(root,total,-1,-2);space(root,12);
+        TextView confirm=centered("Confirm selection",17,WHITE,600);
+        tap(confirm,BLUE,26,()->leaveVideos(true));add(root,confirm,-1,dp(52));return root;
+    }
+    private LinearLayout videoTile(int index,ScrollView scroll){
+        LinearLayout item=column();
+        FrameLayout tile=new FrameLayout(this);tile.setBackground(round(0xffe4e8ee,10));tile.setClipToOutline(true);
+        VideoSample image=new VideoSample(this,index);
+        tile.addView(image,new FrameLayout.LayoutParams(-1,-1));
+        image.setContentDescription("Preview video "+(index+1)+", "+ReviewPlan.VIDEO_DURATION[index]+", "+ReviewPlan.VIDEO_MB[index]+" MB");
+        image.setOnClickListener(w->showVideoPreview(index,scroll));
+        TextView play=centered("▶",21,WHITE,600);play.setBackground(round(0x66000000,24));
+        FrameLayout.LayoutParams playLp=new FrameLayout.LayoutParams(dp(42),dp(42),Gravity.CENTER);
+        tile.addView(play,playLp);play.setContentDescription("Open video preview");
+        play.setOnClickListener(w->showVideoPreview(index,scroll));
+        TextView duration=centered(ReviewPlan.VIDEO_DURATION[index],11,WHITE,600);
+        duration.setBackground(round(0xaa000000,5));duration.setPadding(dp(6),dp(4),dp(6),dp(4));
+        FrameLayout.LayoutParams durLp=new FrameLayout.LayoutParams(-2,-2,Gravity.BOTTOM|Gravity.END);
+        durLp.setMargins(0,0,dp(6),dp(6));tile.addView(duration,durLp);
+        FrameLayout choice=new FrameLayout(this);
+        choice.addView(new Glyph(this,videoDraft[index]?"selected":"unselected",videoDraft[index]?BLUE:WHITE),
+                new FrameLayout.LayoutParams(dp(25),dp(25),Gravity.CENTER));
+        choice.setContentDescription("Video "+(index+1)+(videoDraft[index]?", selected":", not selected"));
+        choice.setSelected(videoDraft[index]);
+        tap(choice,0x55000000,22,()->{videoDraft[index]=!videoDraft[index];setContentView(videoScreen(scroll.getScrollY()));});
+        tile.addView(choice,new FrameLayout.LayoutParams(dp(44),dp(44),Gravity.TOP|Gravity.END));
+        add(item,tile,-1,v(128));space(item,7);
+        LinearLayout detail=row();add(detail,txt(ReviewPlan.gb(ReviewPlan.VIDEO_MB[index]),15,INK,600),-2,-2);
+        stretch(detail);add(detail,txt("MP4",11,GRAY,400),-2,-2);add(item,detail,-1,-2);
+        return item;
+    }
+    private void showVideoPreview(int index,ScrollView scroll){
+        android.app.Dialog dialog=new android.app.Dialog(this,android.R.style.Theme_Material_Light_NoActionBar_Fullscreen);
+        LinearLayout layout=column();layout.setBackgroundColor(BG);layout.setPadding(dp(18),v(12),dp(18),v(16));
+        FrameLayout header=new FrameLayout(this);
+        header.addView(centered("Video preview",17,INK,600),new FrameLayout.LayoutParams(-1,-1));
+        FrameLayout close=new FrameLayout(this);
+        close.addView(new Glyph(this,"back",INK),new FrameLayout.LayoutParams(dp(24),dp(24),Gravity.CENTER));
+        close.setContentDescription("Close video preview");tap(close,WHITE,22,dialog::dismiss);
+        header.addView(close,new FrameLayout.LayoutParams(dp(44),dp(44),Gravity.START|Gravity.CENTER_VERTICAL));
+        add(layout,header,-1,dp(44));
+        FrameLayout canvas=new FrameLayout(this);canvas.setBackgroundColor(INK);
+        VideoSample image=new VideoSample(this,index);
+        canvas.addView(image,new FrameLayout.LayoutParams(1,1,Gravity.CENTER));
+        canvas.addOnLayoutChangeListener((view,left,top,right,bottom,ol,ot,or,ob)->{
+            int width=Math.min(right-left,Math.round((bottom-top)*160f/120f));
+            if(width<=0)return;
+            int height=Math.round(width*120f/160f);
+            FrameLayout.LayoutParams lp=(FrameLayout.LayoutParams)image.getLayoutParams();
+            if(lp.width!=width||lp.height!=height){lp.width=width;lp.height=height;image.setLayoutParams(lp);}
+        });
+        layout.addView(canvas,new LinearLayout.LayoutParams(-1,0,1f));space(layout,12);
+        add(layout,centered("Illustrated sample preview · no actual video file",12,GRAY,400),-1,-2);space(layout,8);
+        add(layout,centered(ReviewPlan.gb(ReviewPlan.VIDEO_MB[index])+" · "+ReviewPlan.VIDEO_DURATION[index]+" · MP4",14,INK,500),-1,-2);space(layout,12);
+        TextView toggle=centered(videoDraft[index]?"Keep this video":"Select video",17,WHITE,600);
+        tap(toggle,BLUE,26,()->{videoDraft[index]=!videoDraft[index];int offset=scroll.getScrollY();dialog.dismiss();setContentView(videoScreen(offset));});
+        add(layout,toggle,-1,dp(52));dialog.setContentView(layout);dialog.show();
+        if(dialog.getWindow()!=null){
+            dialog.getWindow().setLayout(-1,-1);
+            dialog.getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,WindowManager.LayoutParams.FLAG_FULLSCREEN);
+            dialog.getWindow().setNavigationBarColor(BG);
+            dialog.getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR);
+        }
+    }
+    private static final class VideoSample extends View {
+        private final Paint p=new Paint(Paint.ANTI_ALIAS_FLAG);
+        private final int index;
+        VideoSample(Context c,int index){super(c);this.index=index;}
+        private void fill(int color){p.setColor(color);p.setStyle(Paint.Style.FILL);}
+        private void shape(Canvas c,int color,float... xy){
+            fill(color);Path path=new Path();path.moveTo(xy[0],xy[1]);
+            for(int i=2;i<xy.length;i+=2)path.lineTo(xy[i],xy[i+1]);path.close();c.drawPath(path,p);
+        }
+        @Override protected void onDraw(Canvas c){
+            super.onDraw(c);c.save();c.scale(getWidth()/160f,getHeight()/120f);
+            int mode=index%4;int[] sky={0xffb3d1e4,0xffe8c1a6,0xffb0cbc9,0xffa6b2cb};
+            fill(sky[mode]);c.drawRect(0,0,160,120,p);
+            if(mode==0){
+                shape(c,0xff718993,0,90,42+index,18,112,90,138,40,160,75,160,120,0,120);
+                shape(c,0xff557b65,0,103,50,87,112,103,160,92,160,120,0,120);
+            }else if(mode==1){
+                fill(0xffffe6af);c.drawCircle(118-index,37,20,p);
+                shape(c,0xffa98b7a,0,80,35,54,85,80,160,75,160,120,0,120);
+                shape(c,0xff726f80,0,94,80,80,160,95,160,120,0,120);
+            }else if(mode==2){
+                shape(c,0xff6b9384,0,78,48,38,95,72,160,36,160,120,0,120);
+                shape(c,0xffdddacb,62,120,80,75,92,75,125,120);
+            }else{
+                for(int b=0;b<5;b++){fill(b%2==0?0xff65778d:0xff7b899b);c.drawRect(b*34,30+(b%3)*12+index,b*34+29,120,p);}
+            }
+            c.restore();
+        }
+    }
+
     private void openSimilar() {
         similarDraft=reviewPlan.draftSimilar();similarViewing=true;similarTab=0;
         setContentView(similarScreen(0));

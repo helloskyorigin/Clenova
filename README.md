@@ -28,3 +28,6 @@ Pure Java selection check: `javac -d /tmp/clenova-tests app/src/main/java/com/cl
 
 ## Similar photos preview
 Agent Picks uses inline statistics and a single group preview. View All shows 32 groups (16 groups of four and 16 of three), with 32 protected best shots and 80 selectable sample photos at 12.5 MB each. Selection drafts update both tabs, are committed only on Confirm selection, and are discarded on Back. All totals use exact half-MB sample increments. No device media is accessed or removed.
+
+## Large videos preview
+Agent Picks shows four largest videos; View All shows all 12 sorted by size (2600 MB total). Tiles display illustrative thumbnails, sample durations and sizes. Full-screen preview displays a sample still, not playback, because no video assets or device media are accessed. Selection is shared across tabs and added to the review plan only on Confirm selection. Back discards drafts. Pure Java CI test covers all 4096 video selection masks.

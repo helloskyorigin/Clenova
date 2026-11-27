@@ -18,7 +18,24 @@ final class ReviewPlan {
     static final double SIMILAR_MB=12.5;
     private boolean[] similar=new boolean[SIMILAR_COUNT];
     private boolean similarReviewed;
-    private final boolean[] selected = {true, false, false};
+    static final int[] VIDEO_MB={480,360,320,280,250,220,180,150,120,100,80,60};
+    static final String[] VIDEO_DURATION={"12:48","08:24","06:12","04:38","03:25","05:12","03:56","02:41","02:18","01:54","01:26","01:08"};
+    private boolean[] videos=new boolean[VIDEO_MB.length];
+    private boolean videosReviewed;
+    boolean[] draftVideos() {
+        boolean[] draft=videos.clone();
+        if(!videosReviewed)Arrays.fill(draft,true);
+        return draft;
+    }
+    void confirmVideos(boolean[] draft) {
+        if(draft.length!=VIDEO_MB.length)throw new IllegalArgumentException("Invalid selection");
+        videos=draft.clone();videosReviewed=true;
+    }
+    static int videoMb(boolean[] draft) {
+        if(draft.length!=VIDEO_MB.length)throw new IllegalArgumentException("Invalid selection");
+        int total=0;for(int i=0;i<draft.length;i++)if(draft[i])total+=VIDEO_MB[i];
+        return total;
+    }
     boolean[] draftSimilar() {
         boolean[] draft=similar.clone();
         if(!similarReviewed) Arrays.fill(draft,true);
@@ -41,13 +58,13 @@ final class ReviewPlan {
     static int selectedCount(boolean[] values) {
         int count=0; for(boolean value:values) if(value) count++; return count;
     }
-    boolean isSelected(int i) { return i==0 ? selectedCount(copies)>0 : i==1 ? selectedCount(similar)>0 : selected[i]; }
+    boolean isSelected(int i) { return i==0 ? selectedCount(copies)>0 : i==1 ? selectedCount(similar)>0 : selectedCount(videos)>0; }
     void setSelected(int i, boolean value) {
-        if(i==0) Arrays.fill(copies,value); else if(i==1){if(value&&!similarReviewed)throw new IllegalStateException("Review similar photos first");Arrays.fill(similar,value);} else selected[i]=value;
+        if(i==0) Arrays.fill(copies,value); else if(i==1){if(value&&!similarReviewed)throw new IllegalStateException("Review similar photos first");Arrays.fill(similar,value);} else {if(value&&!videosReviewed)throw new IllegalStateException("Review videos first");Arrays.fill(videos,value);}
     }
-    double categoryMb(int i) { return i==0 ? selectedCount(copies)*COPY_MB : i==1 ? selectedCount(similar)*SIMILAR_MB : selected[i]?MB[i]:0; }
+    double categoryMb(int i) { return i==0 ? selectedCount(copies)*COPY_MB : i==1 ? selectedCount(similar)*SIMILAR_MB : videoMb(videos); }
     double total() { return categoryMb(0)+categoryMb(1)+categoryMb(2); }
-    int count() { return selectedCount(copies)+selectedCount(similar)+(selected[2]?COUNTS[2]:0); }
+    int count() { return selectedCount(copies)+selectedCount(similar)+selectedCount(videos); }
     static String gb(double mb) {
         BigDecimal amount=BigDecimal.valueOf(mb).stripTrailingZeros();
         if(mb<1000) return amount.toPlainString()+" MB";
