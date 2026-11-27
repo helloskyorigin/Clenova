@@ -50,7 +50,10 @@ public final class MainActivity extends Activity {
     private boolean storageVisible, settingsVisible, agentPrefsVisible, protectionVisible, foldersVisible, filesVisible, historyVisible;
     private ActivityHistory history;
     private int historyFilter;
-    private String cleanupEventId;
+    private String cleanupEventId, historyDetailId;
+    private int[] cleanupCategoryCounts;
+    private ScrollView historyScroll;
+    private int historyScrollY;
     private ProtectedFiles protectedFiles;
     private static final int PICK_PROTECTED_FILES=93;
     private ProtectedFolders protectedFolders;
@@ -66,7 +69,7 @@ public final class MainActivity extends Activity {
         protectedFolders=new ProtectedFolders(this);
         protectedFiles=new ProtectedFiles(this);
         history=new ActivityHistory(this);
-        if(state!=null){historyFilter=state.getInt("history_filter");cleanupEventId=state.getString("cleanup_event_id");}
+        if(state!=null){historyFilter=state.getInt("history_filter");cleanupEventId=state.getString("cleanup_event_id");cleanupCategoryCounts=state.getIntArray("cleanup_category_counts");historyDetailId=state.getString("history_detail_id");historyScrollY=state.getInt("history_scroll_y");}
         applyPalette();
         density = getResources().getDisplayMetrics().density;
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
@@ -81,7 +84,7 @@ public final class MainActivity extends Activity {
             if(state.getBoolean("cleanup_running")){startCleanupAnimation();return;}
             if(completed && state.getBoolean("cleanup_visible")){showCompletion(false);return;}
         }
-        if(state!=null && state.getBoolean("history_visible")){openHistory();return;}
+        if(state!=null && state.getBoolean("history_visible")){if(historyDetailId!=null){openHistoryDetails(historyDetailId);}else openHistory();return;}
         if(state!=null && state.getBoolean("files_visible")){openProtectedFiles();return;}
         if(state!=null && state.getBoolean("folders_visible")){openProtectedFolders();return;}
         if(state!=null && state.getBoolean("protection_visible")){openProtection();return;}
@@ -101,6 +104,9 @@ public final class MainActivity extends Activity {
         state.putBoolean("history_visible",historyVisible);
         state.putInt("history_filter",historyFilter);
         state.putString("cleanup_event_id",cleanupEventId);
+        state.putIntArray("cleanup_category_counts",cleanupCategoryCounts);
+        state.putString("history_detail_id",historyDetailId);
+        state.putInt("history_scroll_y",historyDetailId==null&&historyScroll!=null?historyScroll.getScrollY():historyScrollY);
         if(cleanup!=null){
             state.putDoubleArray("cleanup_amounts",cleanup.amounts());
             state.putInt("cleanup_count",cleanup.count);
@@ -236,7 +242,7 @@ public final class MainActivity extends Activity {
         add(l,settings,dp(44),dp(44)); return l;
     }
     private void openSettings(){
-        historyVisible=false;filesVisible=false;foldersVisible=false;protectionVisible=false;agentPrefsVisible=false;settingsVisible=true;setContentView(settingsScreen());
+        historyDetailId=null;historyScroll=null;historyScrollY=0;historyVisible=false;filesVisible=false;foldersVisible=false;protectionVisible=false;agentPrefsVisible=false;settingsVisible=true;setContentView(settingsScreen());
     }
     private LinearLayout settingsScreen(){
         LinearLayout root=column();root.setBackgroundColor(BG);
@@ -289,7 +295,7 @@ public final class MainActivity extends Activity {
             if(preference)tap(line,WHITE,0,()->showPreferencePopup(line,item[1]));
             else if(item[1].equals("Agent preferences"))tap(line,WHITE,0,this::openAgentPreferences);
             else if(item[1].equals("Cleanup protection"))tap(line,WHITE,0,this::openProtection);
-            else if(item[1].equals("Activity history"))tap(line,WHITE,0,()->{historyFilter=0;openHistory();});
+            else if(item[1].equals("Activity history"))tap(line,WHITE,0,()->{historyFilter=0;historyScrollY=0;openHistory();});
             add(group,line,-1,-2);
             if(i<items.length-1){
                 View divider=new View(this);divider.setBackgroundColor(surface(0xffeeeef0));
@@ -384,7 +390,8 @@ public final class MainActivity extends Activity {
         if(!history.add(id,category,title,detail,mb,count,preview))folderToast("Could not save activity");
     }
     private void openHistory(){
-        settingsVisible=true;historyVisible=true;setContentView(historyScreen());
+        historyDetailId=null;settingsVisible=true;historyVisible=true;setContentView(historyScreen());
+        if(historyScroll!=null){final ScrollView scroll=historyScroll;scroll.post(()->scroll.scrollTo(0,historyScrollY));}
     }
     private static final String[] HISTORY_FILTERS={"All activity","Scans","Cleanups","Protection"};
     private static final String[] HISTORY_CATEGORIES={"","scan","cleanup","protection"};
@@ -396,7 +403,7 @@ public final class MainActivity extends Activity {
         back.addView(new Glyph(this,"back",INK),new FrameLayout.LayoutParams(dp(24),dp(24),Gravity.CENTER));
         back.setContentDescription(tr("Back to Settings"));tap(back,WHITE,22,this::openSettings);
         header.addView(back,new FrameLayout.LayoutParams(dp(44),dp(44),Gravity.START|Gravity.CENTER_VERTICAL));add(root,header,-1,dp(44));
-        ScrollView scroll=new ScrollView(this);scroll.setVerticalScrollBarEnabled(false);scroll.setOverScrollMode(View.OVER_SCROLL_NEVER);
+        ScrollView scroll=new ScrollView(this);historyScroll=scroll;scroll.setVerticalScrollBarEnabled(false);scroll.setOverScrollMode(View.OVER_SCROLL_NEVER);
         LinearLayout body=column();body.setPadding(0,v(18),0,v(12));
         scroll.addView(body,new ScrollView.LayoutParams(-1,-2));root.addView(scroll,new LinearLayout.LayoutParams(-1,0,1f));
         LinearLayout hero=column();hero.setGravity(Gravity.CENTER_HORIZONTAL);
@@ -464,9 +471,96 @@ public final class MainActivity extends Activity {
         String time=android.text.format.DateFormat.getTimeFormat(this).format(new java.util.Date(entry.timestamp));
         add(details,txt(time+(entry.preview?" · "+tr("Preview"):""),11,GRAY,400),-1,-2);
         weight(line,details);
-        // Activity Details is a separate next phase; no inert chevron or fake click.
+        gap(line,8);add(line,new Glyph(this,"chevron",GRAY),dp(14),dp(14));
+        tap(line,WHITE,10,()->{historyScrollY=historyScroll==null?0:historyScroll.getScrollY();openHistoryDetails(entry.id);});
         return line;
     }
+    private void recordCleanupHistory(boolean complete){
+        if(!history.add(cleanupEventId+(complete?":complete":":approved"),"cleanup",
+            complete?"Cleanup preview completed":"Cleanup preview approved",complete?"No files deleted":"Approved by you",
+            cleanup.total,cleanup.count,true,cleanup.amounts(),cleanupCategoryCounts))folderToast("Could not save activity");
+    }
+    private void openHistoryDetails(String id){
+        ActivityHistory.Entry entry=history.find(id);
+        if(entry==null){folderToast("Activity unavailable");openHistory();return;}
+        settingsVisible=true;historyVisible=true;historyDetailId=id;historyScroll=null;
+        setContentView(historyDetailsScreen(entry));
+    }
+    private LinearLayout historyDetailsScreen(ActivityHistory.Entry entry){
+        LinearLayout root=column();root.setBackgroundColor(BG);root.setPadding(dp(18),v(12),dp(18),v(12));
+        FrameLayout header=new FrameLayout(this);
+        header.addView(centered("Activity details",17,INK,600),new FrameLayout.LayoutParams(-1,-1));
+        FrameLayout back=new FrameLayout(this);
+        back.addView(new Glyph(this,"back",INK),new FrameLayout.LayoutParams(dp(24),dp(24),Gravity.CENTER));
+        back.setContentDescription(tr("Activity history"));tap(back,WHITE,22,this::openHistory);
+        header.addView(back,new FrameLayout.LayoutParams(dp(44),dp(44),Gravity.START|Gravity.CENTER_VERTICAL));
+        add(root,header,-1,dp(44));
+        ScrollView scroll=new ScrollView(this);scroll.setVerticalScrollBarEnabled(false);scroll.setOverScrollMode(View.OVER_SCROLL_NEVER);
+        LinearLayout body=column();body.setPadding(0,v(20),0,v(12));scroll.addView(body,new ScrollView.LayoutParams(-1,-2));
+        root.addView(scroll,new LinearLayout.LayoutParams(-1,0,1f));
+        boolean cleanupActivity=entry.category.equals("cleanup"),scan=entry.category.equals("scan");
+        boolean done=entry.title.equals("Cleanup preview completed");
+        boolean approved=entry.title.equals("Cleanup preview approved");
+        boolean protection=entry.category.equals("protection");
+        boolean removed=entry.title.endsWith("removed")||entry.title.endsWith("disabled");
+        LinearLayout hero=column();hero.setGravity(Gravity.CENTER_HORIZONTAL);
+        FrameLayout mark=new FrameLayout(this);mark.setBackground(round(done?0xffe8f6ec:PALE,38));
+        mark.addView(new Glyph(this,done?"check":scan?"sparkles":removed?"lock":"shield",done?GREEN:BLUE),new FrameLayout.LayoutParams(dp(36),dp(36),Gravity.CENTER));
+        add(hero,mark,dp(76),dp(76));space(hero,15);add(hero,centered(entry.title,24,INK,700),-1,-2);space(hero,8);
+        java.util.Date date=new java.util.Date(entry.timestamp);
+        String timestamp=android.text.format.DateFormat.getMediumDateFormat(this).format(date)+" · "+android.text.format.DateFormat.getTimeFormat(this).format(date);
+        add(hero,centered(timestamp,13,GRAY,400),-1,-2);space(hero,10);
+        String status=entry.preview?"Preview":protection?(removed?"Protection removed":"Protection added"):"Recorded";
+        TextView pill=centered(status,12,entry.preview?BLUE:removed?GRAY:GREEN,600);
+        pill.setBackground(round(entry.preview||removed?PALE:0xffe8f6ec,18));pill.setPadding(dp(14),dp(7),dp(14),dp(7));
+        add(hero,pill,-2,-2);add(body,hero,-1,-2);space(body,24);
+        if(cleanupActivity||scan){
+            LinearLayout summary=card();summary.setGravity(Gravity.CENTER_HORIZONTAL);pad(summary,16,20);
+            add(summary,centered(done?"Preview recovery":approved?"Approved preview size":"Sample opportunities",13,GRAY,400),-1,-2);space(summary,9);
+            add(summary,centered(entry.mb==0?"0 GB":ReviewPlan.gb(entry.mb),36,INK,700),-1,-2);space(summary,7);
+            if(entry.count>0)add(summary,centered(entry.count+" "+tr(done?"Preview items":approved?"Approved items":"Sample items"),14,GRAY,400),-1,-2);
+            add(body,summary,-1,-2);space(body,20);
+            add(body,txt(scan?"Sample breakdown":"Cleanup breakdown",14,GRAY,500),-1,-2);space(body,9);
+            LinearLayout breakdown=card();pad(breakdown,13,6);
+            if(entry.categoryMb!=null&&entry.categoryCounts!=null){
+                boolean first=true;
+                for(int i=0;i<3;i++){
+                    if(entry.categoryMb[i]<=0)continue;
+                    if(!first)thinRule(breakdown);first=false;
+                    LinearLayout line=row();line.setPadding(0,dp(11),0,dp(11));
+                    add(line,new Glyph(this,ReviewPlan.ICONS[i],BLUE),dp(23),dp(23));gap(line,12);
+                    LinearLayout labels=column();add(labels,txt(ReviewPlan.NAMES[i],14,INK,600),-1,-2);space(labels,5);
+                    add(labels,txt(entry.categoryCounts[i]+" "+tr("items"),12,GRAY,400),-1,-2);weight(line,labels);gap(line,8);
+                    add(line,txt(ReviewPlan.gb(entry.categoryMb[i]),14,INK,600),-2,-2);add(breakdown,line,-1,-2);
+                }
+            }else{
+                add(breakdown,centered("Breakdown was not recorded for this activity.",13,GRAY,400),-1,dp(66));
+            }
+            add(body,breakdown,-1,-2);space(body,19);
+            LinearLayout note=card(),line=row();
+            add(line,new Glyph(this,"shield",BLUE),dp(25),dp(25));gap(line,12);
+            LinearLayout labels=column();
+            add(labels,txt(cleanupActivity?"Approved by you":"Sample recommendations viewed",15,INK,600),-1,-2);space(labels,5);
+            add(labels,txt(cleanupActivity?"Simulation · No files were deleted.":"Preview only · No real scan performed",12,GRAY,400),-1,-2);
+            weight(line,labels);add(note,line,-1,-2);add(body,note,-1,-2);
+        }else{
+            add(body,txt("Recorded change",14,GRAY,500),-1,-2);space(body,9);
+            LinearLayout info=card();pad(info,16,15);
+            add(info,txt(entry.title,15,INK,600),-1,-2);space(info,9);
+            TextView target=txt("",16,INK,500);
+            target.setText(entry.title.startsWith("Smart protection")?tr(entry.detail):entry.detail);
+            target.setTextIsSelectable(true);add(info,target,-1,-2);space(info,10);
+            add(info,txt("Status at the time of activity",12,GRAY,400),-1,-2);space(info,5);
+            add(info,txt(status,14,removed?GRAY:GREEN,600),-1,-2);
+            add(body,info,-1,-2);space(body,19);
+            add(body,centered("This records a setting change, not a file deletion.",12,GRAY,400),-1,-2);
+        }
+        space(body,22);LinearLayout footer=row();footer.setGravity(Gravity.CENTER);
+        add(footer,new Glyph(this,"lock",GRAY),dp(16),dp(16));gap(footer,6);
+        add(footer,txt("Your data. Your decisions.",12,GRAY,400),-2,-2);add(body,footer,-1,-2);
+        return root;
+    }
+
     private void showHistoryFilter(View anchor){
         if(preferencePopup!=null)preferencePopup.dismiss();
         LinearLayout menu=column();menu.setPadding(dp(8),dp(6),dp(8),dp(6));menu.setBackground(round(WHITE,16));
@@ -475,7 +569,7 @@ public final class MainActivity extends Activity {
         popup.setOnDismissListener(()->{if(preferencePopup==popup)preferencePopup=null;});
         for(int i=0;i<HISTORY_FILTERS.length;i++){
             final int index=i;LinearLayout option=preferenceOption(null,HISTORY_FILTERS[i],historyFilter==i);
-            tap(option,WHITE,10,()->{historyFilter=index;popup.dismiss();openHistory();});add(menu,option,-1,dp(46));
+            tap(option,WHITE,10,()->{historyFilter=index;historyScrollY=0;popup.dismiss();openHistory();});add(menu,option,-1,dp(46));
         }
         popup.showAsDropDown(anchor,0,-anchor.getHeight(),Gravity.END);
         menu.setAlpha(0f);menu.setScaleX(.97f);menu.setScaleY(.97f);menu.animate().alpha(1f).scaleX(1f).scaleY(1f).setDuration(140).start();
@@ -976,11 +1070,14 @@ public final class MainActivity extends Activity {
         reviewPlan = new ReviewPlan();
         if(!prefs.discovery(0))reviewPlan.setSelected(0,false);
         reviewing = true;
-        recordHistory(null,"scan","Sample recommendations viewed","Preview only",prefs.recommendedMb(),0,true);
+        double[] offeredMb=new double[3];int[] offeredCounts=new int[3];int offeredTotal=0;
+        for(int i=0;i<3;i++)if(prefs.discovery(i)){offeredMb[i]=ReviewPlan.MB[i];offeredCounts[i]=ReviewPlan.COUNTS[i];offeredTotal+=offeredCounts[i];}
+        if(!history.add(null,"scan","Sample recommendations viewed","Preview only",prefs.recommendedMb(),offeredTotal,true,offeredMb,offeredCounts))folderToast("Could not save activity");
         setContentView(reviewScreen());
     }
     @Override public void onBackPressed() {
         if(cleaning)return;
+        if(historyVisible&&historyDetailId!=null){openHistory();return;}
         if(historyVisible){openSettings();return;}
         if(filesVisible || foldersVisible){openProtection();return;}
         if(protectionVisible || agentPrefsVisible){openSettings();return;}
@@ -1547,7 +1644,10 @@ public final class MainActivity extends Activity {
                 .setNegativeButton(tr("Cancel"),null)
                 .setPositiveButton(tr("Approve preview"),(d,w)->{
                     cleanup=new CleanupPreview(reviewPlan);cleanupEventId=java.util.UUID.randomUUID().toString();
-                    recordHistory(cleanupEventId+":approved","cleanup","Cleanup preview approved","Approved by you",cleanup.total,cleanup.count,true);
+                    cleanupCategoryCounts=new int[]{ReviewPlan.selectedCount(reviewPlan.draftCopies()),
+                        reviewPlan.isSelected(1)?ReviewPlan.selectedCount(reviewPlan.draftSimilar()):0,
+                        reviewPlan.isSelected(2)?ReviewPlan.selectedCount(reviewPlan.draftVideos()):0};
+                    recordCleanupHistory(false);
                     startCleanupAnimation();
                 }).show();
     }
@@ -1624,7 +1724,7 @@ public final class MainActivity extends Activity {
             @Override public void onAnimationEnd(android.animation.Animator animation){
                 if(isFinishing()||isDestroyed())return;
                 cleaning=false;completed=true;
-                if(cleanupEventId!=null)recordHistory(cleanupEventId+":complete","cleanup","Cleanup preview completed","No files deleted",cleanup.total,cleanup.count,true);
+                if(cleanupEventId!=null)recordCleanupHistory(true);
                 showCompletion(true);
             }
         });

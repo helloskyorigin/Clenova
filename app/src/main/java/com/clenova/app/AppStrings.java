@@ -5,6 +5,23 @@ import java.util.Map;
 final class AppStrings {
  private static final Map<String,String[]> TEXT=new HashMap<>();
  static {
+  TEXT.put("Activity details",new String[]{"गतिविधि विवरण","Detalles de actividad","Détails de l’activité","Aktivitätsdetails"});
+  TEXT.put("Activity unavailable",new String[]{"गतिविधि उपलब्ध नहीं","Actividad no disponible","Activité indisponible","Aktivität nicht verfügbar"});
+  TEXT.put("Protection removed",new String[]{"सुरक्षा हटाई गई","Protección retirada","Protection retirée","Schutz entfernt"});
+  TEXT.put("Protection added",new String[]{"सुरक्षा जोड़ी गई","Protección añadida","Protection ajoutée","Schutz hinzugefügt"});
+  TEXT.put("Recorded",new String[]{"दर्ज किया गया","Registrado","Enregistré","Aufgezeichnet"});
+  TEXT.put("Approved preview size",new String[]{"स्वीकृत प्रीव्यू आकार","Tamaño aprobado","Taille approuvée","Freigegebene Vorschaugröße"});
+  TEXT.put("Sample opportunities",new String[]{"नमूना सुझाव","Oportunidades de ejemplo","Opportunités d’exemple","Beispielmöglichkeiten"});
+  TEXT.put("Approved items",new String[]{"स्वीकृत आइटम","Elementos aprobados","Éléments approuvés","Freigegebene Elemente"});
+  TEXT.put("Sample items",new String[]{"नमूना आइटम","Elementos de ejemplo","Éléments d’exemple","Beispielelemente"});
+  TEXT.put("Sample breakdown",new String[]{"नमूना विवरण","Desglose de ejemplo","Répartition d’exemple","Beispielübersicht"});
+  TEXT.put("Cleanup breakdown",new String[]{"सफाई विवरण","Desglose de limpieza","Répartition du nettoyage","Bereinigungsübersicht"});
+  TEXT.put("Breakdown was not recorded for this activity.",new String[]{"इस गतिविधि का विस्तृत विवरण दर्ज नहीं है।","No se registró el desglose de esta actividad.","La répartition de cette activité n’a pas été enregistrée.","Für diese Aktivität wurde keine Aufschlüsselung erfasst."});
+  TEXT.put("Preview only · No real scan performed",new String[]{"प्रीव्यू · असली स्कैन नहीं हुआ","Vista previa · Sin análisis real","Aperçu · Aucun scan réel","Vorschau · Kein echter Scan"});
+  TEXT.put("Recorded change",new String[]{"दर्ज बदलाव","Cambio registrado","Modification enregistrée","Aufgezeichnete Änderung"});
+  TEXT.put("Status at the time of activity",new String[]{"गतिविधि के समय की स्थिति","Estado en el momento de la actividad","État au moment de l’activité","Status zum Zeitpunkt der Aktivität"});
+  TEXT.put("This records a setting change, not a file deletion.",new String[]{"यह सेटिंग बदलाव का रिकॉर्ड है, फ़ाइल हटाने का नहीं।","Registra un cambio de configuración, no un borrado.","Enregistre un réglage, pas une suppression.","Erfasst eine Einstellung, keine Dateilöschung."});
+  TEXT.put("Your data. Your decisions.",new String[]{"आपका डेटा। आपके फैसले।","Tus datos. Tus decisiones.","Vos données. Vos décisions.","Deine Daten. Deine Entscheidungen."});
   TEXT.put("Always in the loop.",new String[]{"हमेशा जानकारी में।","Siempre al tanto.","Toujours informé.","Immer auf dem Laufenden."});
   TEXT.put("See what your Agent has been up to.",new String[]{"देखें आपका एजेंट क्या कर रहा है।","Consulta la actividad de tu agente.","Consultez l’activité de votre agent.","Sieh, was dein Agent gemacht hat."});
   TEXT.put("Preview recovery",new String[]{"प्रीव्यू में खाली जगह","Recuperación simulada","Récupération simulée","Simulierte Freigabe"});
