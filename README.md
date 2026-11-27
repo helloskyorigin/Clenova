@@ -70,3 +70,6 @@ Native privacy page with OS-reported app UID data bytes (including cache), label
 
 ## Help & support
 Native offline FAQ screen with seven current-build answers, real-time multilingual keyword search, single expanded answer with animated transitions, preserved query and expanded index on recreation, and empty results state. Contact support opens an email draft to hello.skyorigin@gmail.com (configured project contact, verify mailbox before release) containing app version and Android version only. User sends the message themselves. No files, logs or identifiers attached; fallback copies the email address if no handler exists. FAQ matcher tests added to CI.
+
+## Send feedback
+Settings > Send feedback provides four selectable categories, multiline input capped at 1000 UTF-16 units with live counter, disabled empty submission, optional app/Android version (on by default), and native mail draft to the configured support address. If no email app is available, the user can explicitly copy the draft including recipient and subject. No attachments, network submissions or delivery claims. Draft is retained in session and saved instance state, not persistent preferences; leaving/reopening in the same session does not discard it. FeedbackDraft JVM checks added to CI.

@@ -19,12 +19,13 @@ jobs:
       - uses: gradle/actions/setup-gradle@v4
       - name: Verify sample selection logic
         run: |
-          javac -d /tmp/clenova-tests app/src/main/java/com/clenova/app/ReviewPlan.java app/src/main/java/com/clenova/app/CleanupPreview.java app/src/main/java/com/clenova/app/StoragePreview.java tests/ReviewPlanTest.java app/src/main/java/com/clenova/app/AppStrings.java tests/AppStringsTest.java app/src/main/java/com/clenova/app/ProtectionPolicy.java tests/ProtectionPolicyTest.java app/src/main/java/com/clenova/app/FolderExclusion.java tests/FolderExclusionTest.java app/src/main/java/com/clenova/app/FaqSearch.java tests/FaqSearchTest.java
+          javac -d /tmp/clenova-tests app/src/main/java/com/clenova/app/ReviewPlan.java app/src/main/java/com/clenova/app/CleanupPreview.java app/src/main/java/com/clenova/app/StoragePreview.java tests/ReviewPlanTest.java app/src/main/java/com/clenova/app/AppStrings.java tests/AppStringsTest.java app/src/main/java/com/clenova/app/ProtectionPolicy.java tests/ProtectionPolicyTest.java app/src/main/java/com/clenova/app/FolderExclusion.java tests/FolderExclusionTest.java app/src/main/java/com/clenova/app/FaqSearch.java tests/FaqSearchTest.java app/src/main/java/com/clenova/app/FeedbackDraft.java tests/FeedbackDraftTest.java
           java -cp /tmp/clenova-tests com.clenova.app.ReviewPlanTest
           java -cp /tmp/clenova-tests com.clenova.app.AppStringsTest
           java -cp /tmp/clenova-tests com.clenova.app.ProtectionPolicyTest
           java -cp /tmp/clenova-tests com.clenova.app.FolderExclusionTest
           java -cp /tmp/clenova-tests com.clenova.app.FaqSearchTest
+          java -cp /tmp/clenova-tests com.clenova.app.FeedbackDraftTest
       - run: ./gradlew :app:assembleDebug :app:lintDebug
       - uses: actions/upload-artifact@v4
         with:

@@ -47,7 +47,10 @@ public final class MainActivity extends Activity {
     private boolean[] videoDraft;
     private CleanupPreview cleanup;
     private boolean cleaning, completed, completionVisible;
-    private boolean storageVisible, settingsVisible, agentPrefsVisible, protectionVisible, foldersVisible, filesVisible, historyVisible, permissionsVisible, privacyVisible, helpVisible;
+    private boolean storageVisible, settingsVisible, agentPrefsVisible, protectionVisible, foldersVisible, filesVisible, historyVisible, permissionsVisible, privacyVisible, helpVisible, feedbackVisible;
+    private int feedbackCategory=0;
+    private String feedbackText="";
+    private boolean feedbackAppInfo=true;
     private String helpQuery="";
     private int expandedFaq=-1;
     private static final String SUPPORT_EMAIL="hello.skyorigin@gmail.com";
@@ -91,6 +94,7 @@ public final class MainActivity extends Activity {
             if(state.getBoolean("cleanup_running")){startCleanupAnimation();return;}
             if(completed && state.getBoolean("cleanup_visible")){showCompletion(false);return;}
         }
+        if(state!=null && state.getBoolean("feedback_visible")){feedbackCategory=FeedbackDraft.category(state.getInt("feedback_category"));feedbackText=state.getString("feedback_text","");feedbackAppInfo=state.getBoolean("feedback_app_info",true);openFeedback();return;}
         if(state!=null && state.getBoolean("help_visible")){helpQuery=state.getString("help_query","");expandedFaq=state.getInt("expanded_faq",-1);openHelpSupport();return;}
         if(state!=null && state.getBoolean("privacy_visible")){openPrivacyData();return;}
         if(state!=null && state.getBoolean("permissions_visible")){openAppPermissions();return;}
@@ -115,6 +119,7 @@ public final class MainActivity extends Activity {
         state.putBoolean("permissions_visible",permissionsVisible);
         state.putBoolean("privacy_visible",privacyVisible);
         state.putBoolean("help_visible",helpVisible);
+        if(feedbackVisible){state.putBoolean("feedback_visible",true);state.putInt("feedback_category",feedbackCategory);state.putString("feedback_text",feedbackText);state.putBoolean("feedback_app_info",feedbackAppInfo);}
         state.putString("help_query",helpQuery);
         state.putInt("expanded_faq",expandedFaq);
         state.putInt("history_filter",historyFilter);
@@ -257,7 +262,7 @@ public final class MainActivity extends Activity {
         add(l,settings,dp(44),dp(44)); return l;
     }
     private void openSettings(){
-        helpVisible=false;hideHelpKeyboard();permissionsVisible=false;privacyVisible=false;
+        feedbackVisible=false;helpVisible=false;hideHelpKeyboard();permissionsVisible=false;privacyVisible=false;
         historyDetailId=null;historyScroll=null;historyScrollY=0;historyVisible=false;filesVisible=false;foldersVisible=false;protectionVisible=false;agentPrefsVisible=false;settingsVisible=true;setContentView(settingsScreen());
     }
     private LinearLayout settingsScreen(){
@@ -315,6 +320,7 @@ public final class MainActivity extends Activity {
             else if(item[1].equals("App permissions"))tap(line,WHITE,0,this::openAppPermissions);
             else if(item[1].equals("Privacy & data"))tap(line,WHITE,0,this::openPrivacyData);
             else if(item[1].equals("Help & support"))tap(line,WHITE,0,()->{helpQuery="";expandedFaq=-1;openHelpSupport();});
+            else if(item[1].equals("Send feedback"))tap(line,WHITE,0,this::openFeedback);
             add(group,line,-1,-2);
             if(i<items.length-1){
                 View divider=new View(this);divider.setBackgroundColor(surface(0xffeeeef0));
@@ -413,6 +419,111 @@ public final class MainActivity extends Activity {
         super.onRequestPermissionsResult(requestCode,permissions,grantResults);
         if(requestCode==REQUEST_NOTIFICATION_ACCESS&&permissionsVisible)openAppPermissions();
     }
+    private void openFeedback(){
+        feedbackVisible=true;settingsVisible=true;setContentView(feedbackScreen());
+    }
+    private void leaveFeedback(){
+        // Keep unsent draft in memory for this session, not in persistent preferences.
+        hideHelpKeyboard();openSettings();
+    }
+    private LinearLayout feedbackScreen(){
+        LinearLayout root=column();root.setBackgroundColor(BG);root.setPadding(dp(18),v(12),dp(18),v(12));root.setFocusableInTouchMode(true);
+        FrameLayout header=new FrameLayout(this);
+        header.addView(centered("Send feedback",17,INK,600),new FrameLayout.LayoutParams(-1,-1));
+        FrameLayout back=new FrameLayout(this);
+        back.addView(new Glyph(this,"back",INK),new FrameLayout.LayoutParams(dp(24),dp(24),Gravity.CENTER));
+        back.setContentDescription(tr("Back to Settings"));tap(back,WHITE,22,this::leaveFeedback);
+        header.addView(back,new FrameLayout.LayoutParams(dp(44),dp(44),Gravity.START|Gravity.CENTER_VERTICAL));add(root,header,-1,dp(44));
+        ScrollView scroll=new ScrollView(this);scroll.setVerticalScrollBarEnabled(false);scroll.setOverScrollMode(View.OVER_SCROLL_NEVER);scroll.setFillViewport(false);
+        LinearLayout body=column();body.setPadding(0,v(14),0,v(12));scroll.addView(body,new ScrollView.LayoutParams(-1,-2));
+        root.addView(scroll,new LinearLayout.LayoutParams(-1,0,1f));
+        LinearLayout hero=column();hero.setGravity(Gravity.CENTER_HORIZONTAL);
+        FrameLayout mark=new FrameLayout(this);mark.setBackground(round(PALE,20));
+        mark.addView(new Glyph(this,"feedback",BLUE),new FrameLayout.LayoutParams(dp(35),dp(35),Gravity.CENTER));
+        add(hero,mark,dp(68),dp(68));space(hero,12);
+        add(hero,centered("Make us better.",25,INK,700),-1,-2);space(hero,6);
+        add(hero,centered("Help us build a better Clenova for you.",14,GRAY,400),-1,-2);
+        add(body,hero,-1,-2);space(body,20);
+        add(body,txt("What's it about?",14,GRAY,500),-1,-2);space(body,9);
+        LinearLayout categories=column();add(body,categories,-1,-2);renderFeedbackCategories(categories);
+        space(body,18);add(body,txt("Your feedback",14,GRAY,500),-1,-2);space(body,9);
+        LinearLayout field=card();pad(field,14,10);
+        android.widget.EditText input=new android.widget.EditText(this);
+        input.setInputType(android.text.InputType.TYPE_CLASS_TEXT|android.text.InputType.TYPE_TEXT_FLAG_MULTI_LINE|android.text.InputType.TYPE_TEXT_FLAG_CAP_SENTENCES);
+        input.setGravity(Gravity.TOP|Gravity.START);input.setTextColor(INK);input.setHintTextColor(GRAY);input.setTextSize(15);
+        input.setBackgroundColor(Color.TRANSPARENT);input.setPadding(0,dp(4),0,dp(4));input.setMinLines(4);input.setMaxLines(6);
+        input.setFilters(new android.text.InputFilter[]{new android.text.InputFilter.LengthFilter(FeedbackDraft.MAX_LENGTH)});
+        input.setHint(tr("Tell us what's on your mind..."));input.setContentDescription(tr("Your feedback"));
+        input.setText(feedbackText);input.setSelection(input.length());add(field,input,-1,-2);
+        TextView counter=txt(feedbackText.length()+"/"+FeedbackDraft.MAX_LENGTH,12,GRAY,400);counter.setGravity(Gravity.END);
+        space(field,6);add(field,counter,-1,-2);add(body,field,-1,-2);space(body,14);
+        LinearLayout optional=card();pad(optional,13,4);
+        add(optional,agentToggle("info","Include app information","App version & Android version only",feedbackAppInfo,value->feedbackAppInfo=value),-1,-2);add(body,optional,-1,-2);
+        space(body,13);
+        LinearLayout note=row();note.setGravity(Gravity.CENTER);add(note,new Glyph(this,"lock",GRAY),dp(15),dp(15));gap(note,6);
+        add(note,txt("No personal files are attached.",12,GRAY,400),-2,-2);add(body,note,-1,-2);space(body,5);
+        LinearLayout send=row();send.setGravity(Gravity.CENTER);add(send,new Glyph(this,"send",Color.WHITE),dp(21),dp(21));gap(send,8);
+        add(send,txt("Send feedback",16,Color.WHITE,600),-2,-2);
+        tap(send,BLUE,26,this::sendFeedbackDraft);send.setContentDescription(tr("Send feedback"));
+        updateFeedbackSend(send);space(root,6);add(root,send,-1,dp(52));
+        space(root,7);add(root,centered("Opens your email app. You send the message.",11,GRAY,400),-1,-2);
+        input.addTextChangedListener(new android.text.TextWatcher(){
+            public void beforeTextChanged(CharSequence text,int start,int count,int after){}
+            public void onTextChanged(CharSequence text,int start,int before,int count){
+                feedbackText=text.toString();counter.setText(feedbackText.length()+"/"+FeedbackDraft.MAX_LENGTH);updateFeedbackSend(send);
+            }
+            public void afterTextChanged(android.text.Editable text){}
+        });
+        root.requestFocus();return root;
+    }
+    private void updateFeedbackSend(View send){
+        boolean ready=FeedbackDraft.valid(feedbackText);
+        send.setEnabled(ready);send.setAlpha(ready?1f:.48f);
+    }
+    private void renderFeedbackCategories(LinearLayout target){
+        target.removeAllViews();
+        String[] icons={"lightbulb","bug","sparkles","message"};
+        for(int pair=0;pair<2;pair++){
+            if(pair>0)space(target,9);
+            LinearLayout line=row();
+            for(int j=0;j<2;j++){
+                if(j>0)gap(line,9);
+                final int index=pair*2+j;boolean selected=feedbackCategory==index;
+                LinearLayout tile=column();tile.setMinimumHeight(dp(77));pad(tile,13,11);
+                LinearLayout top=row();add(top,new Glyph(this,icons[index],selected?BLUE:GRAY),dp(23),dp(23));stretch(top);
+                if(selected)add(top,new Glyph(this,"check",BLUE),dp(16),dp(16));add(tile,top,-1,-2);space(tile,9);
+                add(tile,txt(FeedbackDraft.CATEGORIES[index],14,selected?BLUE:INK,500),-1,-2);
+                tap(tile,selected?PALE:WHITE,15,()->{feedbackCategory=index;renderFeedbackCategories(target);});
+                GradientDrawable bg=round(selected?PALE:WHITE,15);
+                if(selected)bg.setStroke(dp(1),BLUE);
+                tile.setBackground(new RippleDrawable(ColorStateList.valueOf(0x19000000),bg,round(WHITE,15)));
+                tile.setSelected(selected);tile.setContentDescription(tr(FeedbackDraft.CATEGORIES[index])+(selected?", "+tr("Selected"):""));
+                weight(line,tile);
+            }
+            add(target,line,-1,-2);
+        }
+    }
+    private void sendFeedbackDraft(){
+        if(!FeedbackDraft.valid(feedbackText))return;
+        hideHelpKeyboard();
+        String subject=FeedbackDraft.subject(feedbackCategory);
+        String body=FeedbackDraft.body(feedbackCategory,feedbackText,feedbackAppInfo,feedbackAppInfo?supportAppVersion():"",feedbackAppInfo?android.os.Build.VERSION.RELEASE:"");
+        android.net.Uri mail=android.net.Uri.parse("mailto:"+SUPPORT_EMAIL+"?subject="+android.net.Uri.encode(subject)+"&body="+android.net.Uri.encode(body));
+        try{startActivity(new android.content.Intent(android.content.Intent.ACTION_SENDTO,mail));}
+        catch(android.content.ActivityNotFoundException|SecurityException e){
+            privacyDialog().setTitle(tr("No email app available"))
+                .setMessage(tr("Copy the draft to send it manually.")+"\n\n"+SUPPORT_EMAIL)
+                .setNegativeButton(tr("Cancel"),null).setPositiveButton(tr("Copy feedback"),(d,w)->{
+                    android.content.ClipboardManager clipboard=getSystemService(android.content.ClipboardManager.class);
+                    if(clipboard!=null){
+                        clipboard.setPrimaryClip(android.content.ClipData.newPlainText("Clenova feedback","To: "+SUPPORT_EMAIL+"\nSubject: "+subject+"\n\n"+body));
+                        folderToast("Feedback copied");
+                    }
+                }).show();
+        }
+        // Do not clear the draft or claim the email was sent: external mail delivery is unobservable.
+    }
+
     private static final String[][] HELP_FAQS={{"How does the AI Agent work?","The Agent is designed to find cleanup opportunities for your approval. This preview shows sample recommendations; automatic scanning is not active yet."},
         {"Can Clenova delete files automatically?","No. Cleanup requires your approval. In this preview, cleanup is simulated and no personal files are deleted."},
         {"How do I protect important files?","Open Settings > Cleanup protection > Protected files or Protected folders. Select items with the Android picker. Exclusions are saved locally; the real cleanup engine is not active yet."},
@@ -1412,7 +1523,7 @@ public final class MainActivity extends Activity {
         add(c,approve,-1,dp(51)); return c;
     }
     private void showHome() {
-        helpVisible=false;permissionsVisible=false;privacyVisible=false;
+        feedbackVisible=false;helpVisible=false;permissionsVisible=false;privacyVisible=false;
         storageVisible=false;
         settingsVisible=false;agentPrefsVisible=false;protectionVisible=false;foldersVisible=false;filesVisible=false;historyVisible=false;
         completionVisible=false;
@@ -1431,6 +1542,7 @@ public final class MainActivity extends Activity {
     }
     @Override public void onBackPressed() {
         if(cleaning)return;
+        if(feedbackVisible){leaveFeedback();return;}
         if(helpVisible||privacyVisible||permissionsVisible){openSettings();return;}
         if(historyVisible&&historyDetailId!=null){openHistory();return;}
         if(historyVisible){openSettings();return;}
@@ -2261,6 +2373,10 @@ public final class MainActivity extends Activity {
                 case "close":path(c,6,6,18,18);path(c,18,6,6,18);break;
                 case "chevron_up":path(c,5,15,12,8,19,15);break;
                 case "chevron_down":path(c,5,9,12,16,19,9);break;
+                case "feedback":path(c,3,3,21,3,21,17,9,17,3,21,3,3);path(c,7,8,17,8);path(c,7,12,14,12);break;
+                case "lightbulb":c.drawArc(new RectF(5,2,19,16),155,230,false,p);path(c,6,11,9,16,9,18,15,18,15,16,18,11);path(c,10,21,14,21);break;
+                case "bug":c.drawRoundRect(new RectF(7,7,17,21),5,5,p);c.drawArc(new RectF(9,2,15,9),180,180,false,p);path(c,12,9,12,21);path(c,3,7,7,11);path(c,17,11,21,7);path(c,3,14,7,14);path(c,17,14,21,14);path(c,3,21,7,17);path(c,17,17,21,21);break;
+                case "send":path(c,3,3,22,12,3,21,7,12,3,3);path(c,7,12,22,12);break;
                 case "folder":path(c,3,5,10,5,12,8,21,8,21,20,3,20,3,5);break;
                 case "folder_lock":path(c,3,18,3,5,10,5,12,8,21,8,21,12);
                     path(c,3,18,10,18);c.drawRoundRect(new RectF(13,15,22,22),2,2,p);c.drawArc(new RectF(15,10,20,18),180,180,false,p);break;

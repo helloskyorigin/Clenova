@@ -5,6 +5,22 @@ import java.util.Map;
 final class AppStrings {
  private static final Map<String,String[]> TEXT=new HashMap<>();
  static {
+  TEXT.put("Make us better.",new String[]{"हमें बेहतर बनाएँ।","Ayúdanos a mejorar.","Aidez-nous à progresser.","Hilf uns, besser zu werden."});
+  TEXT.put("Help us build a better Clenova for you.",new String[]{"Clenova को आपके लिए बेहतर बनाने में मदद करें।","Ayúdanos a mejorar Clenova para ti.","Aidez-nous à améliorer Clenova pour vous.","Hilf uns, Clenova für dich zu verbessern."});
+  TEXT.put("What's it about?",new String[]{"किस बारे में है?","¿De qué se trata?","De quoi s’agit-il ?","Worum geht es?"});
+  TEXT.put("Suggestion",new String[]{"सुझाव","Sugerencia","Suggestion","Vorschlag"});
+  TEXT.put("Report a bug",new String[]{"बग रिपोर्ट","Informar de un error","Signaler un bug","Fehler melden"});
+  TEXT.put("Feature request",new String[]{"नई सुविधा का सुझाव","Solicitud de función","Demande de fonctionnalité","Funktionswunsch"});
+  TEXT.put("Something else",new String[]{"कुछ और","Otro tema","Autre chose","Etwas anderes"});
+  TEXT.put("Your feedback",new String[]{"आपकी प्रतिक्रिया","Tus comentarios","Vos commentaires","Dein Feedback"});
+  TEXT.put("Tell us what's on your mind...",new String[]{"हमें अपने विचार बताएँ...","Cuéntanos qué piensas...","Dites-nous ce que vous pensez...","Sag uns, was du denkst..."});
+  TEXT.put("Include app information",new String[]{"ऐप जानकारी शामिल करें","Incluir información de la app","Inclure les informations de l’application","App-Informationen hinzufügen"});
+  TEXT.put("App version & Android version only",new String[]{"सिर्फ ऐप और Android संस्करण","Solo versión de la app y Android","Versions de l’application et d’Android uniquement","Nur App- und Android-Version"});
+  TEXT.put("No personal files are attached.",new String[]{"कोई निजी फ़ाइल संलग्न नहीं है।","No se adjuntan archivos personales.","Aucun fichier personnel joint.","Keine persönlichen Dateien angehängt."});
+  TEXT.put("Opens your email app. You send the message.",new String[]{"ईमेल ऐप खुलेगा। संदेश आप भेजेंगे।","Abre tu correo. Tú envías el mensaje.","Ouvre votre messagerie. Vous envoyez le message.","Öffnet deine E-Mail-App. Du sendest die Nachricht."});
+  TEXT.put("Copy the draft to send it manually.",new String[]{"मैन्युअल रूप से भेजने के लिए ड्राफ्ट कॉपी करें।","Copia el borrador para enviarlo manualmente.","Copiez le brouillon pour l’envoyer manuellement.","Kopiere den Entwurf, um ihn selbst zu senden."});
+  TEXT.put("Copy feedback",new String[]{"प्रतिक्रिया कॉपी करें","Copiar comentarios","Copier les commentaires","Feedback kopieren"});
+  TEXT.put("Feedback copied",new String[]{"प्रतिक्रिया कॉपी हुई","Comentarios copiados","Commentaires copiés","Feedback kopiert"});
   TEXT.put("We're here for you.",new String[]{"हम आपके साथ हैं।","Estamos aquí para ti.","Nous sommes là pour vous.","Wir sind für dich da."});
   TEXT.put("Find answers. Get back to what matters.",new String[]{"जवाब पाएँ। ज़रूरी काम पर लौटें।","Encuentra respuestas y vuelve a lo importante.","Trouvez vos réponses et revenez à l’essentiel.","Finde Antworten und widme dich dem Wesentlichen."});
   TEXT.put("Search for answers",new String[]{"जवाब खोजें","Buscar respuestas","Rechercher des réponses","Antworten suchen"});
