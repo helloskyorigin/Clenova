@@ -36,6 +36,13 @@ public final class MainActivity extends Activity {
     private float compact = 1f;
     private boolean reviewing;
     private boolean cleanVisible;
+    private static final int REQUEST_SCAN_MEDIA=96;
+    private SmartMediaScan runningScan;
+    private SmartMediaScan.Result scanResult;
+    private boolean scanVisible, scanReviewVisible, requestingScan;
+    private final boolean[] scanSelected=new boolean[3];
+    private TextView scanStatus,scanProgress;
+    private android.widget.ProgressBar scanBar;
     private ScrollView cleanScroll;
     private int cleanScrollY;
     private ReviewPlan reviewPlan;
@@ -162,6 +169,7 @@ public final class MainActivity extends Activity {
         if(cleanupAnimation!=null){
             cleanupAnimation.removeAllListeners();cleanupAnimation.removeAllUpdateListeners();cleanupAnimation.cancel();
         }
+        if(runningScan!=null){runningScan.cancel();runningScan=null;}
         if(preferencePopup!=null)preferencePopup.dismiss();
         if(ratingDialog!=null)ratingDialog.dismiss();
         super.onDestroy();
@@ -276,7 +284,7 @@ public final class MainActivity extends Activity {
         if(cleanVisible)showClean();else showHome();
     }
     private void showClean(){
-        cleanVisible=true;settingsVisible=false;storageVisible=false;reviewing=false;
+        scanVisible=false;scanReviewVisible=false;cleanVisible=true;settingsVisible=false;storageVisible=false;reviewing=false;
         aboutVisible=false;policyVisible=false;termsVisible=false;feedbackVisible=false;helpVisible=false;
         permissionsVisible=false;privacyVisible=false;historyVisible=false;agentPrefsVisible=false;protectionVisible=false;foldersVisible=false;filesVisible=false;
         setContentView(cleanScreen());
@@ -296,11 +304,11 @@ public final class MainActivity extends Activity {
         LinearLayout hero=card();pad(hero,17,16);
         LinearLayout top=row();LinearLayout copy=column();
         LinearLayout kicker=row();add(kicker,new Glyph(this,"sparkles",BLUE),dp(15),dp(15));gap(kicker,5);weight(kicker,txt("SMART CLEANUP",11,BLUE,600));add(copy,kicker,-1,-2);space(copy,11);
-        add(copy,txt("—",35,INK,700),-1,-2);space(copy,5);add(copy,txt("Space you could recover",13,GRAY,400),-1,-2);
-        space(copy,5);add(copy,txt("Not scanned yet",12,GRAY,500),-1,-2);weight(top,copy);gap(top,10);
+        add(copy,txt(scanResult==null?"—":scanBytes(scanResult.total()),35,INK,700),-1,-2);space(copy,5);add(copy,txt("Space you could recover",13,GRAY,400),-1,-2);
+        space(copy,5);add(copy,txt(scanResult==null?"Not scanned yet":"Last scan · Review candidates",12,GRAY,500),-1,-2);weight(top,copy);gap(top,10);
         FrameLayout ring=new FrameLayout(this);ring.addView(new CleanScanMark(this),new FrameLayout.LayoutParams(-1,-1));add(top,ring,dp(92),dp(92));add(hero,top,-1,-2);space(hero,17);
         LinearLayout scan=row();scan.setGravity(Gravity.CENTER);add(scan,new Glyph(this,"scan",Color.WHITE),dp(21),dp(21));gap(scan,8);add(scan,txt("Smart Scan",16,Color.WHITE,600),-2,-2);
-        tap(scan,BLUE,26,()->cleanPending("Smart Scan"));add(hero,scan,-1,dp(50));
+        tap(scan,BLUE,26,this::requestSmartScan);add(hero,scan,-1,dp(50));
         add(body,hero,-1,-2);space(body,20);
         LinearLayout section=row();weight(section,txt("Media cleanup",20,INK,700));add(section,txt("Gallery",12,GRAY,400),-2,-2);add(body,section,-1,-2);space(body,10);
         String[][] media={{"copy","Duplicates"},{"images","Similar photos"},{"video","Large videos"},{"screenshot","Screenshots"}};
@@ -336,6 +344,123 @@ public final class MainActivity extends Activity {
         add(footer,new Glyph(this,"shield",GREEN),dp(16),dp(16));gap(footer,6);add(footer,txt("Always protected. Always your choice.",12,GRAY,400),-2,-2);add(body,footer,-1,-2);
         space(root,6);add(root,navigation(),-1,dp(64));return root;
     }
+    private String scanBytes(long bytes){
+        if(bytes>=1024L*1024*1024)return String.format(java.util.Locale.US,"%.2f GB",bytes/(1024d*1024*1024));
+        if(bytes>=1024L*1024)return String.format(java.util.Locale.US,"%.1f MB",bytes/(1024d*1024));
+        if(bytes>=1024)return String.format(java.util.Locale.US,"%.1f KB",bytes/1024d);
+        return bytes+" B";
+    }
+    private void requestSmartScan(){
+        if(requestingScan||runningScan!=null)return;
+        if(SmartMediaScan.hasAccess(this)){startSmartScan();return;}
+        privacyDialog().setTitle(tr("Media access needed"))
+            .setMessage(tr("Smart Scan reads only the photos and videos you allow. Nothing is deleted."))
+            .setNegativeButton(tr("Cancel"),null).setPositiveButton(tr("Continue"),(d,w)->{
+                requestingScan=true;
+                if(android.os.Build.VERSION.SDK_INT>=34)requestPermissions(new String[]{android.Manifest.permission.READ_MEDIA_IMAGES,android.Manifest.permission.READ_MEDIA_VIDEO,android.Manifest.permission.READ_MEDIA_VISUAL_USER_SELECTED},REQUEST_SCAN_MEDIA);
+                else if(android.os.Build.VERSION.SDK_INT>=33)requestPermissions(new String[]{android.Manifest.permission.READ_MEDIA_IMAGES,android.Manifest.permission.READ_MEDIA_VIDEO},REQUEST_SCAN_MEDIA);
+                else requestPermissions(new String[]{android.Manifest.permission.READ_EXTERNAL_STORAGE},REQUEST_SCAN_MEDIA);
+            }).show();
+    }
+    private LinearLayout scanShell(String title,Runnable back){
+        LinearLayout root=column();root.setBackgroundColor(BG);root.setPadding(dp(18),v(12),dp(18),v(12));
+        FrameLayout header=new FrameLayout(this);header.addView(centered(title,17,INK,600),new FrameLayout.LayoutParams(-1,-1));
+        FrameLayout arrow=new FrameLayout(this);arrow.addView(new Glyph(this,"back",INK),new FrameLayout.LayoutParams(dp(24),dp(24),Gravity.CENTER));tap(arrow,WHITE,22,back);arrow.setContentDescription(tr("Back"));
+        header.addView(arrow,new FrameLayout.LayoutParams(dp(44),dp(44),Gravity.START|Gravity.CENTER_VERTICAL));add(root,header,-1,dp(44));return root;
+    }
+    private LinearLayout scanBody(LinearLayout root){
+        ScrollView scroll=new ScrollView(this);scroll.setVerticalScrollBarEnabled(false);scroll.setOverScrollMode(View.OVER_SCROLL_NEVER);
+        LinearLayout body=column();body.setPadding(0,v(18),0,v(12));scroll.addView(body,new ScrollView.LayoutParams(-1,-2));root.addView(scroll,new LinearLayout.LayoutParams(-1,0,1f));return body;
+    }
+    private void scanButton(LinearLayout root,String label,boolean primary,Runnable action){
+        TextView button=centered(label,16,primary?Color.WHITE:INK,600);tap(button,primary?BLUE:WHITE,26,action);add(root,button,-1,dp(52));
+    }
+    private void startSmartScan(){
+        if(runningScan!=null)return;
+        if(cleanScroll!=null){cleanScrollY=cleanScroll.getScrollY();cleanScroll=null;}
+        scanVisible=true;scanReviewVisible=false;scanResult=null;
+        final SmartMediaScan job=new SmartMediaScan(this,prefs,protectedFiles,protectedFolders);runningScan=job;
+        LinearLayout root=scanShell("Smart Scan",this::cancelSmartScan),body=scanBody(root);
+        LinearLayout hero=column();hero.setGravity(Gravity.CENTER_HORIZONTAL);
+        FrameLayout ring=new FrameLayout(this);ring.addView(new CleanScanMark(this),new FrameLayout.LayoutParams(-1,-1));add(hero,ring,dp(164),dp(164));space(hero,18);
+        scanProgress=centered("Scanning",23,INK,700);add(hero,scanProgress,-1,-2);space(hero,8);
+        add(hero,centered("Finding what you don't need.",18,INK,600),-1,-2);space(hero,6);
+        add(hero,centered("Analyzing accessible photos and videos.",13,GRAY,400),-1,-2);add(body,hero,-1,-2);space(body,20);
+        LinearLayout status=card();scanStatus=txt("Reading media library",15,INK,600);add(status,scanStatus,-1,-2);space(status,13);
+        scanBar=new android.widget.ProgressBar(this,null,android.R.attr.progressBarStyleHorizontal);
+        scanBar.setIndeterminate(true);scanBar.setIndeterminateTintList(ColorStateList.valueOf(BLUE));scanBar.setProgressTintList(ColorStateList.valueOf(BLUE));add(status,scanBar,-1,dp(8));space(status,12);
+        add(status,txt("Duplicate photos · Large videos · Screenshots",12,GRAY,400),-1,-2);add(body,status,-1,-2);space(body,16);
+        add(body,centered("Your files are safe during scanning.",12,GREEN,500),-1,-2);
+        scanButton(root,"Cancel scan",false,this::cancelSmartScan);setContentView(root);
+        new Thread(()->{
+            try{
+                SmartMediaScan.Result result=job.run((stage,done,total)->{
+                    if(done!=total&&done%16!=0)return;
+                    runOnUiThread(()->{if(runningScan!=job||isFinishing()||isDestroyed())return;
+                        scanStatus.setText(tr(new String[]{"Reading media library","Checking exact duplicates","Classifying media"}[stage]));
+                        scanBar.setIndeterminate(total<=0);if(total>0){scanBar.setMax(total);scanBar.setProgress(done);scanProgress.setText(done+" / "+total);}else scanProgress.setText(tr("Scanning"));
+                    });
+                });
+                runOnUiThread(()->{if(runningScan!=job||isFinishing()||isDestroyed())return;runningScan=null;scanResult=result;
+                    java.util.Arrays.fill(scanSelected,false);showScanResults();});
+            }catch(Exception e){runOnUiThread(()->{if(runningScan!=job||isFinishing()||isDestroyed())return;runningScan=null;showClean();folderToast("Scan could not finish");});}
+        },"Clenova-media-scan").start();
+    }
+    private void cancelSmartScan(){
+        if(runningScan!=null){runningScan.cancel();runningScan=null;}
+        scanVisible=false;scanReviewVisible=false;showClean();
+    }
+    private void showScanResults(){
+        if(scanResult==null){showClean();return;}
+        scanVisible=true;scanReviewVisible=false;
+        LinearLayout root=scanShell("Scan results",this::cancelSmartScan),body=scanBody(root);
+        LinearLayout hero=column();hero.setGravity(Gravity.CENTER_HORIZONTAL);add(hero,new Glyph(this,"selected",BLUE),dp(62),dp(62));space(hero,12);
+        add(hero,centered(scanResult.partial?"Partial scan results":"Scan complete",15,BLUE,600),-1,-2);space(hero,8);
+        add(hero,centered(scanBytes(scanResult.total()),35,INK,700),-1,-2);space(hero,5);add(hero,centered("Potential space to recover",14,GRAY,400),-1,-2);
+        space(hero,7);add(hero,centered(scanResult.examined+" "+tr("media items checked"),12,GRAY,400),-1,-2);add(body,hero,-1,-2);space(body,20);
+        add(body,txt("Cleanup opportunities",18,INK,700),-1,-2);space(body,10);
+        LinearLayout list=card();pad(list,13,4);TextView review=centered("Review cleanup",16,Color.WHITE,600);
+        for(int i=0;i<3;i++){
+            if(i>0)thinRule(list);final int index=i;LinearLayout line=row();line.setMinimumHeight(dp(65));line.setPadding(0,dp(9),0,dp(9));
+            add(line,new Glyph(this,new String[]{"copy","video","screenshot"}[i],BLUE),dp(25),dp(25));gap(line,12);
+            LinearLayout labels=column();add(labels,txt(SmartMediaScan.LABELS[i],15,INK,600),-1,-2);space(labels,5);
+            boolean scanned=i==1?scanResult.videosScanned:scanResult.imagesScanned;
+            add(labels,txt(scanned?scanResult.groups.get(i).size()+" · "+scanBytes(scanResult.bytes(i)):tr("Not scanned"),12,GRAY,400),-1,-2);weight(line,labels);
+            android.widget.CheckBox check=new android.widget.CheckBox(this);check.setButtonTintList(ColorStateList.valueOf(BLUE));check.setChecked(scanSelected[i]);check.setEnabled(!scanResult.groups.get(i).isEmpty());check.setContentDescription(tr(SmartMediaScan.LABELS[i]));check.setOnCheckedChangeListener((v,checked)->{scanSelected[index]=checked;updateScanReview(review);});add(line,check,dp(44),dp(44));add(list,line,-1,-2);
+        }
+        add(body,list,-1,-2);space(body,14);
+        LinearLayout scope=card();add(scope,txt("Scan coverage",15,INK,600),-1,-2);space(scope,8);
+        add(scope,txt("Similar photos, downloads, other files and unused apps are not scanned in this build.",13,GRAY,400),-1,-2);
+        if(scanResult.limited){space(scope,7);add(scope,txt("Limited media access. Only accessible items were checked.",13,GRAY,400),-1,-2);}
+        if(scanResult.partial){space(scope,7);add(scope,txt("Some media could not be checked or the scan limit was reached.",13,GRAY,400),-1,-2);}
+        space(scope,7);add(scope,txt("Large videos: 100 MiB or more. Screenshots: folder-based detection.",12,GRAY,400),-1,-2);
+        add(body,scope,-1,-2);space(body,12);
+        LinearLayout protection=card();add(protection,txt("Protection enabled",15,GREEN,600),-1,-2);space(protection,6);add(protection,txt("Protected or uncertain items are excluded. At least one exact duplicate is retained.",13,GRAY,400),-1,-2);add(body,protection,-1,-2);
+        tap(review,BLUE,26,this::showScanReview);updateScanReview(review);add(root,review,-1,dp(52));space(root,7);
+        add(root,centered("Nothing is deleted without your approval.",12,GRAY,400),-1,-2);setContentView(root);
+    }
+    private void updateScanReview(TextView button){
+        long bytes=0;for(int i=0;i<3;i++)if(scanSelected[i])bytes+=scanResult.bytes(i);
+        button.setEnabled(bytes>0);button.setAlpha(bytes>0?1f:.45f);button.setText(tr("Review cleanup")+" · "+scanBytes(bytes));
+    }
+    private void showScanReview(){
+        if(scanResult==null){showClean();return;}
+        scanReviewVisible=true;scanVisible=true;LinearLayout root=scanShell("Review cleanup",this::showScanResults),body=scanBody(root);
+        add(body,txt("Review selected media",21,INK,700),-1,-2);space(body,8);
+        add(body,txt("Read-only review. File deletion will be enabled in a later phase.",13,GRAY,400),-1,-2);space(body,14);
+        for(int i=0;i<3;i++)if(scanSelected[i]){
+            add(body,txt(SmartMediaScan.LABELS[i],15,INK,600),-1,-2);space(body,8);
+            LinearLayout group=card();int shown=0;
+            for(SmartMediaScan.Item item:scanResult.groups.get(i)){
+                if(shown==100)break;if(shown++>0)thinRule(group);LinearLayout line=row();line.setMinimumHeight(dp(48));
+                TextView name=txt(item.name,13,INK,500);name.setMaxLines(2);weight(line,name);gap(line,8);add(line,txt(scanBytes(item.bytes),12,GRAY,400),-2,-2);add(group,line,-1,-2);
+            }
+            int remaining=scanResult.groups.get(i).size()-shown;if(remaining>0){space(group,8);add(group,txt(remaining+" "+tr("more items not shown"),12,GRAY,400),-1,-2);}
+            add(body,group,-1,-2);space(body,15);
+        }
+        scanButton(root,"Done",true,this::showScanResults);setContentView(root);
+    }
+
     private void cleanPending(String label){
         // Main dashboard is implemented first. Never route manual actions to simulated Home cleanup.
         privacyDialog().setTitle(tr(label)).setMessage(tr("This cleaning tool is not available in this preview yet. No files have been scanned or changed.")).setPositiveButton(tr("Done"),null).show();
@@ -369,6 +494,7 @@ public final class MainActivity extends Activity {
         add(l,settings,dp(44),dp(44)); return l;
     }
     private void openSettings(){
+        scanResult=null; // protection rules may change in settings; re-scan before recommending again.
         if(cleanScroll!=null){cleanScrollY=cleanScroll.getScrollY();cleanScroll=null;}
         aboutVisible=false;aboutScroll=null;policyVisible=false;termsVisible=false;policyScroll=null;feedbackVisible=false;helpVisible=false;hideHelpKeyboard();permissionsVisible=false;privacyVisible=false;
         historyDetailId=null;historyScroll=null;historyScrollY=0;historyVisible=false;filesVisible=false;foldersVisible=false;protectionVisible=false;agentPrefsVisible=false;settingsVisible=true;setContentView(settingsScreen());
@@ -530,6 +656,7 @@ public final class MainActivity extends Activity {
     }
     @Override public void onRequestPermissionsResult(int requestCode,String[] permissions,int[] grantResults){
         super.onRequestPermissionsResult(requestCode,permissions,grantResults);
+        if(requestCode==REQUEST_SCAN_MEDIA){requestingScan=false;if(SmartMediaScan.hasAccess(this))startSmartScan();else privacyDialog().setTitle(tr("Media access needed")).setMessage(tr("Allow access to photos or videos to scan them. No files were scanned.")).setPositiveButton(tr("Done"),null).show();return;}
         if(requestCode==REQUEST_NOTIFICATION_ACCESS&&permissionsVisible)openAppPermissions();
     }
     private static final String[] RATING_LABELS={"Tap to rate your experience","Very poor","Could be better","It's okay","Pretty good","Love it!"};
@@ -686,7 +813,7 @@ public final class MainActivity extends Activity {
         LinearLayout intro=card();add(intro,txt("A smarter phone experience.",19,INK,700),-1,-2);space(intro,9);
         TextView message=txt("Clenova is built to make phone management effortless, intelligent and personal. Less clutter, more space, and complete control over what matters to you.",14,GRAY,400);
         message.setLineSpacing(dp(4),1f);add(intro,message,-1,-2);
-        if(PUBLIC_LISTING_URL.isEmpty()){space(intro,9);add(intro,txt("Preview build · Cleanup and scanning are simulated or not active yet.",12,GRAY,400),-1,-2);}
+        if(PUBLIC_LISTING_URL.isEmpty()){space(intro,9);add(intro,txt("Preview build · Manual media scan is read-only. Home cleanup is simulated.",12,GRAY,400),-1,-2);}
         add(body,intro,-1,-2);space(body,15);
         LinearLayout principles=card();pad(principles,14,5);
         add(principles,aboutPrinciple("shield","Privacy by design"),-1,-2);thinRule(principles);
@@ -908,10 +1035,10 @@ public final class MainActivity extends Activity {
         // Do not clear the draft or claim the email was sent: external mail delivery is unobservable.
     }
 
-    private static final String[][] HELP_FAQS={{"How does the AI Agent work?","The Agent is designed to find cleanup opportunities for your approval. This preview shows sample recommendations; automatic scanning is not active yet."},
+    private static final String[][] HELP_FAQS={{"How does the AI Agent work?","The Agent is designed to find cleanup opportunities for your approval. Home shows sample recommendations; Smart Scan reads accessible media on request. Automatic scanning is not active yet."},
         {"Can Clenova delete files automatically?","No. Cleanup requires your approval. In this preview, cleanup is simulated and no personal files are deleted."},
         {"How do I protect important files?","Open Settings > Cleanup protection > Protected files or Protected folders. Select items with the Android picker. Exclusions are saved locally; the real cleanup engine is not active yet."},
-        {"Why does Clenova need permissions?","Permissions support specific features. Open Settings > App permissions to manage access. This build requests notification permission only; file selection uses the Android picker."},
+        {"Why does Clenova need permissions?","Permissions support specific features. Open Settings > App permissions to manage access. Smart Scan requests optional photo and video access. Notification access is separate; file selection uses the Android picker."},
         {"Is my personal data safe?","Preferences, exclusions and activity history are stored locally. Clenova does not automatically upload personal files. You can export or clear your history in Privacy & data."},
         {"How do I clear my activity history?","Open Settings > Privacy & data > Clear activity history. Confirm to remove local activity records without changing your protection settings."},
         {"How do I change the app language or theme?","Open Settings and select Language or Appearance. Your choice is saved on your device."}};
@@ -1907,6 +2034,7 @@ public final class MainActivity extends Activity {
         add(c,approve,-1,dp(51)); return c;
     }
     private void showHome() {
+        scanResult=null;scanVisible=false;scanReviewVisible=false;
         cleanVisible=false;cleanScroll=null;cleanScrollY=0;
         aboutVisible=false;aboutScroll=null;policyVisible=false;termsVisible=false;policyScroll=null;feedbackVisible=false;helpVisible=false;permissionsVisible=false;privacyVisible=false;
         storageVisible=false;
@@ -1927,6 +2055,8 @@ public final class MainActivity extends Activity {
     }
     @Override public void onBackPressed() {
         if(cleaning)return;
+        if(scanReviewVisible){showScanResults();return;}
+        if(scanVisible){cancelSmartScan();return;}
         if(aboutVisible||policyVisible||termsVisible){openSettings();return;}
         if(feedbackVisible){leaveFeedback();return;}
         if(helpVisible||privacyVisible||permissionsVisible){openSettings();return;}

@@ -1,0 +1,144 @@
+package com.clenova.app;
+
+import android.content.*;
+import android.database.Cursor;
+import android.net.Uri;
+import android.os.*;
+import android.provider.MediaStore;
+import android.provider.DocumentsContract;
+import java.io.*;
+import java.security.MessageDigest;
+import java.util.*;
+
+/** Foreground, read-only MediaStore scan. No file deletion or network access. */
+final class SmartMediaScan {
+    static final int DUPLICATES=0,VIDEOS=1,SCREENSHOTS=2;
+    static final long LARGE_VIDEO=100L*1024*1024, HASH_BUDGET=512L*1024*1024;
+    static final int ROW_LIMIT=10000;
+    static final String[] LABELS={"Duplicate photos","Large videos","Screenshots"};
+    interface Progress {void update(int stage,int done,int total);}
+    static final class Item {
+        final Uri uri;final String name,path,volume;final long bytes,modified;final boolean image;final Boolean favorite;
+        boolean protectedItem;
+        Item(Uri u,String n,String p,String v,long b,long m,boolean image,Boolean f){uri=u;name=n;path=p;volume=v;bytes=b;modified=m;this.image=image;favorite=f;}
+    }
+    static final class Result {
+        final List<List<Item>> groups=Arrays.asList(new ArrayList<>(),new ArrayList<>(),new ArrayList<>());
+        int examined,protectedCount,failed;boolean partial,imagesScanned,videosScanned,limited;
+        long bytes(int category){long sum=0;for(Item item:groups.get(category))sum+=item.bytes;return sum;}
+        long total(){return bytes(0)+bytes(1)+bytes(2);}
+    }
+    private final Context context;private final ContentResolver resolver;private final CancellationSignal cancel=new CancellationSignal();
+    private final List<ProtectedFiles.Entry> files;private final List<ProtectedFolders.Entry> folders;
+    private final boolean favorite, recent,best;private final long now=System.currentTimeMillis();
+    SmartMediaScan(Context c,AppPreferences prefs,ProtectedFiles protectedFiles,ProtectedFolders protectedFolders){
+        context=c.getApplicationContext();resolver=context.getContentResolver();files=protectedFiles.entries();folders=protectedFolders.entries();
+        favorite=prefs.protection(0);recent=prefs.protection(1);best=prefs.protection(3);
+    }
+    void cancel(){cancel.cancel();}
+    private void check(){cancel.throwIfCanceled();}
+    private boolean granted(String p){return context.checkSelfPermission(p)==android.content.pm.PackageManager.PERMISSION_GRANTED;}
+    static boolean hasAccess(Context c){
+        if(Build.VERSION.SDK_INT>=33)return c.checkSelfPermission(android.Manifest.permission.READ_MEDIA_IMAGES)==0||c.checkSelfPermission(android.Manifest.permission.READ_MEDIA_VIDEO)==0||(Build.VERSION.SDK_INT>=34&&c.checkSelfPermission(android.Manifest.permission.READ_MEDIA_VISUAL_USER_SELECTED)==0);
+        return c.checkSelfPermission(android.Manifest.permission.READ_EXTERNAL_STORAGE)==0;
+    }
+    Result run(Progress progress)throws Exception{
+        Result r=new Result();List<Item> all=new ArrayList<>();
+        boolean selected=Build.VERSION.SDK_INT>=34&&granted(android.Manifest.permission.READ_MEDIA_VISUAL_USER_SELECTED);
+        boolean photos=Build.VERSION.SDK_INT>=33?granted(android.Manifest.permission.READ_MEDIA_IMAGES):hasAccess(context);
+        boolean videos=Build.VERSION.SDK_INT>=33?granted(android.Manifest.permission.READ_MEDIA_VIDEO):hasAccess(context);
+        r.limited=!photos||!videos;r.imagesScanned=photos||selected;r.videosScanned=videos||selected;
+        progress.update(0,0,0);
+        if(r.imagesScanned)read(true,all,r);if(r.videosScanned)read(false,all,r);
+        r.examined=all.size();check();
+        Map<Long,List<Item>> bySize=new HashMap<>();for(Item i:all){
+            i.protectedItem=explicitlyProtected(i)||(favorite&&!Boolean.FALSE.equals(i.favorite))||(recent&&(i.modified<=0||i.modified>=now-ProtectionPolicy.RECENT_WINDOW_MS));
+            if(i.image)bySize.computeIfAbsent(i.bytes,k->new ArrayList<>()).add(i);
+        }
+        List<Item> hashItems=new ArrayList<>();for(List<Item> batch:bySize.values())if(batch.size()>1)hashItems.addAll(batch);
+        hashItems.sort(Comparator.comparingLong((Item i)->i.bytes).thenComparing(i->i.uri.toString()));
+        Map<String,List<Item>> exact=new HashMap<>();long remaining=HASH_BUDGET;int done=0;
+        progress.update(1,0,hashItems.size());
+        for(Item i:hashItems){
+            check();if(i.bytes>remaining){r.partial=true;break;}
+            remaining-=i.bytes;
+            try{String hash=hash(i);exact.computeIfAbsent(i.bytes+":"+hash,k->new ArrayList<>()).add(i);}
+            catch(OperationCanceledException e){throw e;}catch(Exception e){r.failed++;r.partial=true;}
+            progress.update(1,++done,hashItems.size());
+        }
+        Set<String> allocated=new HashSet<>();
+        for(List<Item> group:exact.values()){
+            if(group.size()<2)continue;
+            group.sort(Comparator.comparing((Item i)->!i.protectedItem).thenComparingLong(i->i.modified).thenComparing(i->i.uri.toString()));
+            // Always retain at least one verified matching copy, even with protection toggles off.
+            Item keep=group.get(0);keep.protectedItem=true;
+            for(int k=1;k<group.size();k++){Item i=group.get(k);if(!i.protectedItem&&allocated.add(i.uri.toString()))r.groups.get(DUPLICATES).add(i);}
+        }
+        progress.update(2,0,all.size());int classified=0;
+        for(Item i:all){
+            check();
+            if(i.protectedItem){r.protectedCount++;}
+            else if(!allocated.contains(i.uri.toString())){
+                if(!i.image&&i.bytes>=LARGE_VIDEO){allocated.add(i.uri.toString());r.groups.get(VIDEOS).add(i);}
+                else if(i.image&&isScreenshot(i)){
+                    // Best-shot status is unknown for non-identical photos. Fail closed if enabled.
+                    if(best)r.protectedCount++;else{allocated.add(i.uri.toString());r.groups.get(SCREENSHOTS).add(i);}
+                }
+            }
+            if(++classified%128==0||classified==all.size())progress.update(2,classified,all.size());
+        }
+        for(List<Item> group:r.groups)group.sort(Comparator.comparingLong((Item i)->i.bytes).reversed().thenComparing(i->i.name));
+        check();return r;
+    }
+    private void read(boolean image,List<Item> out,Result r){
+        Uri base=image?MediaStore.Images.Media.EXTERNAL_CONTENT_URI:MediaStore.Video.Media.EXTERNAL_CONTENT_URI;
+        List<String> cols=new ArrayList<>(Arrays.asList("_id","_display_name","_size","date_modified"));
+        if(Build.VERSION.SDK_INT>=29){cols.add("relative_path");cols.add("volume_name");}
+        if(Build.VERSION.SDK_INT>=30)cols.add("is_favorite");
+        try(Cursor c=resolver.query(base,cols.toArray(new String[0]),null,null,"_id ASC",cancel)){
+            if(c==null){r.partial=true;r.failed++;return;}
+            int read=0;while(c.moveToNext()){
+                check();if(read++>=ROW_LIMIT){r.partial=true;break;}
+                long bytes=c.getLong(2);if(bytes<=0)continue;
+                String name=c.getString(1);if(name==null)name="Media";
+                String path=Build.VERSION.SDK_INT>=29?c.getString(4):null,volume=Build.VERSION.SDK_INT>=29?c.getString(5):null;
+                Boolean fav=Build.VERSION.SDK_INT>=30&&!c.isNull(6)?c.getInt(6)!=0:null;
+                Uri collection=base;
+                if(Build.VERSION.SDK_INT>=29&&volume!=null)collection=image?MediaStore.Images.Media.getContentUri(volume):MediaStore.Video.Media.getContentUri(volume);
+                out.add(new Item(ContentUris.withAppendedId(collection,c.getLong(0)),name,path,volume,bytes,c.getLong(3)*1000L,image,fav));
+            }
+        }catch(OperationCanceledException e){throw e;}catch(RuntimeException e){r.failed++;r.partial=true;}
+    }
+    private boolean explicitlyProtected(Item i){
+        String external="com.android.externalstorage.documents",media="com.android.providers.media.documents";
+        String id=i.volume==null||i.path==null?null:("external_primary".equals(i.volume)?"primary":i.volume)+":"+i.path+i.name;
+        for(ProtectedFolders.Entry e:folders){
+            // Unknown document-provider aliases or missing paths are conservatively excluded.
+            if(!external.equals(e.authority)||id==null)return true;
+            if(FolderExclusion.matches(e.authority,e.documentId,external,id))return true;
+        }
+        for(ProtectedFiles.Entry e:files){
+            Uri u=Uri.parse(e.key);if(u.equals(i.uri))return true;
+            if(external.equals(u.getAuthority())&&id!=null){
+                try{if(DocumentsContract.getDocumentId(u).equalsIgnoreCase(id))return true;}catch(RuntimeException error){return true;}
+            }else if(media.equals(u.getAuthority())){
+                try{String doc=DocumentsContract.getDocumentId(u);if(doc.equals((i.image?"image:":"video:")+i.uri.getLastPathSegment()))return true;}catch(RuntimeException error){return true;}
+            }else return true;
+        }
+        return false;
+    }
+    private boolean isScreenshot(Item i){
+        String path=i.path==null?"":i.path.toLowerCase(Locale.ROOT);
+        for(String part:path.split("/"))if(part.equals("screenshots")||part.equals("screenshot"))return true;
+        return false;
+    }
+    private String hash(Item i)throws Exception{
+        MessageDigest digest=MessageDigest.getInstance("SHA-256");long read=0;
+        try(InputStream in=resolver.openInputStream(i.uri)){
+            if(in==null)throw new IOException("Unreadable media");byte[] buf=new byte[65536];int n;
+            while((n=in.read(buf))!=-1){check();read+=n;if(read>i.bytes)throw new IOException("Media changed");digest.update(buf,0,n);}
+        }
+        if(read!=i.bytes)throw new IOException("Media size changed");
+        return android.util.Base64.encodeToString(digest.digest(),android.util.Base64.NO_WRAP);
+    }
+}
