@@ -67,3 +67,6 @@ Settings > App permissions reads Android runtime permission, notification channe
 
 ## Privacy & data
 Native privacy page with OS-reported app UID data bytes (including cache), labeled fallback to saved preference-file bytes, and real record/exclusion counts. Explicitly confirmed activity history JSON export through ACTION_CREATE_DOCUMENT; destination may be a user-selected cloud provider. Clear history removes local journal only. Reset clears five known Clenova preference stores and in-memory cleanup previews, leaving personal files, Android permissions, system notification channel settings and exported copies untouched. No broad storage permission or automatic uploads added. Errors are reported without claiming success.
+
+## Help & support
+Native offline FAQ screen with seven current-build answers, real-time multilingual keyword search, single expanded answer with animated transitions, preserved query and expanded index on recreation, and empty results state. Contact support opens an email draft to hello.skyorigin@gmail.com (configured project contact, verify mailbox before release) containing app version and Android version only. User sends the message themselves. No files, logs or identifiers attached; fallback copies the email address if no handler exists. FAQ matcher tests added to CI.

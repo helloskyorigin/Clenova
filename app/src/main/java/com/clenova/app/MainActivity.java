@@ -47,7 +47,10 @@ public final class MainActivity extends Activity {
     private boolean[] videoDraft;
     private CleanupPreview cleanup;
     private boolean cleaning, completed, completionVisible;
-    private boolean storageVisible, settingsVisible, agentPrefsVisible, protectionVisible, foldersVisible, filesVisible, historyVisible, permissionsVisible, privacyVisible;
+    private boolean storageVisible, settingsVisible, agentPrefsVisible, protectionVisible, foldersVisible, filesVisible, historyVisible, permissionsVisible, privacyVisible, helpVisible;
+    private String helpQuery="";
+    private int expandedFaq=-1;
+    private static final String SUPPORT_EMAIL="hello.skyorigin@gmail.com";
     private static final int EXPORT_ACTIVITY_HISTORY=95;
     private DevicePermissions devicePermissions;
     private static final int REQUEST_NOTIFICATION_ACCESS=94;
@@ -88,6 +91,7 @@ public final class MainActivity extends Activity {
             if(state.getBoolean("cleanup_running")){startCleanupAnimation();return;}
             if(completed && state.getBoolean("cleanup_visible")){showCompletion(false);return;}
         }
+        if(state!=null && state.getBoolean("help_visible")){helpQuery=state.getString("help_query","");expandedFaq=state.getInt("expanded_faq",-1);openHelpSupport();return;}
         if(state!=null && state.getBoolean("privacy_visible")){openPrivacyData();return;}
         if(state!=null && state.getBoolean("permissions_visible")){openAppPermissions();return;}
         if(state!=null && state.getBoolean("history_visible")){if(historyDetailId!=null){openHistoryDetails(historyDetailId);}else openHistory();return;}
@@ -110,6 +114,9 @@ public final class MainActivity extends Activity {
         state.putBoolean("history_visible",historyVisible);
         state.putBoolean("permissions_visible",permissionsVisible);
         state.putBoolean("privacy_visible",privacyVisible);
+        state.putBoolean("help_visible",helpVisible);
+        state.putString("help_query",helpQuery);
+        state.putInt("expanded_faq",expandedFaq);
         state.putInt("history_filter",historyFilter);
         state.putString("cleanup_event_id",cleanupEventId);
         state.putIntArray("cleanup_category_counts",cleanupCategoryCounts);
@@ -250,7 +257,7 @@ public final class MainActivity extends Activity {
         add(l,settings,dp(44),dp(44)); return l;
     }
     private void openSettings(){
-        permissionsVisible=false;privacyVisible=false;
+        helpVisible=false;hideHelpKeyboard();permissionsVisible=false;privacyVisible=false;
         historyDetailId=null;historyScroll=null;historyScrollY=0;historyVisible=false;filesVisible=false;foldersVisible=false;protectionVisible=false;agentPrefsVisible=false;settingsVisible=true;setContentView(settingsScreen());
     }
     private LinearLayout settingsScreen(){
@@ -307,6 +314,7 @@ public final class MainActivity extends Activity {
             else if(item[1].equals("Activity history"))tap(line,WHITE,0,()->{historyFilter=0;historyScrollY=0;openHistory();});
             else if(item[1].equals("App permissions"))tap(line,WHITE,0,this::openAppPermissions);
             else if(item[1].equals("Privacy & data"))tap(line,WHITE,0,this::openPrivacyData);
+            else if(item[1].equals("Help & support"))tap(line,WHITE,0,()->{helpQuery="";expandedFaq=-1;openHelpSupport();});
             add(group,line,-1,-2);
             if(i<items.length-1){
                 View divider=new View(this);divider.setBackgroundColor(surface(0xffeeeef0));
@@ -405,6 +413,129 @@ public final class MainActivity extends Activity {
         super.onRequestPermissionsResult(requestCode,permissions,grantResults);
         if(requestCode==REQUEST_NOTIFICATION_ACCESS&&permissionsVisible)openAppPermissions();
     }
+    private static final String[][] HELP_FAQS={{"How does the AI Agent work?","The Agent is designed to find cleanup opportunities for your approval. This preview shows sample recommendations; automatic scanning is not active yet."},
+        {"Can Clenova delete files automatically?","No. Cleanup requires your approval. In this preview, cleanup is simulated and no personal files are deleted."},
+        {"How do I protect important files?","Open Settings > Cleanup protection > Protected files or Protected folders. Select items with the Android picker. Exclusions are saved locally; the real cleanup engine is not active yet."},
+        {"Why does Clenova need permissions?","Permissions support specific features. Open Settings > App permissions to manage access. This build requests notification permission only; file selection uses the Android picker."},
+        {"Is my personal data safe?","Preferences, exclusions and activity history are stored locally. Clenova does not automatically upload personal files. You can export or clear your history in Privacy & data."},
+        {"How do I clear my activity history?","Open Settings > Privacy & data > Clear activity history. Confirm to remove local activity records without changing your protection settings."},
+        {"How do I change the app language or theme?","Open Settings and select Language or Appearance. Your choice is saved on your device."}};
+    private void hideHelpKeyboard(){
+        View focused=getCurrentFocus();
+        android.view.inputmethod.InputMethodManager manager=getSystemService(android.view.inputmethod.InputMethodManager.class);
+        if(focused!=null&&manager!=null)manager.hideSoftInputFromWindow(focused.getWindowToken(),0);
+    }
+    private void openHelpSupport(){
+        helpVisible=true;settingsVisible=true;setContentView(helpSupportScreen());
+    }
+    private LinearLayout helpSupportScreen(){
+        LinearLayout root=column();root.setBackgroundColor(BG);root.setPadding(dp(18),v(12),dp(18),v(12));
+        root.setFocusableInTouchMode(true);
+        FrameLayout header=new FrameLayout(this);
+        header.addView(centered("Help & support",17,INK,600),new FrameLayout.LayoutParams(-1,-1));
+        FrameLayout back=new FrameLayout(this);
+        back.addView(new Glyph(this,"back",INK),new FrameLayout.LayoutParams(dp(24),dp(24),Gravity.CENTER));
+        back.setContentDescription(tr("Back to Settings"));tap(back,WHITE,22,this::openSettings);
+        header.addView(back,new FrameLayout.LayoutParams(dp(44),dp(44),Gravity.START|Gravity.CENTER_VERTICAL));add(root,header,-1,dp(44));
+        ScrollView scroll=new ScrollView(this);scroll.setVerticalScrollBarEnabled(false);scroll.setOverScrollMode(View.OVER_SCROLL_NEVER);
+        LinearLayout body=column();body.setPadding(0,v(18),0,v(12));scroll.addView(body,new ScrollView.LayoutParams(-1,-2));
+        root.addView(scroll,new LinearLayout.LayoutParams(-1,0,1f));
+        LinearLayout hero=column();hero.setGravity(Gravity.CENTER_HORIZONTAL);
+        FrameLayout mark=new FrameLayout(this);mark.setBackground(round(PALE,20));
+        mark.addView(new Glyph(this,"headphones",BLUE),new FrameLayout.LayoutParams(dp(35),dp(35),Gravity.CENTER));
+        add(hero,mark,dp(68),dp(68));space(hero,13);
+        add(hero,centered("We're here for you.",25,INK,700),-1,-2);space(hero,7);
+        add(hero,centered("Find answers. Get back to what matters.",14,GRAY,400),-1,-2);
+        add(body,hero,-1,-2);space(body,22);
+        LinearLayout search=row();search.setBackground(round(WHITE,16));search.setPadding(dp(13),0,dp(8),0);
+        add(search,new Glyph(this,"search",GRAY),dp(21),dp(21));gap(search,10);
+        android.widget.EditText input=new android.widget.EditText(this);
+        input.setSingleLine(true);input.setTextColor(INK);input.setHintTextColor(GRAY);input.setTextSize(15);
+        input.setBackgroundColor(Color.TRANSPARENT);input.setPadding(0,0,0,0);
+        input.setHint(tr("Search for answers"));input.setContentDescription(tr("Search for answers"));
+        input.setInputType(android.text.InputType.TYPE_CLASS_TEXT);input.setImeOptions(android.view.inputmethod.EditorInfo.IME_ACTION_SEARCH);
+        input.setText(helpQuery);input.setSelection(input.length());weight(search,input);
+        FrameLayout clear=new FrameLayout(this);clear.addView(new Glyph(this,"close",GRAY),new FrameLayout.LayoutParams(dp(17),dp(17),Gravity.CENTER));
+        clear.setContentDescription(tr("Clear search"));tap(clear,WHITE,18,()->input.setText(""));
+        clear.setVisibility(helpQuery.isEmpty()?View.INVISIBLE:View.VISIBLE);add(search,clear,dp(36),dp(44));
+        add(body,search,-1,dp(52));space(body,22);
+        TextView heading=txt(helpQuery.trim().isEmpty()?"Popular questions":"Search results",14,GRAY,500);
+        add(body,heading,-1,-2);space(body,9);
+        LinearLayout results=card();pad(results,13,4);add(body,results,-1,-2);
+        renderFaqs(results,false);
+        input.addTextChangedListener(new android.text.TextWatcher(){
+            public void beforeTextChanged(CharSequence text,int start,int count,int after){}
+            public void onTextChanged(CharSequence text,int start,int before,int count){
+                helpQuery=text.toString();expandedFaq=-1;
+                heading.setText(tr(helpQuery.trim().isEmpty()?"Popular questions":"Search results"));
+                clear.setVisibility(helpQuery.isEmpty()?View.INVISIBLE:View.VISIBLE);renderFaqs(results,false);
+            }
+            public void afterTextChanged(android.text.Editable text){}
+        });
+        input.setOnEditorActionListener((view,action,event)->{
+            if(action==android.view.inputmethod.EditorInfo.IME_ACTION_SEARCH){hideHelpKeyboard();input.clearFocus();return true;}return false;
+        });
+        space(body,23);add(body,txt("Need more help?",14,GRAY,500),-1,-2);space(body,9);
+        LinearLayout contact=card(),line=row();pad(contact,13,13);
+        FrameLayout icon=new FrameLayout(this);icon.setBackground(round(PALE,13));
+        icon.addView(new Glyph(this,"message",BLUE),new FrameLayout.LayoutParams(dp(25),dp(25),Gravity.CENTER));
+        add(line,icon,dp(44),dp(44));gap(line,12);
+        LinearLayout copy=column();add(copy,txt("Contact support",15,INK,600),-1,-2);space(copy,5);
+        add(copy,txt("Send us an email",12,GRAY,400),-1,-2);weight(line,copy);gap(line,7);
+        add(line,new Glyph(this,"chevron",GRAY),dp(14),dp(14));add(contact,line,-1,-2);
+        tap(contact,WHITE,22,this::openSupportEmail);add(body,contact,-1,-2);space(body,20);
+        add(body,centered("Clenova · Always here to help.",12,GRAY,400),-1,-2);
+        root.requestFocus();return root;
+    }
+    private void renderFaqs(LinearLayout results,boolean animate){
+        if(animate){
+            android.transition.AutoTransition transition=new android.transition.AutoTransition();
+            transition.setDuration(180);android.transition.TransitionManager.beginDelayedTransition(results,transition);
+        }
+        results.removeAllViews();
+        String query=helpQuery.trim();int matches=0;
+        for(int i=0;i<HELP_FAQS.length;i++){
+            String question=HELP_FAQS[i][0],answer=HELP_FAQS[i][1];
+            if(!FaqSearch.matches(query,question+" "+answer+" "+tr(question)+" "+tr(answer)))continue;
+            if(matches++>0)thinRule(results);
+            final int index=i;boolean expanded=expandedFaq==i;
+            LinearLayout item=column();LinearLayout line=row();line.setMinimumHeight(dp(56));line.setPadding(0,dp(10),0,dp(10));
+            weight(line,txt(question,15,INK,500));gap(line,10);
+            add(line,new Glyph(this,expanded?"chevron_up":"chevron_down",GRAY),dp(16),dp(16));
+            line.setContentDescription(tr(question)+", "+tr(expanded?"Expanded":"Collapsed"));
+            tap(line,WHITE,10,()->{expandedFaq=expandedFaq==index?-1:index;renderFaqs(results,true);});
+            add(item,line,-1,-2);
+            if(expanded){TextView explanation=txt(answer,13,GRAY,400);explanation.setLineSpacing(dp(3),1f);
+                explanation.setPadding(0,0,dp(8),dp(13));add(item,explanation,-1,-2);}
+            add(results,item,-1,-2);
+        }
+        if(matches==0){
+            LinearLayout empty=column();empty.setGravity(Gravity.CENTER_HORIZONTAL);pad(empty,12,24);
+            add(empty,new Glyph(this,"search",GRAY),dp(29),dp(29));space(empty,10);
+            add(empty,centered("No answers found",15,INK,600),-1,-2);space(empty,6);
+            add(empty,centered("Try another keyword or contact support.",13,GRAY,400),-1,-2);add(results,empty,-1,-2);
+        }
+    }
+    private String supportAppVersion(){
+        try{String version=getPackageManager().getPackageInfo(getPackageName(),0).versionName;return version==null?tr("Unavailable"):version;}
+        catch(android.content.pm.PackageManager.NameNotFoundException e){return tr("Unavailable");}
+    }
+    private void openSupportEmail(){
+        hideHelpKeyboard();
+        String subject="Clenova support";
+        String body="\n\n"+tr("App version")+": "+supportAppVersion()+"\nAndroid: "+android.os.Build.VERSION.RELEASE;
+        // SENDTO confines handling to compatible email apps; no files, logs or identifiers attached.
+        android.net.Uri mail=android.net.Uri.parse("mailto:"+SUPPORT_EMAIL+"?subject="+android.net.Uri.encode(subject)+"&body="+android.net.Uri.encode(body));
+        try{startActivity(new android.content.Intent(android.content.Intent.ACTION_SENDTO,mail));}
+        catch(android.content.ActivityNotFoundException e){
+            privacyDialog().setTitle(tr("No email app available")).setMessage(SUPPORT_EMAIL)
+                .setNegativeButton(tr("Cancel"),null).setPositiveButton(tr("Copy email"),(d,w)->{
+                    android.content.ClipboardManager clipboard=getSystemService(android.content.ClipboardManager.class);
+                    if(clipboard!=null){clipboard.setPrimaryClip(android.content.ClipData.newPlainText("Support email",SUPPORT_EMAIL));folderToast("Email copied");}
+                }).show();
+        }
+    }
+
     private AlertDialog.Builder privacyDialog(){
         return new AlertDialog.Builder(this,dark?android.R.style.Theme_Material_Dialog_Alert:android.R.style.Theme_Material_Light_Dialog_Alert);
     }
@@ -1281,7 +1412,7 @@ public final class MainActivity extends Activity {
         add(c,approve,-1,dp(51)); return c;
     }
     private void showHome() {
-        permissionsVisible=false;privacyVisible=false;
+        helpVisible=false;permissionsVisible=false;privacyVisible=false;
         storageVisible=false;
         settingsVisible=false;agentPrefsVisible=false;protectionVisible=false;foldersVisible=false;filesVisible=false;historyVisible=false;
         completionVisible=false;
@@ -1300,7 +1431,7 @@ public final class MainActivity extends Activity {
     }
     @Override public void onBackPressed() {
         if(cleaning)return;
-        if(privacyVisible||permissionsVisible){openSettings();return;}
+        if(helpVisible||privacyVisible||permissionsVisible){openSettings();return;}
         if(historyVisible&&historyDetailId!=null){openHistory();return;}
         if(historyVisible){openSettings();return;}
         if(filesVisible || foldersVisible){openProtection();return;}
@@ -2125,6 +2256,11 @@ public final class MainActivity extends Activity {
                 case "database":c.drawOval(new RectF(4,2,20,9),p);path(c,4,5,4,19);path(c,20,5,20,19);c.drawArc(new RectF(4,9,20,16),0,180,false,p);c.drawArc(new RectF(4,15,20,22),0,180,false,p);break;
                 case "download":path(c,12,3,12,15,7,10);path(c,12,15,17,10);path(c,3,16,3,21,21,21,21,16);break;
                 case "trash":path(c,3,6,21,6);path(c,9,6,9,3,15,3,15,6);path(c,5,6,6,21,18,21,19,6);path(c,10,10,10,17);path(c,14,10,14,17);break;
+                case "headphones":c.drawArc(new RectF(3,2,21,20),180,180,false,p);c.drawRoundRect(new RectF(3,11,8,20),2,2,p);c.drawRoundRect(new RectF(16,11,21,20),2,2,p);break;
+                case "search":c.drawCircle(10,10,6.5f,p);path(c,15,15,21,21);break;
+                case "close":path(c,6,6,18,18);path(c,18,6,6,18);break;
+                case "chevron_up":path(c,5,15,12,8,19,15);break;
+                case "chevron_down":path(c,5,9,12,16,19,9);break;
                 case "folder":path(c,3,5,10,5,12,8,21,8,21,20,3,20,3,5);break;
                 case "folder_lock":path(c,3,18,3,5,10,5,12,8,21,8,21,12);
                     path(c,3,18,10,18);c.drawRoundRect(new RectF(13,15,22,22),2,2,p);c.drawArc(new RectF(15,10,20,18),180,180,false,p);break;
