@@ -5,6 +5,18 @@ import java.util.Map;
 final class AppStrings {
  private static final Map<String,String[]> TEXT=new HashMap<>();
  static {
+  TEXT.put("Recoverable space",new String[]{"खाली हो सकने वाली जगह","Espacio recuperable","Espace récupérable","Rückgewinnbarer Speicher"});
+  TEXT.put("Smart picks",new String[]{"स्मार्ट चयन","Selección inteligente","Sélection intelligente","Smarte Auswahl"});
+  TEXT.put("All photos",new String[]{"सभी फ़ोटो","Todas las fotos","Toutes les photos","Alle Fotos"});
+  TEXT.put("Duplicate groups",new String[]{"डुप्लिकेट समूह","Grupos duplicados","Groupes de doublons","Duplikatgruppen"});
+  TEXT.put("At least one copy kept",new String[]{"कम से कम एक कॉपी सुरक्षित","Se conserva al menos una copia","Au moins une copie conservée","Mindestens eine Kopie bleibt"});
+  TEXT.put("No removable duplicates found",new String[]{"हटाने योग्य डुप्लिकेट नहीं मिले","No hay duplicados eliminables","Aucun doublon supprimable","Keine entfernbaren Duplikate"});
+  TEXT.put("Only verified identical copies are suggested.",new String[]{"केवल सत्यापित समान कॉपी सुझाई जाती हैं।","Solo se sugieren copias idénticas verificadas.","Seules les copies identiques vérifiées sont proposées.","Nur geprüfte identische Kopien werden vorgeschlagen."});
+  TEXT.put("Review & clean",new String[]{"समीक्षा और सफाई","Revisar y limpiar","Vérifier et nettoyer","Prüfen und bereinigen"});
+  TEXT.put("Move to trash",new String[]{"ट्रैश में भेजें","Mover a la papelera","Mettre à la corbeille","In Papierkorb verschieben"});
+  TEXT.put("Rechecking duplicate safety",new String[]{"डुप्लिकेट सुरक्षा फिर जाँच रहे हैं","Verificando seguridad","Nouvelle vérification de sécurité","Sicherheit erneut prüfen"});
+  TEXT.put("Your originals stay safe.",new String[]{"आपकी मूल कॉपी सुरक्षित रहती हैं।","Tus originales quedan protegidos.","Vos originaux restent protégés.","Deine Originale bleiben geschützt."});
+  TEXT.put("Move only verified duplicate copies to the system trash. Space may not be freed until trash is emptied.",new String[]{"केवल सत्यापित डुप्लिकेट ट्रैश में जाएँगी। ट्रैश खाली होने तक जगह खाली नहीं हो सकती।","Mueve solo duplicados verificados a la papelera. El espacio puede no liberarse hasta vaciarla.","Placez uniquement les doublons vérifiés dans la corbeille. L’espace peut rester occupé jusqu’à son vidage.","Nur geprüfte Duplikate in den Papierkorb verschieben. Speicher wird eventuell erst beim Leeren frei."});
   TEXT.put("Optional access for Smart Scan",new String[]{"स्मार्ट स्कैन के लिए वैकल्पिक अनुमति","Acceso opcional para Smart Scan","Accès facultatif pour Smart Scan","Optionaler Zugriff für Smart Scan"});
   TEXT.put("Media access needed",new String[]{"मीडिया की अनुमति चाहिए","Se necesita acceso multimedia","Accès aux médias requis","Medienzugriff erforderlich"});
   TEXT.put("Smart Scan reads only the photos and videos you allow. Nothing is deleted.",new String[]{"स्मार्ट स्कैन सिर्फ आपकी अनुमति वाले फोटो और वीडियो पढ़ता है। कुछ नहीं हटता।","Smart Scan solo lee fotos y vídeos permitidos. No borra nada.","Smart Scan lit uniquement les médias autorisés. Rien n’est supprimé.","Smart Scan liest nur erlaubte Fotos und Videos. Nichts wird gelöscht."});

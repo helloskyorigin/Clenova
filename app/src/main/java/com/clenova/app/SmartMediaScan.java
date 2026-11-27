@@ -22,7 +22,12 @@ final class SmartMediaScan {
         boolean protectedItem;
         Item(Uri u,String n,String p,String v,long b,long m,boolean image,Boolean f){uri=u;name=n;path=p;volume=v;bytes=b;modified=m;this.image=image;favorite=f;}
     }
+    static final class DuplicateGroup {
+        final String fingerprint;final List<Item> items;
+        DuplicateGroup(String fingerprint,List<Item> items){this.fingerprint=fingerprint;this.items=new ArrayList<>(items);}
+    }
     static final class Result {
+        final List<DuplicateGroup> duplicates=new ArrayList<>();
         final List<List<Item>> groups=Arrays.asList(new ArrayList<>(),new ArrayList<>(),new ArrayList<>());
         int examined,protectedCount,failed;boolean partial,imagesScanned,videosScanned,limited;
         long bytes(int category){long sum=0;for(Item item:groups.get(category))sum+=item.bytes;return sum;}
@@ -67,13 +72,15 @@ final class SmartMediaScan {
             progress.update(1,++done,hashItems.size());
         }
         Set<String> allocated=new HashSet<>();
-        for(List<Item> group:exact.values()){
-            if(group.size()<2)continue;
+        for(Map.Entry<String,List<Item>> entry:exact.entrySet()){
+            List<Item> group=entry.getValue();if(group.size()<2)continue;
             group.sort(Comparator.comparing((Item i)->!i.protectedItem).thenComparingLong(i->i.modified).thenComparing(i->i.uri.toString()));
             // Always retain at least one verified matching copy, even with protection toggles off.
             Item keep=group.get(0);keep.protectedItem=true;
+            r.duplicates.add(new DuplicateGroup(entry.getKey(),group));
             for(int k=1;k<group.size();k++){Item i=group.get(k);if(!i.protectedItem&&allocated.add(i.uri.toString()))r.groups.get(DUPLICATES).add(i);}
         }
+        r.duplicates.sort(Comparator.comparingLong((DuplicateGroup g)->g.items.get(0).bytes).reversed().thenComparing(g->g.fingerprint));
         progress.update(2,0,all.size());int classified=0;
         for(Item i:all){
             check();

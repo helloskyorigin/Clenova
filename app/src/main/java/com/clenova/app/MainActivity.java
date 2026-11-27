@@ -38,6 +38,13 @@ public final class MainActivity extends Activity {
     private boolean cleanVisible;
     private static final int REQUEST_SCAN_MEDIA=96;
     private SmartMediaScan runningScan;
+    private static final int REQUEST_DUP_TRASH=97;
+    private boolean realDupVisible,realDupReview,dupAfterScan,dupFromResults,dupAll,dupTrashPending;
+    private int dupPage;
+    private volatile int dupThumbGeneration;
+    private final java.util.Set<String> realDupSelected=new java.util.LinkedHashSet<>();
+    private final java.util.concurrent.ExecutorService dupThumbs=java.util.concurrent.Executors.newFixedThreadPool(2);
+    private final android.util.LruCache<String,android.graphics.Bitmap> dupCache=new android.util.LruCache<String,android.graphics.Bitmap>(12*1024*1024){@Override protected int sizeOf(String key,android.graphics.Bitmap value){return value.getByteCount();}};
     private SmartMediaScan.Result scanResult;
     private boolean scanVisible, scanReviewVisible, requestingScan;
     private final boolean[] scanSelected=new boolean[3];
@@ -96,7 +103,7 @@ public final class MainActivity extends Activity {
         protectedFiles=new ProtectedFiles(this);
         history=new ActivityHistory(this);
         devicePermissions=new DevicePermissions(this);
-        if(state!=null){cleanVisible=state.getBoolean("clean_visible");cleanScrollY=state.getInt("clean_scroll_y");historyFilter=state.getInt("history_filter");cleanupEventId=state.getString("cleanup_event_id");cleanupCategoryCounts=state.getIntArray("cleanup_category_counts");historyDetailId=state.getString("history_detail_id");historyScrollY=state.getInt("history_scroll_y");}
+        if(state!=null){dupTrashPending=state.getBoolean("dup_trash_pending");cleanVisible=state.getBoolean("clean_visible");cleanScrollY=state.getInt("clean_scroll_y");historyFilter=state.getInt("history_filter");cleanupEventId=state.getString("cleanup_event_id");cleanupCategoryCounts=state.getIntArray("cleanup_category_counts");historyDetailId=state.getString("history_detail_id");historyScrollY=state.getInt("history_scroll_y");}
         applyPalette();
         density = getResources().getDisplayMetrics().density;
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
@@ -132,6 +139,7 @@ public final class MainActivity extends Activity {
         super.onSaveInstanceState(state);
         state.putBoolean("storage_visible",storageVisible);
         state.putBoolean("clean_visible",cleanVisible);
+        state.putBoolean("dup_trash_pending",dupTrashPending);
         state.putInt("clean_scroll_y",cleanScroll==null?cleanScrollY:cleanScroll.getScrollY());
         state.putBoolean("settings_visible",settingsVisible);
         state.putBoolean("rating_open",ratingDialog!=null&&ratingDialog.isShowing());
@@ -168,6 +176,7 @@ public final class MainActivity extends Activity {
     @Override protected void onStop(){
         super.onStop();
         // Do not retain visible media results across backgrounding; selected-photo access may change.
+        if(dupTrashPending)return;
         if(runningScan!=null){runningScan.cancel();runningScan=null;scanVisible=false;scanReviewVisible=false;scanResult=null;showClean();}
         else if(scanResult!=null){scanResult=null;if(cleanVisible&&!settingsVisible)showClean();}
     }
@@ -176,6 +185,7 @@ public final class MainActivity extends Activity {
             cleanupAnimation.removeAllListeners();cleanupAnimation.removeAllUpdateListeners();cleanupAnimation.cancel();
         }
         if(runningScan!=null){runningScan.cancel();runningScan=null;}
+        dupThumbs.shutdownNow();dupCache.evictAll();
         if(preferencePopup!=null)preferencePopup.dismiss();
         if(ratingDialog!=null)ratingDialog.dismiss();
         super.onDestroy();
@@ -290,6 +300,7 @@ public final class MainActivity extends Activity {
         if(cleanVisible)showClean();else showHome();
     }
     private void showClean(){
+        realDupVisible=false;realDupReview=false;dupAfterScan=false;realDupSelected.clear();dupThumbGeneration++;dupCache.evictAll();
         scanVisible=false;scanReviewVisible=false;cleanVisible=true;settingsVisible=false;storageVisible=false;reviewing=false;
         aboutVisible=false;policyVisible=false;termsVisible=false;feedbackVisible=false;helpVisible=false;
         permissionsVisible=false;privacyVisible=false;historyVisible=false;agentPrefsVisible=false;protectionVisible=false;foldersVisible=false;filesVisible=false;
@@ -314,7 +325,7 @@ public final class MainActivity extends Activity {
         space(copy,5);add(copy,txt(scanResult==null?"Not scanned yet":"Last scan · Review candidates",12,GRAY,500),-1,-2);weight(top,copy);gap(top,10);
         FrameLayout ring=new FrameLayout(this);ring.addView(new CleanScanMark(this),new FrameLayout.LayoutParams(-1,-1));add(top,ring,dp(92),dp(92));add(hero,top,-1,-2);space(hero,17);
         LinearLayout scan=row();scan.setGravity(Gravity.CENTER);add(scan,new Glyph(this,"scan",Color.WHITE),dp(21),dp(21));gap(scan,8);add(scan,txt("Smart Scan",16,Color.WHITE,600),-2,-2);
-        tap(scan,BLUE,26,this::requestSmartScan);add(hero,scan,-1,dp(50));
+        tap(scan,BLUE,26,()->{dupAfterScan=false;requestSmartScan();});add(hero,scan,-1,dp(50));
         add(body,hero,-1,-2);space(body,20);
         LinearLayout section=row();weight(section,txt("Media cleanup",20,INK,700));add(section,txt("Gallery",12,GRAY,400),-2,-2);add(body,section,-1,-2);space(body,10);
         String[][] media={{"copy","Duplicates"},{"images","Similar photos"},{"video","Large videos"},{"screenshot","Screenshots"}};
@@ -332,7 +343,7 @@ public final class MainActivity extends Activity {
                 boolean scanned=scanResult!=null&&category>=0&&(category==1?scanResult.videosScanned:scanResult.imagesScanned);
                 add(tile,txt(scanned?scanBytes(scanResult.bytes(category)):"—",23,INK,700),-1,-2);space(tile,5);add(tile,txt(item[1],14,INK,600),-1,-2);space(tile,4);
                 add(tile,txt(scanned?scanResult.groups.get(category).size()+" "+tr("items"):tr("Scan to find"),12,GRAY,400),-1,-2);
-                tap(tile,WHITE,18,()->{if(scanned)showScanResults();else cleanPending(item[1]);});tile.setContentDescription(tr(item[1])+", "+(scanned?scanBytes(scanResult.bytes(category)):tr("Not scanned yet")));
+                tap(tile,WHITE,18,()->{if(category==0){openRealDuplicates(false);}else if(scanned)showScanResults();else cleanPending(item[1]);});tile.setContentDescription(tr(item[1])+", "+(scanned?scanBytes(scanResult.bytes(category)):tr("Not scanned yet")));
                 tiles.addView(tile,new LinearLayout.LayoutParams(0,-2,1f));
             }
             add(body,tiles,-1,-2);
@@ -410,7 +421,7 @@ public final class MainActivity extends Activity {
                     });
                 });
                 runOnUiThread(()->{if(runningScan!=job||isFinishing()||isDestroyed())return;runningScan=null;scanResult=result;
-                    java.util.Arrays.fill(scanSelected,false);showScanResults();});
+                    java.util.Arrays.fill(scanSelected,false);if(dupAfterScan){dupAfterScan=false;showRealDuplicates();}else showScanResults();});
             }catch(Exception e){runOnUiThread(()->{if(runningScan!=job||isFinishing()||isDestroyed())return;runningScan=null;showClean();folderToast("Scan could not finish");});}
         },"Clenova-media-scan").start();
     }
@@ -420,6 +431,7 @@ public final class MainActivity extends Activity {
     }
     private void showScanResults(){
         if(scanResult==null){showClean();return;}
+        realDupVisible=false;realDupReview=false;dupThumbGeneration++;
         scanVisible=true;scanReviewVisible=false;
         LinearLayout root=scanShell("Scan results",this::cancelSmartScan),body=scanBody(root);
         LinearLayout hero=column();hero.setGravity(Gravity.CENTER_HORIZONTAL);add(hero,new Glyph(this,"selected",BLUE),dp(62),dp(62));space(hero,12);
@@ -434,6 +446,7 @@ public final class MainActivity extends Activity {
             LinearLayout labels=column();add(labels,txt(SmartMediaScan.LABELS[i],15,INK,600),-1,-2);space(labels,5);
             boolean scanned=i==1?scanResult.videosScanned:scanResult.imagesScanned;
             add(labels,txt(scanned?scanResult.groups.get(i).size()+" · "+scanBytes(scanResult.bytes(i)):tr("Not scanned"),12,GRAY,400),-1,-2);weight(line,labels);
+            if(i==0){tap(labels,WHITE,8,()->openRealDuplicates(true));add(line,new Glyph(this,"chevron",GRAY),dp(14),dp(14));}
             android.widget.CheckBox check=new android.widget.CheckBox(this);check.setButtonTintList(ColorStateList.valueOf(BLUE));check.setChecked(scanSelected[i]);check.setEnabled(!scanResult.groups.get(i).isEmpty());check.setContentDescription(tr(SmartMediaScan.LABELS[i]));check.setOnCheckedChangeListener((v,checked)->{scanSelected[index]=checked;updateScanReview(review);});add(line,check,dp(44),dp(44));add(list,line,-1,-2);
         }
         add(body,list,-1,-2);space(body,14);
@@ -467,6 +480,152 @@ public final class MainActivity extends Activity {
             add(body,group,-1,-2);space(body,15);
         }
         scanButton(root,"Done",true,this::showScanResults);setContentView(root);
+    }
+
+    private void openRealDuplicates(boolean fromResults){
+        dupFromResults=fromResults;dupPage=0;dupAll=false;realDupSelected.clear();
+        if(scanResult!=null&&scanResult.imagesScanned){showRealDuplicates();return;}
+        dupAfterScan=true;requestSmartScan();
+    }
+    private void leaveRealDuplicates(){
+        realDupVisible=false;realDupReview=false;dupThumbGeneration++;realDupSelected.clear();
+        if(dupFromResults&&scanResult!=null)showScanResults();else showClean();
+    }
+    private long duplicateSelectedBytes(){
+        long size=0;if(scanResult!=null)for(SmartMediaScan.Item i:scanResult.groups.get(0))if(realDupSelected.contains(i.uri.toString()))size+=i.bytes;return size;
+    }
+    private void showRealDuplicates(){
+        if(scanResult==null){showClean();return;}
+        realDupVisible=true;realDupReview=false;scanVisible=false;scanReviewVisible=false;
+        final int generation=++dupThumbGeneration;
+        LinearLayout root=scanShell("Duplicate photos",this::leaveRealDuplicates),body=scanBody(root);
+        LinearLayout hero=card(),summary=row(),copy=column();add(copy,txt("Recoverable space",13,GRAY,400),-1,-2);space(copy,6);
+        add(copy,txt(scanBytes(scanResult.bytes(0)),32,INK,700),-1,-2);space(copy,6);
+        add(copy,txt(scanResult.groups.get(0).size()+" "+tr("duplicates")+" · "+scanResult.duplicates.size()+" "+tr("groups"),12,GRAY,400),-1,-2);weight(summary,copy);
+        FrameLayout mark=new FrameLayout(this);mark.setBackground(round(PALE,18));mark.addView(new Glyph(this,"copy",BLUE),new FrameLayout.LayoutParams(dp(33),dp(33),Gravity.CENTER));add(summary,mark,dp(64),dp(64));add(hero,summary,-1,-2);space(hero,12);thinRule(hero);space(hero,10);
+        LinearLayout safe=row();add(safe,new Glyph(this,"shield",GREEN),dp(20),dp(20));gap(safe,8);weight(safe,txt(tr("At least one copy kept")+" · "+scanResult.duplicates.size()+" "+tr("groups"),13,GREEN,600));add(hero,safe,-1,-2);add(body,hero,-1,-2);space(body,14);
+        LinearLayout tabs=row();tabs.setBackground(round(surface(0xffe7e7ec),15));pad(tabs,4,4);
+        String[] names={"Smart picks","All photos"};for(int j=0;j<2;j++){final boolean all=j==1;TextView tab=centered(names[j],14,dupAll==all?INK:GRAY,600);tap(tab,dupAll==all?WHITE:surface(0xffe7e7ec),12,()->{dupAll=all;dupPage=0;showRealDuplicates();});tabs.addView(tab,new LinearLayout.LayoutParams(0,dp(40),1f));}
+        add(body,tabs,-1,-2);space(body,15);
+        java.util.List<SmartMediaScan.DuplicateGroup> groups=new java.util.ArrayList<>();
+        for(SmartMediaScan.DuplicateGroup g:scanResult.duplicates){boolean candidate=false;for(SmartMediaScan.Item i:g.items)if(!i.protectedItem)candidate=true;if(dupAll||candidate)groups.add(g);}
+        // Bound UI work: paginate groups, and each group can reveal its remaining photos by a separate dialog.
+        int pages=Math.max(1,(groups.size()+5)/6);dupPage=Math.max(0,Math.min(dupPage,pages-1));
+        LinearLayout section=row();weight(section,txt("Duplicate groups",17,INK,600));
+        TextView select=txt(realDupSelected.isEmpty()?"Select all":"Deselect all",13,BLUE,600);
+        tap(select,BG,8,()->{if(!realDupSelected.isEmpty())realDupSelected.clear();else for(SmartMediaScan.Item i:scanResult.groups.get(0)){if(realDupSelected.size()>=DuplicateApproval.MAX_BATCH)break;realDupSelected.add(i.uri.toString());}showRealDuplicates();});add(section,select,-2,dp(44));add(body,section,-1,-2);
+        TextView count=txt("",12,GRAY,400),amount=txt("",22,INK,700),review=centered("Review & clean",14,Color.WHITE,600);
+        if(groups.isEmpty()){
+            LinearLayout empty=card();add(empty,centered("No removable duplicates found",17,INK,600),-1,-2);space(empty,8);add(empty,centered("Only verified identical copies are suggested.",13,GRAY,400),-1,-2);add(body,empty,-1,-2);
+        }
+        for(int g=dupPage*6;g<Math.min(groups.size(),(dupPage+1)*6);g++){
+            SmartMediaScan.DuplicateGroup group=groups.get(g);LinearLayout card=card();pad(card,12,12);
+            add(card,txt(tr("Group")+" "+(g+1),15,INK,600),-1,-2);space(card,5);add(card,txt(group.items.size()+" "+tr("identical photos"),12,GRAY,400),-1,-2);space(card,11);
+            int shown=Math.min(18,group.items.size());
+            for(int start=0;start<shown;start+=3){
+                LinearLayout row=row();row.setGravity(Gravity.TOP);for(int col=0;col<3;col++){
+                    if(col>0)gap(row,7);int index=start+col;
+                    if(index>=shown){row.addView(new View(this),new LinearLayout.LayoutParams(0,1,1f));continue;}
+                    SmartMediaScan.Item item=group.items.get(index);
+                    row.addView(duplicateTile(item,generation,()->updateDuplicateFooter(count,amount,review)),new LinearLayout.LayoutParams(0,-2,1f));
+                }add(card,row,-1,-2);space(card,7);
+            }
+            if(group.items.size()>shown){TextView more=centered(tr("View all in group")+" ("+group.items.size()+")",13,BLUE,600);tap(more,PALE,10,()->showDuplicateGroup(group));add(card,more,-1,dp(42));}
+            add(body,card,-1,-2);space(body,11);
+        }
+        if(pages>1){LinearLayout pager=row();TextView prev=centered("Previous",13,BLUE,600),next=centered("Next",13,BLUE,600);
+            tap(prev,WHITE,12,()->{dupPage--;showRealDuplicates();});prev.setEnabled(dupPage>0);prev.setAlpha(dupPage>0?1:.4f);
+            tap(next,WHITE,12,()->{dupPage++;showRealDuplicates();});next.setEnabled(dupPage+1<pages);next.setAlpha(dupPage+1<pages?1:.4f);
+            weight(pager,prev);weight(pager,centered((dupPage+1)+" / "+pages,13,GRAY,400));weight(pager,next);add(body,pager,-1,dp(48));}
+        if(scanResult.partial||scanResult.limited){space(body,8);add(body,txt("Partial scan results",12,GRAY,500),-1,-2);}
+        LinearLayout footer=row();footer.setBackground(round(WHITE,18));pad(footer,13,10);LinearLayout selected=column();add(selected,count,-1,-2);space(selected,4);add(selected,amount,-1,-2);weight(footer,selected);gap(footer,8);
+        tap(review,BLUE,24,this::showRealDuplicateReview);review.setPadding(dp(13),0,dp(13),0);add(footer,review,-2,dp(46));add(root,footer,-1,-2);
+        space(root,7);add(root,centered("Your originals stay safe.",12,GRAY,400),-1,-2);updateDuplicateFooter(count,amount,review);setContentView(root);
+    }
+    private LinearLayout duplicateTile(SmartMediaScan.Item item,int generation,Runnable changed){
+        LinearLayout tile=column();tile.setBackground(round(WHITE,10));tile.setClipToOutline(true);
+        android.widget.ImageView image=new android.widget.ImageView(this);image.setScaleType(android.widget.ImageView.ScaleType.CENTER_CROP);image.setBackgroundColor(PALE);
+        image.setContentDescription(item.name);image.setOnClickListener(v->showRealPhoto(item));add(tile,image,-1,dp(86));loadDupThumb(image,item,256,generation);
+        TextView select=centered("",11,GRAY,600);add(tile,select,-1,dp(36));
+        Runnable refresh=()->{boolean chosen=realDupSelected.contains(item.uri.toString());select.setText(item.protectedItem?tr("Keep"):((chosen?"✓ ":"")+scanBytes(item.bytes)));
+            select.setTextColor(item.protectedItem?GREEN:chosen?Color.WHITE:GRAY);select.setBackground(round(item.protectedItem?surface(0xffe8f6ec):chosen?BLUE:BG,8));
+            select.setContentDescription(item.name+", "+tr(item.protectedItem?"Keep":chosen?"Selected":"Not selected"));};
+        select.setClickable(!item.protectedItem);select.setEnabled(!item.protectedItem);select.setOnClickListener(v->{
+            String id=item.uri.toString();if(!realDupSelected.remove(id)){if(realDupSelected.size()>=DuplicateApproval.MAX_BATCH){folderToast("Select up to 100 photos at a time");return;}realDupSelected.add(id);}refresh.run();changed.run();});
+        refresh.run();return tile;
+    }
+    private void updateDuplicateFooter(TextView count,TextView amount,TextView review){
+        count.setText(realDupSelected.size()+" "+tr("photos selected"));amount.setText(scanBytes(duplicateSelectedBytes()));
+        review.setEnabled(!realDupSelected.isEmpty());review.setAlpha(realDupSelected.isEmpty()?.45f:1f);
+    }
+    private void loadDupThumb(android.widget.ImageView image,SmartMediaScan.Item item,int size,int generation){
+        String key=item.uri.toString()+":"+size;android.graphics.Bitmap cached=dupCache.get(key);if(cached!=null){image.setImageBitmap(cached);return;}
+        try{dupThumbs.execute(()->{
+            if(generation!=dupThumbGeneration)return;android.graphics.Bitmap bitmap=null;
+            try{
+                if(android.os.Build.VERSION.SDK_INT>=29)bitmap=getContentResolver().loadThumbnail(item.uri,new android.util.Size(size,size),null);
+                else{
+                    android.graphics.BitmapFactory.Options opts=new android.graphics.BitmapFactory.Options();opts.inJustDecodeBounds=true;
+                    try(java.io.InputStream in=getContentResolver().openInputStream(item.uri)){android.graphics.BitmapFactory.decodeStream(in,null,opts);}
+                    if(opts.outWidth<=0||opts.outHeight<=0)return;int factor=1;while(Math.max(opts.outWidth,opts.outHeight)/factor>size*2)factor*=2;
+                    opts.inSampleSize=factor;opts.inJustDecodeBounds=false;try(java.io.InputStream in=getContentResolver().openInputStream(item.uri)){bitmap=android.graphics.BitmapFactory.decodeStream(in,null,opts);}
+                }
+            }catch(Exception ignored){}
+            if(bitmap==null)return;final android.graphics.Bitmap loaded=bitmap;
+            runOnUiThread(()->{if(generation!=dupThumbGeneration||isDestroyed())return;dupCache.put(key,loaded);image.setImageBitmap(loaded);});
+        });}catch(java.util.concurrent.RejectedExecutionException ignored){}
+    }
+    private void showRealPhoto(SmartMediaScan.Item item){
+        LinearLayout content=column();pad(content,12,12);android.widget.ImageView image=new android.widget.ImageView(this);image.setScaleType(android.widget.ImageView.ScaleType.FIT_CENTER);image.setBackgroundColor(BG);
+        add(content,image,-1,dp(300));space(content,8);add(content,txt(item.name+" · "+scanBytes(item.bytes),13,INK,500),-1,-2);
+        loadDupThumb(image,item,1024,dupThumbGeneration);
+        privacyDialog().setTitle(tr(item.protectedItem?"Keep":"Photo preview")).setView(content).setPositiveButton(tr("Done"),null).show();
+    }
+    private void showDuplicateGroup(SmartMediaScan.DuplicateGroup group){
+        // Native multi-choice dialog exposes every member without unbounded thumbnail allocations.
+        String[] labels=new String[group.items.size()];boolean[] checked=new boolean[labels.length];
+        for(int i=0;i<labels.length;i++){SmartMediaScan.Item item=group.items.get(i);labels[i]=(item.protectedItem?tr("Keep")+" · ":"")+item.name+" · "+scanBytes(item.bytes);checked[i]=realDupSelected.contains(item.uri.toString());}
+        AlertDialog dialog=privacyDialog().setTitle(tr("Duplicate group")).setMultiChoiceItems(labels,checked,(d,index,value)->{
+            SmartMediaScan.Item item=group.items.get(index);String key=item.uri.toString();
+            if(item.protectedItem||(value&&!realDupSelected.contains(key)&&realDupSelected.size()>=DuplicateApproval.MAX_BATCH)){
+                ((AlertDialog)d).getListView().setItemChecked(index,false);return;
+            }
+            if(value)realDupSelected.add(key);else realDupSelected.remove(key);
+        }).setPositiveButton(tr("Done"),null).create();dialog.setOnDismissListener(d->showRealDuplicates());dialog.show();
+    }
+    private void showRealDuplicateReview(){
+        if(scanResult==null||realDupSelected.isEmpty()){showRealDuplicates();return;}
+        realDupReview=true;LinearLayout root=scanShell("Review cleanup",this::showRealDuplicates),body=scanBody(root);
+        add(body,txt(realDupSelected.size()+" "+tr("photos selected"),22,INK,700),-1,-2);space(body,6);add(body,txt(scanBytes(duplicateSelectedBytes()),24,BLUE,600),-1,-2);space(body,12);
+        add(body,txt("Move only verified duplicate copies to the system trash. Space may not be freed until trash is emptied.",14,GRAY,400),-1,-2);space(body,14);
+        LinearLayout items=card();int n=0;for(SmartMediaScan.Item i:scanResult.groups.get(0))if(realDupSelected.contains(i.uri.toString())){
+            if(n++>0)thinRule(items);LinearLayout line=row();line.setMinimumHeight(dp(48));TextView name=txt(i.name,13,INK,500);name.setMaxLines(2);weight(line,name);gap(line,6);add(line,txt(scanBytes(i.bytes),12,GRAY,400),-2,-2);add(items,line,-1,-2);
+        }add(body,items,-1,-2);
+        if(android.os.Build.VERSION.SDK_INT>=30)scanButton(root,"Move to trash",true,this::recheckDuplicateTrash);
+        else{space(body,12);add(body,txt("System trash approval requires Android 11 or later. Review only on this device.",13,GRAY,400),-1,-2);scanButton(root,"Done",true,this::showRealDuplicates);}
+        setContentView(root);
+    }
+    private void recheckDuplicateTrash(){
+        if(android.os.Build.VERSION.SDK_INT<30||runningScan!=null||scanResult==null||realDupSelected.isEmpty())return;
+        final SmartMediaScan.Result before=scanResult;final java.util.Set<String> selected=new java.util.HashSet<>(realDupSelected);
+        final SmartMediaScan job=new SmartMediaScan(this,prefs,protectedFiles,protectedFolders);runningScan=job;
+        LinearLayout root=scanShell("Review cleanup",()->{job.cancel();runningScan=null;showRealDuplicates();}),body=scanBody(root);
+        add(body,centered("Rechecking duplicate safety",20,INK,600),-1,-2);space(body,12);
+        android.widget.ProgressBar spinner=new android.widget.ProgressBar(this);add(body,spinner,dp(42),dp(42));
+        scanButton(root,"Cancel",false,()->{job.cancel();runningScan=null;showRealDuplicates();});setContentView(root);
+        new Thread(()->{
+            try{
+                SmartMediaScan.Result fresh=job.run((stage,done,total)->{});java.util.List<android.net.Uri> approved=DuplicateApproval.verified(before,fresh,selected);
+                runOnUiThread(()->{
+                    if(runningScan!=job||isDestroyed()||isFinishing())return;runningScan=null;
+                    if(approved.isEmpty()){scanResult=fresh;realDupSelected.clear();showRealDuplicates();folderToast("Files or protection changed. Review again.");return;}
+                    try{
+                        android.app.PendingIntent pending=android.provider.MediaStore.createTrashRequest(getContentResolver(),approved,true);
+                        dupTrashPending=true;startIntentSenderForResult(pending.getIntentSender(),REQUEST_DUP_TRASH,null,0,0,0);
+                    }catch(Exception e){dupTrashPending=false;showRealDuplicates();folderToast("Could not open Android trash approval");}
+                });
+            }catch(Exception e){runOnUiThread(()->{if(runningScan!=job||isDestroyed())return;runningScan=null;showRealDuplicates();folderToast("Safety recheck failed");});}
+        },"Clenova-duplicate-recheck").start();
     }
 
     private void cleanPending(String label){
@@ -664,7 +823,7 @@ public final class MainActivity extends Activity {
     }
     @Override public void onRequestPermissionsResult(int requestCode,String[] permissions,int[] grantResults){
         super.onRequestPermissionsResult(requestCode,permissions,grantResults);
-        if(requestCode==REQUEST_SCAN_MEDIA){requestingScan=false;if(SmartMediaScan.hasAccess(this))startSmartScan();else privacyDialog().setTitle(tr("Media access needed")).setMessage(tr("Allow access to photos or videos to scan them. No files were scanned.")).setPositiveButton(tr("Done"),null).show();return;}
+        if(requestCode==REQUEST_SCAN_MEDIA){requestingScan=false;if(SmartMediaScan.hasAccess(this))startSmartScan();else {dupAfterScan=false;privacyDialog().setTitle(tr("Media access needed")).setMessage(tr("Allow access to photos or videos to scan them. No files were scanned.")).setPositiveButton(tr("Done"),null).show();}return;}
         if(requestCode==REQUEST_NOTIFICATION_ACCESS&&permissionsVisible)openAppPermissions();
     }
     private static final String[] RATING_LABELS={"Tap to rate your experience","Very poor","Could be better","It's okay","Pretty good","Love it!"};
@@ -1787,6 +1946,7 @@ public final class MainActivity extends Activity {
     }
     @Override protected void onActivityResult(int requestCode,int resultCode,android.content.Intent data){
         super.onActivityResult(requestCode,resultCode,data);
+        if(requestCode==REQUEST_DUP_TRASH){dupTrashPending=false;scanResult=null;realDupSelected.clear();dupCache.evictAll();showClean();folderToast(resultCode==RESULT_OK?"Android trash request approved. Scan again to refresh.":"Trash request cancelled");return;}
         if(requestCode==EXPORT_ACTIVITY_HISTORY){if(resultCode==RESULT_OK&&data!=null&&data.getData()!=null)writeHistoryExport(data.getData());return;}
         if(requestCode==PICK_PROTECTED_FILES){if(resultCode==RESULT_OK&&data!=null)handleProtectedFiles(data);return;}
         if(requestCode!=PICK_PROTECTED_FOLDER||resultCode!=RESULT_OK||data==null||data.getData()==null)return;
@@ -2063,6 +2223,8 @@ public final class MainActivity extends Activity {
     }
     @Override public void onBackPressed() {
         if(cleaning)return;
+        if(realDupReview){if(runningScan!=null){runningScan.cancel();runningScan=null;}showRealDuplicates();return;}
+        if(realDupVisible){leaveRealDuplicates();return;}
         if(scanReviewVisible){showScanResults();return;}
         if(scanVisible){cancelSmartScan();return;}
         if(aboutVisible||policyVisible||termsVisible){openSettings();return;}
