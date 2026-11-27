@@ -25,13 +25,13 @@ import android.widget.ScrollView;
 import android.widget.TextView;
 
 public final class MainActivity extends Activity {
-    private static final int BG = Color.rgb(245,245,247);
-    private static final int WHITE = Color.WHITE;
-    private static final int INK = Color.rgb(17,17,17);
-    private static final int GRAY = Color.rgb(134,134,139);
-    private static final int BLUE = Color.rgb(0,122,255);
-    private static final int PALE = Color.rgb(230,240,255);
-    private static final int GREEN = Color.rgb(39,152,77);
+    private int BG = Color.rgb(245,245,247);
+    private int WHITE = Color.WHITE;
+    private int INK = Color.rgb(17,17,17);
+    private int GRAY = Color.rgb(134,134,139);
+    private int BLUE = Color.rgb(0,122,255);
+    private int PALE = Color.rgb(230,240,255);
+    private int GREEN = Color.rgb(39,152,77);
     private float density;
     private float compact = 1f;
     private boolean reviewing;
@@ -49,14 +49,19 @@ public final class MainActivity extends Activity {
     private boolean cleaning, completed, completionVisible;
     private boolean storageVisible, settingsVisible;
     private ValueAnimator cleanupAnimation;
+    private AppPreferences prefs;
+    private android.widget.PopupWindow preferencePopup;
+    private boolean dark;
 
     @Override public void onCreate(Bundle state) {
         super.onCreate(state);
+        prefs=new AppPreferences(this);
+        applyPalette();
         density = getResources().getDisplayMetrics().density;
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
                 WindowManager.LayoutParams.FLAG_FULLSCREEN);
         getWindow().setNavigationBarColor(BG);
-        getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR);
+        getWindow().getDecorView().setSystemUiVisibility(dark?0:View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR);
         int height = getResources().getConfiguration().screenHeightDp;
         compact = height < 740 ? .88f : 1f;
         if(state!=null && state.containsKey("cleanup_amounts")){
@@ -85,8 +90,34 @@ public final class MainActivity extends Activity {
         if(cleanupAnimation!=null){
             cleanupAnimation.removeAllListeners();cleanupAnimation.removeAllUpdateListeners();cleanupAnimation.cancel();
         }
+        if(preferencePopup!=null)preferencePopup.dismiss();
         super.onDestroy();
     }
+    private void applyPalette(){
+        dark=prefs.appearance().equals("Dark") || (prefs.appearance().equals("System") &&
+            (getResources().getConfiguration().uiMode & android.content.res.Configuration.UI_MODE_NIGHT_MASK)==android.content.res.Configuration.UI_MODE_NIGHT_YES);
+        BG=dark?0xff141416:0xfff5f5f7;
+        WHITE=dark?0xff242426:Color.WHITE;
+        INK=dark?0xfff4f4f6:0xff111111;
+        GRAY=dark?0xffa2a2aa:0xff86868b;
+        BLUE=dark?0xff409cff:0xff007aff;
+        PALE=dark?0xff19334c:0xffe6f0ff;
+        GREEN=dark?0xff61d883:0xff27984d;
+        getWindow().setNavigationBarColor(BG);
+        getWindow().getDecorView().setSystemUiVisibility(dark?0:View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR);
+    }
+    private int surface(int c){
+        if(!dark)return c;
+        switch(c){
+            case 0xffeeeef0:case 0xffe6e6eb:case 0xffe5e5ea:case 0xffdfe2e8:case 0xffdcdce1:return 0xff38383c;
+            case 0xffe7e7ec:case 0xfff0f0f3:case 0xffe4e8ee:return 0xff343438;
+            case 0xfff0f4fa:return 0xff29394a;
+            case 0xffe8f6ec:case 0xffeaf7ee:case 0xffe5f5e9:return 0xff203d2b;
+            case 0xffc7c7cc:return 0xff72727a;
+            default:return c;
+        }
+    }
+    private String tr(String value){return AppStrings.translate(prefs.language(),value);}
     private StoragePreview storageData(){return new StoragePreview(completed?cleanup:null);}
     private double previewAvailable(){return storageData().available();}
     private double previewRecovered(){return storageData().recovered;}
@@ -97,7 +128,7 @@ public final class MainActivity extends Activity {
     private int v(float n) { return dp(n * compact); }
     private GradientDrawable round(int color, float radius) {
         GradientDrawable shape = new GradientDrawable();
-        shape.setColor(color); shape.setCornerRadius(dp(radius)); return shape;
+        shape.setColor(surface(color)); shape.setCornerRadius(dp(radius)); return shape;
     }
     private void tap(View view, int color, float radius, Runnable action) {
         view.setBackground(new RippleDrawable(ColorStateList.valueOf(0x19000000),
@@ -110,7 +141,7 @@ public final class MainActivity extends Activity {
     }
     private TextView txt(String s, float size, int color, int weight) {
         TextView t = new TextView(this);
-        t.setText(s); t.setTextSize(size); t.setTextColor(color);
+        t.setText(tr(s)); t.setTextSize(size); t.setTextColor(color);
         t.setTypeface(Typeface.create(weight >= 600 ? "sans-serif-medium" :
                 "sans-serif", weight >= 700 ? Typeface.BOLD : Typeface.NORMAL));
         t.setIncludeFontPadding(false); return t;
@@ -139,8 +170,8 @@ public final class MainActivity extends Activity {
         LinearLayout l=column(); l.setBackground(round(WHITE,22)); pad(l,16,14); return l;
     }
     private void demo(String title, String message) {
-        new AlertDialog.Builder(this).setTitle(title).setMessage(message)
-                .setPositiveButton("OK",null).show();
+        new AlertDialog.Builder(this,dark?android.R.style.Theme_Material_Dialog_Alert:android.R.style.Theme_Material_Light_Dialog_Alert).setTitle(tr(title)).setMessage(tr(message))
+                .setPositiveButton(tr("OK"),null).show();
     }
     private LinearLayout home() {
         LinearLayout root=column(); root.setBackgroundColor(BG);
@@ -200,7 +231,7 @@ public final class MainActivity extends Activity {
         scroll.addView(body,new ScrollView.LayoutParams(-1,-2));
         root.addView(scroll,new LinearLayout.LayoutParams(-1,0,1f));
         addSettingsGroup(body,"Preferences",new String[][]{
-            {"moon","Appearance","System"},{"language","Language","English"},{"bell","Notifications",""}
+            {"moon","Appearance",prefs.appearance()},{"language","Language",prefs.languageName()},{"bell","Notifications",""}
         });
         addSettingsGroup(body,"AI Agent",new String[][]{
             {"bot","Agent preferences",""},{"shield","Cleanup protection",""},{"history","Activity history",""}
@@ -229,18 +260,85 @@ public final class MainActivity extends Activity {
             add(line,new Glyph(this,item[0],BLUE),dp(22),dp(22));gap(line,12);
             weight(line,txt(item[1],15,INK,500));
             if(!item[2].isEmpty()){gap(line,6);add(line,txt(item[2],12,GRAY,400),-2,-2);}
-            gap(line,9);add(line,new Glyph(this,"chevron",0xffc7c7cc),dp(14),dp(14));
-            // Only the main Settings page is implemented in this phase.
-            // No settings value, permission or external account is changed.
-            line.setContentDescription(item[1]+(item[2].isEmpty()?"":", "+item[2])+", preview");
+            boolean preference=title.equals("Preferences");
+            gap(line,9);add(line,new Glyph(this,preference?"select_arrows":"chevron",GRAY),dp(14),dp(14));
+            line.setContentDescription(tr(item[1])+(item[2].isEmpty()?"":", "+tr(item[2])));
+            if(preference)tap(line,WHITE,0,()->showPreferencePopup(line,item[1]));
             add(group,line,-1,-2);
             if(i<items.length-1){
-                View divider=new View(this);divider.setBackgroundColor(0xffeeeef0);
+                View divider=new View(this);divider.setBackgroundColor(surface(0xffeeeef0));
                 LinearLayout.LayoutParams lp=new LinearLayout.LayoutParams(-1,dp(1));
                 lp.leftMargin=dp(47);group.addView(divider,lp);
             }
         }
         add(body,group,-1,-2);space(body,18);
+    }
+
+    private void showPreferencePopup(View anchor,String kind){
+        if(preferencePopup!=null)preferencePopup.dismiss();
+        LinearLayout menu=column();menu.setBackground(round(WHITE,16));
+        menu.setPadding(dp(8),dp(6),dp(8),dp(6));
+        int width=Math.min(dp(kind.equals("Notifications")?280:205),getResources().getDisplayMetrics().widthPixels-dp(32));
+        android.widget.PopupWindow popup=new android.widget.PopupWindow(menu,width,-2,true);
+        preferencePopup=popup;
+        popup.setBackgroundDrawable(round(WHITE,16));
+        popup.setElevation(dp(10));popup.setOutsideTouchable(true);popup.setClippingEnabled(true);
+        popup.setInputMethodMode(android.widget.PopupWindow.INPUT_METHOD_NOT_NEEDED);
+        popup.setOnDismissListener(()->{if(preferencePopup==popup)preferencePopup=null;});
+        if(kind.equals("Appearance")){
+            String[] options={"Light","Dark","System"},icons={"sun","moon","phone"};
+            for(int i=0;i<options.length;i++){
+                final String value=options[i];LinearLayout option=preferenceOption(icons[i],value,prefs.appearance().equals(value));
+                tap(option,WHITE,10,()->{prefs.setAppearance(value);popup.dismiss();applyPalette();openSettings();});
+                add(menu,option,-1,dp(46));
+            }
+        }else if(kind.equals("Language")){
+            ScrollView scroll=new ScrollView(this);scroll.setVerticalScrollBarEnabled(false);
+            LinearLayout options=column();
+            for(int i=0;i<AppPreferences.LANG_CODES.length;i++){
+                final String code=AppPreferences.LANG_CODES[i];
+                LinearLayout option=preferenceOption(null,AppPreferences.LANG_NAMES[i],prefs.language().equals(code));
+                tap(option,WHITE,10,()->{prefs.setLanguage(code);popup.dismiss();openSettings();});
+                add(options,option,-1,dp(46));
+            }
+            scroll.addView(options,new ScrollView.LayoutParams(-1,-2));add(menu,scroll,-1,dp(230));
+        }else{
+            for(int i=0;i<AppPreferences.NOTIFICATION_KEYS.length;i++){
+                final int index=i;LinearLayout option=row();option.setPadding(dp(8),0,dp(6),0);
+                weight(option,txt(AppPreferences.NOTIFICATION_LABELS[i],14,INK,500));gap(option,8);
+                android.widget.Switch toggle=new android.widget.Switch(this);
+                toggle.setShowText(false);toggle.setChecked(prefs.notificationEnabled(i));
+                toggle.setContentDescription(tr(AppPreferences.NOTIFICATION_LABELS[i]));
+                toggle.setThumbTintList(ColorStateList.valueOf(Color.WHITE));
+                toggle.setTrackTintList(new ColorStateList(new int[][]{new int[]{android.R.attr.state_checked},new int[]{}},new int[]{BLUE,GRAY}));
+                toggle.setOnCheckedChangeListener((button,checked)->{
+                    prefs.setNotification(index,checked);
+                    if(checked && android.os.Build.VERSION.SDK_INT>=33 &&
+                        checkSelfPermission(android.Manifest.permission.POST_NOTIFICATIONS)!=android.content.pm.PackageManager.PERMISSION_GRANTED){
+                        popup.dismiss();requestPermissions(new String[]{android.Manifest.permission.POST_NOTIFICATIONS},91);
+                    }
+                });
+                add(option,toggle,-2,dp(44));add(menu,option,-1,dp(48));
+            }
+            if(!prefs.systemNotificationsAllowed()){
+                TextView settings=centered("Enable in Android settings",12,BLUE,600);
+                tap(settings,WHITE,8,()->{popup.dismiss();android.content.Intent intent=new android.content.Intent(android.provider.Settings.ACTION_APP_NOTIFICATION_SETTINGS);
+                    intent.putExtra(android.provider.Settings.EXTRA_APP_PACKAGE,getPackageName());startActivity(intent);});
+                add(menu,settings,-1,dp(42));
+            }
+        }
+        // Overlay the anchor row; do not resize or expand Settings.
+        popup.showAsDropDown(anchor,0,-anchor.getHeight(),Gravity.END);
+        menu.setAlpha(0f);menu.setScaleX(.97f);menu.setScaleY(.97f);
+        menu.animate().alpha(1f).scaleX(1f).scaleY(1f).setDuration(140).start();
+    }
+    private LinearLayout preferenceOption(String icon,String value,boolean selected){
+        LinearLayout line=row();line.setPadding(dp(9),0,dp(9),0);
+        if(icon!=null){add(line,new Glyph(this,icon,INK),dp(20),dp(20));gap(line,10);}
+        weight(line,txt(value,15,INK,500));
+        if(selected)add(line,new Glyph(this,"check",BLUE),dp(19),dp(19));
+        line.setSelected(selected);line.setContentDescription(tr(value)+(selected?", selected":""));
+        return line;
     }
 
     private LinearLayout hero() {
@@ -261,7 +359,7 @@ public final class MainActivity extends Activity {
     private LinearLayout storage() {
         LinearLayout card=card(); LinearLayout metrics=row();
         weight(metrics,metric("Available storage",gbNumber(previewAvailable()),false));
-        View rule=new View(this); rule.setBackgroundColor(0xffe6e6eb);
+        View rule=new View(this); rule.setBackgroundColor(surface(0xffe6e6eb));
         add(metrics,rule,dp(1),v(42)); gap(metrics,15);
         weight(metrics,metric("Space recovered",gbNumber(previewRecovered()),true));
         add(card,metrics,-1,-2); space(card,12);
@@ -339,7 +437,7 @@ public final class MainActivity extends Activity {
             for(int i=0;i<6;i++){
                 double amount=i<5?data.amount(i):data.available();
                 float width=(float)(usable*amount/StoragePreview.CAPACITY);
-                paint.setColor(STORAGE_COLORS[i]);
+                paint.setColor(surface(STORAGE_COLORS[i]));
                 canvas.drawRoundRect(new RectF(x,0,x+width,getHeight()),dp(4),dp(4),paint);
                 x+=width+gap;
             }
@@ -354,7 +452,7 @@ public final class MainActivity extends Activity {
         }
         @Override protected void onDraw(Canvas canvas){
             super.onDraw(canvas);float radius=getHeight()/2f;
-            paint.setColor(0xfff0f0f3);canvas.drawRoundRect(new RectF(0,0,getWidth(),getHeight()),radius,radius,paint);
+            paint.setColor(surface(0xfff0f0f3));canvas.drawRoundRect(new RectF(0,0,getWidth(),getHeight()),radius,radius,paint);
             paint.setColor(color);canvas.drawRoundRect(new RectF(0,0,(float)(getWidth()*amount/StoragePreview.CAPACITY),getHeight()),radius,radius,paint);
         }
     }
@@ -381,8 +479,8 @@ public final class MainActivity extends Activity {
         weight(amount,txt("ready to recover",13,GRAY,400)); add(c,amount,-1,-2);
         space(c,12);
         LinearLayout approve=row(); approve.setGravity(Gravity.CENTER);
-        add(approve,txt("Review & Approve",17,WHITE,600),-2,-2); gap(approve,8);
-        add(approve,new Glyph(this,"right",WHITE),dp(17),dp(17));
+        add(approve,txt("Review & Approve",17,Color.WHITE,600),-2,-2); gap(approve,8);
+        add(approve,new Glyph(this,"right",Color.WHITE),dp(17),dp(17));
         tap(approve,BLUE,26,this::openReview);
         add(c,approve,-1,dp(51)); return c;
     }
@@ -466,7 +564,7 @@ public final class MainActivity extends Activity {
             add(right,choice,dp(44),dp(44)); add(category,right,-2,-2);
             add(plan,category,-1,-2);
             if(i<ReviewPlan.NAMES.length-1){
-                View divider=new View(this);divider.setBackgroundColor(0xffeeeef0);add(plan,divider,-1,dp(1));
+                View divider=new View(this);divider.setBackgroundColor(surface(0xffeeeef0));add(plan,divider,-1,dp(1));
             }
         }
         add(body,plan,-1,-2); space(body,14);
@@ -479,8 +577,8 @@ public final class MainActivity extends Activity {
         add(footer,txt("You'll free up",14,GRAY,400),-1,-2);space(footer,5);
         add(footer,txt(ReviewPlan.gb(reviewPlan.total()),34,INK,700),-1,-2);space(footer,13);
         LinearLayout approve=row();approve.setGravity(Gravity.CENTER);
-        add(approve,txt("Approve "+ReviewPlan.gb(reviewPlan.total())+" Cleanup",16,WHITE,600),-2,-2);
-        gap(approve,8);add(approve,new Glyph(this,"right",WHITE),dp(17),dp(17));
+        add(approve,txt("Approve "+ReviewPlan.gb(reviewPlan.total())+" Cleanup",16,Color.WHITE,600),-2,-2);
+        gap(approve,8);add(approve,new Glyph(this,"right",Color.WHITE),dp(17),dp(17));
         if(reviewPlan.total()>0) tap(approve,BLUE,26,()->confirmPreview());
         else {approve.setBackground(round(0xffc7c7cc,26));approve.setEnabled(false);}
         add(footer,approve,-1,dp(52));space(footer,5);
@@ -555,7 +653,7 @@ public final class MainActivity extends Activity {
         space(root,8);thinRule(root);space(root,12);
         LinearLayout total=row();add(total,txt(count+" videos selected",14,GRAY,500),-2,-2);stretch(total);
         add(total,txt(amount,21,INK,700),-2,-2);add(root,total,-1,-2);space(root,12);
-        TextView confirm=centered("Confirm selection",17,WHITE,600);
+        TextView confirm=centered("Confirm selection",17,Color.WHITE,600);
         tap(confirm,BLUE,26,()->leaveVideos(true));add(root,confirm,-1,dp(52));return root;
     }
     private LinearLayout videoTile(int index,ScrollView scroll){
@@ -565,16 +663,16 @@ public final class MainActivity extends Activity {
         tile.addView(image,new FrameLayout.LayoutParams(-1,-1));
         image.setContentDescription("Preview video "+(index+1)+", "+ReviewPlan.VIDEO_DURATION[index]+", "+ReviewPlan.VIDEO_MB[index]+" MB");
         image.setOnClickListener(w->showVideoPreview(index,scroll));
-        TextView play=centered("▶",21,WHITE,600);play.setBackground(round(0x66000000,24));
+        TextView play=centered("▶",21,Color.WHITE,600);play.setBackground(round(0x66000000,24));
         FrameLayout.LayoutParams playLp=new FrameLayout.LayoutParams(dp(42),dp(42),Gravity.CENTER);
         tile.addView(play,playLp);play.setContentDescription("Open video preview");
         play.setOnClickListener(w->showVideoPreview(index,scroll));
-        TextView duration=centered(ReviewPlan.VIDEO_DURATION[index],11,WHITE,600);
+        TextView duration=centered(ReviewPlan.VIDEO_DURATION[index],11,Color.WHITE,600);
         duration.setBackground(round(0xaa000000,5));duration.setPadding(dp(6),dp(4),dp(6),dp(4));
         FrameLayout.LayoutParams durLp=new FrameLayout.LayoutParams(-2,-2,Gravity.BOTTOM|Gravity.END);
         durLp.setMargins(0,0,dp(6),dp(6));tile.addView(duration,durLp);
         FrameLayout choice=new FrameLayout(this);
-        choice.addView(new Glyph(this,videoDraft[index]?"selected":"unselected",videoDraft[index]?BLUE:WHITE),
+        choice.addView(new Glyph(this,videoDraft[index]?"selected":"unselected",videoDraft[index]?BLUE:Color.WHITE),
                 new FrameLayout.LayoutParams(dp(25),dp(25),Gravity.CENTER));
         choice.setContentDescription("Video "+(index+1)+(videoDraft[index]?", selected":", not selected"));
         choice.setSelected(videoDraft[index]);
@@ -586,7 +684,7 @@ public final class MainActivity extends Activity {
         return item;
     }
     private void showVideoPreview(int index,ScrollView scroll){
-        android.app.Dialog dialog=new android.app.Dialog(this,android.R.style.Theme_Material_Light_NoActionBar_Fullscreen);
+        android.app.Dialog dialog=new android.app.Dialog(this,dark?android.R.style.Theme_Material_NoActionBar_Fullscreen:android.R.style.Theme_Material_Light_NoActionBar_Fullscreen);
         LinearLayout layout=column();layout.setBackgroundColor(BG);layout.setPadding(dp(18),v(12),dp(18),v(16));
         FrameLayout header=new FrameLayout(this);
         header.addView(centered("Video preview",17,INK,600),new FrameLayout.LayoutParams(-1,-1));
@@ -608,14 +706,14 @@ public final class MainActivity extends Activity {
         layout.addView(canvas,new LinearLayout.LayoutParams(-1,0,1f));space(layout,12);
         add(layout,centered("Illustrated sample preview · no actual video file",12,GRAY,400),-1,-2);space(layout,8);
         add(layout,centered(ReviewPlan.gb(ReviewPlan.VIDEO_MB[index])+" · "+ReviewPlan.VIDEO_DURATION[index]+" · MP4",14,INK,500),-1,-2);space(layout,12);
-        TextView toggle=centered(videoDraft[index]?"Keep this video":"Select video",17,WHITE,600);
+        TextView toggle=centered(videoDraft[index]?"Keep this video":"Select video",17,Color.WHITE,600);
         tap(toggle,BLUE,26,()->{videoDraft[index]=!videoDraft[index];int offset=scroll.getScrollY();dialog.dismiss();setContentView(videoScreen(offset));});
         add(layout,toggle,-1,dp(52));dialog.setContentView(layout);dialog.show();
         if(dialog.getWindow()!=null){
             dialog.getWindow().setLayout(-1,-1);
             dialog.getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,WindowManager.LayoutParams.FLAG_FULLSCREEN);
             dialog.getWindow().setNavigationBarColor(BG);
-            dialog.getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR);
+            dialog.getWindow().getDecorView().setSystemUiVisibility(dark?0:View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR);
         }
     }
     private static final class VideoSample extends View {
@@ -693,7 +791,7 @@ public final class MainActivity extends Activity {
             LinearLayout stats=row();stats.setPadding(0,v(6),0,v(6));
             LinearLayout left=column();add(left,txt("80",25,INK,700),-1,-2);space(left,5);
             add(left,txt("Suggested to remove",12,GRAY,400),-1,-2);weight(stats,left);
-            View divider=new View(this);divider.setBackgroundColor(0xffdcdce1);add(stats,divider,dp(1),dp(36));gap(stats,15);
+            View divider=new View(this);divider.setBackgroundColor(surface(0xffdcdce1));add(stats,divider,dp(1),dp(36));gap(stats,15);
             LinearLayout right=column();add(right,txt("32",25,GREEN,700),-1,-2);space(right,5);
             add(right,txt("Best shots to keep",12,GRAY,400),-1,-2);weight(stats,right);
             add(body,stats,-1,-2);space(body,12);thinRule(body);space(body,6);
@@ -716,7 +814,7 @@ public final class MainActivity extends Activity {
         space(root,8);thinRule(root);space(root,12);
         LinearLayout total=row();add(total,txt(count+" photos selected",14,GRAY,500),-2,-2);stretch(total);
         add(total,txt(amount,21,INK,700),-2,-2);add(root,total,-1,-2);space(root,12);
-        TextView confirm=centered("Confirm selection",17,WHITE,600);
+        TextView confirm=centered("Confirm selection",17,Color.WHITE,600);
         tap(confirm,BLUE,26,()->leaveSimilar(true));add(root,confirm,-1,dp(52));return root;
     }
     private void addSimilarGroup(LinearLayout body,int group,ScrollView scroll){
@@ -739,7 +837,7 @@ public final class MainActivity extends Activity {
                 }else{
                     int index=ReviewPlan.similarIndex(group,photo);
                     FrameLayout choice=new FrameLayout(this);
-                    choice.addView(new Glyph(this,similarDraft[index]?"selected":"unselected",similarDraft[index]?BLUE:WHITE),
+                    choice.addView(new Glyph(this,similarDraft[index]?"selected":"unselected",similarDraft[index]?BLUE:Color.WHITE),
                             new FrameLayout.LayoutParams(dp(24),dp(24),Gravity.CENTER));
                     choice.setContentDescription("Group "+(group+1)+" photo "+(photo+1)+(similarDraft[index]?", selected":", not selected"));
                     choice.setSelected(similarDraft[index]);
@@ -828,13 +926,13 @@ public final class MainActivity extends Activity {
         add(total,txt(selectedCount+" photos selected",14,GRAY,500),-2,-2);stretch(total);
         add(total,txt(selectedSize,21,INK,700),-2,-2);
         add(root,total,-1,-2);space(root,12);
-        TextView confirm=centered("Confirm selection",17,WHITE,600);
+        TextView confirm=centered("Confirm selection",17,Color.WHITE,600);
         tap(confirm,BLUE,26,()->leaveDuplicates(true));
         add(root,confirm,-1,dp(52));
         return root;
     }
     private void thinRule(LinearLayout parent) {
-        View rule=new View(this);rule.setBackgroundColor(0xffe5e5ea);add(parent,rule,-1,dp(1));
+        View rule=new View(this);rule.setBackgroundColor(surface(0xffe5e5ea));add(parent,rule,-1,dp(1));
     }
     private LinearLayout duplicateSummary(String icon,int tint,int background,String title,String subtitle,String count){
         LinearLayout l=row();
@@ -867,7 +965,7 @@ public final class MainActivity extends Activity {
             }else{
                 int index=group*2+photo-1;
                 FrameLayout choice=new FrameLayout(this);
-                choice.addView(new Glyph(this,duplicateDraft[index]?"selected":"unselected",duplicateDraft[index]?BLUE:WHITE),
+                choice.addView(new Glyph(this,duplicateDraft[index]?"selected":"unselected",duplicateDraft[index]?BLUE:Color.WHITE),
                         new FrameLayout.LayoutParams(dp(24),dp(24),Gravity.CENTER));
                 choice.setContentDescription("Group "+(group+1)+" copy "+photo+(duplicateDraft[index]?", selected":", not selected"));
                 choice.setSelected(duplicateDraft[index]);
@@ -885,7 +983,7 @@ public final class MainActivity extends Activity {
         showPhotoPreview(group,photo,scroll,false);
     }
     private void showPhotoPreview(int group,int photo,ScrollView scroll,boolean similar) {
-        android.app.Dialog dialog=new android.app.Dialog(this,android.R.style.Theme_Material_Light_NoActionBar_Fullscreen);
+        android.app.Dialog dialog=new android.app.Dialog(this,dark?android.R.style.Theme_Material_NoActionBar_Fullscreen:android.R.style.Theme_Material_Light_NoActionBar_Fullscreen);
         LinearLayout layout=column();layout.setBackgroundColor(BG);
         layout.setPadding(dp(18),v(12),dp(18),v(16));
         FrameLayout header=new FrameLayout(this);
@@ -914,7 +1012,7 @@ public final class MainActivity extends Activity {
         }else{
             int index=similar?ReviewPlan.similarIndex(group,photo):group*2+photo-1;
             boolean[] draft=similar?similarDraft:duplicateDraft;
-            TextView toggle=centered(draft[index]?"Keep this copy":"Select copy",17,WHITE,600);
+            TextView toggle=centered(draft[index]?"Keep this copy":"Select copy",17,Color.WHITE,600);
             tap(toggle,BLUE,26,()->{
                 draft[index]=!draft[index];
                 int offset=scroll.getScrollY();dialog.dismiss();setContentView(similar?similarScreen(offset):duplicateScreen(offset));
@@ -926,7 +1024,7 @@ public final class MainActivity extends Activity {
             dialog.getWindow().setLayout(-1,-1);
             dialog.getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,WindowManager.LayoutParams.FLAG_FULLSCREEN);
             dialog.getWindow().setNavigationBarColor(BG);
-            dialog.getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR);
+            dialog.getWindow().getDecorView().setSystemUiVisibility(dark?0:View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR);
         }
     }
 
@@ -956,11 +1054,11 @@ public final class MainActivity extends Activity {
 
     private void confirmPreview() {
         if(reviewPlan.total()<=0 || cleaning || completed)return;
-        new AlertDialog.Builder(this).setTitle("Approve cleanup?")
+        new AlertDialog.Builder(this,dark?android.R.style.Theme_Material_Dialog_Alert:android.R.style.Theme_Material_Light_Dialog_Alert).setTitle(tr("Approve cleanup?"))
                 .setMessage("Preview: "+reviewPlan.count()+" sample items · "+ReviewPlan.gb(reviewPlan.total())+
                         ". No real files will be deleted.")
-                .setNegativeButton("Cancel",null)
-                .setPositiveButton("Approve preview",(d,w)->{
+                .setNegativeButton(tr("Cancel"),null)
+                .setPositiveButton(tr("Approve preview"),(d,w)->{
                     cleanup=new CleanupPreview(reviewPlan);startCleanupAnimation();
                 }).show();
     }
@@ -1029,7 +1127,7 @@ public final class MainActivity extends Activity {
                 int status=cleanup.status(i,recovered);
                 markers[i].setText(status==2?"✓":status==1?"◌":"○");
                 markers[i].setTextColor(status==2?GREEN:status==1?BLUE:GRAY);
-                labels[i].setText(status==2?"Completed":status==1?"Cleaning…":"Waiting");
+                labels[i].setText(tr(status==2?"Completed":status==1?"Cleaning…":"Waiting"));
                 labels[i].setTextColor(status==1?BLUE:GRAY);
             }
         });
@@ -1053,7 +1151,7 @@ public final class MainActivity extends Activity {
         LinearLayout metrics=card(),line=row();
         LinearLayout left=column();add(left,txt("Items cleaned",12,GRAY,400),-1,-2);space(left,6);
         add(left,txt(Integer.toString(cleanup.count),25,INK,700),-1,-2);weight(line,left);
-        View divider=new View(this);divider.setBackgroundColor(0xffe5e5ea);add(line,divider,dp(1),dp(44));gap(line,14);
+        View divider=new View(this);divider.setBackgroundColor(surface(0xffe5e5ea));add(line,divider,dp(1),dp(44));gap(line,14);
         LinearLayout right=column();add(right,txt("Available storage",12,GRAY,400),-1,-2);space(right,6);
         add(right,txt(ReviewPlan.gb(cleanup.available()),22,INK,700),-1,-2);weight(line,right);
         add(metrics,line,-1,-2);add(body,metrics,-1,-2);space(body,15);
@@ -1061,7 +1159,7 @@ public final class MainActivity extends Activity {
         add(shield,new Glyph(this,"shield",GREEN),dp(17),dp(17));gap(shield,6);
         add(shield,txt("Your protected photos are safe.",12,GRAY,400),-2,-2);add(body,shield,-1,-2);
         add(root,centered("Simulation · No files were deleted.",12,GRAY,400),-1,dp(26));space(root,6);
-        TextView home=centered("Back to Home",17,WHITE,600);
+        TextView home=centered("Back to Home",17,Color.WHITE,600);
         tap(home,BLUE,26,this::showHome);add(root,home,-1,dp(52));setContentView(root);
         if(animate){
             ring.setFraction(0f);
@@ -1081,7 +1179,7 @@ public final class MainActivity extends Activity {
         private void label(Canvas c,String label,float y,int size,int color,boolean bold){
             paint.setStyle(Paint.Style.FILL);paint.setColor(color);paint.setTextAlign(Paint.Align.CENTER);
             paint.setTypeface(Typeface.create("sans-serif",bold?Typeface.BOLD:Typeface.NORMAL));
-            paint.setTextSize(size);c.drawText(label,130,y,paint);
+            paint.setTextSize(size);c.drawText(tr(label),130,y,paint);
         }
         @Override protected void onDraw(Canvas c){
             super.onDraw(c);
@@ -1090,11 +1188,11 @@ public final class MainActivity extends Activity {
             paint.setStyle(Paint.Style.STROKE);paint.setStrokeWidth(3.5f);paint.setStrokeCap(Paint.Cap.ROUND);
             for(int i=0;i<80;i++){
                 double a=Math.toRadians(i*4.5-90);float x=(float)Math.cos(a),y=(float)Math.sin(a);
-                paint.setColor(success?0xff34c759:i<Math.round(80*fraction)?BLUE:0xffdfe2e8);
+                paint.setColor(success?0xff34c759:i<Math.round(80*fraction)?BLUE:surface(0xffdfe2e8));
                 c.drawLine(130+x*104,130+y*104,130+x*117,130+y*117,paint);
             }
             if(success){
-                paint.setStyle(Paint.Style.FILL);paint.setColor(0xffe5f5e9);c.drawCircle(130,130,70,paint);
+                paint.setStyle(Paint.Style.FILL);paint.setColor(surface(0xffe5f5e9));c.drawCircle(130,130,70,paint);
                 c.save();c.translate(130,130);float tick=.75f+.25f*fraction;c.scale(tick,tick);
                 paint.setStyle(Paint.Style.STROKE);paint.setStrokeWidth(9);paint.setColor(GREEN);
                 paint.setAlpha(Math.round(fraction*255));paint.setStrokeJoin(Paint.Join.ROUND);
@@ -1149,7 +1247,7 @@ public final class MainActivity extends Activity {
             p.setStrokeWidth(3.6f); p.setStrokeCap(Paint.Cap.ROUND);
             for(int i=0;i<81;i++){
                 double a=Math.toRadians(130+i*3.5);
-                p.setColor(i<Math.round(progress*81)?BLUE:0xffdfe2e8);
+                p.setColor(i<Math.round(progress*81)?BLUE:surface(0xffdfe2e8));
                 c.drawLine(140+89*(float)Math.cos(a),111+89*(float)Math.sin(a),
                     140+102*(float)Math.cos(a),111+102*(float)Math.sin(a),p);
             }
@@ -1162,14 +1260,14 @@ public final class MainActivity extends Activity {
         private void label(Canvas c,String text,float x,float y,float size,int color,boolean strong){
             p.setColor(color); p.setStyle(Paint.Style.FILL); p.setTextAlign(Paint.Align.CENTER);
             p.setTypeface(Typeface.create(strong?"sans-serif-medium":"sans-serif",strong?Typeface.BOLD:Typeface.NORMAL));
-            p.setTextSize(size); c.drawText(text,x,y,p);
+            p.setTextSize(size); c.drawText(tr(text),x,y,p);
         }
     }
     private final class StorageBar extends View {
         private final Paint p=new Paint(Paint.ANTI_ALIAS_FLAG);
         StorageBar(Context c){super(c);setContentDescription(ReviewPlan.gb(previewUsed())+" used of 128 GB, "+ReviewPlan.gb(previewAvailable())+" available");}
         @Override protected void onDraw(Canvas c){
-            float[] parts={.45f,(float)(previewUsed()/128000.0-.45),(float)(previewAvailable()/128000.0)}; int[] colors={BLUE,0xff91bdff,0xffe5e5ea};
+            float[] parts={.45f,(float)(previewUsed()/128000.0-.45),(float)(previewAvailable()/128000.0)}; int[] colors={BLUE,0xff91bdff,surface(0xffe5e5ea)};
             float available=getWidth()-dp(4), x=0;
             for(int i=0;i<3;i++){
                 float w=available*parts[i]; p.setColor(colors[i]);
@@ -1202,6 +1300,9 @@ public final class MainActivity extends Activity {
                 case "document":path(c,5,2,14,2,20,8,20,22,5,22,5,2);path(c,14,2,14,8,20,8);path(c,8,13,17,13);path(c,8,17,17,17);break;
                 case "phone":c.drawRoundRect(new RectF(6,2,18,22),3,3,p);path(c,10,18,14,18);break;
                 case "chevron":path(c,9,5,16,12,9,19);break;
+                case "select_arrows":path(c,8,9,12,5,16,9);path(c,8,15,12,19,16,15);break;
+                case "check":path(c,5,12,10,17,20,7);break;
+                case "sun":c.drawCircle(12,12,4.5f,p);for(int i=0;i<8;i++){double a=i*Math.PI/4;float x=(float)Math.cos(a),y=(float)Math.sin(a);c.drawLine(12+8*x,12+8*y,12+10*x,12+10*y,p);}break;
                 case "moon":{
                     Path a=new Path();a.moveTo(13,2);a.cubicTo(3,1,0,14,7,19);a.cubicTo(14,25,22,18,22,12);
                     a.cubicTo(15,16,8,9,13,2);a.close();c.drawPath(a,p);break;}

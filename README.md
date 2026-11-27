@@ -40,3 +40,6 @@ Tap Home's storage card to open Storage. Shared sample data drives Home and Stor
 
 ## Settings landing preview
 Home gear opens the scrollable Settings screen with five groups and fourteen rows, native blue line icons and a centered Clenova footer. System appearance and English are illustrative labels. Rows are intentionally non-interactive until their detail screens are implemented. Footer 1.0.0 is approved design placeholder; actual preview build version remains unchanged. Back and system Back return Home; landing state restores on activity recreation. No new account, billing, privacy or permission functionality.
+
+## Preferences popups
+Native focusable PopupWindow overlays the tapped row without changing Settings layout. Appearance (Light/Dark/System) updates app surfaces and persists locally; app-local language selector translates common existing screen labels into English, Hindi, Spanish, French or German. Some dynamic sample text and accessibility descriptions remain English. Notification switches persist and create Android channels; enabling requests notification permission on Android 13+, and blocked permission links to Android settings. No automated notifications are emitted while Agent/storage remain simulated. Other Settings detail screens remain unimplemented.
