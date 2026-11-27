@@ -412,8 +412,8 @@ public final class MainActivity extends Activity {
         setContentView(root);
     }
     private void startAgentTask(int task){
-        if(task==3){agentTaskVisible=false;agentShortcut=true;openProtection();return;}
-        agentVisible=false;agentTaskVisible=false;agentTaskOrigin=true;cleanVisible=true;restoreAgentWindow();
+        if(task==3){agentTaskVisible=false;agentShortcut=true;scanResult=null;openProtection();return;}
+        agentVisible=false;agentTaskVisible=false;agentTaskOrigin=true;showClean();
         if(task==0){dupAfterScan=false;similarAfterScan=false;videoAfterScan=false;shotAfterScan=false;requestSmartScan();}
         else if(task==1)openRealDuplicates(false);else if(task==2)openUnusedApps();else if(task==4)openDownloads();
         else if(task==5)openRealVideos(false);else if(task==6)openRealScreenshots(false);else if(task==7)openRealSimilar(false);else if(task==8)openLargeFiles();else if(task==9)openClutter();
@@ -513,7 +513,7 @@ public final class MainActivity extends Activity {
         if(SmartMediaScan.hasAccess(this)&&(!(dupAfterScan||similarAfterScan||shotAfterScan)||SmartMediaScan.hasPhotoAccess(this))&&(!videoAfterScan||SmartMediaScan.hasVideoAccess(this))){startSmartScan();return;}
         privacyDialog().setTitle(tr("Media access needed"))
             .setMessage(tr("Smart Scan reads only the photos and videos you allow. Nothing is deleted."))
-            .setNegativeButton(tr("Cancel"),null).setPositiveButton(tr("Continue"),(d,w)->{
+            .setNegativeButton(tr("Cancel"),(d,w)->{dupAfterScan=false;similarAfterScan=false;videoAfterScan=false;shotAfterScan=false;if(agentTaskOrigin)showAgent();}).setPositiveButton(tr("Continue"),(d,w)->{
                 requestingScan=true;
                 if(videoAfterScan&&android.os.Build.VERSION.SDK_INT>=34)requestPermissions(new String[]{android.Manifest.permission.READ_MEDIA_VIDEO,android.Manifest.permission.READ_MEDIA_VISUAL_USER_SELECTED},REQUEST_SCAN_MEDIA);
                 else if(videoAfterScan&&android.os.Build.VERSION.SDK_INT>=33)requestPermissions(new String[]{android.Manifest.permission.READ_MEDIA_VIDEO},REQUEST_SCAN_MEDIA);
@@ -1427,7 +1427,7 @@ public final class MainActivity extends Activity {
     }
     private void openSettings(){
         restoreAgentWindow();
-        if(agentVisible&&agentShortcut){agentShortcut=false;showAgent();return;}
+        if(agentVisible&&agentShortcut){agentShortcut=false;scanResult=null;showAgent();return;}
         scanResult=null; // protection rules may change in settings; re-scan before recommending again.
         if(cleanScroll!=null){cleanScrollY=cleanScroll.getScrollY();cleanScroll=null;}
         aboutVisible=false;aboutScroll=null;policyVisible=false;termsVisible=false;policyScroll=null;feedbackVisible=false;helpVisible=false;hideHelpKeyboard();permissionsVisible=false;privacyVisible=false;
