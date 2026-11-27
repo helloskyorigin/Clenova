@@ -5,6 +5,16 @@ import java.util.Map;
 final class AppStrings {
  private static final Map<String,String[]> TEXT=new HashMap<>();
  static {
+  TEXT.put("Comparing similar photos",new String[]{"मिलते-जुलते फ़ोटो जाँच रहे हैं","Comparando fotos similares","Comparaison des photos similaires","Ähnliche Fotos vergleichen"});
+  TEXT.put("Similar groups",new String[]{"मिलते-जुलते समूह","Grupos similares","Groupes similaires","Ähnliche Gruppen"});
+  TEXT.put("best shots recommended",new String[]{"बेहतरीन फ़ोटो सुझाए गए","mejores tomas sugeridas","meilleures photos suggérées","beste Aufnahmen empfohlen"});
+  TEXT.put("Compare photos",new String[]{"फ़ोटो की तुलना","Comparar fotos","Comparer les photos","Fotos vergleichen"});
+  TEXT.put("Mark to keep",new String[]{"रखने के लिए चिह्नित करें","Marcar para conservar","Marquer à conserver","Zum Behalten markieren"});
+  TEXT.put("Remove keep mark",new String[]{"रखने का चिह्न हटाएँ","Quitar marca","Retirer la marque","Markierung entfernen"});
+  TEXT.put("No similar photo suggestions",new String[]{"मिलते-जुलते फ़ोटो के सुझाव नहीं","Sin sugerencias de fotos similares","Aucune suggestion de photos similaires","Keine ähnlichen Fotovorschläge"});
+  TEXT.put("Similar photos are not identical. Review each one before selecting it.",new String[]{"मिलते-जुलते फ़ोटो एक जैसे नहीं हैं। चुनने से पहले हर फ़ोटो देखें।","Las fotos similares no son idénticas. Revisa cada una antes de seleccionarla.","Les photos similaires ne sont pas identiques. Vérifiez chacune avant de la sélectionner.","Ähnliche Fotos sind nicht identisch. Prüfe jedes vor der Auswahl."});
+  TEXT.put("Suggested using sharpness, lighting and resolution estimates.",new String[]{"स्पष्टता, रोशनी और रिज़ॉल्यूशन के अनुमान पर सुझाव।","Sugerida por estimaciones de nitidez, luz y resolución.","Suggestion selon la netteté, la lumière et la résolution estimées.","Empfohlen anhand geschätzter Schärfe, Beleuchtung und Auflösung."});
+  TEXT.put("Your memories. Your choice.",new String[]{"आपकी यादें। आपकी पसंद।","Tus recuerdos. Tu decisión.","Vos souvenirs. Votre choix.","Deine Erinnerungen. Deine Wahl."});
   TEXT.put("Recoverable space",new String[]{"खाली हो सकने वाली जगह","Espacio recuperable","Espace récupérable","Rückgewinnbarer Speicher"});
   TEXT.put("Smart picks",new String[]{"स्मार्ट चयन","Selección inteligente","Sélection intelligente","Smarte Auswahl"});
   TEXT.put("All photos",new String[]{"सभी फ़ोटो","Todas las fotos","Toutes les photos","Alle Fotos"});

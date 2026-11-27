@@ -38,7 +38,10 @@ public final class MainActivity extends Activity {
     private boolean cleanVisible;
     private static final int REQUEST_SCAN_MEDIA=96;
     private SmartMediaScan runningScan;
-    private static final int REQUEST_DUP_TRASH=97;
+    private static final int REQUEST_DUP_TRASH=97, REQUEST_SIMILAR_TRASH=98;
+    private boolean realSimilarVisible,realSimilarReview,similarAfterScan,similarFromResults,similarAll;
+    private int realSimilarPage;
+    private final java.util.Set<String> realSimilarSelected=new java.util.LinkedHashSet<>(), realSimilarKeep=new java.util.HashSet<>();
     private boolean realDupVisible,realDupReview,dupAfterScan,dupFromResults,dupAll,dupTrashPending;
     private int dupPage;
     private volatile int dupThumbGeneration;
@@ -47,7 +50,7 @@ public final class MainActivity extends Activity {
     private final android.util.LruCache<String,android.graphics.Bitmap> dupCache=new android.util.LruCache<String,android.graphics.Bitmap>(12*1024*1024){@Override protected int sizeOf(String key,android.graphics.Bitmap value){return value.getByteCount();}};
     private SmartMediaScan.Result scanResult;
     private boolean scanVisible, scanReviewVisible, requestingScan;
-    private final boolean[] scanSelected=new boolean[3];
+    private final boolean[] scanSelected=new boolean[4];
     private TextView scanStatus,scanProgress;
     private android.widget.ProgressBar scanBar;
     private ScrollView cleanScroll;
@@ -300,6 +303,7 @@ public final class MainActivity extends Activity {
         if(cleanVisible)showClean();else showHome();
     }
     private void showClean(){
+        realSimilarVisible=false;realSimilarReview=false;similarAfterScan=false;realSimilarSelected.clear();realSimilarKeep.clear();
         realDupVisible=false;realDupReview=false;dupAfterScan=false;realDupSelected.clear();dupThumbGeneration++;dupCache.evictAll();
         scanVisible=false;scanReviewVisible=false;cleanVisible=true;settingsVisible=false;storageVisible=false;reviewing=false;
         aboutVisible=false;policyVisible=false;termsVisible=false;feedbackVisible=false;helpVisible=false;
@@ -325,7 +329,7 @@ public final class MainActivity extends Activity {
         space(copy,5);add(copy,txt(scanResult==null?"Not scanned yet":"Last scan · Review candidates",12,GRAY,500),-1,-2);weight(top,copy);gap(top,10);
         FrameLayout ring=new FrameLayout(this);ring.addView(new CleanScanMark(this),new FrameLayout.LayoutParams(-1,-1));add(top,ring,dp(92),dp(92));add(hero,top,-1,-2);space(hero,17);
         LinearLayout scan=row();scan.setGravity(Gravity.CENTER);add(scan,new Glyph(this,"scan",Color.WHITE),dp(21),dp(21));gap(scan,8);add(scan,txt("Smart Scan",16,Color.WHITE,600),-2,-2);
-        tap(scan,BLUE,26,()->{dupAfterScan=false;requestSmartScan();});add(hero,scan,-1,dp(50));
+        tap(scan,BLUE,26,()->{dupAfterScan=false;similarAfterScan=false;requestSmartScan();});add(hero,scan,-1,dp(50));
         add(body,hero,-1,-2);space(body,20);
         LinearLayout section=row();weight(section,txt("Media cleanup",20,INK,700));add(section,txt("Gallery",12,GRAY,400),-2,-2);add(body,section,-1,-2);space(body,10);
         String[][] media={{"copy","Duplicates"},{"images","Similar photos"},{"video","Large videos"},{"screenshot","Screenshots"}};
@@ -339,11 +343,11 @@ public final class MainActivity extends Activity {
                 LinearLayout title=row();FrameLayout icon=new FrameLayout(this);icon.setBackground(round(PALE,11));
                 icon.addView(new Glyph(this,item[0],BLUE),new FrameLayout.LayoutParams(dp(21),dp(21),Gravity.CENTER));add(title,icon,dp(36),dp(36));stretch(title);
                 add(title,new Glyph(this,"up",GRAY),dp(15),dp(15));add(tile,title,-1,-2);space(tile,9);
-                int category=new int[]{0,-1,1,2}[pair*2+j];
+                int category=new int[]{0,3,1,2}[pair*2+j];
                 boolean scanned=scanResult!=null&&category>=0&&(category==1?scanResult.videosScanned:scanResult.imagesScanned);
                 add(tile,txt(scanned?scanBytes(scanResult.bytes(category)):"—",23,INK,700),-1,-2);space(tile,5);add(tile,txt(item[1],14,INK,600),-1,-2);space(tile,4);
                 add(tile,txt(scanned?scanResult.groups.get(category).size()+" "+tr("items"):tr("Scan to find"),12,GRAY,400),-1,-2);
-                tap(tile,WHITE,18,()->{if(category==0){openRealDuplicates(false);}else if(scanned)showScanResults();else cleanPending(item[1]);});tile.setContentDescription(tr(item[1])+", "+(scanned?scanBytes(scanResult.bytes(category)):tr("Not scanned yet")));
+                tap(tile,WHITE,18,()->{if(category==0){openRealDuplicates(false);}else if(category==3){openRealSimilar(false);}else if(scanned)showScanResults();else cleanPending(item[1]);});tile.setContentDescription(tr(item[1])+", "+(scanned?scanBytes(scanResult.bytes(category)):tr("Not scanned yet")));
                 tiles.addView(tile,new LinearLayout.LayoutParams(0,-2,1f));
             }
             add(body,tiles,-1,-2);
@@ -371,7 +375,7 @@ public final class MainActivity extends Activity {
     }
     private void requestSmartScan(){
         if(requestingScan||runningScan!=null)return;
-        if(SmartMediaScan.hasAccess(this)&&(!dupAfterScan||SmartMediaScan.hasPhotoAccess(this))){startSmartScan();return;}
+        if(SmartMediaScan.hasAccess(this)&&(!(dupAfterScan||similarAfterScan)||SmartMediaScan.hasPhotoAccess(this))){startSmartScan();return;}
         privacyDialog().setTitle(tr("Media access needed"))
             .setMessage(tr("Smart Scan reads only the photos and videos you allow. Nothing is deleted."))
             .setNegativeButton(tr("Cancel"),null).setPositiveButton(tr("Continue"),(d,w)->{
@@ -408,7 +412,7 @@ public final class MainActivity extends Activity {
         LinearLayout status=card();scanStatus=txt("Reading media library",15,INK,600);add(status,scanStatus,-1,-2);space(status,13);
         scanBar=new android.widget.ProgressBar(this,null,android.R.attr.progressBarStyleHorizontal);
         scanBar.setIndeterminate(true);scanBar.setIndeterminateTintList(ColorStateList.valueOf(BLUE));scanBar.setProgressTintList(ColorStateList.valueOf(BLUE));add(status,scanBar,-1,dp(8));space(status,12);
-        add(status,txt("Duplicate photos · Large videos · Screenshots",12,GRAY,400),-1,-2);add(body,status,-1,-2);space(body,16);
+        add(status,txt("Duplicate photos · Similar photos · Large videos · Screenshots",12,GRAY,400),-1,-2);add(body,status,-1,-2);space(body,16);
         add(body,centered("Your files are safe during scanning.",12,GREEN,500),-1,-2);
         scanButton(root,"Cancel scan",false,this::cancelSmartScan);setContentView(root);
         new Thread(()->{
@@ -416,12 +420,12 @@ public final class MainActivity extends Activity {
                 SmartMediaScan.Result result=job.run((stage,done,total)->{
                     if(done!=total&&done%16!=0)return;
                     runOnUiThread(()->{if(runningScan!=job||isFinishing()||isDestroyed())return;
-                        scanStatus.setText(tr(new String[]{"Reading media library","Checking exact duplicates","Classifying media"}[stage]));
+                        scanStatus.setText(tr(new String[]{"Reading media library","Checking exact duplicates","Classifying media","Comparing similar photos"}[stage]));
                         scanBar.setIndeterminate(total<=0);if(total>0){scanBar.setMax(total);scanBar.setProgress(done);scanProgress.setText(done+" / "+total);}else scanProgress.setText(tr("Scanning"));
                     });
                 });
                 runOnUiThread(()->{if(runningScan!=job||isFinishing()||isDestroyed())return;runningScan=null;scanResult=result;
-                    java.util.Arrays.fill(scanSelected,false);if(dupAfterScan){dupAfterScan=false;showRealDuplicates();}else showScanResults();});
+                    java.util.Arrays.fill(scanSelected,false);if(dupAfterScan){dupAfterScan=false;showRealDuplicates();}else if(similarAfterScan){similarAfterScan=false;showRealSimilar();}else showScanResults();});
             }catch(Exception e){runOnUiThread(()->{if(runningScan!=job||isFinishing()||isDestroyed())return;runningScan=null;showClean();folderToast("Scan could not finish");});}
         },"Clenova-media-scan").start();
     }
@@ -431,6 +435,7 @@ public final class MainActivity extends Activity {
     }
     private void showScanResults(){
         if(scanResult==null){showClean();return;}
+        realSimilarVisible=false;realSimilarReview=false;
         realDupVisible=false;realDupReview=false;dupThumbGeneration++;
         scanVisible=true;scanReviewVisible=false;
         LinearLayout root=scanShell("Scan results",this::cancelSmartScan),body=scanBody(root);
@@ -440,18 +445,18 @@ public final class MainActivity extends Activity {
         space(hero,7);add(hero,centered(scanResult.examined+" "+tr("media items checked"),12,GRAY,400),-1,-2);add(body,hero,-1,-2);space(body,20);
         add(body,txt("Cleanup opportunities",18,INK,700),-1,-2);space(body,10);
         LinearLayout list=card();pad(list,13,4);TextView review=centered("Review cleanup",16,Color.WHITE,600);
-        for(int i=0;i<3;i++){
+        for(int i=0;i<4;i++){
             if(i>0)thinRule(list);final int index=i;LinearLayout line=row();line.setMinimumHeight(dp(65));line.setPadding(0,dp(9),0,dp(9));
-            add(line,new Glyph(this,new String[]{"copy","video","screenshot"}[i],BLUE),dp(25),dp(25));gap(line,12);
+            add(line,new Glyph(this,new String[]{"copy","video","screenshot","images"}[i],BLUE),dp(25),dp(25));gap(line,12);
             LinearLayout labels=column();add(labels,txt(SmartMediaScan.LABELS[i],15,INK,600),-1,-2);space(labels,5);
             boolean scanned=i==1?scanResult.videosScanned:scanResult.imagesScanned;
             add(labels,txt(scanned?scanResult.groups.get(i).size()+" · "+scanBytes(scanResult.bytes(i)):tr("Not scanned"),12,GRAY,400),-1,-2);weight(line,labels);
-            if(i==0){tap(labels,WHITE,8,()->openRealDuplicates(true));add(line,new Glyph(this,"chevron",GRAY),dp(14),dp(14));}
+            if(i==0||i==3){tap(labels,WHITE,8,()->{if(index==0)openRealDuplicates(true);else openRealSimilar(true);});add(line,new Glyph(this,"chevron",GRAY),dp(14),dp(14));}
             android.widget.CheckBox check=new android.widget.CheckBox(this);check.setButtonTintList(ColorStateList.valueOf(BLUE));check.setChecked(scanSelected[i]);check.setEnabled(!scanResult.groups.get(i).isEmpty());check.setContentDescription(tr(SmartMediaScan.LABELS[i]));check.setOnCheckedChangeListener((v,checked)->{scanSelected[index]=checked;updateScanReview(review);});add(line,check,dp(44),dp(44));add(list,line,-1,-2);
         }
         add(body,list,-1,-2);space(body,14);
         LinearLayout scope=card();add(scope,txt("Scan coverage",15,INK,600),-1,-2);space(scope,8);
-        add(scope,txt("Similar photos, downloads, other files and unused apps are not scanned in this build.",13,GRAY,400),-1,-2);
+        add(scope,txt("Downloads, other files and unused apps are not scanned in this build. Similar-photo suggestions are heuristic and require visual review.",13,GRAY,400),-1,-2);
         if(scanResult.limited){space(scope,7);add(scope,txt("Limited media access. Only accessible items were checked.",13,GRAY,400),-1,-2);}
         if(scanResult.partial){space(scope,7);add(scope,txt("Some media could not be checked or the scan limit was reached.",13,GRAY,400),-1,-2);}
         space(scope,7);add(scope,txt("Large videos: 100 MiB or more. Screenshots: folder-based detection.",12,GRAY,400),-1,-2);
@@ -461,15 +466,15 @@ public final class MainActivity extends Activity {
         add(root,centered("Nothing is deleted without your approval.",12,GRAY,400),-1,-2);setContentView(root);
     }
     private void updateScanReview(TextView button){
-        long bytes=0;for(int i=0;i<3;i++)if(scanSelected[i])bytes+=scanResult.bytes(i);
+        long bytes=0;for(int i=0;i<4;i++)if(scanSelected[i])bytes+=scanResult.bytes(i);
         button.setEnabled(bytes>0);button.setAlpha(bytes>0?1f:.45f);button.setText(tr("Review cleanup")+" · "+scanBytes(bytes));
     }
     private void showScanReview(){
         if(scanResult==null){showClean();return;}
         scanReviewVisible=true;scanVisible=true;LinearLayout root=scanShell("Review cleanup",this::showScanResults),body=scanBody(root);
         add(body,txt("Review selected media",21,INK,700),-1,-2);space(body,8);
-        add(body,txt("This combined review is read-only. Open Duplicate photos for the separate Android trash workflow.",13,GRAY,400),-1,-2);space(body,14);
-        for(int i=0;i<3;i++)if(scanSelected[i]){
+        add(body,txt("This combined review is read-only. Open Duplicate or Similar photos for their separate Android trash workflows.",13,GRAY,400),-1,-2);space(body,14);
+        for(int i=0;i<4;i++)if(scanSelected[i]){
             add(body,txt(SmartMediaScan.LABELS[i],15,INK,600),-1,-2);space(body,8);
             LinearLayout group=card();int shown=0;
             for(SmartMediaScan.Item item:scanResult.groups.get(i)){
@@ -626,6 +631,102 @@ public final class MainActivity extends Activity {
                 });
             }catch(Exception e){runOnUiThread(()->{if(runningScan!=job||isDestroyed())return;runningScan=null;showRealDuplicates();folderToast("Safety recheck failed");});}
         },"Clenova-duplicate-recheck").start();
+    }
+
+    private void openRealSimilar(boolean fromResults){
+        similarFromResults=fromResults;realSimilarPage=0;similarAll=false;realSimilarSelected.clear();realSimilarKeep.clear();
+        if(scanResult!=null&&scanResult.similarScanned){showRealSimilar();return;}
+        similarAfterScan=true;dupAfterScan=false;requestSmartScan();
+    }
+    private void leaveRealSimilar(){
+        realSimilarVisible=false;realSimilarReview=false;dupThumbGeneration++;realSimilarSelected.clear();realSimilarKeep.clear();
+        if(similarFromResults&&scanResult!=null)showScanResults();else showClean();
+    }
+    private long similarBytes(){long bytes=0;if(scanResult!=null)for(SmartMediaScan.Item item:scanResult.groups.get(3))if(realSimilarSelected.contains(item.uri.toString()))bytes+=item.bytes;return bytes;}
+    private void similarFooter(TextView count,TextView amount,TextView action){
+        count.setText(realSimilarSelected.size()+" "+tr("photos selected"));amount.setText(scanBytes(similarBytes()));
+        action.setEnabled(!realSimilarSelected.isEmpty());action.setAlpha(realSimilarSelected.isEmpty()?.45f:1f);
+    }
+    private void showRealSimilar(){
+        if(scanResult==null){showClean();return;}
+        realSimilarVisible=true;realSimilarReview=false;realDupVisible=false;scanVisible=false;scanReviewVisible=false;int generation=++dupThumbGeneration;
+        LinearLayout root=scanShell("Similar photos",this::leaveRealSimilar),body=scanBody(root);
+        LinearLayout hero=card(),summary=row(),labels=column();add(labels,txt("Potential space to recover",13,GRAY,400),-1,-2);space(labels,6);
+        add(labels,txt(scanBytes(scanResult.bytes(3)),32,INK,700),-1,-2);space(labels,5);add(labels,txt(scanResult.groups.get(3).size()+" "+tr("similar photos")+" · "+scanResult.similarGroups.size()+" "+tr("groups"),12,GRAY,400),-1,-2);weight(summary,labels);
+        FrameLayout mark=new FrameLayout(this);mark.setBackground(round(PALE,18));mark.addView(new Glyph(this,"images",BLUE),new FrameLayout.LayoutParams(dp(33),dp(33),Gravity.CENTER));add(summary,mark,dp(64),dp(64));add(hero,summary,-1,-2);space(hero,12);thinRule(hero);space(hero,10);
+        add(hero,txt(scanResult.similarGroups.size()+" "+tr("best shots recommended"),13,BLUE,600),-1,-2);add(body,hero,-1,-2);space(body,13);
+        LinearLayout tabs=row();tabs.setBackground(round(surface(0xffe7e7ec),15));pad(tabs,4,4);
+        for(int j=0;j<2;j++){final boolean all=j==1;TextView tab=centered(all?"All photos":"Smart picks",14,similarAll==all?INK:GRAY,600);tap(tab,similarAll==all?WHITE:surface(0xffe7e7ec),12,()->{similarAll=all;realSimilarPage=0;showRealSimilar();});tabs.addView(tab,new LinearLayout.LayoutParams(0,dp(40),1f));}add(body,tabs,-1,-2);space(body,12);
+        add(body,txt("Similar groups",18,INK,600),-1,-2);space(body,7);
+        add(body,txt("Similar photos are not identical. Review each one before selecting it.",12,GRAY,400),-1,-2);space(body,9);
+        java.util.List<SimilarPhotoScan.Group> groups=new java.util.ArrayList<>();
+        for(SimilarPhotoScan.Group g:scanResult.similarGroups){boolean candidate=false;for(SmartMediaScan.Item i:g.items)if(SimilarPhotoScan.candidate(g,i)&&!realSimilarKeep.contains(i.uri.toString()))candidate=true;if(similarAll||candidate)groups.add(g);}
+        int pages=Math.max(1,(groups.size()+3)/4);realSimilarPage=Math.max(0,Math.min(realSimilarPage,pages-1));
+        TextView count=txt("",12,GRAY,400),amount=txt("",22,INK,700),review=centered("Review & clean",14,Color.WHITE,600);
+        TextView clear=centered("Deselect all",13,BLUE,600);tap(clear,BG,8,()->{realSimilarSelected.clear();showRealSimilar();});add(body,clear,-1,dp(40));
+        if(groups.isEmpty()){LinearLayout empty=card();add(empty,centered(scanResult.similarScanned?"No similar photo suggestions":"Photo access needed",17,INK,600),-1,-2);space(empty,7);add(empty,centered("Only visually close photos in the same folder and time window are grouped.",13,GRAY,400),-1,-2);add(body,empty,-1,-2);}
+        for(int n=realSimilarPage*4;n<Math.min(groups.size(),(realSimilarPage+1)*4);n++){
+            SimilarPhotoScan.Group g=groups.get(n);LinearLayout group=card();pad(group,12,12);
+            add(group,txt(tr("Group")+" "+(n+1)+" · "+g.items.size()+" "+tr("photos"),15,INK,600),-1,-2);space(group,10);
+            add(group,similarImage(g,g.best,generation,dp(160),true,()->similarFooter(count,amount,review)), -1,-2);space(group,8);
+            add(group,txt("Suggested using sharpness, lighting and resolution estimates.",12,GRAY,400),-1,-2);space(group,10);
+            java.util.List<SmartMediaScan.Item> others=new java.util.ArrayList<>();for(SmartMediaScan.Item i:g.items)if(i!=g.best)others.add(i);
+            for(int start=0;start<others.size();start+=2){LinearLayout row=row();row.setGravity(Gravity.TOP);for(int col=0;col<2;col++){if(col>0)gap(row,8);int index=start+col;
+                if(index>=others.size()){row.addView(new View(this),new LinearLayout.LayoutParams(0,1,1f));continue;}
+                row.addView(similarImage(g,others.get(index),generation,dp(106),false,()->similarFooter(count,amount,review)),new LinearLayout.LayoutParams(0,-2,1f));
+            }add(group,row,-1,-2);space(group,8);}
+            TextView compare=centered("Compare photos",14,BLUE,600);tap(compare,PALE,12,()->compareSimilar(g,0));add(group,compare,-1,dp(44));add(body,group,-1,-2);space(body,12);
+        }
+        if(pages>1){LinearLayout pager=row();TextView prev=centered("Previous",13,BLUE,600),next=centered("Next",13,BLUE,600);
+            tap(prev,WHITE,12,()->{realSimilarPage--;showRealSimilar();});prev.setEnabled(realSimilarPage>0);prev.setAlpha(realSimilarPage>0?1:.4f);
+            tap(next,WHITE,12,()->{realSimilarPage++;showRealSimilar();});next.setEnabled(realSimilarPage+1<pages);next.setAlpha(realSimilarPage+1<pages?1:.4f);
+            weight(pager,prev);weight(pager,centered((realSimilarPage+1)+" / "+pages,13,GRAY,400));weight(pager,next);add(body,pager,-1,dp(48));}
+        if(scanResult.partial||scanResult.limited){space(body,8);add(body,txt("Partial scan results",12,GRAY,500),-1,-2);}
+        LinearLayout footer=row();footer.setBackground(round(WHITE,18));pad(footer,13,10);LinearLayout selected=column();add(selected,count,-1,-2);space(selected,4);add(selected,amount,-1,-2);weight(footer,selected);gap(footer,8);tap(review,BLUE,24,this::showRealSimilarReview);review.setPadding(dp(13),0,dp(13),0);add(footer,review,-2,dp(46));add(root,footer,-1,-2);space(root,7);add(root,centered("Your memories. Your choice.",12,GRAY,400),-1,-2);similarFooter(count,amount,review);setContentView(root);
+    }
+    private LinearLayout similarImage(SimilarPhotoScan.Group group,SmartMediaScan.Item item,int generation,int height,boolean best,Runnable changed){
+        LinearLayout tile=column();tile.setBackground(round(BG,12));tile.setClipToOutline(true);
+        android.widget.ImageView image=new android.widget.ImageView(this);image.setScaleType(android.widget.ImageView.ScaleType.CENTER_CROP);image.setBackgroundColor(PALE);image.setContentDescription(item.name);image.setOnClickListener(v->showRealPhoto(item));add(tile,image,-1,height);loadDupThumb(image,item,best?512:256,generation);
+        String id=item.uri.toString();TextView select=centered("",12,GRAY,600);add(tile,select,-1,dp(40));
+        boolean locked=best||item.protectedItem||realSimilarKeep.contains(id);
+        Runnable refresh=()->{boolean chosen=realSimilarSelected.contains(id);select.setText(best?tr("Best shot")+" · "+tr("Keep"):locked?tr("Keep"):((chosen?"✓ ":"")+scanBytes(item.bytes)));select.setTextColor(locked?GREEN:chosen?Color.WHITE:INK);select.setBackground(round(locked?surface(0xffe8f6ec):chosen?BLUE:BG,8));};
+        select.setEnabled(!locked);select.setOnClickListener(v->{if(locked)return;if(!realSimilarSelected.remove(id)){if(realSimilarSelected.size()>=100){folderToast("Select up to 100 photos at a time");return;}realSimilarSelected.add(id);}refresh.run();changed.run();});refresh.run();
+        if(!best&&!item.protectedItem){TextView keep=centered(realSimilarKeep.contains(id)?"Remove keep mark":"Mark to keep",11,BLUE,500);tap(keep,BG,8,()->{if(!realSimilarKeep.remove(id)){realSimilarKeep.add(id);realSimilarSelected.remove(id);}showRealSimilar();});add(tile,keep,-1,dp(40));}
+        return tile;
+    }
+    private void compareSimilar(SimilarPhotoScan.Group group,int index){
+        java.util.List<SmartMediaScan.Item> others=new java.util.ArrayList<>();for(SmartMediaScan.Item i:group.items)if(i!=group.best)others.add(i);if(others.isEmpty())return;
+        int pos=Math.max(0,Math.min(index,others.size()-1));SmartMediaScan.Item other=others.get(pos);
+        LinearLayout content=column();pad(content,12,12);LinearLayout pair=row();for(SmartMediaScan.Item i:new SmartMediaScan.Item[]{group.best,other}){
+            if(i==other)gap(pair,6);LinearLayout col=column();android.widget.ImageView view=new android.widget.ImageView(this);view.setScaleType(android.widget.ImageView.ScaleType.FIT_CENTER);view.setBackgroundColor(BG);add(col,view,-1,dp(200));loadDupThumb(view,i,768,dupThumbGeneration);space(col,6);add(col,centered(i==group.best?"Best shot":scanBytes(i.bytes),12,GRAY,500),-1,-2);weight(pair,col);
+        }add(content,pair,-1,-2);space(content,8);add(content,centered((pos+1)+" / "+others.size(),12,GRAY,400),-1,-2);
+        AlertDialog.Builder dialog=privacyDialog().setTitle(tr("Compare photos")).setView(content).setPositiveButton(tr("Done"),null);
+        if(pos+1<others.size())dialog.setNeutralButton(tr("Next"),(d,w)->compareSimilar(group,pos+1));if(pos>0)dialog.setNegativeButton(tr("Previous"),(d,w)->compareSimilar(group,pos-1));dialog.show();
+    }
+    private void showRealSimilarReview(){
+        if(scanResult==null||realSimilarSelected.isEmpty()){showRealSimilar();return;}realSimilarReview=true;
+        LinearLayout root=scanShell("Review cleanup",this::showRealSimilar),body=scanBody(root);
+        add(body,txt(realSimilarSelected.size()+" "+tr("photos selected"),22,INK,700),-1,-2);space(body,6);add(body,txt(scanBytes(similarBytes()),24,BLUE,600),-1,-2);space(body,12);
+        add(body,txt("These are different photos. Review each one before moving it to trash.",14,GRAY,400),-1,-2);space(body,12);
+        LinearLayout items=card();int n=0;for(SmartMediaScan.Item i:scanResult.groups.get(3))if(realSimilarSelected.contains(i.uri.toString())){
+            if(n++>0)thinRule(items);LinearLayout line=row();line.setMinimumHeight(dp(64));android.widget.ImageView thumb=new android.widget.ImageView(this);thumb.setScaleType(android.widget.ImageView.ScaleType.CENTER_CROP);loadDupThumb(thumb,i,128,dupThumbGeneration);add(line,thumb,dp(48),dp(48));gap(line,9);TextView name=txt(i.name,13,INK,500);name.setMaxLines(2);weight(line,name);add(line,txt(scanBytes(i.bytes),12,GRAY,400),-2,-2);add(items,line,-1,-2);
+        }add(body,items,-1,-2);space(body,12);add(body,txt("Space may not be freed until trash is emptied.",12,GRAY,400),-1,-2);
+        if(android.os.Build.VERSION.SDK_INT>=30)scanButton(root,"Move to trash",true,this::recheckSimilarTrash);else{add(body,txt("System trash approval requires Android 11 or later. Review only on this device.",13,GRAY,400),-1,-2);scanButton(root,"Done",true,this::showRealSimilar);}setContentView(root);
+    }
+    private void recheckSimilarTrash(){
+        if(android.os.Build.VERSION.SDK_INT<30||runningScan!=null||scanResult==null||realSimilarSelected.isEmpty())return;
+        final SmartMediaScan.Result before=scanResult;final java.util.Set<String> selected=new java.util.HashSet<>(realSimilarSelected),keep=new java.util.HashSet<>(realSimilarKeep);
+        final SmartMediaScan job=new SmartMediaScan(this,prefs,protectedFiles,protectedFolders);runningScan=job;
+        Runnable cancel=()->{job.cancel();runningScan=null;showRealSimilar();};LinearLayout root=scanShell("Review cleanup",cancel),body=scanBody(root);
+        add(body,centered("Rechecking similar photos",20,INK,600),-1,-2);space(body,12);add(body,new android.widget.ProgressBar(this),dp(42),dp(42));scanButton(root,"Cancel",false,cancel);setContentView(root);
+        new Thread(()->{try{
+            SmartMediaScan.Result fresh=job.run((stage,done,total)->{});java.util.List<android.net.Uri> approved=SimilarPhotoScan.verify(before,fresh,selected,keep);
+            runOnUiThread(()->{if(runningScan!=job||isDestroyed()||isFinishing())return;runningScan=null;
+                if(approved.isEmpty()){scanResult=fresh;realSimilarSelected.clear();showRealSimilar();folderToast("Files or protection changed. Review again.");return;}
+                try{android.app.PendingIntent pending=android.provider.MediaStore.createTrashRequest(getContentResolver(),approved,true);dupTrashPending=true;startIntentSenderForResult(pending.getIntentSender(),REQUEST_SIMILAR_TRASH,null,0,0,0);}
+                catch(Exception e){dupTrashPending=false;showRealSimilar();folderToast("Could not open Android trash approval");}
+            });
+        }catch(Exception e){runOnUiThread(()->{if(runningScan!=job||isDestroyed())return;runningScan=null;showRealSimilar();folderToast("Safety recheck failed");});}},"Clenova-similar-recheck").start();
     }
 
     private void cleanPending(String label){
@@ -823,7 +924,7 @@ public final class MainActivity extends Activity {
     }
     @Override public void onRequestPermissionsResult(int requestCode,String[] permissions,int[] grantResults){
         super.onRequestPermissionsResult(requestCode,permissions,grantResults);
-        if(requestCode==REQUEST_SCAN_MEDIA){requestingScan=false;if(SmartMediaScan.hasAccess(this))startSmartScan();else {dupAfterScan=false;privacyDialog().setTitle(tr("Media access needed")).setMessage(tr("Allow access to photos or videos to scan them. No files were scanned.")).setPositiveButton(tr("Done"),null).show();}return;}
+        if(requestCode==REQUEST_SCAN_MEDIA){requestingScan=false;if(SmartMediaScan.hasAccess(this))startSmartScan();else {dupAfterScan=false;similarAfterScan=false;privacyDialog().setTitle(tr("Media access needed")).setMessage(tr("Allow access to photos or videos to scan them. No files were scanned.")).setPositiveButton(tr("Done"),null).show();}return;}
         if(requestCode==REQUEST_NOTIFICATION_ACCESS&&permissionsVisible)openAppPermissions();
     }
     private static final String[] RATING_LABELS={"Tap to rate your experience","Very poor","Could be better","It's okay","Pretty good","Love it!"};
@@ -980,7 +1081,7 @@ public final class MainActivity extends Activity {
         LinearLayout intro=card();add(intro,txt("A smarter phone experience.",19,INK,700),-1,-2);space(intro,9);
         TextView message=txt("Clenova is built to make phone management effortless, intelligent and personal. Less clutter, more space, and complete control over what matters to you.",14,GRAY,400);
         message.setLineSpacing(dp(4),1f);add(intro,message,-1,-2);
-        if(PUBLIC_LISTING_URL.isEmpty()){space(intro,9);add(intro,txt("Preview build · Manual media scanning and approved duplicate trash are available. Home cleanup is simulated.",12,GRAY,400),-1,-2);}
+        if(PUBLIC_LISTING_URL.isEmpty()){space(intro,9);add(intro,txt("Preview build · Manual media scanning and approved photo trash are available. Home cleanup is simulated.",12,GRAY,400),-1,-2);}
         add(body,intro,-1,-2);space(body,15);
         LinearLayout principles=card();pad(principles,14,5);
         add(principles,aboutPrinciple("shield","Privacy by design"),-1,-2);thinRule(principles);
@@ -1203,7 +1304,7 @@ public final class MainActivity extends Activity {
     }
 
     private static final String[][] HELP_FAQS={{"How does the AI Agent work?","The Agent is designed to find cleanup opportunities for your approval. Home shows sample recommendations; Smart Scan reads accessible media on request. Automatic scanning is not active yet."},
-        {"Can Clenova delete files automatically?","No. Home cleanup is simulated. Duplicate copies can be moved to Android trash only after your review and Android approval on Android 11 or later."},
+        {"Can Clenova delete files automatically?","No. Home cleanup is simulated. Duplicate copies and manually selected similar photos can be moved to Android trash only after your review and Android approval on Android 11 or later."},
         {"How do I protect important files?","Open Settings > Cleanup protection > Protected files or Protected folders. Select items with the Android picker. Exclusions are saved locally; the real cleanup engine is not active yet."},
         {"Why does Clenova need permissions?","Permissions support specific features. Open Settings > App permissions to manage access. Smart Scan requests optional photo and video access. Notification access is separate; file selection uses the Android picker."},
         {"Is my personal data safe?","Preferences, exclusions and activity history are stored locally. Clenova does not automatically upload personal files. You can export or clear your history in Privacy & data."},
@@ -1946,7 +2047,7 @@ public final class MainActivity extends Activity {
     }
     @Override protected void onActivityResult(int requestCode,int resultCode,android.content.Intent data){
         super.onActivityResult(requestCode,resultCode,data);
-        if(requestCode==REQUEST_DUP_TRASH){dupTrashPending=false;scanResult=null;realDupSelected.clear();dupCache.evictAll();showClean();folderToast(resultCode==RESULT_OK?"Android trash request approved. Scan again to refresh.":"Trash request cancelled");return;}
+        if(requestCode==REQUEST_DUP_TRASH||requestCode==REQUEST_SIMILAR_TRASH){dupTrashPending=false;scanResult=null;realDupSelected.clear();dupCache.evictAll();showClean();folderToast(resultCode==RESULT_OK?"Android trash request approved. Scan again to refresh.":"Trash request cancelled");return;}
         if(requestCode==EXPORT_ACTIVITY_HISTORY){if(resultCode==RESULT_OK&&data!=null&&data.getData()!=null)writeHistoryExport(data.getData());return;}
         if(requestCode==PICK_PROTECTED_FILES){if(resultCode==RESULT_OK&&data!=null)handleProtectedFiles(data);return;}
         if(requestCode!=PICK_PROTECTED_FOLDER||resultCode!=RESULT_OK||data==null||data.getData()==null)return;
@@ -2223,6 +2324,8 @@ public final class MainActivity extends Activity {
     }
     @Override public void onBackPressed() {
         if(cleaning)return;
+        if(realSimilarReview){if(runningScan!=null){runningScan.cancel();runningScan=null;}showRealSimilar();return;}
+        if(realSimilarVisible){leaveRealSimilar();return;}
         if(realDupReview){if(runningScan!=null){runningScan.cancel();runningScan=null;}showRealDuplicates();return;}
         if(realDupVisible){leaveRealDuplicates();return;}
         if(scanReviewVisible){showScanResults();return;}

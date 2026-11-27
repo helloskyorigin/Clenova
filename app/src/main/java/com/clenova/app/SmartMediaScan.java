@@ -12,10 +12,10 @@ import java.util.*;
 
 /** Foreground, read-only MediaStore scan. No file deletion or network access. */
 final class SmartMediaScan {
-    static final int DUPLICATES=0,VIDEOS=1,SCREENSHOTS=2;
+    static final int DUPLICATES=0,VIDEOS=1,SCREENSHOTS=2,SIMILAR=3;
     static final long LARGE_VIDEO=100L*1024*1024, HASH_BUDGET=512L*1024*1024;
     static final int ROW_LIMIT=10000;
-    static final String[] LABELS={"Duplicate photos","Large videos","Screenshots"};
+    static final String[] LABELS={"Duplicate photos","Large videos","Screenshots","Similar photos"};
     interface Progress {void update(int stage,int done,int total);}
     static final class Item {
         final Uri uri;final String name,path,volume;final long bytes,modified;final boolean image;final Boolean favorite;
@@ -28,10 +28,12 @@ final class SmartMediaScan {
     }
     static final class Result {
         final List<DuplicateGroup> duplicates=new ArrayList<>();
-        final List<List<Item>> groups=Arrays.asList(new ArrayList<>(),new ArrayList<>(),new ArrayList<>());
+        final List<SimilarPhotoScan.Group> similarGroups=new ArrayList<>();
+        final List<List<Item>> groups=Arrays.asList(new ArrayList<>(),new ArrayList<>(),new ArrayList<>(),new ArrayList<>());
+        boolean similarPartial,similarScanned;
         int examined,protectedCount,failed;boolean partial,imagesScanned,videosScanned,limited;
         long bytes(int category){long sum=0;for(Item item:groups.get(category))sum+=item.bytes;return sum;}
-        long total(){return bytes(0)+bytes(1)+bytes(2);}
+        long total(){return bytes(0)+bytes(1)+bytes(2)+bytes(3);}
     }
     private final Context context;private final ContentResolver resolver;private final CancellationSignal cancel=new CancellationSignal();
     private final List<ProtectedFiles.Entry> files;private final List<ProtectedFolders.Entry> folders;
@@ -75,13 +77,14 @@ final class SmartMediaScan {
             catch(OperationCanceledException e){throw e;}catch(Exception e){r.failed++;r.partial=true;}
             progress.update(1,++done,hashItems.size());
         }
-        Set<String> allocated=new HashSet<>();
+        Set<String> allocated=new HashSet<>(),exactMembers=new HashSet<>();
         for(Map.Entry<String,List<Item>> entry:exact.entrySet()){
             List<Item> group=entry.getValue();if(group.size()<2)continue;
             group.sort(Comparator.comparing((Item i)->!i.protectedItem).thenComparingLong(i->i.modified).thenComparing(i->i.uri.toString()));
             // Always retain at least one verified matching copy, even with protection toggles off.
             Item keep=group.get(0);keep.protectedItem=true;
             r.duplicates.add(new DuplicateGroup(entry.getKey(),group));
+            for(Item i:group)exactMembers.add(i.uri.toString());
             for(int k=1;k<group.size();k++){Item i=group.get(k);if(!i.protectedItem&&allocated.add(i.uri.toString()))r.groups.get(DUPLICATES).add(i);}
         }
         r.duplicates.sort(Comparator.comparingLong((DuplicateGroup g)->g.items.get(0).bytes).reversed().thenComparing(g->g.fingerprint));
@@ -97,6 +100,12 @@ final class SmartMediaScan {
                 }
             }
             if(++classified%128==0||classified==all.size())progress.update(2,classified,all.size());
+        }
+        if(r.imagesScanned){
+            List<Item> visual=new ArrayList<>();for(Item i:all)if(i.image&&!exactMembers.contains(i.uri.toString())&&!isScreenshot(i)&&!allocated.contains(i.uri.toString())&&i.path!=null&&i.modified>0)visual.add(i);
+            r.similarScanned=true;r.similarGroups.addAll(SimilarPhotoScan.run(resolver,visual,cancel,r,progress));
+            for(SimilarPhotoScan.Group g:r.similarGroups)for(Item i:g.items)if(SimilarPhotoScan.candidate(g,i)&&allocated.add(i.uri.toString()))r.groups.get(SIMILAR).add(i);
+            if(r.similarPartial)r.partial=true;
         }
         for(List<Item> group:r.groups)group.sort(Comparator.comparingLong((Item i)->i.bytes).reversed().thenComparing(i->i.name));
         check();return r;
