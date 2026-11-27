@@ -5,6 +5,26 @@ import java.util.Map;
 final class AppStrings {
  private static final Map<String,String[]> TEXT=new HashMap<>();
  static {
+  TEXT.put("large videos found",new String[]{"बड़े वीडियो मिले","vídeos grandes encontrados","grandes vidéos trouvées","große Videos gefunden"});
+  TEXT.put("Videos at least 100 MiB · Protected items excluded",new String[]{"कम से कम 100 MiB के वीडियो · सुरक्षित आइटम अलग","Vídeos de al menos 100 MiB · protegidos excluidos","Vidéos d’au moins 100 Mio · éléments protégés exclus","Videos ab 100 MiB · geschützte Elemente ausgeschlossen"});
+  TEXT.put("Your videos",new String[]{"आपके वीडियो","Tus vídeos","Vos vidéos","Deine Videos"});
+  TEXT.put("Largest first",new String[]{"सबसे बड़े पहले","Mayor tamaño primero","Les plus volumineux","Größte zuerst"});
+  TEXT.put("Longest first",new String[]{"सबसे लंबे पहले","Más largos primero","Les plus longs","Längste zuerst"});
+  TEXT.put("Newest first",new String[]{"नए पहले","Más recientes primero","Les plus récents","Neueste zuerst"});
+  TEXT.put("Sort videos",new String[]{"वीडियो क्रम","Ordenar vídeos","Trier les vidéos","Videos sortieren"});
+  TEXT.put("No removable large videos found",new String[]{"हटाने योग्य बड़े वीडियो नहीं मिले","No hay vídeos grandes eliminables","Aucune grande vidéo supprimable","Keine entfernbaren großen Videos"});
+  TEXT.put("Video access needed",new String[]{"वीडियो की अनुमति चाहिए","Se necesita acceso a vídeos","Accès vidéo requis","Videozugriff erforderlich"});
+  TEXT.put("Only accessible videos that pass protection rules are shown.",new String[]{"सिर्फ उपलब्ध और सुरक्षा नियमों से अनुमत वीडियो दिखते हैं।","Solo se muestran vídeos accesibles que cumplen las reglas de protección.","Seules les vidéos accessibles conformes aux règles de protection sont affichées.","Nur zugängliche Videos gemäß Schutzregeln werden angezeigt."});
+  TEXT.put("Preview video",new String[]{"वीडियो देखें","Vista previa","Aperçu vidéo","Video ansehen"});
+  TEXT.put("videos selected",new String[]{"वीडियो चुने गए","vídeos seleccionados","vidéos sélectionnées","Videos ausgewählt"});
+  TEXT.put("You decide what stays.",new String[]{"क्या रखना है आप तय करें।","Tú decides qué conservar.","Vous décidez quoi garder.","Du entscheidest, was bleibt."});
+  TEXT.put("Play video",new String[]{"वीडियो चलाएँ","Reproducir vídeo","Lire la vidéo","Video abspielen"});
+  TEXT.put("Pause video",new String[]{"वीडियो रोकें","Pausar vídeo","Mettre en pause","Video pausieren"});
+  TEXT.put("Video playback unavailable",new String[]{"वीडियो नहीं चल सकता","Reproducción no disponible","Lecture indisponible","Wiedergabe nicht verfügbar"});
+  TEXT.put("Keep video",new String[]{"वीडियो रखें","Conservar vídeo","Conserver la vidéo","Video behalten"});
+  TEXT.put("Deselect video",new String[]{"वीडियो चयन हटाएँ","Deseleccionar vídeo","Désélectionner la vidéo","Video abwählen"});
+  TEXT.put("Rechecking video safety",new String[]{"वीडियो सुरक्षा फिर जाँच रहे हैं","Verificando seguridad del vídeo","Vérification de la sécurité vidéo","Videosicherheit erneut prüfen"});
+  TEXT.put("Large videos may be important memories. Review each video before moving it to trash.",new String[]{"बड़े वीडियो ज़रूरी यादें हो सकते हैं। ट्रैश में भेजने से पहले हर वीडियो देखें।","Los vídeos grandes pueden ser recuerdos importantes. Revisa cada vídeo antes de enviarlo a la papelera.","Les grandes vidéos peuvent être des souvenirs importants. Vérifiez chaque vidéo avant la corbeille.","Große Videos können wichtige Erinnerungen sein. Prüfe jedes Video vor dem Papierkorb."});
   TEXT.put("Comparing similar photos",new String[]{"मिलते-जुलते फ़ोटो जाँच रहे हैं","Comparando fotos similares","Comparaison des photos similaires","Ähnliche Fotos vergleichen"});
   TEXT.put("Similar groups",new String[]{"मिलते-जुलते समूह","Grupos similares","Groupes similaires","Ähnliche Gruppen"});
   TEXT.put("best shots recommended",new String[]{"बेहतरीन फ़ोटो सुझाए गए","mejores tomas sugeridas","meilleures photos suggérées","beste Aufnahmen empfohlen"});

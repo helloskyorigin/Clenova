@@ -20,6 +20,7 @@ final class SmartMediaScan {
     static final class Item {
         final Uri uri;final String name,path,volume;final long bytes,modified;final boolean image;final Boolean favorite;
         boolean protectedItem;
+        long duration=-1,generation=-1;int width=-1,height=-1;String mime="";
         Item(Uri u,String n,String p,String v,long b,long m,boolean image,Boolean f){uri=u;name=n;path=p;volume=v;bytes=b;modified=m;this.image=image;favorite=f;}
     }
     static final class DuplicateGroup {
@@ -52,6 +53,18 @@ final class SmartMediaScan {
     static boolean hasAccess(Context c){
         if(Build.VERSION.SDK_INT>=33)return c.checkSelfPermission(android.Manifest.permission.READ_MEDIA_IMAGES)==0||c.checkSelfPermission(android.Manifest.permission.READ_MEDIA_VIDEO)==0||(Build.VERSION.SDK_INT>=34&&c.checkSelfPermission(android.Manifest.permission.READ_MEDIA_VISUAL_USER_SELECTED)==0);
         return c.checkSelfPermission(android.Manifest.permission.READ_EXTERNAL_STORAGE)==0;
+    }
+    static boolean hasVideoAccess(Context c){
+        if(Build.VERSION.SDK_INT>=33)return c.checkSelfPermission(android.Manifest.permission.READ_MEDIA_VIDEO)==0||(Build.VERSION.SDK_INT>=34&&c.checkSelfPermission(android.Manifest.permission.READ_MEDIA_VISUAL_USER_SELECTED)==0);
+        return c.checkSelfPermission(android.Manifest.permission.READ_EXTERNAL_STORAGE)==0;
+    }
+    Result runVideos(Progress progress){
+        Result r=new Result();List<Item> all=new ArrayList<>();r.videosScanned=hasVideoAccess(context);r.limited=true;
+        progress.update(0,0,0);if(r.videosScanned)read(false,all,r);r.examined=all.size();int done=0;
+        for(Item i:all){check();i.protectedItem=explicitlyProtected(i)||(favorite&&!Boolean.FALSE.equals(i.favorite))||(recent&&(i.modified<=0||i.modified>=now-ProtectionPolicy.RECENT_WINDOW_MS));
+            if(i.protectedItem)r.protectedCount++;else if(i.bytes>=LARGE_VIDEO)r.groups.get(VIDEOS).add(i);
+            if(++done%128==0||done==all.size())progress.update(2,done,all.size());}
+        r.groups.get(VIDEOS).sort(Comparator.comparingLong((Item i)->i.bytes).reversed().thenComparing(i->i.name));check();return r;
     }
     Result run(Progress progress)throws Exception{
         Result r=new Result();List<Item> all=new ArrayList<>();
@@ -115,6 +128,7 @@ final class SmartMediaScan {
         List<String> cols=new ArrayList<>(Arrays.asList("_id","_display_name","_size","date_modified"));
         if(Build.VERSION.SDK_INT>=29){cols.add("relative_path");cols.add("volume_name");}
         if(Build.VERSION.SDK_INT>=30)cols.add("is_favorite");
+        if(!image){cols.addAll(Arrays.asList("duration","width","height","mime_type"));if(Build.VERSION.SDK_INT>=30)cols.add("generation_modified");}
         try(Cursor c=resolver.query(base,cols.toArray(new String[0]),null,null,"_id ASC",cancel)){
             if(c==null){r.partial=true;r.failed++;return;}
             int read=0;while(c.moveToNext()){
@@ -125,7 +139,10 @@ final class SmartMediaScan {
                 Boolean fav=Build.VERSION.SDK_INT>=30&&!c.isNull(6)?c.getInt(6)!=0:null;
                 Uri collection=base;
                 if(Build.VERSION.SDK_INT>=29&&volume!=null)collection=image?MediaStore.Images.Media.getContentUri(volume):MediaStore.Video.Media.getContentUri(volume);
-                out.add(new Item(ContentUris.withAppendedId(collection,c.getLong(0)),name,path,volume,bytes,c.getLong(3)*1000L,image,fav));
+                Item item=new Item(ContentUris.withAppendedId(collection,c.getLong(0)),name,path,volume,bytes,c.getLong(3)*1000L,image,fav);
+                if(!image){int d=c.getColumnIndex("duration"),w=c.getColumnIndex("width"),h=c.getColumnIndex("height"),m=c.getColumnIndex("mime_type"),g=c.getColumnIndex("generation_modified");
+                    if(d>=0&&!c.isNull(d))item.duration=c.getLong(d);if(w>=0&&!c.isNull(w))item.width=c.getInt(w);if(h>=0&&!c.isNull(h))item.height=c.getInt(h);if(m>=0&&!c.isNull(m))item.mime=c.getString(m);if(g>=0&&!c.isNull(g))item.generation=c.getLong(g);}
+                out.add(item);
             }
         }catch(OperationCanceledException e){throw e;}catch(RuntimeException e){r.failed++;r.partial=true;}
     }
