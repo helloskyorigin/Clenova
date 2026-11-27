@@ -5,6 +5,20 @@ import java.util.Map;
 final class AppStrings {
  private static final Map<String,String[]> TEXT=new HashMap<>();
  static {
+  TEXT.put("Enjoying Clenova?",new String[]{"Clenova पसंद आ रहा है?","¿Te gusta Clenova?","Vous aimez Clenova ?","Gefällt dir Clenova?"});
+  TEXT.put("Your feedback helps us make Clenova even better.",new String[]{"आपकी प्रतिक्रिया Clenova को और बेहतर बनाती है।","Tus comentarios nos ayudan a mejorar Clenova.","Vos avis nous aident à améliorer Clenova.","Dein Feedback hilft uns, Clenova zu verbessern."});
+  TEXT.put("Tap to rate your experience",new String[]{"अपना अनुभव रेट करें","Toca para valorar tu experiencia","Touchez pour noter votre expérience","Tippe, um dein Erlebnis zu bewerten"});
+  TEXT.put("Very poor",new String[]{"बहुत खराब","Muy mala","Très mauvaise","Sehr schlecht"});
+  TEXT.put("Could be better",new String[]{"और बेहतर हो सकता है","Podría mejorar","Pourrait être mieux","Könnte besser sein"});
+  TEXT.put("It's okay",new String[]{"ठीक है","Está bien","Correct","Ganz okay"});
+  TEXT.put("Pretty good",new String[]{"काफ़ी अच्छा","Bastante buena","Plutôt bonne","Ziemlich gut"});
+  TEXT.put("Love it!",new String[]{"बहुत पसंद आया!","¡Me encanta!","J’adore !","Gefällt mir sehr!"});
+  TEXT.put("Rate on Google Play",new String[]{"Google Play पर रेट करें","Valorar en Google Play","Noter sur Google Play","Bei Google Play bewerten"});
+  TEXT.put("Maybe later",new String[]{"बाद में","Quizás más tarde","Peut-être plus tard","Vielleicht später"});
+  TEXT.put("Swipe down to dismiss",new String[]{"बंद करने के लिए नीचे स्वाइप करें","Desliza hacia abajo para cerrar","Balayez vers le bas pour fermer","Zum Schließen nach unten wischen"});
+  TEXT.put("star",new String[]{"स्टार","estrella","étoile","Stern"});
+  TEXT.put("stars",new String[]{"स्टार","estrellas","étoiles","Sterne"});
+  TEXT.put("Google Play is unavailable",new String[]{"Google Play उपलब्ध नहीं है","Google Play no está disponible","Google Play indisponible","Google Play ist nicht verfügbar"});
   TEXT.put("Make us better.",new String[]{"हमें बेहतर बनाएँ।","Ayúdanos a mejorar.","Aidez-nous à progresser.","Hilf uns, besser zu werden."});
   TEXT.put("Help us build a better Clenova for you.",new String[]{"Clenova को आपके लिए बेहतर बनाने में मदद करें।","Ayúdanos a mejorar Clenova para ti.","Aidez-nous à améliorer Clenova pour vous.","Hilf uns, Clenova für dich zu verbessern."});
   TEXT.put("What's it about?",new String[]{"किस बारे में है?","¿De qué se trata?","De quoi s’agit-il ?","Worum geht es?"});

@@ -51,6 +51,8 @@ public final class MainActivity extends Activity {
     private int feedbackCategory=0;
     private String feedbackText="";
     private boolean feedbackAppInfo=true;
+    private android.app.Dialog ratingDialog;
+    private int ratingStars;
     private String helpQuery="";
     private int expandedFaq=-1;
     private static final String SUPPORT_EMAIL="hello.skyorigin@gmail.com";
@@ -103,7 +105,7 @@ public final class MainActivity extends Activity {
         if(state!=null && state.getBoolean("folders_visible")){openProtectedFolders();return;}
         if(state!=null && state.getBoolean("protection_visible")){openProtection();return;}
         if(state!=null && state.getBoolean("agent_prefs_visible")){openAgentPreferences();return;}
-        if(state!=null && state.getBoolean("settings_visible")){openSettings();return;}
+        if(state!=null && state.getBoolean("settings_visible")){openSettings();if(state.getBoolean("rating_open")){ratingStars=Math.max(0,Math.min(5,state.getInt("rating_stars")));showRatingSheet();}return;}
         if(state!=null && state.getBoolean("storage_visible")){openStorage();return;}
         setContentView(home());
     }
@@ -111,6 +113,8 @@ public final class MainActivity extends Activity {
         super.onSaveInstanceState(state);
         state.putBoolean("storage_visible",storageVisible);
         state.putBoolean("settings_visible",settingsVisible);
+        state.putBoolean("rating_open",ratingDialog!=null&&ratingDialog.isShowing());
+        state.putInt("rating_stars",ratingStars);
         state.putBoolean("agent_prefs_visible",agentPrefsVisible);
         state.putBoolean("protection_visible",protectionVisible);
         state.putBoolean("folders_visible",foldersVisible);
@@ -140,6 +144,7 @@ public final class MainActivity extends Activity {
             cleanupAnimation.removeAllListeners();cleanupAnimation.removeAllUpdateListeners();cleanupAnimation.cancel();
         }
         if(preferencePopup!=null)preferencePopup.dismiss();
+        if(ratingDialog!=null)ratingDialog.dismiss();
         super.onDestroy();
     }
     private void applyPalette(){
@@ -321,6 +326,7 @@ public final class MainActivity extends Activity {
             else if(item[1].equals("Privacy & data"))tap(line,WHITE,0,this::openPrivacyData);
             else if(item[1].equals("Help & support"))tap(line,WHITE,0,()->{helpQuery="";expandedFaq=-1;openHelpSupport();});
             else if(item[1].equals("Send feedback"))tap(line,WHITE,0,this::openFeedback);
+            else if(item[1].equals("Rate Clenova"))tap(line,WHITE,0,()->{ratingStars=0;showRatingSheet();});
             add(group,line,-1,-2);
             if(i<items.length-1){
                 View divider=new View(this);divider.setBackgroundColor(surface(0xffeeeef0));
@@ -419,6 +425,129 @@ public final class MainActivity extends Activity {
         super.onRequestPermissionsResult(requestCode,permissions,grantResults);
         if(requestCode==REQUEST_NOTIFICATION_ACCESS&&permissionsVisible)openAppPermissions();
     }
+    private static final String[] RATING_LABELS={"Tap to rate your experience","Very poor","Could be better","It's okay","Pretty good","Love it!"};
+    private void showRatingSheet(){
+        if(ratingDialog!=null&&ratingDialog.isShowing())return;
+        android.app.Dialog dialog=new android.app.Dialog(this);
+        dialog.requestWindowFeature(android.view.Window.FEATURE_NO_TITLE);
+        ratingDialog=dialog;dialog.setCancelable(true);dialog.setCanceledOnTouchOutside(true);
+        LinearLayout sheet=column();sheet.setGravity(Gravity.CENTER_HORIZONTAL);
+        GradientDrawable bg=new GradientDrawable();bg.setColor(WHITE);
+        float radius=dp(28);bg.setCornerRadii(new float[]{radius,radius,radius,radius,0,0,0,0});
+        sheet.setBackground(bg);sheet.setPadding(dp(22),dp(10),dp(22),dp(19));
+        FrameLayout handle=new FrameLayout(this);
+        View bar=new View(this);bar.setBackground(round(surface(0xffc7c7cc),4));
+        handle.addView(bar,new FrameLayout.LayoutParams(dp(36),dp(4),Gravity.CENTER));
+        add(sheet,handle,-1,dp(28));
+        ScrollView scroll=new ScrollView(this);scroll.setVerticalScrollBarEnabled(false);scroll.setOverScrollMode(View.OVER_SCROLL_NEVER);
+        LinearLayout body=column();body.setGravity(Gravity.CENTER_HORIZONTAL);
+        scroll.addView(body,new ScrollView.LayoutParams(-1,-2));
+        add(sheet,scroll,-1,-2);
+        space(body,5);
+        FrameLayout mark=new FrameLayout(this);mark.setBackground(round(PALE,22));
+        mark.addView(new Glyph(this,"star",BLUE),new FrameLayout.LayoutParams(dp(39),dp(39),Gravity.CENTER));
+        add(body,mark,dp(76),dp(76));space(body,17);
+        add(body,centered("Enjoying Clenova?",25,INK,700),-1,-2);space(body,8);
+        add(body,centered("Your feedback helps us make Clenova even better.",14,GRAY,400),-1,-2);space(body,21);
+        LinearLayout stars=row();stars.setGravity(Gravity.CENTER);
+        RatingStar[] starViews=new RatingStar[5];
+        TextView description=centered(RATING_LABELS[ratingStars],13,GRAY,500);
+        for(int i=0;i<5;i++){
+            final int selected=i+1;RatingStar star=new RatingStar(this,selected);starViews[i]=star;
+            star.setFocusable(true);star.setClickable(true);
+            star.setOnClickListener(view->{
+                ratingStars=selected;view.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP);
+                for(RatingStar item:starViews)if(item!=null)item.refresh();
+                description.setText(tr(RATING_LABELS[ratingStars]));
+                description.announceForAccessibility(tr(RATING_LABELS[ratingStars]));
+            });
+            stars.addView(star,new LinearLayout.LayoutParams(0,dp(52),1f));
+        }
+        add(body,stars,-1,dp(52));space(body,9);add(body,description,-1,-2);space(body,23);
+        TextView play=centered("Rate on Google Play",16,Color.WHITE,600);
+        // A rating is not required, and all star values follow exactly the same public-store route.
+        tap(play,BLUE,26,()->openPlayRating(dialog));add(body,play,-1,dp(52));space(body,9);
+        TextView later=centered("Maybe later",14,GRAY,500);
+        tap(later,WHITE,20,dialog::dismiss);add(body,later,-1,dp(44));
+        // Only the dedicated drag handle intercepts gestures, so star selection and scrolling remain reliable.
+        handle.setContentDescription(tr("Swipe down to dismiss"));
+        handle.setOnTouchListener(new View.OnTouchListener(){
+            float start;boolean dragging;
+            public boolean onTouch(View view,android.view.MotionEvent event){
+                switch(event.getActionMasked()){
+                    case android.view.MotionEvent.ACTION_DOWN:
+                        sheet.animate().cancel();start=event.getRawY();dragging=true;return true;
+                    case android.view.MotionEvent.ACTION_MOVE:
+                        if(dragging)sheet.setTranslationY(Math.max(0,event.getRawY()-start));return true;
+                    case android.view.MotionEvent.ACTION_UP:
+                        dragging=false;
+                        if(sheet.getTranslationY()>dp(72)){
+                            sheet.animate().translationY(sheet.getHeight()).setDuration(150).withEndAction(dialog::dismiss).start();
+                        }else sheet.animate().translationY(0).setDuration(160).start();
+                        return true;
+                    case android.view.MotionEvent.ACTION_CANCEL:
+                        dragging=false;sheet.animate().translationY(0).setDuration(160).start();return true;
+                    default:return true;
+                }
+            }
+        });
+        dialog.setContentView(sheet);
+        dialog.setOnDismissListener(d->{sheet.animate().cancel();if(ratingDialog==dialog)ratingDialog=null;});
+        dialog.show();
+        android.view.Window window=dialog.getWindow();
+        if(window!=null){
+            window.setBackgroundDrawableResource(android.R.color.transparent);
+            window.addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
+            window.setDimAmount(.44f);window.setGravity(Gravity.BOTTOM);
+            window.setLayout(-1,-2);
+            window.setNavigationBarColor(WHITE);
+            window.getDecorView().setSystemUiVisibility(dark?0:View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR);
+            // Constrain tall sheets on short/landscape displays while keeping content scrollable.
+            int maxHeight=Math.max(dp(160),getResources().getDisplayMetrics().heightPixels-dp(100));
+            scroll.measure(View.MeasureSpec.makeMeasureSpec(Math.max(1,getResources().getDisplayMetrics().widthPixels-dp(44)),View.MeasureSpec.EXACTLY),View.MeasureSpec.makeMeasureSpec(0,View.MeasureSpec.UNSPECIFIED));
+            if(scroll.getMeasuredHeight()>maxHeight)scroll.getLayoutParams().height=maxHeight;
+            scroll.requestLayout();
+        }
+        sheet.setAlpha(0f);sheet.post(()->{
+            if(!dialog.isShowing())return;
+            sheet.setTranslationY(Math.min(sheet.getHeight(),dp(240)));
+            sheet.animate().alpha(1f).translationY(0).setDuration(240).setInterpolator(new DecelerateInterpolator()).start();
+        });
+    }
+    private final class RatingStar extends View{
+        private final int value;
+        private final Paint paint=new Paint(Paint.ANTI_ALIAS_FLAG);
+        RatingStar(Context context,int value){super(context);this.value=value;refresh();}
+        void refresh(){
+            setSelected(value<=ratingStars);setContentDescription(value+" "+tr(value==1?"star":"stars")+(value==ratingStars?", "+tr("Selected"):""));invalidate();
+        }
+        @Override protected void onDraw(Canvas canvas){
+            super.onDraw(canvas);float size=Math.min(dp(39),Math.min(getWidth()-dp(5),getHeight()-dp(5)));
+            if(size<=0)return;
+            canvas.save();canvas.translate((getWidth()-size)/2,(getHeight()-size)/2);canvas.scale(size/24f,size/24f);
+            Path star=new Path();
+            for(int i=0;i<10;i++){double a=Math.PI*i/5-Math.PI/2;float r=i%2==0?10:4.8f;float x=12+r*(float)Math.cos(a),y=12+r*(float)Math.sin(a);if(i==0)star.moveTo(x,y);else star.lineTo(x,y);}star.close();
+            boolean active=value<=ratingStars;paint.setStyle(Paint.Style.FILL);paint.setColor(active?0xffffb340:BG);canvas.drawPath(star,paint);
+            paint.setStyle(Paint.Style.STROKE);paint.setStrokeJoin(Paint.Join.ROUND);paint.setStrokeWidth(1.4f);paint.setColor(active?0xffffb340:surface(0xffc7c7cc));canvas.drawPath(star,paint);canvas.restore();
+        }
+        @Override public void onInitializeAccessibilityNodeInfo(android.view.accessibility.AccessibilityNodeInfo info){
+            super.onInitializeAccessibilityNodeInfo(info);info.setClassName("android.widget.RadioButton");info.setCheckable(true);info.setChecked(value==ratingStars);
+        }
+    }
+    private void openPlayRating(android.app.Dialog dialog){
+        String id=getPackageName();
+        android.content.Intent market=new android.content.Intent(android.content.Intent.ACTION_VIEW,android.net.Uri.parse("market://details?id="+id));
+        market.setPackage("com.android.vending");
+        try{startActivity(market);dialog.dismiss();return;}
+        catch(android.content.ActivityNotFoundException|SecurityException ignored){}
+        try{
+            startActivity(new android.content.Intent(android.content.Intent.ACTION_VIEW,android.net.Uri.parse("https://play.google.com/store/apps/details?id="+id)));
+            dialog.dismiss();
+        }catch(android.content.ActivityNotFoundException|SecurityException e){
+            folderToast("Google Play is unavailable");
+        }
+    }
+
     private void openFeedback(){
         feedbackVisible=true;settingsVisible=true;setContentView(feedbackScreen());
     }

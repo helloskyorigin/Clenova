@@ -73,3 +73,6 @@ Native offline FAQ screen with seven current-build answers, real-time multilingu
 
 ## Send feedback
 Settings > Send feedback provides four selectable categories, multiline input capped at 1000 UTF-16 units with live counter, disabled empty submission, optional app/Android version (on by default), and native mail draft to the configured support address. If no email app is available, the user can explicitly copy the draft including recipient and subject. No attachments, network submissions or delivery claims. Draft is retained in session and saved instance state, not persistent preferences; leaving/reopening in the same session does not discard it. FeedbackDraft JVM checks added to CI.
+
+## Rate Clenova
+Settings > Rate Clenova opens an animated native bottom sheet with optional 1–5 star selection, accessible star labels, a drag handle for swipe-down dismissal, Maybe later, outside/back dismissal, and rotation restoration. All users including those selecting zero or low stars have the same Google Play action. Opens the current application ID listing through the Play Store app, with browser fallback. No stars are submitted or stored as a public review by Clenova; the user rates independently in Google Play. A public listing must exist for the destination to work; publishing remains separate. No in-app review API or network permissions added.
