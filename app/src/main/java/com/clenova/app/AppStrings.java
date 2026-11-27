@@ -5,6 +5,7 @@ import java.util.Map;
 final class AppStrings {
  private static final Map<String,String[]> TEXT=new HashMap<>();
  static {
+  TEXT.put("Filters use observed use and last update. Apps with unknown usage are excluded.",new String[]{"फ़िल्टर दर्ज उपयोग और अंतिम अपडेट पर आधारित हैं। अज्ञात उपयोग वाले ऐप अलग हैं।","Los filtros usan el uso observado y la última actualización. Se excluyen apps de uso desconocido.","Les filtres utilisent le dernier usage observé et la mise à jour. Les apps à usage inconnu sont exclues.","Filter nutzen beobachtete Nutzung und letztes Update. Apps mit unbekannter Nutzung werden ausgeschlossen."});
   TEXT.put("Usage access",new String[]{"उपयोग की अनुमति","Acceso de uso","Accès à l’utilisation","Nutzungszugriff"});
   TEXT.put("Optional access for Unused apps",new String[]{"कम उपयोग वाले ऐप के लिए वैकल्पिक अनुमति","Acceso opcional para apps poco usadas","Accès facultatif aux apps peu utilisées","Optionaler Zugriff für selten genutzte Apps"});
   TEXT.put("Usage access required",new String[]{"उपयोग की अनुमति चाहिए","Se requiere acceso de uso","Accès à l’utilisation requis","Nutzungszugriff erforderlich"});

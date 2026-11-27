@@ -22,7 +22,7 @@ final class UnusedAppScan {
             this.pkg=pkg;this.name=name;firstInstall=first;this.updated=updated;lastUsed=last;appBytes=app;dataBytes=data;cacheBytes=cache;this.icon=icon;
         }
         long bytes(){return appBytes<0||dataBytes<0?-1:appBytes+dataBytes;}
-        long days(long now){return Math.max(0,(now-lastUsed)/DAY);}
+        long days(long now){return Math.max(0,(now-Math.max(lastUsed,updated))/DAY);}
     }
     static final class Result {
         final List<Item> items=new ArrayList<>();int unknown,checked;boolean partial,allowed;
@@ -67,7 +67,7 @@ final class UnusedAppScan {
         if(Build.VERSION.SDK_INT>=29)last=Math.max(last,Math.max(stats.getLastTimeVisible(),stats.getLastTimeForegroundServiceUsed()));
         if(last<=0||last>now||last<info.firstInstallTime||last<now-180*DAY)return -1;
         // Do not suggest newly updated apps based on pre-update inactivity.
-        return Math.max(last,info.lastUpdateTime);
+        return last;
     }
     private Bitmap icon(ApplicationInfo ai){
         try{Drawable drawable=pm.getApplicationIcon(ai);Bitmap bitmap=Bitmap.createBitmap(96,96,Bitmap.Config.ARGB_8888);Canvas canvas=new Canvas(bitmap);drawable.setBounds(0,0,96,96);drawable.draw(canvas);return bitmap;}catch(RuntimeException e){return null;}
@@ -82,9 +82,9 @@ final class UnusedAppScan {
         for(String pkg:packages){
             cancel.throwIfCanceled();if(result.checked>=LIMIT){result.partial=true;break;}result.checked++;
             try{PackageInfo info=pm.getPackageInfo(pkg,0);ApplicationInfo ai=info.applicationInfo;if(!eligible(ai,protectedNames))continue;
-                long last=lastUsed(history,info,now);if(last<=0){result.unknown++;continue;}if(now-last<30*DAY)continue;
+                long last=lastUsed(history,info,now);if(last<=0){result.unknown++;continue;}if(now-Math.max(last,info.lastUpdateTime)<30*DAY)continue;
                 long app=-1,data=-1,cache=-1;
-                if(storage!=null)try{StorageStats stats=storage.queryStatsForPackage(ai.storageUuid,pkg,android.os.Process.myUserHandle());app=stats.getAppBytes();data=stats.getDataBytes();cache=stats.getCacheBytes();}catch(Exception ignored){}
+                if(storage!=null&&info.sharedUserId==null)try{StorageStats stats=storage.queryStatsForPackage(ai.storageUuid,pkg,android.os.Process.myUserHandle());app=stats.getAppBytes();data=stats.getDataBytes();cache=stats.getCacheBytes();}catch(Exception ignored){}
                 CharSequence label=pm.getApplicationLabel(ai);result.items.add(new Item(pkg,label.toString(),info.firstInstallTime,info.lastUpdateTime,last,app,data,cache,icon(ai)));
             }catch(PackageManager.NameNotFoundException|RuntimeException e){result.partial=true;}
         }
@@ -96,7 +96,7 @@ final class UnusedAppScan {
             if(!eligible(info.applicationInfo,protectedPackages())||info.firstInstallTime!=old.firstInstall||info.lastUpdateTime!=old.updated)return false;
             Intent launch=pm.getLaunchIntentForPackage(old.pkg);if(launch==null)return false;
             long last=lastUsed(history(now),info,now);
-            return last==old.lastUsed&&now-last>=days*DAY;
+            return last==old.lastUsed&&last>0&&now-Math.max(last,info.lastUpdateTime)>=days*DAY;
         }catch(Exception e){return false;}
     }
 }
