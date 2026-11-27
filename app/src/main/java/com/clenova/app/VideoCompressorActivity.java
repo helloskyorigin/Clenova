@@ -20,7 +20,7 @@ import java.util.*;
 import java.util.concurrent.*;
 
 /** The four approved compressor screens and their real local workflows. */
-@UnstableApi
+@androidx.annotation.OptIn(markerClass = UnstableApi.class)
 public final class VideoCompressorActivity extends Activity {
     private static final int ACCESS=211, PICK=212, SAVE=213, TRASH=214, PAGE=24;
     private static final int GALLERY=0, SETTINGS=1, ENCODING=2, RESULT=3, HISTORY=4;
@@ -131,7 +131,7 @@ public final class VideoCompressorActivity extends Activity {
         else if(loadingGallery){LinearLayout c=block();add(c,centered("Loading your videos…",15,gray,false),-1,dp(100));add(b,c,-1,-2);}
         else if(videos.isEmpty()){LinearLayout c=block();add(c,centered(error.isEmpty()?"No accessible videos":error,15,gray,false),-1,dp(75));add(c,button("Refresh gallery",blue,pale,this::loadGallery),-1,dp(44));add(b,c,-1,-2);}
         else{
-            if(limited){add(b,text("Limited video access or gallery coverage",12,gray,false),-1,-2);gap(b,8);}
+            if(limited){add(b,text("Limited video access or gallery coverage",12,gray,false),-1,-2);gap(b,8);if(Build.VERSION.SDK_INT>=34){add(b,button("Manage video access",blue,pale,this::requestAccess),-1,dp(42));gap(b,8);}}
             LinearLayout list=block();list.setPadding(dp(12),dp(4),dp(12),dp(4));int start=page*PAGE,end=Math.min(videos.size(),start+PAGE);
             for(int n=start;n<end;n++){SmartMediaScan.Item item=videos.get(n);if(n>start)rule(list);LinearLayout line=row();line.setPadding(0,dp(10),0,dp(10));
                 ImageView image=new ImageView(this);image.setBackground(shape(pale,12));image.setClipToOutline(true);image.setScaleType(ImageView.ScaleType.CENTER_CROP);image.setContentDescription(null);add(line,image,dp(86),dp(65));gap(line,12);
@@ -188,7 +188,7 @@ public final class VideoCompressorActivity extends Activity {
         private final Paint p=new Paint(Paint.ANTI_ALIAS_FLAG);private int progress=-1;
         ProgressRing(){super(VideoCompressorActivity.this);setContentDescription("Compression progress");}
         void setProgress(int v){progress=v;setContentDescription(v<0?"Preparing video":v+" percent");invalidate();}
-        @Override protected void onDraw(Canvas canvas){super.onDraw(canvas);float cx=getWidth()/2f,cy=getHeight()/2f,r=Math.min(cx,cy)-dp(18);p.setStyle(Paint.Style.STROKE);p.setStrokeWidth(dp(10));p.setStrokeCap(Paint.Cap.ROUND);p.setColor(dark?0xff38383c:0xffe2e5eb);canvas.drawCircle(cx,cy,r,p);p.setColor(blue);if(progress>=0)canvas.drawArc(cx-r,cy-r,cx+r,cy+r,-90,360f*progress/100f,false,p);else canvas.drawArc(cx-r,cy-r,cx+r,cy+r,-90,36,false,p);
+        @Override protected void onDraw(Canvas canvas){super.onDraw(canvas);float cx=getWidth()/2f,cy=getHeight()/2f,r=Math.max(1,Math.min(cx,cy)-dp(18));p.setStyle(Paint.Style.STROKE);p.setStrokeWidth(dp(10));p.setStrokeCap(Paint.Cap.ROUND);p.setColor(dark?0xff38383c:0xffe2e5eb);canvas.drawCircle(cx,cy,r,p);p.setColor(blue);if(progress>=0)canvas.drawArc(cx-r,cy-r,cx+r,cy+r,-90,360f*progress/100f,false,p);else canvas.drawArc(cx-r,cy-r,cx+r,cy+r,-90,36,false,p);
             p.setStyle(Paint.Style.FILL);p.setTextAlign(Paint.Align.CENTER);p.setTypeface(Typeface.DEFAULT_BOLD);p.setColor(ink);p.setTextSize(dp(44));canvas.drawText(progress<0?"…":progress+"%",cx,cy+dp(15),p);p.setColor(gray);p.setTypeface(Typeface.DEFAULT);p.setTextSize(dp(13));canvas.drawText("Compressing",cx,cy-dp(35),p);}
     }
     private void confirmCancel(){if(!busy)return;dialog().setTitle("Cancel compression?").setMessage("The unfinished copy will be discarded. Your original stays safe.").setNegativeButton("Continue",null).setPositiveButton("Cancel compression",(d,w)->{cancelCompression();showSettings();}).show();}
@@ -199,8 +199,8 @@ public final class VideoCompressorActivity extends Activity {
         TextView mark=centered("✓",45,0xffffffff,true);mark.setBackground(shape(0xff34c759,52));add(hero,mark,dp(88),dp(88));gap(hero,15);add(hero,centered(saved==null?"All compressed!":"Compressed video saved",25,ink,true),-1,-2);gap(hero,6);add(hero,centered(saved==null?"Your video is ready to review.":"Your copy is available to open or share.",13,gray,false),-1,-2);add(b,hero,-1,-2);gap(b,20);
         long delta=source.bytes-output.meta.bytes;LinearLayout stats=block();add(stats,centered(delta>0?"Reduced file size by":"Output file size",13,gray,false),-1,-2);gap(stats,9);add(stats,centered(size(delta>0?delta:output.meta.bytes),36,delta>0?green:ink,true),-1,-2);gap(stats,5);add(stats,centered(delta>0?Math.round(100d*delta/source.bytes)+"% smaller":"Not smaller · try a different preset",13,delta>0?green:gray,false),-1,-2);gap(stats,14);rule(stats);gap(stats,12);sizeRow(stats,"Before",source.bytes,source.bytes,gray);gap(stats,12);sizeRow(stats,"After",output.meta.bytes,Math.max(source.bytes,output.meta.bytes),blue);gap(stats,9);add(stats,text(output.meta.width+" × "+output.meta.height+" · "+duration(output.meta.duration)+(output.meta.audio?" · Audio included":""),12,gray,false),-1,-2);add(b,stats,-1,-2);gap(b,14);
         if(saved==null){add(b,button("Preview compressed video",blue,card,()->play(Uri.fromFile(output.file),true)),-1,dp(48));gap(b,8);add(b,button("Try another quality",blue,card,()->{clearOutput();showSettings();}),-1,dp(48));primary(l,"Save compressed video",this::save);}
-        else{LinearLayout actions=row();TextView preview=button("Preview",blue,card,()->play(saved,true));weight(actions,preview);gap(actions,8);weight(actions,button("Share",blue,card,this::share));add(b,actions,-1,dp(48));gap(b,12);if(savedLocal&&!sourceRemoved&&delta>0&&original!=null&&Build.VERSION.SDK_INT>=30&&!sourceVersion.isEmpty()&&!original.protectedItem){add(b,button("Remove original video",red,card,this::confirmOriginalRemoval),-1,dp(48));foot(b,"Only after reviewing the saved copy and Android approval.");}else foot(b,sourceRemoved?"Android approved the original trash request.":"Original kept. Removal may be unavailable for protected or picker-selected videos.");primary(l,"Done",()->{clearOutput();source=null;original=null;loadGallery();});}
-        foot(l,saved==null?"Saving a separate copy uses additional space.":"No storage recovery is claimed while the original remains.");setContentView(l);
+        else{LinearLayout actions=row();TextView preview=button("Preview",blue,card,()->play(saved,true));actions.addView(preview,new LinearLayout.LayoutParams(0,-1,1));gap(actions,8);actions.addView(button("Share",blue,card,this::share),new LinearLayout.LayoutParams(0,-1,1));add(b,actions,-1,dp(48));gap(b,12);if(savedLocal&&!sourceRemoved&&delta>0&&original!=null&&Build.VERSION.SDK_INT>=30&&!sourceVersion.isEmpty()&&!original.protectedItem){add(b,button("Remove original video",red,card,this::confirmOriginalRemoval),-1,dp(48));foot(b,"Only after reviewing the saved copy and Android approval.");}else foot(b,sourceRemoved?"Android approved the original trash request.":"Original kept. Removal may be unavailable for protected or picker-selected videos.");primary(l,"Done",()->{clearOutput();source=null;original=null;loadGallery();});}
+        foot(l,saved==null?"Saving a separate copy uses additional space.":sourceRemoved?"Android Trash may still occupy storage.":"No storage recovery is claimed while the original remains.");setContentView(l);
     }
     private void sizeRow(LinearLayout l,String name,long bytes,long max,int tint){LinearLayout r=row();weight(r,text(name,13,gray,false));add(r,text(size(bytes),15,ink,true),-2,-2);add(l,r,-1,-2);gap(l,7);bar(l,bytes,max,tint);}
     private void save(){
@@ -210,9 +210,9 @@ public final class VideoCompressorActivity extends Activity {
     }
     private void saveTo(Uri destination){
         if(busy||output==null||saved!=null)return;busy=true;status("Saving and verifying compressed copy…");final int token=++epoch;final VideoCompressionEngine.Output result=output;final String filename=VideoCompressionEngine.filename(source);
-        work=io.submit(()->{try{Uri uri;if(destination==null)uri=VideoCompressionEngine.saveGallery(this,result,filename);else{VideoCompressionEngine.copy(this,result,destination);uri=destination;}
+        work=io.submit(()->{try{Uri uri;if(destination==null)uri=VideoCompressionEngine.saveGallery(this,result,filename);else{VideoCompressionEngine.verifyNewDestination(this,source.uri,destination);VideoCompressionEngine.copy(this,result,destination);uri=destination;}
             long before=source.bytes;boolean logged=history.add(null,"compression","Video compressed","Saved copy · "+size(before)+" → "+size(result.meta.bytes),0,1,false);
-            runOnUiThread(()->{if(destroyed||token!=epoch)return;busy=false;saved=uri;savedLocal=destination==null;showResult();if(!logged)toast("Video saved, but history could not be recorded");});
+            runOnUiThread(()->{if(destroyed||token!=epoch)return;busy=false;saved=uri;savedLocal=destination==null;outputReviewed=false;showResult();if(!logged)toast("Video saved, but history could not be recorded");});
         }catch(Exception e){runOnUiThread(()->{if(destroyed||token!=epoch)return;busy=false;showResult();dialog().setTitle("Could not save video").setMessage(destination==null?"The copy could not be published. Your original is safe.":"The selected provider could not verify the copy. It may contain an incomplete file; check the destination. Your original is safe.").setPositiveButton("Done",null).show();});}});
     }
     private void play(Uri uri,boolean compressed){
