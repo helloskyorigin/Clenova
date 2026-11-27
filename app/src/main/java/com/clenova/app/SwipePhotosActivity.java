@@ -67,7 +67,7 @@ public final class SwipePhotosActivity extends Activity {
     private void gap(LinearLayout p,int n){add(p,new View(this),dp(n),dp(n));}
     private TextView label(String s,int size,int color,boolean bold){TextView t=new TextView(this);t.setText(tr(s));t.setTextSize(size);t.setTextColor(color);t.setIncludeFontPadding(false);t.setTypeface(Typeface.create("sans-serif",bold?Typeface.BOLD:Typeface.NORMAL));return t;}
     private TextView button(String s,int color,int fill,Runnable action){
-        TextView t=label(s,15,color,true);t.setGravity(Gravity.CENTER);t.setBackground(rounded(fill,26));t.setPadding(dp(12),dp(8),dp(12),dp(8));
+        TextView t=label(s,15,color,true);t.setGravity(Gravity.CENTER);t.setBackground(rounded(UiPolish.buttonFill(fill,color),26));t.setPadding(dp(12),dp(8),dp(12),dp(8));
         t.setClickable(true);t.setFocusable(true);t.setOnClickListener(v->action.run());return t;
     }
     private LinearLayout root(){LinearLayout l=col();l.setBackgroundColor(bg);l.setPadding(dp(16),dp(10),dp(16),dp(10));return l;}
