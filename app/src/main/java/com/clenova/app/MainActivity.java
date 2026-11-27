@@ -611,6 +611,7 @@ public final class MainActivity extends Activity {
             if(title.equals("Swipe Photos")){startActivity(new android.content.Intent(this,SwipePhotosActivity.class));return;}
             if(title.equals("Video Compressor")){startActivity(new android.content.Intent(this,VideoCompressorActivity.class));return;}
             if(title.equals("Photo Compressor")){startActivity(new android.content.Intent(this,PhotoCompressorActivity.class));return;}
+            if(title.equals("Contacts Cleaner")){startActivity(new android.content.Intent(this,ContactsCleanerActivity.class));return;}
             privacyDialog().setTitle(tr(title))
                 .setMessage(tr("This tool is not available yet. No action has been performed."))
                 .setPositiveButton(tr("Done"),null).show();
@@ -2545,7 +2546,7 @@ public final class MainActivity extends Activity {
     private LinearLayout historyRow(ActivityHistory.Entry entry){
         LinearLayout line=row();line.setPadding(0,dp(12),0,dp(12));
         boolean done=entry.title.equals("Cleanup preview completed");
-        String icon=done?"check":entry.category.equals("scan")?"sparkles":entry.category.equals("photo_compression")?"images":entry.category.equals("compression")?"video":"shield";
+        String icon=done?"check":entry.category.equals("scan")?"sparkles":entry.category.equals("photo_compression")?"images":entry.category.equals("compression")?"video":entry.category.equals("contacts")?"users":"shield";
         FrameLayout mark=new FrameLayout(this);mark.setBackground(round(done?0xffe8f6ec:PALE,12));
         mark.addView(new Glyph(this,icon,done?GREEN:BLUE),new FrameLayout.LayoutParams(dp(24),dp(24),Gravity.CENTER));
         add(line,mark,dp(42),dp(42));gap(line,12);
@@ -2590,10 +2591,11 @@ public final class MainActivity extends Activity {
         boolean approved=entry.title.equals("Cleanup preview approved");
         boolean protection=entry.category.equals("protection");
         boolean compression=entry.category.equals("photo_compression")||entry.category.equals("compression");
+        boolean contacts=entry.category.equals("contacts");
         boolean removed=entry.title.endsWith("removed")||entry.title.endsWith("disabled");
         LinearLayout hero=column();hero.setGravity(Gravity.CENTER_HORIZONTAL);
         FrameLayout mark=new FrameLayout(this);mark.setBackground(round(done?0xffe8f6ec:PALE,38));
-        mark.addView(new Glyph(this,done?"check":scan?"sparkles":compression?(entry.category.equals("photo_compression")?"images":"video"):removed?"lock":"shield",done?GREEN:BLUE),new FrameLayout.LayoutParams(dp(36),dp(36),Gravity.CENTER));
+        mark.addView(new Glyph(this,done?"check":scan?"sparkles":compression?(entry.category.equals("photo_compression")?"images":"video"):contacts?"users":removed?"lock":"shield",done?GREEN:BLUE),new FrameLayout.LayoutParams(dp(36),dp(36),Gravity.CENTER));
         add(hero,mark,dp(76),dp(76));space(hero,15);add(hero,centered(entry.title,24,INK,700),-1,-2);space(hero,8);
         java.util.Date date=new java.util.Date(entry.timestamp);
         String timestamp=android.text.format.DateFormat.getMediumDateFormat(this).format(date)+" · "+android.text.format.DateFormat.getTimeFormat(this).format(date);
@@ -2632,7 +2634,7 @@ public final class MainActivity extends Activity {
             add(labels,txt(cleanupActivity?"Simulation · No files were deleted.":"Preview only · No real scan performed",12,GRAY,400),-1,-2);
             weight(line,labels);add(note,line,-1,-2);add(body,note,-1,-2);
         }else{
-            add(body,txt(compression?"Saved copies":"Recorded change",14,GRAY,500),-1,-2);space(body,9);
+            add(body,txt(compression?"Saved copies":contacts?"Contact activity":"Recorded change",14,GRAY,500),-1,-2);space(body,9);
             LinearLayout info=card();pad(info,16,15);
             add(info,txt(entry.title,15,INK,600),-1,-2);space(info,9);
             TextView target=txt("",16,INK,500);
@@ -2641,7 +2643,7 @@ public final class MainActivity extends Activity {
             add(info,txt("Status at the time of activity",12,GRAY,400),-1,-2);space(info,5);
             add(info,txt(status,14,removed?GRAY:GREEN,600),-1,-2);
             add(body,info,-1,-2);space(body,19);
-            add(body,centered(compression?"This records a saved compressed copy, not reclaimed storage or original deletion.":"This records a setting change, not a file deletion.",12,GRAY,400),-1,-2);
+            add(body,centered(compression?"This records a saved compressed copy, not reclaimed storage or original deletion.":contacts?"This records verified contact activity, not storage recovery.":"This records a setting change, not a file deletion.",12,GRAY,400),-1,-2);
         }
         space(body,22);LinearLayout footer=row();footer.setGravity(Gravity.CENTER);
         add(footer,new Glyph(this,"lock",GRAY),dp(16),dp(16));gap(footer,6);
