@@ -123,3 +123,6 @@ CI SDK setup no longer requests obsolete tools; JVM tests precede SDK installati
 
 ## Agent — Phase 35
 Minimal Agent tab, local storage-pressure and available foreground scan suggestions, fixed composer and responsive scroll, history and settings shortcuts. Bounded English command routing and explicit action preview hand off to existing Clean or protection screens. No AI model, background tasks, fabricated recommendations or automatic destructive actions. Unsupported requests offer supported actions. Agent routing regression tests added; Android build/lint/device testing remains required.
+
+## Agent conversation — Phase 36
+Welcome transforms to chat with two-line drawer, new conversation, bounded local history and delete, pinned composer and hidden navbar. Real inline media scan, progress/cancel and review cards, existing approved native cleanup screens. Results are session-only, history is text only; native approvals are not counted as recovered bytes. Local supported commands work offline. Optional explicit private HTTPS Groq relay with no hardcoded secrets, scoped JSON responses, allowlisted review-only actions, timeouts and rate limits; deployment, live provider and device verification pending. See server/README.md. No production authentication yet.

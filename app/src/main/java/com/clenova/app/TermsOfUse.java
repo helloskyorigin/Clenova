@@ -2,7 +2,7 @@ package com.clenova.app;
 
 /** Offline preview terms; not final production terms. */
 final class TermsOfUse {
-    static final String VERSION="0.9";
+    static final String VERSION="1.0";
     static final String REVISION_DATE="2026-11-27";
     static final String[][] SECTIONS={
         {"Using Clenova","Clenova is currently a preview Android app for exploring phone management and cleanup workflows. Use it lawfully, on devices and files you are authorized to manage. Do not use it to access another person's data without permission or interfere with the app or other devices."},

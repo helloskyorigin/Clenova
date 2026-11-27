@@ -47,16 +47,16 @@ final class SmartMediaScan {
     private void check(){cancel.throwIfCanceled();}
     private boolean granted(String p){return context.checkSelfPermission(p)==android.content.pm.PackageManager.PERMISSION_GRANTED;}
     static boolean hasPhotoAccess(Context c){
-        if(Build.VERSION.SDK_INT>=33)return c.checkSelfPermission(android.Manifest.permission.READ_MEDIA_IMAGES)==0||(Build.VERSION.SDK_INT>=34&&c.checkSelfPermission(android.Manifest.permission.READ_MEDIA_VISUAL_USER_SELECTED)==0);
-        return c.checkSelfPermission(android.Manifest.permission.READ_EXTERNAL_STORAGE)==0;
+        if(Build.VERSION.SDK_INT>=33)return c.checkSelfPermission(android.Manifest.permission.READ_MEDIA_IMAGES)==android.content.pm.PackageManager.PERMISSION_GRANTED||(Build.VERSION.SDK_INT>=34&&c.checkSelfPermission(android.Manifest.permission.READ_MEDIA_VISUAL_USER_SELECTED)==android.content.pm.PackageManager.PERMISSION_GRANTED);
+        return c.checkSelfPermission(android.Manifest.permission.READ_EXTERNAL_STORAGE)==android.content.pm.PackageManager.PERMISSION_GRANTED;
     }
     static boolean hasAccess(Context c){
-        if(Build.VERSION.SDK_INT>=33)return c.checkSelfPermission(android.Manifest.permission.READ_MEDIA_IMAGES)==0||c.checkSelfPermission(android.Manifest.permission.READ_MEDIA_VIDEO)==0||(Build.VERSION.SDK_INT>=34&&c.checkSelfPermission(android.Manifest.permission.READ_MEDIA_VISUAL_USER_SELECTED)==0);
-        return c.checkSelfPermission(android.Manifest.permission.READ_EXTERNAL_STORAGE)==0;
+        if(Build.VERSION.SDK_INT>=33)return c.checkSelfPermission(android.Manifest.permission.READ_MEDIA_IMAGES)==android.content.pm.PackageManager.PERMISSION_GRANTED||c.checkSelfPermission(android.Manifest.permission.READ_MEDIA_VIDEO)==android.content.pm.PackageManager.PERMISSION_GRANTED||(Build.VERSION.SDK_INT>=34&&c.checkSelfPermission(android.Manifest.permission.READ_MEDIA_VISUAL_USER_SELECTED)==android.content.pm.PackageManager.PERMISSION_GRANTED);
+        return c.checkSelfPermission(android.Manifest.permission.READ_EXTERNAL_STORAGE)==android.content.pm.PackageManager.PERMISSION_GRANTED;
     }
     static boolean hasVideoAccess(Context c){
-        if(Build.VERSION.SDK_INT>=33)return c.checkSelfPermission(android.Manifest.permission.READ_MEDIA_VIDEO)==0||(Build.VERSION.SDK_INT>=34&&c.checkSelfPermission(android.Manifest.permission.READ_MEDIA_VISUAL_USER_SELECTED)==0);
-        return c.checkSelfPermission(android.Manifest.permission.READ_EXTERNAL_STORAGE)==0;
+        if(Build.VERSION.SDK_INT>=33)return c.checkSelfPermission(android.Manifest.permission.READ_MEDIA_VIDEO)==android.content.pm.PackageManager.PERMISSION_GRANTED||(Build.VERSION.SDK_INT>=34&&c.checkSelfPermission(android.Manifest.permission.READ_MEDIA_VISUAL_USER_SELECTED)==android.content.pm.PackageManager.PERMISSION_GRANTED);
+        return c.checkSelfPermission(android.Manifest.permission.READ_EXTERNAL_STORAGE)==android.content.pm.PackageManager.PERMISSION_GRANTED;
     }
     Result runVideos(Progress progress){
         Result r=new Result();List<Item> all=new ArrayList<>();r.videosScanned=hasVideoAccess(context);r.limited=true;
