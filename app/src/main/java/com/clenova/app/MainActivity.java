@@ -148,6 +148,8 @@ public final class MainActivity extends Activity {
     private UnifiedOnboardingView onboardingUnified;
     private AutopilotOnboardingView onboardingAutopilot;
     private PermissionSetup onboardingAccess;
+    private AgentSetupView onboardingAgent;
+    private boolean agentSetupFromTab;
     private final android.os.Handler splashHandler=new android.os.Handler(android.os.Looper.getMainLooper());
     private long splashDeadline;
     private final Runnable finishSplash=()->{if(launchSplash==null||isFinishing()||isDestroyed())return;launchSplash=null;showOnboardingIntro();};
@@ -187,10 +189,23 @@ public final class MainActivity extends Activity {
         if(android.os.Build.VERSION.SDK_INT>=27)getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR);
         onboardingAccess=new PermissionSetup(this,state,()->{
             if(onboardingAccess==null||isFinishing()||isDestroyed())return;
-            // Agent setup and initial data preparation are the next integration phases.
-            onboardingAccess=null;applyPalette();setContentView(home());
+            onboardingAccess=null;showAgentSetup(false,false);
         });
         setContentView(onboardingAccess.view());
+    }
+
+    private void showAgentSetup(boolean fromTab,boolean confirmed){
+        agentSetupFromTab=fromTab;
+        getWindow().setNavigationBarColor(AgentOnboardingView.BACKGROUND);
+        if(android.os.Build.VERSION.SDK_INT>=27)getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR);
+        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,WindowManager.LayoutParams.FLAG_FULLSCREEN);
+        onboardingAgent=new AgentSetupView(this,prefs,confirmed,()->{
+            if(onboardingAgent==null||isFinishing()||isDestroyed())return;
+            onboardingAgent.setActive(false);onboardingAgent=null;applyPalette();
+            if(agentSetupFromTab){agentSetupFromTab=false;showAgent();}
+            else setContentView(home()); // Rating and real initial preparation are next phases.
+        });
+        setContentView(onboardingAgent);onboardingAgent.setActive(true);
     }
 
     @Override public void onCreate(Bundle state) {
@@ -211,6 +226,7 @@ public final class MainActivity extends Activity {
         getWindow().getDecorView().setSystemUiVisibility(dark||android.os.Build.VERSION.SDK_INT<27?0:View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR);
         int height = getResources().getConfiguration().screenHeightDp;
         compact = height < 740 ? .88f : 1f;
+        if(state!=null&&state.getBoolean("onboarding_agent_visible")){showAgentSetup(state.getBoolean("agent_setup_from_tab"),state.getBoolean("agent_setup_confirmed"));return;}
         if(state!=null&&state.getBoolean("onboarding_access_visible")){showOnboardingAccess(state);return;}
         if(state!=null&&state.getBoolean("onboarding_autopilot_visible")){showOnboardingAutopilot();onboardingAutopilot.restoreStoryPosition(state.getFloat("onboarding_story_position",0f));return;}
         if(state!=null&&state.getBoolean("onboarding_unified_visible")){showOnboardingUnified();onboardingUnified.restoreStoryPosition(state.getFloat("onboarding_story_position",0f));return;}
@@ -249,6 +265,8 @@ public final class MainActivity extends Activity {
         state.putBoolean("onboarding_intro_visible",onboardingIntro!=null||launchSplash!=null);
         state.putBoolean("onboarding_unified_visible",onboardingUnified!=null);
         state.putBoolean("onboarding_autopilot_visible",onboardingAutopilot!=null);
+        state.putBoolean("onboarding_agent_visible",onboardingAgent!=null);
+        if(onboardingAgent!=null){state.putBoolean("agent_setup_from_tab",agentSetupFromTab);state.putBoolean("agent_setup_confirmed",onboardingAgent.confirmed());}
         state.putBoolean("onboarding_access_visible",onboardingAccess!=null);
         if(onboardingAccess!=null)onboardingAccess.save(state);
         if(onboardingIntro!=null)state.putFloat("onboarding_story_position",onboardingIntro.storyPosition());
@@ -311,6 +329,7 @@ public final class MainActivity extends Activity {
         if(onboardingUnified!=null){onboardingUnified.setActive(false);onboardingUnified=null;}
         if(onboardingAutopilot!=null){onboardingAutopilot.setActive(false);onboardingAutopilot=null;}
         onboardingAccess=null;
+        if(onboardingAgent!=null){onboardingAgent.setActive(false);onboardingAgent=null;}
         agentSessionHandler.removeCallbacks(agentExpiry);
         if(agentScan!=null){agentScan.cancel();agentScan=null;}agentGeneration++;if(agentDrawer!=null)agentDrawer.dismiss();relayToken="";
         if(cleanupAnimation!=null){
@@ -493,6 +512,11 @@ public final class MainActivity extends Activity {
     private void showAgentWelcome(LinearLayout body){
         LinearLayout hero=column();hero.setGravity(Gravity.CENTER_HORIZONTAL);add(hero,new AgentOrb(this),dp(146),dp(124));space(hero,8);
         add(hero,centered("How can I help?",26,INK,700),-1,-2);space(hero,8);LinearLayout ready=row();ready.setGravity(Gravity.CENTER);View dot=new View(this);dot.setBackground(round(GREEN,6));add(ready,dot,dp(6),dp(6));gap(ready,6);add(ready,txt("Ready for you",12,GRAY,500),-2,-2);add(hero,ready,-1,-2);add(body,hero,-1,-2);space(body,25);
+        if(!prefs.autopilot()){
+            LinearLayout setup=card();add(setup,txt("Make your Agent yours",15,INK,600),-1,-2);space(setup,6);
+            add(setup,txt("Configure your Agent, or keep using manual requests.",12,GRAY,400),-1,-2);space(setup,10);
+            scanButton(setup,"Activate Agent",true,()->showAgentSetup(true,false));add(body,setup,-1,-2);space(body,16);
+        }
         add(body,txt("Suggested for your phone",12,GRAY,500),-1,-2);space(body,9);
         long free=-1,total=-1;try{android.os.StatFs stat=new android.os.StatFs(getFilesDir().getAbsolutePath());free=stat.getAvailableBytes();total=stat.getTotalBytes();}catch(RuntimeException ignored){}
         boolean low=free>=0&&total>0&&free/(double)total<0.15;
@@ -573,6 +597,7 @@ public final class MainActivity extends Activity {
         LinearLayout layout=column();layout.setBackgroundColor(WHITE);pad(layout,16,16);LinearLayout header=row();weight(header,txt("Agent",25,INK,700));add(header,agentHeaderButton("close","Close",dialog::dismiss),dp(40),dp(40));add(layout,header,-1,-2);space(layout,12);
         scanButton(layout,"New conversation",true,()->{dialog.dismiss();newAgentChat();});space(layout,10);
         scanButton(layout,"Activity history",false,()->{if(agentBusy())return;dialog.dismiss();restoreAgentWindow();agentShortcut=true;historyFilter=0;historyScrollY=0;openHistory();});
+        if(!prefs.autopilot())scanButton(layout,"Activate Agent",false,()->{if(agentBusy())return;dialog.dismiss();showAgentSetup(true,false);});
         scanButton(layout,"Agent settings",false,()->{if(agentBusy())return;dialog.dismiss();restoreAgentWindow();agentShortcut=true;openAgentPreferences();});
         scanButton(layout,relayToken.isEmpty()?"Connect AI (private test)":"Disconnect AI",false,()->{if(agentBusy())return;dialog.dismiss();if(!relayToken.isEmpty()){relayEndpoint="";relayToken="";folderToast("AI disconnected");}else configureAgentRelay();});
         space(layout,18);add(layout,txt("Temporary conversation",14,INK,600),-1,-2);space(layout,6);
@@ -1844,13 +1869,14 @@ public final class MainActivity extends Activity {
     private void openAgentPreferences(){
         settingsVisible=true;agentPrefsVisible=true;setContentView(agentPreferencesScreen());
     }
-    @Override protected void onPause(){splashHandler.removeCallbacks(finishSplash);if(onboardingIntro!=null)onboardingIntro.setActive(false);if(onboardingUnified!=null)onboardingUnified.setActive(false);if(onboardingAutopilot!=null)onboardingAutopilot.setActive(false);super.onPause();}
+    @Override protected void onPause(){splashHandler.removeCallbacks(finishSplash);if(onboardingIntro!=null)onboardingIntro.setActive(false);if(onboardingUnified!=null)onboardingUnified.setActive(false);if(onboardingAutopilot!=null)onboardingAutopilot.setActive(false);if(onboardingAgent!=null)onboardingAgent.setActive(false);super.onPause();}
     @Override protected void onResume(){
         super.onResume();
         if(onboardingIntro!=null)onboardingIntro.setActive(true);
         if(onboardingUnified!=null)onboardingUnified.setActive(true);
         if(onboardingAutopilot!=null)onboardingAutopilot.setActive(true);
         if(onboardingAccess!=null)onboardingAccess.refresh();
+        if(onboardingAgent!=null)onboardingAgent.setActive(true);
         if(launchSplash!=null){
             if(splashDeadline==0){splashDeadline=android.os.SystemClock.elapsedRealtime()+(android.animation.ValueAnimator.areAnimatorsEnabled()?700:0);launchSplash.reveal();}
             splashHandler.removeCallbacks(finishSplash);splashHandler.postDelayed(finishSplash,Math.max(0,splashDeadline-android.os.SystemClock.elapsedRealtime()));
@@ -3048,7 +3074,7 @@ public final class MainActivity extends Activity {
         add(hero,centered("Choose how Clenova works for you.",14,GRAY,400),-1,-2);add(body,hero,-1,-2);space(body,22);
         add(body,txt("Autopilot",14,GRAY,500),-1,-2);space(body,9);
         LinearLayout auto=card();pad(auto,13,5);
-        LinearLayout enabled=agentToggle("sparkles","AI Autopilot","Find cleanup opportunities automatically",prefs.autopilot(),prefs::setAutopilot);
+        LinearLayout enabled=agentToggle("sparkles","AI Autopilot","Save Agent mode for cleanup recommendations",prefs.autopilot(),prefs::setAutopilot);
         add(auto,enabled,-1,-2);thinRule(auto);
         LinearLayout frequency=row();frequency.setMinimumHeight(dp(54));frequency.setPadding(0,dp(7),0,dp(7));
         add(frequency,new Glyph(this,"clock",BLUE),dp(23),dp(23));gap(frequency,12);
@@ -3075,7 +3101,7 @@ public final class MainActivity extends Activity {
         add(line,new Glyph(this,"lock",GREEN),dp(20),dp(20));add(safety,line,-1,-2);
         safety.setContentDescription(tr("Approval required")+", "+tr("Nothing deleted without your permission."));
         add(body,safety,-1,-2);space(body,10);
-        add(body,centered("Preview mode · No automatic scans or deletion",11,GRAY,400),-1,-2);
+        add(body,centered("On-demand scanning available · Scheduled scanning not active",11,GRAY,400),-1,-2);
         return root;
     }
     private LinearLayout agentToggle(String icon,String name,String subtitle,boolean initial,java.util.function.Consumer<Boolean> change){
@@ -3112,14 +3138,14 @@ public final class MainActivity extends Activity {
         LinearLayout state=row(); state.setGravity(Gravity.CENTER);
         View dot=new View(this); dot.setBackground(round(prefs.autopilot()?0xff34c759:GRAY,8));
         add(state,dot,dp(7),dp(7)); gap(state,6);
-        add(state,txt(prefs.autopilot()?"Autopilot active":"Autopilot paused",15,prefs.autopilot()?GREEN:GRAY,600),-2,-2); add(l,state,-1,-2);
+        add(state,txt(prefs.autopilot()?"Agent configured":"Manual mode",15,prefs.autopilot()?GREEN:GRAY,600),-2,-2); add(l,state,-1,-2);
         space(l,5);
         Gauge gauge=new Gauge(this);
         add(l,gauge,-1,v(207));
         space(l,4);
         add(l,centered("All under control.",27,INK,700),-1,-2);
         space(l,5);
-        add(l,centered(prefs.autopilot()?"Your AI Agent is taking care of things.":"Your Agent is paused.",14,GRAY,400),-1,-2);
+        add(l,centered(prefs.autopilot()?"Your Agent is ready for your requests.":"Clean at your own pace.",14,GRAY,400),-1,-2);
         return l;
     }
     private LinearLayout storage() {
@@ -3231,25 +3257,14 @@ public final class MainActivity extends Activity {
         add(l,value,-1,-2); space(l,1); add(l,txt("GB",14,GRAY,400),-2,-2); return l;
     }
     private LinearLayout agentCard() {
-        if(completed)return completedAgentCard();
-        if(prefs.recommendedMb()==0)return inactiveAgentCard();
-        LinearLayout c=card(); LinearLayout top=row();
-        FrameLayout mark=new FrameLayout(this); mark.setBackground(round(PALE,13));
-        mark.addView(new Glyph(this,"sparkles",BLUE),new FrameLayout.LayoutParams(dp(27),dp(27),Gravity.CENTER));
-        add(top,mark,dp(43),dp(43)); gap(top,10);
-        LinearLayout message=column();
-        add(message,txt("I've prepared your cleanup.",16,INK,600),-1,-2); space(message,4);
-        add(message,txt("Awaiting your approval",12,GRAY,400),-1,-2); weight(top,message);
-        add(c,top,-1,-2); space(c,12);
-        LinearLayout amount=row(); amount.setBaselineAligned(true);
-        add(amount,txt(ReviewPlan.gb(prefs.recommendedMb()),32,INK,700),-2,-2); gap(amount,7);
-        weight(amount,txt("ready to recover",13,GRAY,400)); add(c,amount,-1,-2);
-        space(c,12);
-        LinearLayout approve=row(); approve.setGravity(Gravity.CENTER);
-        add(approve,txt("Review & Approve",17,Color.WHITE,600),-2,-2); gap(approve,8);
-        add(approve,new Glyph(this,"right",Color.WHITE),dp(17),dp(17));
-        tap(approve,BLUE,26,this::openReview);
-        add(c,approve,-1,dp(51)); return c;
+        // Never turn stored Agent preferences into fabricated recommendations.
+        LinearLayout c=card(),top=row();
+        add(top,new Glyph(this,"sparkles",BLUE),dp(30),dp(30));gap(top,12);
+        LinearLayout copy=column();
+        add(copy,txt(prefs.autopilot()?"Your Agent is ready":"Make your Agent yours",16,INK,600),-1,-2);space(copy,5);
+        add(copy,txt(prefs.autopilot()?"Ask for a real storage review.":"Activate anytime, or clean manually.",13,GRAY,400),-1,-2);weight(top,copy);add(c,top,-1,-2);space(c,13);
+        scanButton(c,prefs.autopilot()?"Open Agent":"Activate Agent",true,()->{if(prefs.autopilot())showAgent();else showAgentSetup(true,false);});
+        return c;
     }
     private void showHome() {
         toolsVisible=false;toolsScroll=null;toolsScrollY=0;
@@ -3275,6 +3290,7 @@ public final class MainActivity extends Activity {
     }
     @Override public void onBackPressed() {
         if(launchSplash!=null){splashHandler.removeCallbacks(finishSplash);launchSplash=null;finish();return;}
+        if(onboardingAgent!=null){onboardingAgent.setActive(false);onboardingAgent=null;if(agentSetupFromTab){agentSetupFromTab=false;applyPalette();showAgent();}else showOnboardingAccess(null);return;}
         if(onboardingAccess!=null){if(onboardingAccess.busy())return;onboardingAccess=null;showOnboardingAutopilot();return;}
         if(onboardingAutopilot!=null){onboardingAutopilot.setActive(false);onboardingAutopilot=null;showOnboardingUnified();return;}
         if(onboardingUnified!=null){onboardingUnified.setActive(false);onboardingUnified=null;showOnboardingIntro();return;}

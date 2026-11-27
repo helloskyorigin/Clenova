@@ -21,8 +21,20 @@ final class AppPreferences {
         }
     }
     private static final String[] DISCOVERY_KEYS={"discover_duplicates","discover_similar","discover_videos","discover_unnecessary"};
-    boolean autopilot(){return store.getBoolean("agent_autopilot",true);}
-    void setAutopilot(boolean enabled){store.edit().putBoolean("agent_autopilot",enabled).apply();}
+    // Activation is an explicit preference, not proof of scheduled work.
+    boolean autopilot(){return store.getBoolean("agent_autopilot",false);}
+    boolean agentConfigured(){return store.getBoolean("agent_setup_configured",false);}
+    boolean saveAgentSetup(boolean enabled){
+        SharedPreferences.Editor edit=store.edit().putBoolean("agent_setup_configured",true).putBoolean("agent_autopilot",enabled);
+        if(enabled){
+            // Preserve previously customized choices. Initialize only missing preferences.
+            if(!store.contains("agent_scan_days"))edit.putInt("agent_scan_days",1);
+            for(String key:DISCOVERY_KEYS)if(!store.contains(key))edit.putBoolean(key,true);
+            for(String key:PROTECTION_KEYS)if(!store.contains(key))edit.putBoolean(key,true);
+        }
+        return edit.commit();
+    }
+    void setAutopilot(boolean enabled){saveAgentSetup(enabled);}
     int scanDays(){int days=store.getInt("agent_scan_days",1);return days==3||days==7?days:1;}
     void setScanDays(int days){if(days!=1&&days!=3&&days!=7)throw new IllegalArgumentException("Invalid interval");store.edit().putInt("agent_scan_days",days).apply();}
     boolean discovery(int index){return store.getBoolean(DISCOVERY_KEYS[index],true);}

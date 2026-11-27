@@ -10,7 +10,7 @@ onboarding_start home-1
 adb shell uiautomator dump /sdcard/home.xml
 adb pull /sdcard/home.xml build/home-evidence/home.xml
 adb exec-out screencap -p > build/home-evidence/home.png
-grep -F 'Autopilot active' build/home-evidence/home.xml
+grep -F 'Agent configured' build/home-evidence/home.xml
 grep -F 'All under control.' build/home-evidence/home.xml
 grep -F 'Agent' build/home-evidence/home.xml
 grep -F 'Tools' build/home-evidence/home.xml

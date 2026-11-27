@@ -57,7 +57,7 @@ PY
 # Follow the real permission setup on the API 34 emulator. No app-only bypass.
 onboarding_access() {
   local name="$1" iteration xml="build/onboarding-evidence/$1-access.xml" action
-  for iteration in $(seq 1 24); do
+  for iteration in $(seq 1 30); do
     adb shell uiautomator dump /sdcard/onboarding-access.xml >/dev/null
     adb pull /sdcard/onboarding-access.xml "$xml" >/dev/null
     adb exec-out screencap -p > "build/onboarding-evidence/$name-access-$iteration.png"
@@ -65,7 +65,7 @@ onboarding_access() {
 import sys, re, xml.etree.ElementTree as ET
 nodes=list(ET.parse(sys.argv[1]).iter('node'))
 texts=[n.get('text','') for n in nodes]
-if 'Autopilot active' in texts or any('All under control.' in t for t in texts):
+if 'Agent configured' in texts or 'Manual mode' in texts or any('All under control.' in t for t in texts):
     print('DONE'); raise SystemExit
 def choose(predicate):
     for n in nodes:
@@ -78,6 +78,8 @@ if choose(lambda n:n.get('resource-id','').endswith('/permission_deny_button') o
 if choose(lambda n:n.get('text')=='Continue without media'): raise SystemExit
 if 'App usage' in texts or 'File access' in texts:
     if choose(lambda n:n.get('text')=='Not now'): raise SystemExit
+if 'Ready to activate' in texts:
+    if choose(lambda n:n.get('text')=='Activate Agent'): raise SystemExit
 if choose(lambda n:n.get('text') in ('Allow','Continue')): raise SystemExit
 # Repeated denied notifications may lead to Android settings.
 if any(n.get('package')=='com.android.settings' for n in nodes):
