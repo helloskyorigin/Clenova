@@ -34,7 +34,6 @@ public final class MainActivity extends Activity {
     private int GREEN = Color.rgb(39,152,77);
     private float density;
     private float compact = 1f;
-    private boolean reviewing;
     private boolean toolsVisible;
     private ScrollView toolsScroll;
     private int toolsScrollY;
@@ -107,18 +106,8 @@ public final class MainActivity extends Activity {
     private android.widget.ProgressBar scanBar;
     private ScrollView cleanScroll;
     private int cleanScrollY;
-    private ReviewPlan reviewPlan;
-    private boolean duplicateViewing;
-    private int duplicateTab;
-    private boolean[] duplicateDraft;
-    private boolean similarViewing;
-    private int similarTab;
-    private boolean[] similarDraft;
-    private boolean videoViewing;
-    private int videoTab;
-    private boolean[] videoDraft;
-    private CleanupPreview cleanup;
-    private boolean cleaning, completed, completionVisible;
+    private boolean completionVisible;
+    private boolean mediaVerificationPending,mediaVerificationApproved;
     private boolean storageVisible, settingsVisible, agentPrefsVisible, protectionVisible, foldersVisible, filesVisible, historyVisible, permissionsVisible, privacyVisible, helpVisible, feedbackVisible, policyVisible, termsVisible, aboutVisible;
     private ScrollView aboutScroll;
     private int aboutScrollY;
@@ -138,15 +127,13 @@ public final class MainActivity extends Activity {
     private static final int REQUEST_NOTIFICATION_ACCESS=94;
     private ActivityHistory history;
     private int historyFilter;
-    private String cleanupEventId, historyDetailId;
-    private int[] cleanupCategoryCounts;
+    private String historyDetailId;
     private ScrollView historyScroll;
     private int historyScrollY;
     private ProtectedFiles protectedFiles;
     private static final int PICK_PROTECTED_FILES=93;
     private ProtectedFolders protectedFolders;
     private static final int PICK_PROTECTED_FOLDER=92;
-    private ValueAnimator cleanupAnimation;
     private AppPreferences prefs;
     private android.widget.PopupWindow preferencePopup;
     private boolean dark;
@@ -316,7 +303,7 @@ public final class MainActivity extends Activity {
         protectedFiles=new ProtectedFiles(this);
         history=new ActivityHistory(this);
         devicePermissions=new DevicePermissions(this);
-        if(state!=null){toolsVisible=state.getBoolean("tools_visible");toolsScrollY=state.getInt("tools_scroll_y");agentVisible=state.getBoolean("agent_visible");agentShortcut=state.getBoolean("agent_shortcut");largeFilesMode=state.getBoolean("large_files_mode");clutterMode=state.getBoolean("clutter_mode");dupTrashPending=state.getBoolean("dup_trash_pending");cleanVisible=state.getBoolean("clean_visible");cleanScrollY=state.getInt("clean_scroll_y");historyFilter=state.getInt("history_filter");cleanupEventId=state.getString("cleanup_event_id");cleanupCategoryCounts=state.getIntArray("cleanup_category_counts");historyDetailId=state.getString("history_detail_id");historyScrollY=state.getInt("history_scroll_y");}
+        if(state!=null){toolsVisible=state.getBoolean("tools_visible");toolsScrollY=state.getInt("tools_scroll_y");agentVisible=state.getBoolean("agent_visible");agentShortcut=state.getBoolean("agent_shortcut");largeFilesMode=state.getBoolean("large_files_mode");clutterMode=state.getBoolean("clutter_mode");dupTrashPending=state.getBoolean("dup_trash_pending");cleanVisible=state.getBoolean("clean_visible");cleanScrollY=state.getInt("clean_scroll_y");historyFilter=state.getInt("history_filter");historyDetailId=state.getString("history_detail_id");historyScrollY=state.getInt("history_scroll_y");}
         applyPalette();
         density = getResources().getDisplayMetrics().density;
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
@@ -327,7 +314,8 @@ public final class MainActivity extends Activity {
         compact = height < 740 ? .88f : 1f;
         if(state!=null){cleanupReceipt=CleanupReceipt.restore(state.getBundle("cleanup_receipt"));unusedUninstallPending=state.getBoolean("unused_uninstall_pending");
             pendingUninstallPackage=state.getString("uninstall_pkg","");pendingUninstallName=state.getString("uninstall_name","");pendingUninstallId=state.getString("uninstall_id","");
-            if(dupTrashPending||unusedUninstallPending)agentTaskOrigin=state.getBoolean("cleanup_agent_origin");}
+            if(dupTrashPending||unusedUninstallPending||state.getBoolean("media_verification_pending"))agentTaskOrigin=state.getBoolean("cleanup_agent_origin");}
+        if(state!=null&&state.getBoolean("media_verification_pending")){finishMediaCleanup(state.getBoolean("media_verification_approved"));return;}
         if(dupTrashPending||unusedUninstallPending){LinearLayout root=scanShell("Waiting for Android",()->{}),body=scanBody(root);add(body,centered("Waiting for your approval",20,INK,600),-1,-2);setContentView(root);return;}
         if(state!=null&&state.getBoolean("preparing_phone_visible")){showPreparingPhone();return;}
         if(state!=null&&state.getBoolean("onboarding_agent_visible")){showAgentSetup(state.getBoolean("agent_setup_from_tab"),state.getBoolean("agent_setup_confirmed"));return;}
@@ -339,12 +327,6 @@ public final class MainActivity extends Activity {
         if(state!=null&&state.getBoolean("tool_scan_pending")){
             showClean();requestingScan=true;agentTaskOrigin=state.getBoolean("tool_agent_origin");
             int route=state.getInt("tool_scan_route");dupAfterScan=route==1;videoAfterScan=route==2;similarAfterScan=route==3;shotAfterScan=route==4;return;
-        }
-        if(state!=null && state.containsKey("cleanup_amounts")){
-            cleanup=new CleanupPreview(state.getDoubleArray("cleanup_amounts"),state.getInt("cleanup_count"));
-            completed=state.getBoolean("cleanup_completed");
-            if(state.getBoolean("cleanup_running")){startCleanupAnimation();return;}
-            if(completed && state.getBoolean("cleanup_visible")){showCompletion(false);return;}
         }
         if(state!=null && state.getBoolean("about_visible")){aboutScrollY=state.getInt("about_scroll_y");openAbout();return;}
         if(state!=null && state.getBoolean("terms_visible")){policyScrollY=state.getInt("policy_scroll_y");openTerms();return;}
@@ -389,6 +371,7 @@ public final class MainActivity extends Activity {
         state.putBoolean("large_files_mode",largeFilesMode);state.putBoolean("clutter_mode",clutterMode);
         state.putBoolean("dup_trash_pending",dupTrashPending);
         if(cleanupReceipt!=null)state.putBundle("cleanup_receipt",cleanupReceipt.save());
+        state.putBoolean("media_verification_pending",mediaVerificationPending);state.putBoolean("media_verification_approved",mediaVerificationApproved);
         state.putBoolean("unused_uninstall_pending",unusedUninstallPending);
         state.putString("uninstall_pkg",pendingUninstallPackage);state.putString("uninstall_name",pendingUninstallName);state.putString("uninstall_id",pendingUninstallId);state.putBoolean("cleanup_agent_origin",agentTaskOrigin);
         state.putBoolean("tool_scan_pending",requestingScan);state.putBoolean("tool_agent_pending",agentPermissionPending);
@@ -415,17 +398,9 @@ public final class MainActivity extends Activity {
         state.putString("help_query",helpQuery);
         state.putInt("expanded_faq",expandedFaq);
         state.putInt("history_filter",historyFilter);
-        state.putString("cleanup_event_id",cleanupEventId);
-        state.putIntArray("cleanup_category_counts",cleanupCategoryCounts);
         state.putString("history_detail_id",historyDetailId);
         state.putInt("history_scroll_y",historyDetailId==null&&historyScroll!=null?historyScroll.getScrollY():historyScrollY);
-        if(cleanup!=null){
-            state.putDoubleArray("cleanup_amounts",cleanup.amounts());
-            state.putInt("cleanup_count",cleanup.count);
-            state.putBoolean("cleanup_completed",completed);
-            state.putBoolean("cleanup_running",cleaning);
-            state.putBoolean("cleanup_visible",completionVisible);
-        }
+
     }
     @Override protected void onStop(){
         super.onStop();nextThumbGeneration();dupCache.evictAll();overviewHandler.removeCallbacks(finishPreparation);cancelOverview();deviceOverview=null;preparationReady=false;agentForeground=false;agentSessionHandler.removeCallbacks(agentExpiry);agentLiveResult=null;agentResultChat="";
@@ -450,9 +425,6 @@ public final class MainActivity extends Activity {
         if(onboardingAgent!=null){onboardingAgent.setActive(false);onboardingAgent=null;}
         agentSessionHandler.removeCallbacks(agentExpiry);
         if(agentScan!=null){agentScan.cancel();agentScan=null;}agentGeneration++;cancelRelayRequest();relayWorker.shutdownNow();if(agentDrawer!=null)agentDrawer.dismiss();relayToken="";
-        if(cleanupAnimation!=null){
-            cleanupAnimation.removeAllListeners();cleanupAnimation.removeAllUpdateListeners();cleanupAnimation.cancel();
-        }
         if(runningScan!=null){runningScan.cancel();runningScan=null;}
         if(unusedSignal!=null)unusedSignal.cancel();unusedGeneration++;if(unusedSheet!=null)unusedSheet.dismiss();
         if(downloadsSignal!=null)downloadsSignal.cancel();downloadsGeneration++;if(downloadSheet!=null)downloadSheet.dismiss();
@@ -605,7 +577,7 @@ public final class MainActivity extends Activity {
         realSimilarVisible=false;realSimilarReview=false;realDupVisible=false;realDupReview=false;scanVisible=false;scanReviewVisible=false;
         dupAfterScan=false;similarAfterScan=false;videoAfterScan=false;shotAfterScan=false;nextThumbGeneration();
         settingsVisible=false;agentPrefsVisible=false;historyVisible=false;protectionVisible=false;filesVisible=false;foldersVisible=false;permissionsVisible=false;privacyVisible=false;helpVisible=false;feedbackVisible=false;aboutVisible=false;termsVisible=false;policyVisible=false;
-        storageVisible=false;reviewing=false;cleanVisible=false;agentVisible=true;agentTaskVisible=activeChat!=null;agentTaskOrigin=false;agentShortcut=false;cleanScroll=null;
+        storageVisible=false;cleanVisible=false;agentVisible=true;agentTaskVisible=activeChat!=null;agentTaskOrigin=false;agentShortcut=false;cleanScroll=null;
         restoreAgentWindow();getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);getWindow().setStatusBarColor(BG);
         getWindow().getDecorView().setSystemUiVisibility((dark?0:View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR)|(dark||android.os.Build.VERSION.SDK_INT<27?0:View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR));
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
@@ -753,7 +725,7 @@ public final class MainActivity extends Activity {
         stopRealVideo();realVideoVisible=false;realVideoReview=false;realVideoPreview=false;videoAfterScan=false;realVideoSelected.clear();realVideoKeep.clear();
         realSimilarVisible=false;realSimilarReview=false;similarAfterScan=false;realSimilarSelected.clear();realSimilarKeep.clear();
         realDupVisible=false;realDupReview=false;dupAfterScan=false;realDupSelected.clear();nextThumbGeneration();dupCache.evictAll();
-        scanVisible=false;scanReviewVisible=false;cleanVisible=true;settingsVisible=false;storageVisible=false;reviewing=false;
+        scanVisible=false;scanReviewVisible=false;cleanVisible=true;settingsVisible=false;storageVisible=false;
         aboutVisible=false;policyVisible=false;termsVisible=false;feedbackVisible=false;helpVisible=false;
         permissionsVisible=false;privacyVisible=false;historyVisible=false;agentPrefsVisible=false;protectionVisible=false;foldersVisible=false;filesVisible=false;
         setContentView(cleanScreen());
@@ -766,7 +738,7 @@ public final class MainActivity extends Activity {
         agentVisible=false;agentTaskVisible=false;agentTaskOrigin=false;agentShortcut=false;
         cleanVisible=false;cleanScroll=null;cleanScrollY=0;
         scanResult=null;scanVisible=false;scanReviewVisible=false;
-        settingsVisible=false;storageVisible=false;reviewing=false;completionVisible=false;
+        settingsVisible=false;storageVisible=false;completionVisible=false;
         aboutVisible=false;policyVisible=false;termsVisible=false;feedbackVisible=false;helpVisible=false;
         permissionsVisible=false;privacyVisible=false;historyVisible=false;agentPrefsVisible=false;
         protectionVisible=false;foldersVisible=false;filesVisible=false;
@@ -2400,11 +2372,11 @@ public final class MainActivity extends Activity {
         // Do not clear the draft or claim the email was sent: external mail delivery is unobservable.
     }
 
-    private static final String[][] HELP_FAQS={{"How does the AI Agent work?","Home reads available device storage. Smart Scan analyzes accessible media on request. Automatic scanning is not active yet. You approve any removal."},
-        {"Can Clenova delete files automatically?","No. Home cleanup is simulated. Duplicate copies, manually selected similar photos, large videos and screenshots can be moved to Android trash only after your review and Android approval on Android 11 or later."},
-        {"How do I protect important files?","Open Settings > Cleanup protection > Protected files or Protected folders. Select items with the Android picker. Exclusions are saved locally; the real cleanup engine is not active yet."},
+    private static final String[][] HELP_FAQS={{"How does the AI Agent work?","Home reads available device storage. Smart Scan analyzes accessible media on request. When enabled, Autopilot checks accessible media while charging when Android permits. You approve any removal."},
+        {"Can Clenova delete files automatically?","No. Autopilot only recommends. Media removal requires your review and Android Trash approval on Android 11 or later. Document removal may be permanent and requires separate confirmation."},
+        {"How do I protect important files?","Open Settings > Cleanup protection > Protected files or Protected folders. Select items with the Android picker. Exclusions are saved locally and checked during supported cleanup reviews. They are not an Android filesystem lock."},
         {"Why does Clenova need permissions?","Permissions support specific features. Open Settings > App permissions to manage access. Smart Scan requests optional photo and video access. Notification access is separate; file selection uses the Android picker."},
-        {"Is my personal data safe?","Preferences, exclusions and activity history are stored locally. Clenova does not automatically upload personal files. You can export or clear your history in Privacy & data."},
+        {"Is my personal data safe?","Preferences, exclusions and activity history are stored locally. Personal files are not automatically uploaded. Optional private AI relay sends typed messages after consent. You can export or clear activity history in Privacy & data."},
         {"How do I clear my activity history?","Open Settings > Privacy & data > Clear activity history. Confirm to remove local activity records without changing your protection settings."},
         {"How do I change the app language or theme?","Open Settings and select Language or Appearance. Your choice is saved on your device."}};
     private void hideHelpKeyboard(){
@@ -2621,11 +2593,7 @@ public final class MainActivity extends Activity {
     }
     private void resetClenovaData(){
         cancelOverview();deviceOverview=null;agentSessionHandler.removeCallbacks(agentExpiry);cancelRelayRequest();agentCloudBusy=false;boolean ok=LocalAppData.reset(this);agentChats=new AgentChatStore(this);activeChat=null;agentLiveResult=null;agentResultChat="";relayEndpoint="";relayToken="";agentGeneration++;
-        if(cleanupAnimation!=null){cleanupAnimation.removeAllListeners();cleanupAnimation.removeAllUpdateListeners();cleanupAnimation.cancel();cleanupAnimation=null;}
-        cleanup=null;cleanupCategoryCounts=null;cleanupEventId=null;reviewPlan=null;
-        duplicateDraft=null;similarDraft=null;videoDraft=null;
-        duplicateViewing=false;similarViewing=false;videoViewing=false;reviewing=false;
-        cleaning=false;completed=false;completionVisible=false;historyDetailId=null;historyScroll=null;historyScrollY=0;historyFilter=0;
+        completionVisible=false;historyDetailId=null;historyScroll=null;historyScrollY=0;historyFilter=0;
         prefs=new AppPreferences(this);protectedFolders=new ProtectedFolders(this);protectedFiles=new ProtectedFiles(this);history=new ActivityHistory(this);
         applyPalette();openPrivacyData();folderToast(ok?"Clenova data reset":"Some app data could not be reset");
     }
@@ -2817,11 +2785,6 @@ public final class MainActivity extends Activity {
         gap(line,8);add(line,new Glyph(this,"chevron",GRAY),dp(14),dp(14));
         tap(line,WHITE,10,()->{historyScrollY=historyScroll==null?0:historyScroll.getScrollY();openHistoryDetails(entry.id);});
         return line;
-    }
-    private void recordCleanupHistory(boolean complete){
-        if(!history.add(cleanupEventId+(complete?":complete":":approved"),"cleanup",
-            complete?"Cleanup preview completed":"Cleanup preview approved",complete?"No files deleted":"Approved by you",
-            cleanup.total,cleanup.count,true,cleanup.amounts(),cleanupCategoryCounts))folderToast("Could not save activity");
     }
     private void openHistoryDetails(String id){
         ActivityHistory.Entry entry=history.find(id);
@@ -3096,7 +3059,7 @@ public final class MainActivity extends Activity {
         add(addButton,new Glyph(this,"plus",Color.WHITE),dp(21),dp(21));gap(addButton,8);
         add(addButton,txt("Add files",16,Color.WHITE,600),-2,-2);
         tap(addButton,BLUE,27,this::pickProtectedFiles);add(body,addButton,-1,dp(52));space(body,17);
-        add(body,centered("Saved for exclusion from future cleanup.",12,GRAY,400),-1,-2);space(body,8);
+        add(body,centered("Excluded from supported cleanup reviews.",12,GRAY,400),-1,-2);space(body,8);
         add(body,centered("Saved exclusions · Cleanup engine not active",11,GRAY,400),-1,-2);
         return root;
     }
@@ -3363,11 +3326,11 @@ public final class MainActivity extends Activity {
         },"Clenova-uninstall-receipt").start();
     }
     private void finishMediaCleanup(boolean approved){
-        final CleanupReceipt receipt=cleanupReceipt;cleanupReceipt=null;dupTrashPending=false;verifyingCleanup=true;
+        final CleanupReceipt receipt=cleanupReceipt;dupTrashPending=false;verifyingCleanup=true;mediaVerificationPending=true;mediaVerificationApproved=approved;
         scanResult=null;agentLiveResult=null;realDupSelected.clear();realSimilarSelected.clear();realVideoSelected.clear();shotSelected.clear();dupCache.evictAll();
         LinearLayout root=scanShell("Cleanup result",()->{}),body=scanBody(root);add(body,centered("Checking cleanup result",22,INK,600),-1,-2);space(body,14);add(body,new android.widget.ProgressBar(this),dp(44),dp(44));setContentView(root);
         CleanupReceipt.verifyAsync(this,receipt,approved,result->{
-            verifyingCleanup=false;deviceOverview=null;
+            mediaVerificationPending=false;cleanupReceipt=null;verifyingCleanup=false;deviceOverview=null;
             if(agentTaskOrigin&&activeChat!=null)appendAgent(false,result.detail(),-1);
             showCleanupOutcome(result.title(),result.detail(),result.count(),result.bytes,result.complete(),result.logged);
         });
@@ -3395,7 +3358,6 @@ public final class MainActivity extends Activity {
         storageVisible=false;
         settingsVisible=false;agentPrefsVisible=false;protectionVisible=false;foldersVisible=false;filesVisible=false;historyVisible=false;
         completionVisible=false;
-        reviewing = false;
         setContentView(home());
     }
     private void openReview() {
@@ -3411,7 +3373,7 @@ public final class MainActivity extends Activity {
         if(onboardingIntro!=null){onboardingIntro.setActive(false);onboardingIntro=null;finish();return;}
         if(requestingScan||agentPermissionPending)return;
         if(downloadsBusy){if(downloadsSignal!=null)downloadsSignal.cancel();return;}
-        if(cleaning||unusedUninstallPending||dupTrashPending||verifyingCleanup)return;
+        if(unusedUninstallPending||dupTrashPending||verifyingCleanup)return;
         if(unusedReview){if(unusedSignal!=null){unusedSignal.cancel();unusedSignal=null;unusedGeneration++;}showUnusedApps();return;}
         if(unusedVisible){if(agentTaskOrigin)showAgent();else showClean();return;}
         if(downloadsReview){showDownloads();return;}
@@ -3442,719 +3404,10 @@ public final class MainActivity extends Activity {
         if(agentTaskVisible||agentVisible&&activeChat!=null){showHome();return;}
         if(agentVisible){showHome();return;}
         if(cleanVisible){if(agentTaskOrigin)showAgent();else showHome();return;}
-        if (videoViewing) leaveVideos(false); else if (similarViewing) leaveSimilar(false); else if (duplicateViewing) leaveDuplicates(false); else if (reviewing) showHome(); else super.onBackPressed();
-    }
-    private LinearLayout reviewScreen() {
-        LinearLayout root = column(); root.setBackgroundColor(BG);
-        root.setPadding(dp(18),v(12),dp(18),v(12));
-        FrameLayout header = new FrameLayout(this);
-        TextView title = centered("Review cleanup",17,INK,600);
-        header.addView(title,new FrameLayout.LayoutParams(-1,-1));
-        FrameLayout back = new FrameLayout(this);
-        back.addView(new Glyph(this,"back",INK),new FrameLayout.LayoutParams(dp(24),dp(24),Gravity.CENTER));
-        back.setContentDescription("Back to Home");
-        tap(back,WHITE,22,this::showHome);
-        header.addView(back,new FrameLayout.LayoutParams(dp(44),dp(44),Gravity.START|Gravity.CENTER_VERTICAL));
-        add(root,header,-1,dp(44));
-
-        ScrollView scroll = new ScrollView(this);
-        scroll.setVerticalScrollBarEnabled(false); scroll.setOverScrollMode(View.OVER_SCROLL_NEVER);
-        LinearLayout body = column();
-        body.setPadding(0,v(12),0,v(12));
-        scroll.addView(body,new ScrollView.LayoutParams(-1,-2));
-        root.addView(scroll,new LinearLayout.LayoutParams(-1,0,1f));
-
-        LinearLayout hero = column(); hero.setGravity(Gravity.CENTER_HORIZONTAL);
-        pad(hero,0,16);
-        add(hero,new Glyph(this,"sparkles",BLUE),dp(48),dp(48));
-        space(hero,14);
-        add(hero,centered("I've found "+ReviewPlan.gb(prefs.recommendedMb()),33,INK,700),-1,-2);
-        space(hero,6);
-        add(hero,centered("Your cleanup is ready.",15,GRAY,400),-1,-2);
-        add(body,hero,-1,-2); space(body,16);
-        add(body,txt("Cleanup plan",14,GRAY,600),-1,-2); space(body,10);
-        LinearLayout plan = card(); pad(plan,16,4);
-        for(int i=0;i<ReviewPlan.NAMES.length;i++){
-            if(!prefs.discovery(i))continue;
-            final int index=i;
-            LinearLayout category=row();
-            category.setPadding(0,v(15),0,v(15));
-            FrameLayout mark=new FrameLayout(this); mark.setBackground(round(PALE,12));
-            mark.addView(new Glyph(this,ReviewPlan.ICONS[i],BLUE),
-                    new FrameLayout.LayoutParams(dp(25),dp(25),Gravity.CENTER));
-            add(category,mark,dp(44),dp(44)); gap(category,12);
-            LinearLayout info=column();
-            add(info,txt(ReviewPlan.NAMES[i],16,INK,600),-1,-2); space(info,4);
-            add(info,txt(i==0 && reviewPlan.isSelected(0)?ReviewPlan.selectedCount(reviewPlan.draftCopies())+" extra copies selected":i==1 && reviewPlan.isSelected(1)?ReviewPlan.selectedCount(reviewPlan.draftSimilar())+" photos selected":i==2 && reviewPlan.isSelected(2)?ReviewPlan.selectedCount(reviewPlan.draftVideos())+" videos selected":ReviewPlan.DETAILS[i],13,GRAY,400),-1,-2); space(info,5);
-            TextView review=txt("Review items",13,BLUE,600);
-            review.setMinHeight(dp(32)); review.setGravity(Gravity.CENTER_VERTICAL);
-            review.setContentDescription("Review items: "+ReviewPlan.NAMES[i]);
-            tap(review,WHITE,8,()->reviewCategory(index));
-            add(info,review,-1,-2); weight(category,info); gap(category,8);
-            LinearLayout right=column(); right.setGravity(Gravity.END|Gravity.CENTER_VERTICAL);
-            add(right,txt(ReviewPlan.gb(reviewPlan.isSelected(i)?reviewPlan.categoryMb(i):ReviewPlan.MB[i]),15,INK,600),-2,-2);
-            FrameLayout choice=new FrameLayout(this);
-            choice.addView(new Glyph(this,reviewPlan.isSelected(i)?"selected":"unselected",
-                    reviewPlan.isSelected(i)?BLUE:0xffc7c7cc),
-                    new FrameLayout.LayoutParams(dp(25),dp(25),Gravity.CENTER));
-            choice.setContentDescription(ReviewPlan.NAMES[i]+(reviewPlan.isSelected(i)?", selected":", not selected"));
-            choice.setSelected(reviewPlan.isSelected(i));
-            tap(choice,WHITE,22,()->{
-                if(index!=0 && !reviewPlan.isSelected(index)) reviewCategory(index);
-                else {reviewPlan.setSelected(index,!reviewPlan.isSelected(index));setContentView(reviewScreen());}
-            });
-            add(right,choice,dp(44),dp(44)); add(category,right,-2,-2);
-            add(plan,category,-1,-2);
-            boolean more=false;for(int next=i+1;next<ReviewPlan.NAMES.length;next++)if(prefs.discovery(next))more=true;
-            if(more){
-                View divider=new View(this);divider.setBackgroundColor(surface(0xffeeeef0));add(plan,divider,-1,dp(1));
-            }
-        }
-        add(body,plan,-1,-2); space(body,14);
-        LinearLayout privacy=row();privacy.setGravity(Gravity.CENTER);
-        add(privacy,new Glyph(this,"shield",GREEN),dp(17),dp(17)); gap(privacy,6);
-        add(privacy,txt("Nothing deleted without your approval.",12,GRAY,400),-2,-2);
-        add(body,privacy,-1,-2);
-
-        LinearLayout footer=card(); pad(footer,16,14);
-        add(footer,txt("You'll free up",14,GRAY,400),-1,-2);space(footer,5);
-        add(footer,txt(ReviewPlan.gb(reviewPlan.total()),34,INK,700),-1,-2);space(footer,13);
-        LinearLayout approve=row();approve.setGravity(Gravity.CENTER);
-        add(approve,txt("Approve "+ReviewPlan.gb(reviewPlan.total())+" Cleanup",16,Color.WHITE,600),-2,-2);
-        gap(approve,8);add(approve,new Glyph(this,"right",Color.WHITE),dp(17),dp(17));
-        if(reviewPlan.total()>0) tap(approve,BLUE,26,()->confirmPreview());
-        else {approve.setBackground(round(0xffc7c7cc,26));approve.setEnabled(false);}
-        add(footer,approve,-1,dp(52));space(footer,5);
-        TextView later=centered("Not now",14,GRAY,500);
-        tap(later,WHITE,20,this::showHome);add(footer,later,-1,dp(44));
-        space(root,6);add(root,footer,-1,-2);return root;
-    }
-    private void reviewCategory(int index) {
-        if(index==0)openDuplicates();
-        else if(index==1)openSimilar();
-        else if(index==2)openVideos();
-    }
-    private void openVideos(){
-        videoDraft=reviewPlan.draftVideos();videoViewing=true;videoTab=0;
-        setContentView(videoScreen(0));
-    }
-    private void leaveVideos(boolean confirm){
-        if(confirm)reviewPlan.confirmVideos(videoDraft);
-        videoViewing=false;videoDraft=null;setContentView(reviewScreen());
-    }
-    private LinearLayout videoScreen(int offset){
-        LinearLayout root=column();root.setBackgroundColor(BG);
-        root.setPadding(dp(18),v(12),dp(18),v(12));
-        FrameLayout header=new FrameLayout(this);
-        header.addView(centered("Large videos",17,INK,600),new FrameLayout.LayoutParams(-1,-1));
-        FrameLayout back=new FrameLayout(this);
-        back.addView(new Glyph(this,"back",INK),new FrameLayout.LayoutParams(dp(24),dp(24),Gravity.CENTER));
-        back.setContentDescription("Back to Review cleanup");
-        tap(back,WHITE,22,()->leaveVideos(false));
-        header.addView(back,new FrameLayout.LayoutParams(dp(44),dp(44),Gravity.START|Gravity.CENTER_VERTICAL));
-        add(root,header,-1,dp(44));space(root,14);
-        int count=ReviewPlan.selectedCount(videoDraft);
-        String amount=ReviewPlan.gb(ReviewPlan.videoMb(videoDraft));
-        add(root,txt(amount,36,INK,700),-1,-2);space(root,5);
-        LinearLayout status=row();add(status,new Glyph(this,"sparkles",BLUE),dp(16),dp(16));gap(status,5);
-        add(status,txt("12 videos recommended",14,BLUE,500),-2,-2);add(root,status,-1,-2);space(root,16);
-        LinearLayout tabs=row();tabs.setBackground(round(0xffe7e7ec,14));
-        tabs.setPadding(dp(3),dp(3),dp(3),dp(3));
-        String[] labels={"Agent Picks","View All"};
-        for(int i=0;i<2;i++){
-            final int tab=i;
-            TextView label=centered(labels[i],14,videoTab==i?INK:GRAY,600);
-            tap(label,videoTab==i?WHITE:0xffe7e7ec,11,()->{videoTab=tab;setContentView(videoScreen(0));});
-            label.setSelected(videoTab==i);tabs.addView(label,new LinearLayout.LayoutParams(0,dp(39),1f));
-        }
-        add(root,tabs,-1,-2);space(root,12);
-        LinearLayout options=row();
-        add(options,txt(videoTab==0?"Largest videos":"All 12 videos",14,GRAY,500),-2,-2);stretch(options);
-        ScrollView scroll=new ScrollView(this);scroll.setVerticalScrollBarEnabled(false);scroll.setOverScrollMode(View.OVER_SCROLL_NEVER);
-        TextView all=txt(videoTab==0?"View all":count==12?"Deselect all":"Select all",14,BLUE,600);
-        all.setGravity(Gravity.CENTER_VERTICAL);
-        tap(all,BG,8,()->{
-            if(videoTab==0){videoTab=1;setContentView(videoScreen(0));}
-            else{java.util.Arrays.fill(videoDraft,count!=12);setContentView(videoScreen(scroll.getScrollY()));}
-        });
-        add(options,all,-2,dp(40));add(root,options,-1,-2);
-        LinearLayout body=column();body.setPadding(0,0,0,v(10));
-        scroll.addView(body,new ScrollView.LayoutParams(-1,-2));
-        root.addView(scroll,new LinearLayout.LayoutParams(-1,0,1f));
-        int limit=videoTab==0?4:ReviewPlan.VIDEO_MB.length;
-        for(int first=0;first<limit;first+=2){
-            LinearLayout gallery=row();gallery.setGravity(Gravity.TOP);
-            for(int i=first;i<Math.min(first+2,limit);i++){
-                LinearLayout tile=videoTile(i,scroll);
-                LinearLayout.LayoutParams lp=new LinearLayout.LayoutParams(0,-2,1f);
-                if(i>first)lp.leftMargin=dp(10);
-                gallery.addView(tile,lp);
-            }
-            add(body,gallery,-1,-2);if(first+2<limit)space(body,14);
-        }
-        if(offset>0)scroll.post(()->scroll.scrollTo(0,offset));
-        space(root,8);thinRule(root);space(root,12);
-        LinearLayout total=row();add(total,txt(count+" videos selected",14,GRAY,500),-2,-2);stretch(total);
-        add(total,txt(amount,21,INK,700),-2,-2);add(root,total,-1,-2);space(root,12);
-        TextView confirm=centered("Confirm selection",17,Color.WHITE,600);
-        tap(confirm,BLUE,26,()->leaveVideos(true));add(root,confirm,-1,dp(52));return root;
-    }
-    private LinearLayout videoTile(int index,ScrollView scroll){
-        LinearLayout item=column();
-        FrameLayout tile=new FrameLayout(this);tile.setBackground(round(0xffe4e8ee,10));tile.setClipToOutline(true);
-        VideoSample image=new VideoSample(this,index);
-        tile.addView(image,new FrameLayout.LayoutParams(-1,-1));
-        image.setContentDescription("Preview video "+(index+1)+", "+ReviewPlan.VIDEO_DURATION[index]+", "+ReviewPlan.VIDEO_MB[index]+" MB");
-        image.setOnClickListener(w->showVideoPreview(index,scroll));
-        TextView play=centered("▶",21,Color.WHITE,600);play.setBackground(round(0x66000000,24));
-        FrameLayout.LayoutParams playLp=new FrameLayout.LayoutParams(dp(42),dp(42),Gravity.CENTER);
-        tile.addView(play,playLp);play.setContentDescription("Open video preview");
-        play.setOnClickListener(w->showVideoPreview(index,scroll));
-        TextView duration=centered(ReviewPlan.VIDEO_DURATION[index],11,Color.WHITE,600);
-        duration.setBackground(round(0xaa000000,5));duration.setPadding(dp(6),dp(4),dp(6),dp(4));
-        FrameLayout.LayoutParams durLp=new FrameLayout.LayoutParams(-2,-2,Gravity.BOTTOM|Gravity.END);
-        durLp.setMargins(0,0,dp(6),dp(6));tile.addView(duration,durLp);
-        FrameLayout choice=new FrameLayout(this);
-        choice.addView(new Glyph(this,videoDraft[index]?"selected":"unselected",videoDraft[index]?BLUE:Color.WHITE),
-                new FrameLayout.LayoutParams(dp(25),dp(25),Gravity.CENTER));
-        choice.setContentDescription("Video "+(index+1)+(videoDraft[index]?", selected":", not selected"));
-        choice.setSelected(videoDraft[index]);
-        tap(choice,0x55000000,22,()->{videoDraft[index]=!videoDraft[index];setContentView(videoScreen(scroll.getScrollY()));});
-        tile.addView(choice,new FrameLayout.LayoutParams(dp(44),dp(44),Gravity.TOP|Gravity.END));
-        add(item,tile,-1,v(128));space(item,7);
-        LinearLayout detail=row();add(detail,txt(ReviewPlan.gb(ReviewPlan.VIDEO_MB[index]),15,INK,600),-2,-2);
-        stretch(detail);add(detail,txt("MP4",11,GRAY,400),-2,-2);add(item,detail,-1,-2);
-        return item;
-    }
-    private void showVideoPreview(int index,ScrollView scroll){
-        android.app.Dialog dialog=new android.app.Dialog(this,dark?android.R.style.Theme_Material_NoActionBar_Fullscreen:android.R.style.Theme_Material_Light_NoActionBar_Fullscreen);
-        LinearLayout layout=column();layout.setBackgroundColor(BG);layout.setPadding(dp(18),v(12),dp(18),v(16));
-        FrameLayout header=new FrameLayout(this);
-        header.addView(centered("Video preview",17,INK,600),new FrameLayout.LayoutParams(-1,-1));
-        FrameLayout close=new FrameLayout(this);
-        close.addView(new Glyph(this,"back",INK),new FrameLayout.LayoutParams(dp(24),dp(24),Gravity.CENTER));
-        close.setContentDescription("Close video preview");tap(close,WHITE,22,dialog::dismiss);
-        header.addView(close,new FrameLayout.LayoutParams(dp(44),dp(44),Gravity.START|Gravity.CENTER_VERTICAL));
-        add(layout,header,-1,dp(44));
-        FrameLayout canvas=new FrameLayout(this);canvas.setBackgroundColor(INK);
-        VideoSample image=new VideoSample(this,index);
-        canvas.addView(image,new FrameLayout.LayoutParams(1,1,Gravity.CENTER));
-        canvas.addOnLayoutChangeListener((view,left,top,right,bottom,ol,ot,or,ob)->{
-            int width=Math.min(right-left,Math.round((bottom-top)*160f/120f));
-            if(width<=0)return;
-            int height=Math.round(width*120f/160f);
-            FrameLayout.LayoutParams lp=(FrameLayout.LayoutParams)image.getLayoutParams();
-            if(lp.width!=width||lp.height!=height){lp.width=width;lp.height=height;image.setLayoutParams(lp);}
-        });
-        layout.addView(canvas,new LinearLayout.LayoutParams(-1,0,1f));space(layout,12);
-        add(layout,centered("Illustrated sample preview · no actual video file",12,GRAY,400),-1,-2);space(layout,8);
-        add(layout,centered(ReviewPlan.gb(ReviewPlan.VIDEO_MB[index])+" · "+ReviewPlan.VIDEO_DURATION[index]+" · MP4",14,INK,500),-1,-2);space(layout,12);
-        TextView toggle=centered(videoDraft[index]?"Keep this video":"Select video",17,Color.WHITE,600);
-        tap(toggle,BLUE,26,()->{videoDraft[index]=!videoDraft[index];int offset=scroll.getScrollY();dialog.dismiss();setContentView(videoScreen(offset));});
-        add(layout,toggle,-1,dp(52));dialog.setContentView(layout);dialog.show();
-        if(dialog.getWindow()!=null){
-            dialog.getWindow().setLayout(-1,-1);
-            dialog.getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,WindowManager.LayoutParams.FLAG_FULLSCREEN);
-            dialog.getWindow().setNavigationBarColor(BG);
-            dialog.getWindow().getDecorView().setSystemUiVisibility(dark||android.os.Build.VERSION.SDK_INT<27?0:View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR);
-        }
-    }
-    private static final class VideoSample extends View {
-        private final Paint p=new Paint(Paint.ANTI_ALIAS_FLAG);
-        private final int index;
-        VideoSample(Context c,int index){super(c);this.index=index;}
-        private void fill(int color){p.setColor(color);p.setStyle(Paint.Style.FILL);}
-        private void shape(Canvas c,int color,float... xy){
-            fill(color);Path path=new Path();path.moveTo(xy[0],xy[1]);
-            for(int i=2;i<xy.length;i+=2)path.lineTo(xy[i],xy[i+1]);path.close();c.drawPath(path,p);
-        }
-        @Override protected void onDraw(Canvas c){
-            super.onDraw(c);c.save();c.scale(getWidth()/160f,getHeight()/120f);
-            int mode=index%4;int[] sky={0xffb3d1e4,0xffe8c1a6,0xffb0cbc9,0xffa6b2cb};
-            fill(sky[mode]);c.drawRect(0,0,160,120,p);
-            if(mode==0){
-                shape(c,0xff718993,0,90,42+index,18,112,90,138,40,160,75,160,120,0,120);
-                shape(c,0xff557b65,0,103,50,87,112,103,160,92,160,120,0,120);
-            }else if(mode==1){
-                fill(0xffffe6af);c.drawCircle(118-index,37,20,p);
-                shape(c,0xffa98b7a,0,80,35,54,85,80,160,75,160,120,0,120);
-                shape(c,0xff726f80,0,94,80,80,160,95,160,120,0,120);
-            }else if(mode==2){
-                shape(c,0xff6b9384,0,78,48,38,95,72,160,36,160,120,0,120);
-                shape(c,0xffdddacb,62,120,80,75,92,75,125,120);
-            }else{
-                for(int b=0;b<5;b++){fill(b%2==0?0xff65778d:0xff7b899b);c.drawRect(b*34,30+(b%3)*12+index,b*34+29,120,p);}
-            }
-            c.restore();
-        }
-    }
-
-    private void openSimilar() {
-        similarDraft=reviewPlan.draftSimilar();similarViewing=true;similarTab=0;
-        setContentView(similarScreen(0));
-    }
-    private void leaveSimilar(boolean confirm) {
-        if(confirm)reviewPlan.confirmSimilar(similarDraft);
-        similarViewing=false;similarDraft=null;setContentView(reviewScreen());
-    }
-    private LinearLayout similarScreen(int offset) {
-        LinearLayout root=column();root.setBackgroundColor(BG);
-        root.setPadding(dp(18),v(12),dp(18),v(12));
-        FrameLayout header=new FrameLayout(this);
-        header.addView(centered("Similar photos",17,INK,600),new FrameLayout.LayoutParams(-1,-1));
-        FrameLayout back=new FrameLayout(this);
-        back.addView(new Glyph(this,"back",INK),new FrameLayout.LayoutParams(dp(24),dp(24),Gravity.CENTER));
-        back.setContentDescription("Back to Review cleanup");
-        tap(back,WHITE,22,()->leaveSimilar(false));
-        header.addView(back,new FrameLayout.LayoutParams(dp(44),dp(44),Gravity.START|Gravity.CENTER_VERTICAL));
-        add(root,header,-1,dp(44));space(root,14);
-        int count=ReviewPlan.selectedCount(similarDraft);
-        String amount=ReviewPlan.gb(count*ReviewPlan.SIMILAR_MB);
-        add(root,txt(amount,36,INK,700),-1,-2);space(root,5);
-        LinearLayout status=row();
-        add(status,new Glyph(this,"sparkles",BLUE),dp(16),dp(16));gap(status,5);
-        add(status,txt("80 photos recommended",14,BLUE,500),-2,-2);
-        add(root,status,-1,-2);space(root,16);
-        LinearLayout tabs=row();tabs.setBackground(round(0xffe7e7ec,14));
-        tabs.setPadding(dp(3),dp(3),dp(3),dp(3));
-        String[] labels={"Agent Picks","View All"};
-        for(int i=0;i<2;i++){
-            final int tab=i;
-            TextView label=centered(labels[i],14,similarTab==i?INK:GRAY,600);
-            tap(label,similarTab==i?WHITE:0xffe7e7ec,11,()->{similarTab=tab;setContentView(similarScreen(0));});
-            label.setSelected(similarTab==i);tabs.addView(label,new LinearLayout.LayoutParams(0,dp(39),1f));
-        }
-        add(root,tabs,-1,-2);space(root,12);
-        ScrollView scroll=new ScrollView(this);
-        scroll.setVerticalScrollBarEnabled(false);scroll.setOverScrollMode(View.OVER_SCROLL_NEVER);
-        LinearLayout body=column();body.setPadding(0,0,0,v(10));
-        scroll.addView(body,new ScrollView.LayoutParams(-1,-2));
-        root.addView(scroll,new LinearLayout.LayoutParams(-1,0,1f));
-        if(similarTab==0){
-            LinearLayout stats=row();stats.setPadding(0,v(6),0,v(6));
-            LinearLayout left=column();add(left,txt("80",25,INK,700),-1,-2);space(left,5);
-            add(left,txt("Suggested to remove",12,GRAY,400),-1,-2);weight(stats,left);
-            View divider=new View(this);divider.setBackgroundColor(surface(0xffdcdce1));add(stats,divider,dp(1),dp(36));gap(stats,15);
-            LinearLayout right=column();add(right,txt("32",25,GREEN,700),-1,-2);space(right,5);
-            add(right,txt("Best shots to keep",12,GRAY,400),-1,-2);weight(stats,right);
-            add(body,stats,-1,-2);space(body,12);thinRule(body);space(body,6);
-        }
-        LinearLayout options=row();
-        add(options,txt(similarTab==0?"Preview":"32 similar groups",14,GRAY,500),-2,-2);stretch(options);
-        TextView all=txt(similarTab==0?"View all":count==80?"Deselect all":"Select all",14,BLUE,600);
-        all.setGravity(Gravity.CENTER_VERTICAL);
-        tap(all,BG,8,()->{
-            if(similarTab==0){similarTab=1;setContentView(similarScreen(0));}
-            else{java.util.Arrays.fill(similarDraft,count!=80);setContentView(similarScreen(scroll.getScrollY()));}
-        });
-        add(options,all,-2,dp(40));add(body,options,-1,-2);
-        int limit=similarTab==0?1:ReviewPlan.SIMILAR_GROUPS;
-        for(int group=0;group<limit;group++){
-            addSimilarGroup(body,group,scroll);
-            if(group<limit-1){space(body,14);thinRule(body);space(body,14);}
-        }
-        if(offset>0)scroll.post(()->scroll.scrollTo(0,offset));
-        space(root,8);thinRule(root);space(root,12);
-        LinearLayout total=row();add(total,txt(count+" photos selected",14,GRAY,500),-2,-2);stretch(total);
-        add(total,txt(amount,21,INK,700),-2,-2);add(root,total,-1,-2);space(root,12);
-        TextView confirm=centered("Confirm selection",17,Color.WHITE,600);
-        tap(confirm,BLUE,26,()->leaveSimilar(true));add(root,confirm,-1,dp(52));return root;
-    }
-    private void addSimilarGroup(LinearLayout body,int group,ScrollView scroll){
-        int size=group<16?4:3, columns=size==4?2:3;
-        add(body,txt(size+" similar photos",14,INK,600),-1,-2);space(body,9);
-        for(int first=0;first<size;first+=columns){
-            LinearLayout gallery=row();gallery.setGravity(Gravity.TOP);
-            for(int p=first;p<Math.min(first+columns,size);p++){
-                final int photo=p;
-                FrameLayout tile=new FrameLayout(this);tile.setBackground(round(0xffe4e8ee,10));tile.setClipToOutline(true);
-                SamplePhoto image=new SamplePhoto(this,group,photo);
-                tile.addView(image,new FrameLayout.LayoutParams(-1,-1));
-                image.setContentDescription("Preview similar group "+(group+1)+", photo "+(photo+1));
-                image.setOnClickListener(w->showPhotoPreview(group,photo,scroll,true));
-                if(photo==0){
-                    TextView keep=centered("Best shot",11,GREEN,600);keep.setBackground(round(WHITE,6));
-                    keep.setPadding(dp(7),dp(4),dp(7),dp(4));
-                    FrameLayout.LayoutParams lp=new FrameLayout.LayoutParams(-2,-2,Gravity.TOP|Gravity.START);
-                    lp.setMargins(dp(7),dp(7),0,0);tile.addView(keep,lp);
-                }else{
-                    int index=ReviewPlan.similarIndex(group,photo);
-                    FrameLayout choice=new FrameLayout(this);
-                    choice.addView(new Glyph(this,similarDraft[index]?"selected":"unselected",similarDraft[index]?BLUE:Color.WHITE),
-                            new FrameLayout.LayoutParams(dp(24),dp(24),Gravity.CENTER));
-                    choice.setContentDescription("Group "+(group+1)+" photo "+(photo+1)+(similarDraft[index]?", selected":", not selected"));
-                    choice.setSelected(similarDraft[index]);
-                    tap(choice,0x55000000,22,()->{similarDraft[index]=!similarDraft[index];setContentView(similarScreen(scroll.getScrollY()));});
-                    tile.addView(choice,new FrameLayout.LayoutParams(dp(44),dp(44),Gravity.TOP|Gravity.END));
-                }
-                LinearLayout.LayoutParams lp=new LinearLayout.LayoutParams(0,dp(columns==2?132:110),1f);
-                if(p>first)lp.leftMargin=dp(7);gallery.addView(tile,lp);
-            }
-            add(body,gallery,-1,-2);if(first+columns<size)space(body,7);
-        }
-    }
-
-    private void openDuplicates() {
-        duplicateDraft = reviewPlan.draftCopies();
-        duplicateViewing = true;
-        duplicateTab = 0;
-        setContentView(duplicateScreen(0));
-    }
-    private void leaveDuplicates(boolean confirm) {
-        if(confirm) reviewPlan.confirmCopies(duplicateDraft);
-        duplicateViewing=false; duplicateDraft=null;
-        setContentView(reviewScreen());
-    }
-    private LinearLayout duplicateScreen(int offset) {
-        LinearLayout root=column();root.setBackgroundColor(BG);
-        root.setPadding(dp(18),v(12),dp(18),v(12));
-        FrameLayout header=new FrameLayout(this);
-        header.addView(centered("Duplicate photos",17,INK,600),new FrameLayout.LayoutParams(-1,-1));
-        FrameLayout back=new FrameLayout(this);
-        back.addView(new Glyph(this,"back",INK),new FrameLayout.LayoutParams(dp(24),dp(24),Gravity.CENTER));
-        back.setContentDescription("Back to Review cleanup");
-        tap(back,WHITE,22,()->leaveDuplicates(false));
-        header.addView(back,new FrameLayout.LayoutParams(dp(44),dp(44),Gravity.START|Gravity.CENTER_VERTICAL));
-        add(root,header,-1,dp(44));space(root,16);
-        int selectedCount=ReviewPlan.selectedCount(duplicateDraft);
-        String selectedSize=ReviewPlan.gb(selectedCount*ReviewPlan.COPY_MB);
-        add(root,txt(selectedSize,36,INK,700),-1,-2);space(root,6);
-        LinearLayout status=row();
-        add(status,new Glyph(this,"sparkles",BLUE),dp(16),dp(16));gap(status,6);
-        add(status,txt(selectedCount==48?"48 copies selected by Agent":selectedCount+" copies selected",14,BLUE,500),-2,-2);
-        add(root,status,-1,-2);space(root,18);
-        LinearLayout tabs=row();tabs.setBackground(round(0xffe7e7ec,14));
-        tabs.setPadding(dp(3),dp(3),dp(3),dp(3));
-        String[] labels={"Agent Picks","View All"};
-        for(int i=0;i<2;i++){
-            final int tab=i;
-            TextView label=centered(labels[i],14,duplicateTab==i?INK:GRAY,600);
-            tap(label,duplicateTab==i?WHITE:0xffe7e7ec,11,()->{duplicateTab=tab;setContentView(duplicateScreen(0));});
-            label.setSelected(duplicateTab==i);
-            tabs.addView(label,new LinearLayout.LayoutParams(0,dp(39),1f));
-        }
-        add(root,tabs,-1,-2);space(root,14);
-        ScrollView scroll=new ScrollView(this);
-        scroll.setVerticalScrollBarEnabled(false);scroll.setOverScrollMode(View.OVER_SCROLL_NEVER);
-        LinearLayout body=column();body.setPadding(0,0,0,v(10));
-        scroll.addView(body,new ScrollView.LayoutParams(-1,-2));
-        root.addView(scroll,new LinearLayout.LayoutParams(-1,0,1f));
-        if(duplicateTab==0){
-            LinearLayout summary=card();
-            add(summary,duplicateSummary("images",BLUE,PALE,"Extra copies","Selected for removal",Integer.toString(selectedCount)), -1,-2);
-            space(summary,12);thinRule(summary);space(summary,12);
-            add(summary,duplicateSummary("shield",GREEN,0xffeaf7ee,"Photos to keep","Protected by Agent","24"),-1,-2);
-            add(body,summary,-1,-2);space(body,20);
-            LinearLayout preview=row();
-            add(preview,txt("Preview",14,GRAY,500),-2,-2);stretch(preview);
-            TextView all=txt("View all",14,BLUE,600);all.setGravity(Gravity.CENTER_VERTICAL);
-            tap(all,BG,8,()->{duplicateTab=1;setContentView(duplicateScreen(0));});
-            add(preview,all,-2,dp(40));add(body,preview,-1,-2);
-            addDuplicateGroup(body,0,scroll);
-        }else{
-            LinearLayout options=row();
-            add(options,txt("24 duplicate groups",13,GRAY,500),-2,-2);stretch(options);
-            TextView all=txt(selectedCount==48?"Deselect all":"Select all",14,BLUE,600);
-            all.setGravity(Gravity.CENTER_VERTICAL);
-            tap(all,BG,8,()->{java.util.Arrays.fill(duplicateDraft,selectedCount!=48);setContentView(duplicateScreen(scroll.getScrollY()));});
-            add(options,all,-2,dp(40));add(body,options,-1,-2);
-            for(int group=0;group<ReviewPlan.GROUPS;group++){
-                addDuplicateGroup(body,group,scroll);
-                if(group<ReviewPlan.GROUPS-1){space(body,16);thinRule(body);space(body,16);}
-            }
-        }
-        if(offset>0)scroll.post(()->scroll.scrollTo(0,offset));
-        space(root,8);thinRule(root);space(root,12);
-        LinearLayout total=row();
-        add(total,txt(selectedCount+" photos selected",14,GRAY,500),-2,-2);stretch(total);
-        add(total,txt(selectedSize,21,INK,700),-2,-2);
-        add(root,total,-1,-2);space(root,12);
-        TextView confirm=centered("Confirm selection",17,Color.WHITE,600);
-        tap(confirm,BLUE,26,()->leaveDuplicates(true));
-        add(root,confirm,-1,dp(52));
-        return root;
+        super.onBackPressed();
     }
     private void thinRule(LinearLayout parent) {
         View rule=new View(this);rule.setBackgroundColor(surface(0xffe5e5ea));add(parent,rule,-1,dp(1));
-    }
-    private LinearLayout duplicateSummary(String icon,int tint,int background,String title,String subtitle,String count){
-        LinearLayout l=row();
-        FrameLayout mark=new FrameLayout(this);mark.setBackground(round(background,12));
-        mark.addView(new Glyph(this,icon,tint),new FrameLayout.LayoutParams(dp(25),dp(25),Gravity.CENTER));
-        add(l,mark,dp(44),dp(44));gap(l,12);
-        LinearLayout text=column();
-        add(text,txt(title,16,INK,600),-1,-2);space(text,4);
-        add(text,txt(subtitle,13,GRAY,400),-1,-2);weight(l,text);gap(l,8);
-        add(l,txt(count,24,tint==GREEN?GREEN:INK,700),-2,-2);return l;
-    }
-    private void addDuplicateGroup(LinearLayout body,int group,ScrollView scroll) {
-        LinearLayout heading=row();
-        add(heading,txt("3 identical photos",14,INK,600),-2,-2);stretch(heading);
-        add(heading,txt("50 MB",12,GRAY,400),-2,-2);add(body,heading,-1,-2);space(body,9);
-        LinearLayout gallery=row();gallery.setGravity(Gravity.TOP);
-        for(int photo=0;photo<3;photo++){
-            final int p=photo;
-            FrameLayout tile=new FrameLayout(this);
-            tile.setBackground(round(0xffe4e8ee,10));tile.setClipToOutline(true);
-            SamplePhoto image=new SamplePhoto(this,group);
-            tile.addView(image,new FrameLayout.LayoutParams(-1,-1));
-            image.setContentDescription("Preview group "+(group+1)+", photo "+(photo+1));
-            image.setOnClickListener(w->showSamplePhoto(group,p,scroll));
-            if(photo==0){
-                TextView keep=centered("Keep",11,GREEN,600);
-                keep.setBackground(round(WHITE,6));keep.setPadding(dp(7),dp(4),dp(7),dp(4));
-                FrameLayout.LayoutParams lp=new FrameLayout.LayoutParams(-2,-2,Gravity.TOP|Gravity.START);
-                lp.setMargins(dp(7),dp(7),0,0);tile.addView(keep,lp);
-            }else{
-                int index=group*2+photo-1;
-                FrameLayout choice=new FrameLayout(this);
-                choice.addView(new Glyph(this,duplicateDraft[index]?"selected":"unselected",duplicateDraft[index]?BLUE:Color.WHITE),
-                        new FrameLayout.LayoutParams(dp(24),dp(24),Gravity.CENTER));
-                choice.setContentDescription("Group "+(group+1)+" copy "+photo+(duplicateDraft[index]?", selected":", not selected"));
-                choice.setSelected(duplicateDraft[index]);
-                tap(choice,0x55000000,22,()->{duplicateDraft[index]=!duplicateDraft[index];setContentView(duplicateScreen(scroll.getScrollY()));});
-                FrameLayout.LayoutParams cp=new FrameLayout.LayoutParams(dp(44),dp(44),Gravity.TOP|Gravity.END);
-                tile.addView(choice,cp);
-            }
-            LinearLayout.LayoutParams tileLp=new LinearLayout.LayoutParams(0,dp(122),1f);
-            if(photo>0)tileLp.leftMargin=dp(7);
-            gallery.addView(tile,tileLp);
-        }
-        add(body,gallery,-1,-2);
-    }
-    private void showSamplePhoto(int group,int photo,ScrollView scroll) {
-        showPhotoPreview(group,photo,scroll,false);
-    }
-    private void showPhotoPreview(int group,int photo,ScrollView scroll,boolean similar) {
-        android.app.Dialog dialog=new android.app.Dialog(this,dark?android.R.style.Theme_Material_NoActionBar_Fullscreen:android.R.style.Theme_Material_Light_NoActionBar_Fullscreen);
-        LinearLayout layout=column();layout.setBackgroundColor(BG);
-        layout.setPadding(dp(18),v(12),dp(18),v(16));
-        FrameLayout header=new FrameLayout(this);
-        header.addView(centered(photo==0?(similar?"Best shot":"Protected original"):(similar?"Similar photo":"Duplicate copy"),17,INK,600),
-                new FrameLayout.LayoutParams(-1,-1));
-        FrameLayout close=new FrameLayout(this);
-        close.addView(new Glyph(this,"back",INK),new FrameLayout.LayoutParams(dp(24),dp(24),Gravity.CENTER));
-        close.setContentDescription("Close photo preview");
-        tap(close,WHITE,22,dialog::dismiss);
-        header.addView(close,new FrameLayout.LayoutParams(dp(44),dp(44),Gravity.START|Gravity.CENTER_VERTICAL));
-        add(layout,header,-1,dp(44));
-        FrameLayout preview=new FrameLayout(this);
-        SamplePhoto image=new SamplePhoto(this,group,similar?photo:0);
-        image.setContentDescription("Sample photo, group "+(group+1));
-        preview.addView(image,new FrameLayout.LayoutParams(1,1,Gravity.CENTER));
-        preview.addOnLayoutChangeListener((view,left,top,right,bottom,ol,ot,or,ob)->{
-            int width=Math.min(right-left,Math.round((bottom-top)*110f/125f));
-            if(width<=0)return;
-            int height=Math.round(width*125f/110f);
-            FrameLayout.LayoutParams lp=(FrameLayout.LayoutParams)image.getLayoutParams();
-            if(lp.width!=width||lp.height!=height){lp.width=width;lp.height=height;image.setLayoutParams(lp);}
-        });
-        layout.addView(preview,new LinearLayout.LayoutParams(-1,0,1f));
-        if(photo==0){
-            add(layout,centered(similar?"Best shot · Recommended to keep":"Keep · Protected by Agent",15,GREEN,600),-1,dp(52));
-        }else{
-            int index=similar?ReviewPlan.similarIndex(group,photo):group*2+photo-1;
-            boolean[] draft=similar?similarDraft:duplicateDraft;
-            TextView toggle=centered(draft[index]?"Keep this copy":"Select copy",17,Color.WHITE,600);
-            tap(toggle,BLUE,26,()->{
-                draft[index]=!draft[index];
-                int offset=scroll.getScrollY();dialog.dismiss();setContentView(similar?similarScreen(offset):duplicateScreen(offset));
-            });
-            add(layout,toggle,-1,dp(52));
-        }
-        dialog.setContentView(layout);dialog.show();
-        if(dialog.getWindow()!=null){
-            dialog.getWindow().setLayout(-1,-1);
-            dialog.getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,WindowManager.LayoutParams.FLAG_FULLSCREEN);
-            dialog.getWindow().setNavigationBarColor(BG);
-            dialog.getWindow().getDecorView().setSystemUiVisibility(dark||android.os.Build.VERSION.SDK_INT<27?0:View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR);
-        }
-    }
-
-    /** Procedural sample thumbnails: each group repeats the exact same illustration. */
-    private static final class SamplePhoto extends View {
-        private final Paint paint=new Paint(Paint.ANTI_ALIAS_FLAG);
-        private final int group,variant;
-        SamplePhoto(Context context,int group){this(context,group,0);}
-        SamplePhoto(Context context,int group,int variant){super(context);this.group=group;this.variant=variant;}
-        private void color(int c){paint.setColor(c);paint.setStyle(Paint.Style.FILL);}
-        @Override protected void onDraw(Canvas c){
-            super.onDraw(c);c.save();c.scale(getWidth()/110f,getHeight()/125f);
-            int[] skies={0xffbcd9e7,0xffe7d4bf,0xffc3d6ca,0xffd5c9e3,0xffead2ce,0xffc9ddea};
-            int[] hills={0xff819ca7,0xffa99079,0xff789c89,0xff9292ae,0xffa67e78,0xff758fa8};
-            color(skies[group%6]);c.drawRect(0,0,110,125,paint);
-            color(0xffffefca);c.drawCircle(72+(group%4)*5+variant*3,21+(group%3)*4,12,paint);
-            color(hills[group%6]);
-            Path mountain=new Path();mountain.moveTo(-10,95);mountain.lineTo(26+group%12+variant*4,30+group%9+variant*3);
-            mountain.lineTo(74,85);mountain.lineTo(96,48);mountain.lineTo(120,90);mountain.lineTo(120,125);
-            mountain.lineTo(-10,125);mountain.close();c.drawPath(mountain,paint);
-            color(0xff60877b);Path foreground=new Path();foreground.moveTo(0,102);
-            foreground.quadTo(30,87,60,101);foreground.quadTo(88,111,110,92);
-            foreground.lineTo(110,125);foreground.lineTo(0,125);foreground.close();c.drawPath(foreground,paint);
-            c.restore();
-        }
-    }
-
-    private void confirmPreview() {
-        if(reviewPlan.total()<=0 || cleaning || completed)return;
-        new AlertDialog.Builder(this,dark?android.R.style.Theme_Material_Dialog_Alert:android.R.style.Theme_Material_Light_Dialog_Alert).setTitle(tr("Approve cleanup?"))
-                .setMessage("Preview: "+reviewPlan.count()+" sample items · "+ReviewPlan.gb(reviewPlan.total())+
-                        ". No real files will be deleted.")
-                .setNegativeButton(tr("Cancel"),null)
-                .setPositiveButton(tr("Approve preview"),(d,w)->{
-                    cleanup=new CleanupPreview(reviewPlan);cleanupEventId=java.util.UUID.randomUUID().toString();
-                    cleanupCategoryCounts=new int[]{ReviewPlan.selectedCount(reviewPlan.draftCopies()),
-                        reviewPlan.isSelected(1)?ReviewPlan.selectedCount(reviewPlan.draftSimilar()):0,
-                        reviewPlan.isSelected(2)?ReviewPlan.selectedCount(reviewPlan.draftVideos()):0};
-                    recordCleanupHistory(false);
-                    startCleanupAnimation();
-                }).show();
-    }
-    private LinearLayout completedAgentCard(){
-        LinearLayout c=card(),top=row();
-        FrameLayout mark=new FrameLayout(this);mark.setBackground(round(0xffe5f5e9,13));
-        mark.addView(new Glyph(this,"shield",GREEN),new FrameLayout.LayoutParams(dp(27),dp(27),Gravity.CENTER));
-        add(top,mark,dp(43),dp(43));gap(top,10);
-        LinearLayout message=column();
-        add(message,txt("Cleanup complete.",16,INK,600),-1,-2);space(message,4);
-        add(message,txt("Simulated cleanup · Just now",12,GRAY,400),-1,-2);weight(top,message);
-        add(c,top,-1,-2);space(c,12);
-        LinearLayout amount=row();add(amount,txt(ReviewPlan.gb(cleanup.total),32,INK,700),-2,-2);gap(amount,7);
-        weight(amount,txt("recovered",13,GRAY,400));add(c,amount,-1,-2);space(c,12);
-        TextView receipt=centered("View summary",16,BLUE,600);
-        tap(receipt,PALE,26,()->showCompletion(false));add(c,receipt,-1,dp(51));return c;
-    }
-    private LinearLayout cleanupRoot(String heading){
-        LinearLayout root=column();root.setBackgroundColor(BG);
-        root.setPadding(dp(18),v(12),dp(18),v(12));
-        add(root,centered(heading,17,INK,600),-1,dp(44));
-        return root;
-    }
-    private LinearLayout cleanupBody(LinearLayout root){
-        ScrollView scroll=new ScrollView(this);scroll.setFillViewport(true);
-        scroll.setVerticalScrollBarEnabled(false);scroll.setOverScrollMode(View.OVER_SCROLL_NEVER);
-        LinearLayout body=column();body.setGravity(Gravity.CENTER_HORIZONTAL);
-        body.setPadding(0,v(14),0,v(12));
-        scroll.addView(body,new ScrollView.LayoutParams(-1,-2));
-        root.addView(scroll,new LinearLayout.LayoutParams(-1,0,1f));
-        return body;
-    }
-    private void startCleanupAnimation(){
-        cleaning=true;completionVisible=false;reviewing=false;
-        LinearLayout root=cleanupRoot("Cleaning up");
-        LinearLayout body=cleanupBody(root);
-        space(body,20);
-        CleanupRing ring=new CleanupRing(this,false);
-        add(body,ring,-1,v(238));space(body,12);
-        add(body,centered("Making more room.",26,INK,700),-1,-2);space(body,7);
-        add(body,centered("Your Agent is handling the cleanup.",14,GRAY,400),-1,-2);space(body,25);
-        LinearLayout stages=card();
-        TextView[] markers=new TextView[3], labels=new TextView[3];
-        boolean first=true;
-        for(int i=0;i<3;i++){
-            if(cleanup.amount(i)<=0)continue;
-            if(!first){space(stages,14);thinRule(stages);space(stages,14);}first=false;
-            LinearLayout line=row();
-            markers[i]=centered("○",23,GRAY,600);add(line,markers[i],dp(25),dp(30));gap(line,10);
-            weight(line,txt(ReviewPlan.NAMES[i],14,INK,600));gap(line,6);
-            labels[i]=txt("Waiting",12,GRAY,400);add(line,labels[i],-2,-2);
-            add(stages,line,-1,-2);
-        }
-        add(body,stages,-1,-2);
-        add(root,centered("Only your approved items are processed.",12,GRAY,400),-1,-2);space(root,6);
-        add(root,centered("Simulation · No files are deleted.",12,GRAY,400),-1,dp(22));
-        setContentView(root);
-        cleanupAnimation=ValueAnimator.ofFloat(0f,1f);
-        cleanupAnimation.setDuration(2800);
-        cleanupAnimation.setInterpolator(new android.view.animation.LinearInterpolator());
-        cleanupAnimation.addUpdateListener(a->{
-            float f=(float)a.getAnimatedValue();double recovered=cleanup.recovered(f);
-            ring.setFraction(f);
-            for(int i=0;i<3;i++){
-                if(markers[i]==null)continue;
-                int status=cleanup.status(i,recovered);
-                markers[i].setText(status==2?"✓":status==1?"◌":"○");
-                markers[i].setTextColor(status==2?GREEN:status==1?BLUE:GRAY);
-                labels[i].setText(tr(status==2?"Completed":status==1?"Cleaning…":"Waiting"));
-                labels[i].setTextColor(status==1?BLUE:GRAY);
-            }
-        });
-        cleanupAnimation.addListener(new android.animation.AnimatorListenerAdapter(){
-            @Override public void onAnimationEnd(android.animation.Animator animation){
-                if(isFinishing()||isDestroyed())return;
-                cleaning=false;completed=true;
-                if(cleanupEventId!=null)recordCleanupHistory(true);
-                showCompletion(true);
-            }
-        });
-        cleanupAnimation.start();
-    }
-    private void showCompletion(boolean animate){
-        completionVisible=true;cleaning=false;reviewing=false;
-        LinearLayout root=cleanupRoot("Cleanup complete"),body=cleanupBody(root);
-        space(body,12);
-        CleanupRing ring=new CleanupRing(this,true);add(body,ring,-1,v(210));space(body,8);
-        add(body,centered(ReviewPlan.gb(cleanup.total),38,INK,700),-1,-2);space(body,5);
-        add(body,centered("Successfully recovered",15,GREEN,600),-1,-2);space(body,13);
-        add(body,centered("All clean. All yours.",25,INK,700),-1,-2);space(body,6);
-        add(body,centered("Your Agent took care of it.",14,GRAY,400),-1,-2);space(body,20);
-        LinearLayout metrics=card(),line=row();
-        LinearLayout left=column();add(left,txt("Items cleaned",12,GRAY,400),-1,-2);space(left,6);
-        add(left,txt(Integer.toString(cleanup.count),25,INK,700),-1,-2);weight(line,left);
-        View divider=new View(this);divider.setBackgroundColor(surface(0xffe5e5ea));add(line,divider,dp(1),dp(44));gap(line,14);
-        LinearLayout right=column();add(right,txt("Available storage",12,GRAY,400),-1,-2);space(right,6);
-        add(right,txt(ReviewPlan.gb(cleanup.available()),22,INK,700),-1,-2);weight(line,right);
-        add(metrics,line,-1,-2);add(body,metrics,-1,-2);space(body,15);
-        LinearLayout shield=row();shield.setGravity(Gravity.CENTER);
-        add(shield,new Glyph(this,"shield",GREEN),dp(17),dp(17));gap(shield,6);
-        add(shield,txt("Your protected photos are safe.",12,GRAY,400),-2,-2);add(body,shield,-1,-2);
-        add(root,centered("Simulation · No files were deleted.",12,GRAY,400),-1,dp(26));space(root,6);
-        TextView home=centered("Back to Home",17,Color.WHITE,600);
-        tap(home,BLUE,26,this::showHome);add(root,home,-1,dp(52));setContentView(root);
-        if(animate){
-            ring.setFraction(0f);
-            ring.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP);
-            cleanupAnimation=ValueAnimator.ofFloat(0f,1f);cleanupAnimation.setDuration(480);
-            cleanupAnimation.setInterpolator(new DecelerateInterpolator());
-            cleanupAnimation.addUpdateListener(a->ring.setFraction((float)a.getAnimatedValue()));
-            cleanupAnimation.start();
-        }
-    }
-    private final class CleanupRing extends View {
-        private final Paint paint=new Paint(Paint.ANTI_ALIAS_FLAG);
-        private final boolean success;
-        private float fraction;
-        CleanupRing(Context c,boolean success){super(c);this.success=success;fraction=success?1f:0f;}
-        void setFraction(float f){fraction=f;invalidate();}
-        private void label(Canvas c,String label,float y,int size,int color,boolean bold){
-            paint.setStyle(Paint.Style.FILL);paint.setColor(color);paint.setTextAlign(Paint.Align.CENTER);
-            paint.setTypeface(Typeface.create("sans-serif",bold?Typeface.BOLD:Typeface.NORMAL));
-            paint.setTextSize(size);c.drawText(tr(label),130,y,paint);
-        }
-        @Override protected void onDraw(Canvas c){
-            super.onDraw(c);
-            float scale=Math.min(getWidth(),getHeight())/260f;
-            c.save();c.translate((getWidth()-260*scale)/2,(getHeight()-260*scale)/2);c.scale(scale,scale);
-            paint.setStyle(Paint.Style.STROKE);paint.setStrokeWidth(3.5f);paint.setStrokeCap(Paint.Cap.ROUND);
-            for(int i=0;i<80;i++){
-                double a=Math.toRadians(i*4.5-90);float x=(float)Math.cos(a),y=(float)Math.sin(a);
-                paint.setColor(success?0xff34c759:i<Math.round(80*fraction)?BLUE:surface(0xffdfe2e8));
-                c.drawLine(130+x*104,130+y*104,130+x*117,130+y*117,paint);
-            }
-            if(success){
-                paint.setStyle(Paint.Style.FILL);paint.setColor(surface(0xffe5f5e9));c.drawCircle(130,130,70,paint);
-                c.save();c.translate(130,130);float tick=.75f+.25f*fraction;c.scale(tick,tick);
-                paint.setStyle(Paint.Style.STROKE);paint.setStrokeWidth(9);paint.setColor(GREEN);
-                paint.setAlpha(Math.round(fraction*255));paint.setStrokeJoin(Paint.Join.ROUND);
-                Path path=new Path();path.moveTo(-33,0);path.lineTo(-10,23);path.lineTo(36,-25);c.drawPath(path,paint);
-                paint.setAlpha(255);c.restore();
-            }else{
-                label(c,"Cleaning",100,14,GRAY,false);
-                label(c,Math.min(100,(int)(fraction*100))+"%",151,53,INK,true);
-                label(c,ReviewPlan.gb(cleanup.recovered(fraction))+" recovered",180,13,BLUE,false);
-            }
-            c.restore();
-        }
     }
 
     private LinearLayout navigation() {

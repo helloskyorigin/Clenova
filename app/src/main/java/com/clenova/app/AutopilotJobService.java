@@ -46,7 +46,7 @@ public final class AutopilotJobService extends JobService {
             int count=duplicates+similar+videos;
             boolean partial=result.partial||eligible!=AutopilotScheduler.requested(prefs)||((eligible&3)!=0&&!result.imagesScanned)||((eligible&4)!=0&&!result.videosScanned);
             boolean saved=AutopilotScheduler.state(this).edit().remove("failed").putLong("checked",System.currentTimeMillis()).putInt("eligible",eligible).putInt("count",count).putInt("duplicates",duplicates).putInt("similar",similar).putInt("videos",videos).putBoolean("partial",partial).commit();
-            if(saved&&count>0&&prefs.canNotify(0))notifyReview();
+            if(saved){if(count>0&&prefs.canNotify(0))notifyReview();else{NotificationManager nm=getSystemService(NotificationManager.class);if(nm!=null)nm.cancel("agent_updates",0);}}
         }else if(result==null)recordFailure(revision,mask,eligible);
         jobFinished(params,false);
     }

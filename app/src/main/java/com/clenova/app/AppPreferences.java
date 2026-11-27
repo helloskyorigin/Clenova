@@ -43,11 +43,6 @@ final class AppPreferences {
     void setScanDays(int days){if(days!=1&&days!=3&&days!=7)throw new IllegalArgumentException("Invalid interval");if(days!=scanDays()&&store.edit().putInt("agent_scan_days",days).commit())AutopilotScheduler.changed(context,this);}
     boolean discovery(int index){return store.getBoolean(DISCOVERY_KEYS[index],true);}
     void setDiscovery(int index,boolean enabled){if(enabled!=discovery(index)&&store.edit().putBoolean(DISCOVERY_KEYS[index],enabled).commit())AutopilotScheduler.changed(context,this);}
-    int recommendedMb(){
-        if(!autopilot())return 0;
-        int total=0;for(int i=0;i<ReviewPlan.MB.length;i++)if(discovery(i))total+=ReviewPlan.MB[i];
-        return total;
-    }
     private static final String[] PROTECTION_KEYS={"protect_favorites","protect_recent","protect_documents","protect_best_shots"};
     boolean protection(int index){return store.getBoolean(PROTECTION_KEYS[index],true);}
     void setProtection(int index,boolean enabled){if(enabled!=protection(index)&&store.edit().putBoolean(PROTECTION_KEYS[index],enabled).commit())AutopilotScheduler.changed(context,this);}
