@@ -61,3 +61,6 @@ Settings > Activity history shows a local, initially empty event journal grouped
 
 ## Activity details
 Tap a history row to open a dynamic receipt with recorded timestamp, status, size/count and per-category snapshot for new sample recommendation and cleanup events. Older journal entries without breakdown remain readable and explicitly report missing breakdown. Approval and completion snapshot the same selected item counts and sizes; rotation preserves the in-progress snapshot, selected event, filter and history scroll position. Protection entries show the historical setting change, not current file status or verified deletion protection. All cleanup/scan records remain explicitly preview-only. No data is backfilled or invented.
+
+## App permissions
+Settings > App permissions reads Android runtime permission, notification channel and background restriction status. Refreshes on resume and notification permission result. Notification row requests POST_NOTIFICATIONS on Android 13+ or opens notification settings; app-settings shortcut allows revocation. Media and contacts are not requested in this preview, and files use the Android picker, not broad storage access. Background row explains limitations and opens app settings, without requesting battery exemptions. No new manifest permissions or background scanning added.

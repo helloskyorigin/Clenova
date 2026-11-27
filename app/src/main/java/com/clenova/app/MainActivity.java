@@ -47,7 +47,9 @@ public final class MainActivity extends Activity {
     private boolean[] videoDraft;
     private CleanupPreview cleanup;
     private boolean cleaning, completed, completionVisible;
-    private boolean storageVisible, settingsVisible, agentPrefsVisible, protectionVisible, foldersVisible, filesVisible, historyVisible;
+    private boolean storageVisible, settingsVisible, agentPrefsVisible, protectionVisible, foldersVisible, filesVisible, historyVisible, permissionsVisible;
+    private DevicePermissions devicePermissions;
+    private static final int REQUEST_NOTIFICATION_ACCESS=94;
     private ActivityHistory history;
     private int historyFilter;
     private String cleanupEventId, historyDetailId;
@@ -69,6 +71,7 @@ public final class MainActivity extends Activity {
         protectedFolders=new ProtectedFolders(this);
         protectedFiles=new ProtectedFiles(this);
         history=new ActivityHistory(this);
+        devicePermissions=new DevicePermissions(this);
         if(state!=null){historyFilter=state.getInt("history_filter");cleanupEventId=state.getString("cleanup_event_id");cleanupCategoryCounts=state.getIntArray("cleanup_category_counts");historyDetailId=state.getString("history_detail_id");historyScrollY=state.getInt("history_scroll_y");}
         applyPalette();
         density = getResources().getDisplayMetrics().density;
@@ -84,6 +87,7 @@ public final class MainActivity extends Activity {
             if(state.getBoolean("cleanup_running")){startCleanupAnimation();return;}
             if(completed && state.getBoolean("cleanup_visible")){showCompletion(false);return;}
         }
+        if(state!=null && state.getBoolean("permissions_visible")){openAppPermissions();return;}
         if(state!=null && state.getBoolean("history_visible")){if(historyDetailId!=null){openHistoryDetails(historyDetailId);}else openHistory();return;}
         if(state!=null && state.getBoolean("files_visible")){openProtectedFiles();return;}
         if(state!=null && state.getBoolean("folders_visible")){openProtectedFolders();return;}
@@ -102,6 +106,7 @@ public final class MainActivity extends Activity {
         state.putBoolean("folders_visible",foldersVisible);
         state.putBoolean("files_visible",filesVisible);
         state.putBoolean("history_visible",historyVisible);
+        state.putBoolean("permissions_visible",permissionsVisible);
         state.putInt("history_filter",historyFilter);
         state.putString("cleanup_event_id",cleanupEventId);
         state.putIntArray("cleanup_category_counts",cleanupCategoryCounts);
@@ -242,6 +247,7 @@ public final class MainActivity extends Activity {
         add(l,settings,dp(44),dp(44)); return l;
     }
     private void openSettings(){
+        permissionsVisible=false;
         historyDetailId=null;historyScroll=null;historyScrollY=0;historyVisible=false;filesVisible=false;foldersVisible=false;protectionVisible=false;agentPrefsVisible=false;settingsVisible=true;setContentView(settingsScreen());
     }
     private LinearLayout settingsScreen(){
@@ -296,6 +302,7 @@ public final class MainActivity extends Activity {
             else if(item[1].equals("Agent preferences"))tap(line,WHITE,0,this::openAgentPreferences);
             else if(item[1].equals("Cleanup protection"))tap(line,WHITE,0,this::openProtection);
             else if(item[1].equals("Activity history"))tap(line,WHITE,0,()->{historyFilter=0;historyScrollY=0;openHistory();});
+            else if(item[1].equals("App permissions"))tap(line,WHITE,0,this::openAppPermissions);
             add(group,line,-1,-2);
             if(i<items.length-1){
                 View divider=new View(this);divider.setBackgroundColor(surface(0xffeeeef0));
@@ -386,6 +393,109 @@ public final class MainActivity extends Activity {
     private void openAgentPreferences(){
         settingsVisible=true;agentPrefsVisible=true;setContentView(agentPreferencesScreen());
     }
+    @Override protected void onResume(){
+        super.onResume();
+        if(permissionsVisible&&devicePermissions!=null)openAppPermissions();
+    }
+    @Override public void onRequestPermissionsResult(int requestCode,String[] permissions,int[] grantResults){
+        super.onRequestPermissionsResult(requestCode,permissions,grantResults);
+        if(requestCode==REQUEST_NOTIFICATION_ACCESS&&permissionsVisible)openAppPermissions();
+    }
+    private void openAppPermissions(){
+        permissionsVisible=true;settingsVisible=true;setContentView(appPermissionsScreen());
+    }
+    private LinearLayout appPermissionsScreen(){
+        LinearLayout root=column();root.setBackgroundColor(BG);root.setPadding(dp(18),v(12),dp(18),v(12));
+        FrameLayout header=new FrameLayout(this);
+        header.addView(centered("App permissions",17,INK,600),new FrameLayout.LayoutParams(-1,-1));
+        FrameLayout back=new FrameLayout(this);
+        back.addView(new Glyph(this,"back",INK),new FrameLayout.LayoutParams(dp(24),dp(24),Gravity.CENTER));
+        back.setContentDescription(tr("Back to Settings"));tap(back,WHITE,22,this::openSettings);
+        header.addView(back,new FrameLayout.LayoutParams(dp(44),dp(44),Gravity.START|Gravity.CENTER_VERTICAL));add(root,header,-1,dp(44));
+        ScrollView scroll=new ScrollView(this);scroll.setVerticalScrollBarEnabled(false);scroll.setOverScrollMode(View.OVER_SCROLL_NEVER);
+        LinearLayout body=column();body.setPadding(0,v(18),0,v(12));
+        scroll.addView(body,new ScrollView.LayoutParams(-1,-2));root.addView(scroll,new LinearLayout.LayoutParams(-1,0,1f));
+        LinearLayout hero=column();hero.setGravity(Gravity.CENTER_HORIZONTAL);
+        FrameLayout mark=new FrameLayout(this);mark.setBackground(round(PALE,20));
+        mark.addView(new Glyph(this,"shield",BLUE),new FrameLayout.LayoutParams(dp(35),dp(35),Gravity.CENTER));
+        add(hero,mark,dp(68),dp(68));space(hero,13);
+        add(hero,centered("You're in control.",25,INK,700),-1,-2);space(hero,7);
+        add(hero,centered("Manage what Clenova can access.",14,GRAY,400),-1,-2);
+        add(body,hero,-1,-2);space(body,22);
+        add(body,txt("Device access",14,GRAY,500),-1,-2);space(body,9);
+        LinearLayout access=card();pad(access,13,4);
+        DevicePermissions.Snapshot snapshot=devicePermissions.snapshot();
+        add(access,permissionRow("images","Photos & videos","Media scanning is not active yet",snapshot.media,this::openAndroidAppSettings),-1,-2);
+        thinRule(access);
+        add(access,permissionRow("folder","Files & storage","Select files and folders using Android",snapshot.storage,this::openStoragePermissionInfo),-1,-2);
+        thinRule(access);
+        add(access,permissionRow("bell","Notifications","Agent updates and reminders",snapshot.notifications,this::manageNotificationAccess),-1,-2);
+        thinRule(access);
+        add(access,permissionRow("users","Contacts","Contact cleanup is not active yet",snapshot.contacts,this::openAndroidAppSettings),-1,-2);
+        add(body,access,-1,-2);space(body,22);
+        add(body,txt("Agent access",14,GRAY,500),-1,-2);space(body,9);
+        LinearLayout agent=card();pad(agent,13,4);
+        add(agent,permissionRow("activity","Background activity","Manage background restrictions",snapshot.background,this::openBackgroundInfo),-1,-2);
+        add(body,agent,-1,-2);space(body,19);
+        LinearLayout privacy=row();privacy.setBackground(round(PALE,16));pad(privacy,14,14);
+        add(privacy,new Glyph(this,"lock",BLUE),dp(24),dp(24));gap(privacy,12);
+        LinearLayout copy=column();add(copy,txt("Your privacy comes first.",15,INK,600),-1,-2);space(copy,6);
+        add(copy,txt("Access never means permission to delete. Every cleanup requires your approval.",12,GRAY,400),-1,-2);
+        weight(privacy,copy);add(body,privacy,-1,-2);space(body,16);
+        add(body,centered("No background scanning or automatic deletion is active.",11,GRAY,400),-1,-2);
+        space(root,6);
+        LinearLayout button=row();button.setGravity(Gravity.CENTER);
+        add(button,new Glyph(this,"settings",Color.WHITE),dp(20),dp(20));gap(button,8);
+        add(button,txt("Open Android settings",15,Color.WHITE,600),-2,-2);
+        tap(button,BLUE,27,this::openAndroidAppSettings);add(root,button,-1,dp(52));
+        return root;
+    }
+    private LinearLayout permissionRow(String icon,String name,String description,String status,Runnable action){
+        LinearLayout line=row();line.setMinimumHeight(dp(66));line.setPadding(0,dp(10),0,dp(10));
+        add(line,new Glyph(this,icon,BLUE),dp(23),dp(23));gap(line,10);
+        LinearLayout copy=column();add(copy,txt(name,15,INK,600),-1,-2);space(copy,5);
+        add(copy,txt(description,12,GRAY,400),-1,-2);weight(line,copy);gap(line,8);
+        int tint=status.equals("Allowed")||status.equals("Not restricted")?GREEN:status.equals("Not allowed")||status.equals("Limited")||status.equals("Restricted")?BLUE:GRAY;
+        TextView label=txt(status,11,tint,600);label.setGravity(Gravity.END|Gravity.CENTER_VERTICAL);label.setMaxWidth(dp(92));
+        add(line,label,-2,-2);gap(line,5);
+        add(line,new Glyph(this,"chevron",GRAY),dp(13),dp(13));
+        line.setContentDescription(tr(name)+", "+tr(status));tap(line,WHITE,10,action);
+        return line;
+    }
+    private void openAndroidAppSettings(){
+        android.content.Intent intent=new android.content.Intent(android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
+            android.net.Uri.fromParts("package",getPackageName(),null));
+        try{startActivity(intent);}catch(android.content.ActivityNotFoundException e){folderToast("Android settings unavailable");}
+    }
+    private void openNotificationSettings(){
+        android.content.Intent intent=new android.content.Intent(android.provider.Settings.ACTION_APP_NOTIFICATION_SETTINGS);
+        intent.putExtra(android.provider.Settings.EXTRA_APP_PACKAGE,getPackageName());
+        try{startActivity(intent);}catch(android.content.ActivityNotFoundException e){openAndroidAppSettings();}
+    }
+    private void manageNotificationAccess(){
+        if(android.os.Build.VERSION.SDK_INT>=33&&!devicePermissions.granted(android.Manifest.permission.POST_NOTIFICATIONS)){
+            android.content.SharedPreferences flags=getSharedPreferences("clenova_permission_requests",MODE_PRIVATE);
+            boolean asked=flags.getBoolean("notifications_requested",false);
+            if(!asked||shouldShowRequestPermissionRationale(android.Manifest.permission.POST_NOTIFICATIONS)){
+                flags.edit().putBoolean("notifications_requested",true).apply();
+                requestPermissions(new String[]{android.Manifest.permission.POST_NOTIFICATIONS},REQUEST_NOTIFICATION_ACCESS);return;
+            }
+        }
+        openNotificationSettings();
+    }
+    private void openStoragePermissionInfo(){
+        new AlertDialog.Builder(this,dark?android.R.style.Theme_Material_Dialog_Alert:android.R.style.Theme_Material_Light_Dialog_Alert)
+            .setTitle(tr("Files & storage"))
+            .setMessage(tr("Clenova uses the Android picker for files and folders you choose. It does not request all-files access."))
+            .setNegativeButton(tr("Cancel"),null).setPositiveButton(tr("Open Android settings"),(d,w)->openAndroidAppSettings()).show();
+    }
+    private void openBackgroundInfo(){
+        new AlertDialog.Builder(this,dark?android.R.style.Theme_Material_Dialog_Alert:android.R.style.Theme_Material_Light_Dialog_Alert)
+            .setTitle(tr("Background activity"))
+            .setMessage(tr("Android controls background restrictions. Automatic scans are not active in this build."))
+            .setNegativeButton(tr("Cancel"),null).setPositiveButton(tr("Open Android settings"),(d,w)->openAndroidAppSettings()).show();
+    }
+
     private void recordHistory(String id,String category,String title,String detail,double mb,int count,boolean preview){
         if(!history.add(id,category,title,detail,mb,count,preview))folderToast("Could not save activity");
     }
@@ -1059,6 +1169,7 @@ public final class MainActivity extends Activity {
         add(c,approve,-1,dp(51)); return c;
     }
     private void showHome() {
+        permissionsVisible=false;
         storageVisible=false;
         settingsVisible=false;agentPrefsVisible=false;protectionVisible=false;foldersVisible=false;filesVisible=false;historyVisible=false;
         completionVisible=false;
@@ -1077,6 +1188,7 @@ public final class MainActivity extends Activity {
     }
     @Override public void onBackPressed() {
         if(cleaning)return;
+        if(permissionsVisible){openSettings();return;}
         if(historyVisible&&historyDetailId!=null){openHistory();return;}
         if(historyVisible){openSettings();return;}
         if(filesVisible || foldersVisible){openProtection();return;}
@@ -1895,6 +2007,8 @@ public final class MainActivity extends Activity {
                     a.cubicTo(15,1,22,2,22,8);a.cubicTo(22,13,16,17,12,21);a.close();c.drawPath(a,p);break;}
                 case "plus":path(c,12,4,12,20);path(c,4,12,20,12);break;
                 case "more":p.setStyle(Paint.Style.FILL);for(int i=0;i<3;i++)c.drawCircle(12,5+i*7,1.6f,p);break;
+                case "users":c.drawCircle(9,7,3.4f,p);c.drawArc(new RectF(2,12,16,25),180,180,false,p);c.drawArc(new RectF(14,3,21,10),-90,180,false,p);c.drawArc(new RectF(14,12,23,24),-90,90,false,p);break;
+                case "activity":path(c,2,12,6,12,9,5,13,19,16,12,22,12);break;
                 case "folder":path(c,3,5,10,5,12,8,21,8,21,20,3,20,3,5);break;
                 case "folder_lock":path(c,3,18,3,5,10,5,12,8,21,8,21,12);
                     path(c,3,18,10,18);c.drawRoundRect(new RectF(13,15,22,22),2,2,p);c.drawArc(new RectF(15,10,20,18),180,180,false,p);break;
