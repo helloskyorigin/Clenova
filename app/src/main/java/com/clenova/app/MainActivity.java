@@ -628,7 +628,7 @@ public final class MainActivity extends Activity {
             add(setup,txt("Configure your Agent, or keep using manual requests.",12,GRAY,400),-1,-2);space(setup,10);
             scanButton(setup,"Activate Agent",true,()->showAgentSetup(true,false));add(body,setup,-1,-2);space(body,16);
         }
-        if(prefs.autopilot()){LinearLayout background=card();add(background,txt("Autopilot",14,INK,600),-1,-2);space(background,5);add(background,txt(AutopilotScheduler.status(this,prefs),12,GRAY,400),-1,-2);space(background,8);scanButton(background,"Review current media",false,()->openAgentTask(0,"Review current media"));add(body,background,-1,-2);space(body,12);}
+        if(prefs.autopilot()){LinearLayout background=card();add(background,txt("Autopilot",14,INK,600),-1,-2);space(background,5);add(background,txt(AutopilotScheduler.status(this,prefs),12,GRAY,400),-1,-2);String breakdown=AutopilotScheduler.breakdown(this,prefs);if(!breakdown.isEmpty()){space(background,5);add(background,txt(breakdown,12,INK,500),-1,-2);}space(background,8);scanButton(background,"Review current media",false,()->openAgentTask(0,"Review current media"));add(body,background,-1,-2);space(body,12);}
         add(body,txt("Suggested for your phone",12,GRAY,500),-1,-2);space(body,9);
         long free=-1,total=-1;try{android.os.StatFs stat=new android.os.StatFs(getFilesDir().getAbsolutePath());free=stat.getAvailableBytes();total=stat.getTotalBytes();}catch(RuntimeException ignored){}
         boolean low=free>=0&&total>0&&free/(double)total<0.15;

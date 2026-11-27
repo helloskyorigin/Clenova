@@ -63,7 +63,18 @@ final class AutopilotScheduler {
             return (count>0?count+" review candidates": "No candidates found")
                 +(s.getBoolean("partial",true)?" · Partial check":"")+" · "+when;
         }
+        long failed=s.getLong("failed",0);
+        if(s.getInt("eligible",0)==allowed&&AutopilotPolicy.fresh(failed,System.currentTimeMillis(),p.scanDays()))return "Last background check incomplete · Try a manual scan";
         return scheduled(c)?"Background check scheduled · While charging":"Background check not scheduled";
+    }
+    static String breakdown(Context c,AppPreferences p){
+        SharedPreferences s=state(c);int allowed=eligible(c,p);
+        if(!p.autopilot()||allowed==0||s.getInt("eligible",0)!=allowed||!AutopilotPolicy.fresh(s.getLong("checked",0),System.currentTimeMillis(),p.scanDays()))return "";
+        java.util.List<String> items=new java.util.ArrayList<>();
+        if((allowed&1)!=0&&s.getInt("duplicates",0)>0)items.add(s.getInt("duplicates",0)+" duplicate copies");
+        if((allowed&2)!=0&&s.getInt("similar",0)>0)items.add(s.getInt("similar",0)+" similar photos");
+        if((allowed&4)!=0&&s.getInt("videos",0)>0)items.add(s.getInt("videos",0)+" large videos");
+        return String.join(" · ",items);
     }
     private AutopilotScheduler(){}
 }

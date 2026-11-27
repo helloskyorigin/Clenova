@@ -90,7 +90,7 @@ jobs:
           api-level: 34
           arch: x86_64
           disable-animations: true
-          script: bash scripts/home-smoke.sh && bash scripts/agent-smoke.sh && bash scripts/clean-smoke.sh
+          script: bash scripts/home-smoke.sh && bash scripts/autopilot-smoke.sh && bash scripts/agent-smoke.sh && bash scripts/clean-smoke.sh
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -99,3 +99,4 @@ jobs:
             build/home-evidence/
             build/clean-evidence/
             build/agent-evidence/
+            build/autopilot-evidence/

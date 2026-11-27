@@ -24,7 +24,7 @@ public final class AutopilotJobService extends JobService {
         if(running!=null)return false;
         running=params;
         final SmartMediaScan work=new SmartMediaScan(this,prefs,new ProtectedFiles(this),new ProtectedFolders(this));scan=work;
-        deadline=()->{if(running==params){cancelScan();jobFinished(params,false);}};
+        deadline=()->{if(running==params){cancelScan();recordFailure(revision,mask,eligible);jobFinished(params,false);}};
         main.postDelayed(deadline,120000);
         new Thread(()->{
             try{
@@ -40,14 +40,23 @@ public final class AutopilotJobService extends JobService {
         AppPreferences prefs=new AppPreferences(this);
         if(result!=null&&prefs.autopilot()&&prefs.onboardingComplete()&&mask==ToolAccess.mediaMask(this)
             &&eligible==AutopilotScheduler.eligible(this,prefs)&&revision.equals(AutopilotScheduler.revision(this))){
-            int count=((eligible&1)!=0?result.groups.get(SmartMediaScan.DUPLICATES).size():0)
-                +((eligible&2)!=0?result.groups.get(SmartMediaScan.SIMILAR).size():0)
-                +((eligible&4)!=0?result.groups.get(SmartMediaScan.VIDEOS).size():0);
+            int duplicates=(eligible&1)!=0?result.groups.get(SmartMediaScan.DUPLICATES).size():0;
+            int similar=(eligible&2)!=0?result.groups.get(SmartMediaScan.SIMILAR).size():0;
+            int videos=(eligible&4)!=0?result.groups.get(SmartMediaScan.VIDEOS).size():0;
+            int count=duplicates+similar+videos;
             boolean partial=result.partial||eligible!=AutopilotScheduler.requested(prefs)||((eligible&3)!=0&&!result.imagesScanned)||((eligible&4)!=0&&!result.videosScanned);
-            boolean saved=AutopilotScheduler.state(this).edit().putLong("checked",System.currentTimeMillis()).putInt("eligible",eligible).putInt("count",count).putBoolean("partial",partial).commit();
+            boolean saved=AutopilotScheduler.state(this).edit().remove("failed").putLong("checked",System.currentTimeMillis()).putInt("eligible",eligible).putInt("count",count).putInt("duplicates",duplicates).putInt("similar",similar).putInt("videos",videos).putBoolean("partial",partial).commit();
             if(saved&&count>0&&prefs.canNotify(0))notifyReview();
-        }
+        }else if(result==null)recordFailure(revision,mask,eligible);
         jobFinished(params,false);
+    }
+    private void recordFailure(String revision,int mask,int eligible){
+        AppPreferences p=new AppPreferences(this);
+        if(p.autopilot()&&p.onboardingComplete()&&mask==ToolAccess.mediaMask(this)
+            &&eligible==AutopilotScheduler.eligible(this,p)&&revision.equals(AutopilotScheduler.revision(this))){
+            AutopilotScheduler.state(this).edit().remove("checked").remove("count").remove("duplicates").remove("similar").remove("videos").remove("partial").putInt("eligible",eligible).putLong("failed",System.currentTimeMillis()).commit();
+            NotificationManager nm=getSystemService(NotificationManager.class);if(nm!=null)nm.cancel("agent_updates",0);
+        }
     }
     private void notifyReview(){
         try{
