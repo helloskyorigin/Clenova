@@ -429,17 +429,48 @@ public final class MainActivity extends Activity {
         add(body,gallery,-1,-2);
     }
     private void showSamplePhoto(int group,int photo,ScrollView scroll) {
+        android.app.Dialog dialog=new android.app.Dialog(this,android.R.style.Theme_Material_Light_NoActionBar_Fullscreen);
+        LinearLayout layout=column();layout.setBackgroundColor(BG);
+        layout.setPadding(dp(18),v(12),dp(18),v(16));
+        FrameLayout header=new FrameLayout(this);
+        header.addView(centered(photo==0?"Protected original":"Duplicate copy",17,INK,600),
+                new FrameLayout.LayoutParams(-1,-1));
+        FrameLayout close=new FrameLayout(this);
+        close.addView(new Glyph(this,"back",INK),new FrameLayout.LayoutParams(dp(24),dp(24),Gravity.CENTER));
+        close.setContentDescription("Close photo preview");
+        tap(close,WHITE,22,dialog::dismiss);
+        header.addView(close,new FrameLayout.LayoutParams(dp(44),dp(44),Gravity.START|Gravity.CENTER_VERTICAL));
+        add(layout,header,-1,dp(44));
+        FrameLayout preview=new FrameLayout(this);
         SamplePhoto image=new SamplePhoto(this,group);
-        image.setMinimumHeight(dp(300));
-        AlertDialog.Builder dialog=new AlertDialog.Builder(this).setTitle(photo==0?"Protected original":"Duplicate copy")
-                .setView(image).setNegativeButton("Close",null);
-        if(photo>0){
+        image.setContentDescription("Sample photo, group "+(group+1));
+        preview.addView(image,new FrameLayout.LayoutParams(1,1,Gravity.CENTER));
+        preview.addOnLayoutChangeListener((view,left,top,right,bottom,ol,ot,or,ob)->{
+            int width=Math.min(right-left,Math.round((bottom-top)*110f/125f));
+            if(width<=0)return;
+            int height=Math.round(width*125f/110f);
+            FrameLayout.LayoutParams lp=(FrameLayout.LayoutParams)image.getLayoutParams();
+            if(lp.width!=width||lp.height!=height){lp.width=width;lp.height=height;image.setLayoutParams(lp);}
+        });
+        layout.addView(preview,new LinearLayout.LayoutParams(-1,0,1f));
+        if(photo==0){
+            add(layout,centered("Keep · Protected by Agent",15,GREEN,600),-1,dp(52));
+        }else{
             int index=group*2+photo-1;
-            dialog.setPositiveButton(duplicateDraft[index]?"Keep this copy":"Select copy",(d,w)->{
-                duplicateDraft[index]=!duplicateDraft[index];setContentView(duplicateScreen(scroll.getScrollY()));
+            TextView toggle=centered(duplicateDraft[index]?"Keep this copy":"Select copy",17,WHITE,600);
+            tap(toggle,BLUE,26,()->{
+                duplicateDraft[index]=!duplicateDraft[index];
+                int offset=scroll.getScrollY();dialog.dismiss();setContentView(duplicateScreen(offset));
             });
+            add(layout,toggle,-1,dp(52));
         }
-        dialog.show();
+        dialog.setContentView(layout);dialog.show();
+        if(dialog.getWindow()!=null){
+            dialog.getWindow().setLayout(-1,-1);
+            dialog.getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,WindowManager.LayoutParams.FLAG_FULLSCREEN);
+            dialog.getWindow().setNavigationBarColor(BG);
+            dialog.getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR);
+        }
     }
 
     /** Procedural sample thumbnails: each group repeats the exact same illustration. */
