@@ -158,7 +158,7 @@ public final class MainActivity extends Activity {
             if(onboardingIntro==null||isFinishing()||isDestroyed())return;
             onboardingIntro.setActive(false);onboardingIntro=null;showOnboardingUnified();
         });
-        setContentView(onboardingIntro);onboardingIntro.setActive(true);
+        setContentView(onboardingIntro);onboardingIntro.playEntrance();onboardingIntro.setActive(true);
     }
 
     private void showOnboardingUnified(){
@@ -168,7 +168,7 @@ public final class MainActivity extends Activity {
             if(onboardingUnified==null||isFinishing()||isDestroyed())return;
             onboardingUnified.setActive(false);onboardingUnified=null;showOnboardingAutopilot();
         });
-        setContentView(onboardingUnified);onboardingUnified.setActive(true);
+        setContentView(onboardingUnified);onboardingUnified.playEntrance();onboardingUnified.setActive(true);
     }
 
     private void showOnboardingAutopilot(){
@@ -179,7 +179,7 @@ public final class MainActivity extends Activity {
             // Temporary destination until the actual permissions and setup gate is built.
             onboardingAutopilot.setActive(false);onboardingAutopilot=null;applyPalette();setContentView(home());
         });
-        setContentView(onboardingAutopilot);onboardingAutopilot.setActive(true);
+        setContentView(onboardingAutopilot);onboardingAutopilot.playEntrance();onboardingAutopilot.setActive(true);
     }
 
     @Override public void onCreate(Bundle state) {
@@ -200,9 +200,9 @@ public final class MainActivity extends Activity {
         getWindow().getDecorView().setSystemUiVisibility(dark||android.os.Build.VERSION.SDK_INT<27?0:View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR);
         int height = getResources().getConfiguration().screenHeightDp;
         compact = height < 740 ? .88f : 1f;
-        if(state!=null&&state.getBoolean("onboarding_autopilot_visible")){showOnboardingAutopilot();return;}
-        if(state!=null&&state.getBoolean("onboarding_unified_visible")){showOnboardingUnified();return;}
-        if(state!=null&&state.getBoolean("onboarding_intro_visible")){showOnboardingIntro();return;}
+        if(state!=null&&state.getBoolean("onboarding_autopilot_visible")){showOnboardingAutopilot();onboardingAutopilot.restoreStoryPosition(state.getFloat("onboarding_story_position",0f));return;}
+        if(state!=null&&state.getBoolean("onboarding_unified_visible")){showOnboardingUnified();onboardingUnified.restoreStoryPosition(state.getFloat("onboarding_story_position",0f));return;}
+        if(state!=null&&state.getBoolean("onboarding_intro_visible")){showOnboardingIntro();onboardingIntro.restoreStoryPosition(state.getFloat("onboarding_story_position",0f));return;}
         if(state!=null && state.containsKey("cleanup_amounts")){
             cleanup=new CleanupPreview(state.getDoubleArray("cleanup_amounts"),state.getInt("cleanup_count"));
             completed=state.getBoolean("cleanup_completed");
@@ -237,6 +237,9 @@ public final class MainActivity extends Activity {
         state.putBoolean("onboarding_intro_visible",onboardingIntro!=null||launchSplash!=null);
         state.putBoolean("onboarding_unified_visible",onboardingUnified!=null);
         state.putBoolean("onboarding_autopilot_visible",onboardingAutopilot!=null);
+        if(onboardingIntro!=null)state.putFloat("onboarding_story_position",onboardingIntro.storyPosition());
+        else if(onboardingUnified!=null)state.putFloat("onboarding_story_position",onboardingUnified.storyPosition());
+        else if(onboardingAutopilot!=null)state.putFloat("onboarding_story_position",onboardingAutopilot.storyPosition());
         state.putBoolean("storage_visible",storageVisible);
         state.putBoolean("tools_visible",toolsVisible);
         state.putInt("tools_scroll_y",toolsScroll==null?toolsScrollY:toolsScroll.getScrollY());

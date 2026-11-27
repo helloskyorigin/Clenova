@@ -3,9 +3,7 @@ set -euo pipefail
 source "$(dirname "${BASH_SOURCE[0]}")/onboarding-smoke-helper.sh"
 mkdir -p build/agent-evidence
 adb shell am force-stop com.clenova.app
-adb shell am start -W -n com.clenova.app/.MainActivity
-sleep 2
-onboarding_continue agent-1
+onboarding_start agent-1
 dump() {
   adb shell uiautomator dump /sdcard/agent-qa.xml >/dev/null
   adb pull /sdcard/agent-qa.xml "build/agent-evidence/$1.xml" >/dev/null
@@ -41,9 +39,7 @@ adb shell input keyevent 4
 sleep 1
 dump restored
 adb shell am force-stop com.clenova.app
-adb shell am start -W -n com.clenova.app/.MainActivity
-sleep 2
-onboarding_continue agent-2
+onboarding_start agent-2
 dump relaunched
 tap build/agent-evidence/relaunched.xml Agent
 dump resumed
@@ -52,9 +48,7 @@ tap build/agent-evidence/resumed.xml 'New conversation'
 dump new
 grep -F 'How can I help?' build/agent-evidence/new.xml
 adb shell am force-stop com.clenova.app
-adb shell am start -W -n com.clenova.app/.MainActivity
-sleep 2
-onboarding_continue agent-3
+onboarding_start agent-3
 dump cleared_home
 tap build/agent-evidence/cleared_home.xml Agent
 dump cleared

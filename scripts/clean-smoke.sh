@@ -3,9 +3,7 @@ set -euo pipefail
 source "$(dirname "${BASH_SOURCE[0]}")/onboarding-smoke-helper.sh"
 mkdir -p build/clean-evidence
 adb shell am force-stop com.clenova.app
-adb shell am start -W -n com.clenova.app/.MainActivity
-sleep 2
-onboarding_continue clean-1
+onboarding_start clean-1
 dump() {
   adb shell uiautomator dump /sdcard/clenova-qa.xml >/dev/null
   adb pull /sdcard/clenova-qa.xml "build/clean-evidence/$1.xml" >/dev/null

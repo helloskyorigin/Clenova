@@ -1,6 +1,5 @@
 package com.clenova.app;
 
-import android.animation.ValueAnimator;
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.graphics.Canvas;
@@ -17,20 +16,16 @@ import android.graphics.drawable.RippleDrawable;
 import android.os.Build;
 import android.view.Gravity;
 import android.view.View;
-import android.view.accessibility.AccessibilityManager;
-import android.view.animation.LinearInterpolator;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
 
 /** Native introduction: an animated welcome and conversation; never a real chat or device operation. */
-final class AgentOnboardingView extends ScrollView {
+final class AgentOnboardingView extends OnboardingStoryView {
     static final int BACKGROUND=0xfff5f5f7;
     private static final int BLUE=0xff007aff;
     private final MotionStage stage;
-    private ValueAnimator animator;
-    private boolean active;
 
     AgentOnboardingView(Context context,Runnable next){
         super(context);
@@ -39,6 +34,7 @@ final class AgentOnboardingView extends ScrollView {
         setFocusableInTouchMode(true);
         LinearLayout root=new LinearLayout(context);root.setOrientation(LinearLayout.VERTICAL);
         root.setPadding(0,dp(12),0,dp(28));addView(root,new ScrollView.LayoutParams(-1,-2));
+        addStoryProgress(root,0);
         stage=new MotionStage(context);stage.setMinimumHeight(dp(400));
         root.addView(stage,new LinearLayout.LayoutParams(-1,dp(408),1f));
         LinearLayout copy=new LinearLayout(context);copy.setOrientation(LinearLayout.VERTICAL);
@@ -53,8 +49,8 @@ final class AgentOnboardingView extends ScrollView {
         button.setMinHeight(dp(54));button.setMinimumWidth(0);button.setMinWidth(0);
         button.setPadding(dp(16),dp(15),dp(16),dp(15));button.setStateListAnimator(null);
         button.setBackground(new RippleDrawable(ColorStateList.valueOf(0x33ffffff),shape(BLUE,100),shape(Color.WHITE,100)));
-        button.setOnClickListener(v->{setActive(false);next.run();});append(copy,button,30);
-        if(reducedMotion())stage.setTime(.95f);
+        button.setOnClickListener(v->advanceStory());append(copy,button,30);
+        configureStory(12000L,.95f,true,stage::setTime,next);
     }
     private int dp(float x){return Math.round(x*getResources().getDisplayMetrics().density);}
     private static Typeface font(int weight){return Build.VERSION.SDK_INT>=28?Typeface.create(Typeface.DEFAULT,weight,false):Typeface.create(weight>=500?"sans-serif-medium":"sans-serif",Typeface.NORMAL);}
@@ -64,24 +60,6 @@ final class AgentOnboardingView extends ScrollView {
     }
     private GradientDrawable shape(int color,int radius){GradientDrawable d=new GradientDrawable();d.setColor(color);d.setCornerRadius(dp(radius));return d;}
     private void append(LinearLayout parent,View v,int top){LinearLayout.LayoutParams p=new LinearLayout.LayoutParams(-1,-2);p.topMargin=dp(top);parent.addView(v,p);}
-    private boolean reducedMotion(){
-        AccessibilityManager a=(AccessibilityManager)getContext().getSystemService(Context.ACCESSIBILITY_SERVICE);
-        return !ValueAnimator.areAnimatorsEnabled()||(a!=null&&a.isTouchExplorationEnabled());
-    }
-    void setActive(boolean value){
-        active=value;
-        if(!value){if(animator!=null&&animator.isRunning())animator.pause();return;}
-        if(!isAttachedToWindow())return;
-        if(reducedMotion()){stop();stage.setTime(.95f);return;}
-        if(animator!=null){if(animator.isPaused())animator.resume();return;}
-        animator=ValueAnimator.ofFloat(0f,1f);animator.setDuration(12000L);
-        animator.setInterpolator(new LinearInterpolator());animator.setRepeatCount(ValueAnimator.INFINITE);
-        animator.addUpdateListener(a->stage.setTime((float)a.getAnimatedValue()));animator.start();
-    }
-    private void stop(){if(animator!=null){animator.removeAllUpdateListeners();animator.cancel();animator=null;}}
-    @Override protected void onAttachedToWindow(){super.onAttachedToWindow();if(active)setActive(true);}
-    @Override protected void onDetachedFromWindow(){stop();super.onDetachedFromWindow();}
-
     private static final class MotionStage extends View{
         private final Paint p=new Paint(Paint.ANTI_ALIAS_FLAG);
         private final Path path=new Path(),clip=new Path();
