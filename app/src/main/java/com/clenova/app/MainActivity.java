@@ -37,6 +37,14 @@ public final class MainActivity extends Activity {
     private boolean reviewing;
     private boolean cleanVisible;
     private static final int REQUEST_SCAN_MEDIA=96;
+    private static final int PICK_DOWNLOAD_FILES=101;
+    private boolean downloadsVisible,downloadsReview,downloadsBusy,downloadsPicking,downloadsOpening;
+    private int downloadsFilter,downloadsSort,downloadsPage,downloadsGeneration;
+    private String downloadsQuery="";
+    private final java.util.List<DownloadFiles.Item> downloadItems=new java.util.ArrayList<>();
+    private final java.util.Set<String> downloadSelected=new java.util.LinkedHashSet<>(),downloadKeep=new java.util.HashSet<>();
+    private android.os.CancellationSignal downloadsSignal;
+    private android.app.Dialog downloadSheet;
     private SmartMediaScan runningScan;
     private static final int REQUEST_DUP_TRASH=97, REQUEST_SIMILAR_TRASH=98, REQUEST_VIDEO_TRASH=99, REQUEST_SCREENSHOT_TRASH=100;
     private boolean realShotVisible,realShotReview,realShotPreview,shotAfterScan,shotFromResults;
@@ -186,6 +194,7 @@ public final class MainActivity extends Activity {
     @Override protected void onStop(){
         super.onStop();
         stopRealVideo();
+        if(downloadsVisible){if(downloadsPicking||downloadsOpening||downloadsBusy)return;showClean();}
         // Do not retain visible media results across backgrounding; selected-photo access may change.
         if(dupTrashPending)return;
         if(runningScan!=null){runningScan.cancel();runningScan=null;scanVisible=false;scanReviewVisible=false;scanResult=null;showClean();}
@@ -196,6 +205,7 @@ public final class MainActivity extends Activity {
             cleanupAnimation.removeAllListeners();cleanupAnimation.removeAllUpdateListeners();cleanupAnimation.cancel();
         }
         if(runningScan!=null){runningScan.cancel();runningScan=null;}
+        if(downloadsSignal!=null)downloadsSignal.cancel();downloadsGeneration++;if(downloadSheet!=null)downloadSheet.dismiss();
         stopRealVideo();dupThumbs.shutdownNow();dupCache.evictAll();
         if(preferencePopup!=null)preferencePopup.dismiss();
         if(ratingDialog!=null)ratingDialog.dismiss();
@@ -311,6 +321,7 @@ public final class MainActivity extends Activity {
         if(cleanVisible)showClean();else showHome();
     }
     private void showClean(){
+        downloadsVisible=false;downloadsReview=false;downloadsGeneration++;if(downloadsSignal!=null){downloadsSignal.cancel();downloadsSignal=null;}if(!downloadsBusy){downloadItems.clear();downloadSelected.clear();downloadKeep.clear();}
         realShotVisible=false;realShotReview=false;realShotPreview=false;shotAfterScan=false;shotSelected.clear();shotKeep.clear();
         stopRealVideo();realVideoVisible=false;realVideoReview=false;realVideoPreview=false;videoAfterScan=false;realVideoSelected.clear();realVideoKeep.clear();
         realSimilarVisible=false;realSimilarReview=false;similarAfterScan=false;realSimilarSelected.clear();realSimilarKeep.clear();
@@ -370,7 +381,7 @@ public final class MainActivity extends Activity {
             LinearLayout line=row();line.setMinimumHeight(dp(63));line.setPadding(0,dp(9),0,dp(9));
             FrameLayout icon=new FrameLayout(this);icon.setBackground(round(PALE,11));icon.addView(new Glyph(this,item[0],BLUE),new FrameLayout.LayoutParams(dp(22),dp(22),Gravity.CENTER));
             add(line,icon,dp(38),dp(38));gap(line,12);LinearLayout labels=column();add(labels,txt(item[1],15,INK,600),-1,-2);space(labels,4);add(labels,txt(item[2],12,GRAY,400),-1,-2);
-            weight(line,labels);gap(line,8);add(line,new Glyph(this,"chevron",GRAY),dp(14),dp(14));tap(line,WHITE,10,()->cleanPending(item[1]));add(files,line,-1,-2);
+            weight(line,labels);gap(line,8);add(line,new Glyph(this,"chevron",GRAY),dp(14),dp(14));tap(line,WHITE,10,()->{if(item[1].equals("Downloads"))openDownloads();else cleanPending(item[1]);});add(files,line,-1,-2);
         }
         add(body,files,-1,-2);space(body,17);
         LinearLayout footer=row();footer.setGravity(Gravity.CENTER);
@@ -972,6 +983,126 @@ public final class MainActivity extends Activity {
         }catch(Exception e){runOnUiThread(()->{if(runningScan!=job||isDestroyed())return;runningScan=null;showRealScreenshots();folderToast("Safety recheck failed");});}},"Clenova-screenshot-recheck").start();
     }
 
+    private DownloadFiles downloadEngine(){return new DownloadFiles(this,prefs,protectedFiles,protectedFolders);}
+    private void openDownloads(){
+        if(cleanScroll!=null){cleanScrollY=cleanScroll.getScrollY();cleanScroll=null;}
+        downloadsVisible=true;downloadsReview=false;downloadsFilter=-1;downloadsSort=0;downloadsPage=0;downloadsQuery="";downloadSelected.clear();downloadKeep.clear();downloadItems.clear();scanResult=null;showDownloads();
+    }
+    private void pickDownloads(){
+        if(downloadsBusy||downloadsPicking)return;
+        android.content.Intent intent=new android.content.Intent(android.content.Intent.ACTION_OPEN_DOCUMENT);
+        intent.addCategory(android.content.Intent.CATEGORY_OPENABLE);intent.setType("*/*");
+        intent.putExtra(android.content.Intent.EXTRA_ALLOW_MULTIPLE,true);
+        intent.addFlags(android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION|android.content.Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+        if(android.os.Build.VERSION.SDK_INT>=26)intent.putExtra(android.provider.DocumentsContract.EXTRA_INITIAL_URI,android.net.Uri.parse("content://com.android.externalstorage.documents/document/primary%3ADownload"));
+        try{downloadsPicking=true;startActivityForResult(intent,PICK_DOWNLOAD_FILES);}catch(RuntimeException e){downloadsPicking=false;folderToast("File picker unavailable");}
+    }
+    private void loadPickedDownloads(android.content.Intent data){
+        java.util.LinkedHashSet<android.net.Uri> uris=new java.util.LinkedHashSet<>();
+        for(DownloadFiles.Item item:downloadItems)uris.add(item.uri);
+        if(data.getData()!=null)uris.add(data.getData());
+        android.content.ClipData clip=data.getClipData();if(clip!=null)for(int i=0;i<clip.getItemCount()&&uris.size()<DownloadFiles.LIMIT;i++){android.net.Uri uri=clip.getItemAt(i).getUri();if(uri!=null)uris.add(uri);}
+        readDownloads(uris);
+    }
+    private void refreshDownloads(){
+        java.util.List<android.net.Uri> uris=new java.util.ArrayList<>();for(DownloadFiles.Item i:downloadItems)uris.add(i.uri);readDownloads(uris);
+    }
+    private void readDownloads(java.util.Collection<android.net.Uri> uris){
+        if(downloadsSignal!=null)downloadsSignal.cancel();final android.os.CancellationSignal signal=new android.os.CancellationSignal();downloadsSignal=signal;
+        final int generation=++downloadsGeneration;downloadsVisible=true;downloadsReview=false;downloadSelected.clear();downloadsPage=0;
+        LinearLayout root=scanShell("Downloads",this::showClean),body=scanBody(root);add(body,centered("Reading selected files",20,INK,600),-1,-2);space(body,12);add(body,new android.widget.ProgressBar(this),dp(40),dp(40));setContentView(root);
+        new Thread(()->{try{
+            java.util.List<DownloadFiles.Item> result=downloadEngine().readAll(uris,signal);
+            runOnUiThread(()->{if(generation!=downloadsGeneration||isDestroyed())return;downloadsSignal=null;downloadItems.clear();downloadItems.addAll(result);showDownloads();if(result.size()<uris.size())folderToast("Some files were unavailable or outside supported Downloads locations");});
+        }catch(Exception e){runOnUiThread(()->{if(generation!=downloadsGeneration||isDestroyed())return;downloadsSignal=null;showDownloads();folderToast("Could not read selected files");});}},"Clenova-downloads-read").start();
+    }
+    private long downloadBytes(int category){long bytes=0;for(DownloadFiles.Item i:downloadItems)if((category<0||i.type==category)&&i.bytes>0)bytes+=i.bytes;return bytes;}
+    private String downloadSize(DownloadFiles.Item i){return i.bytes>=0?scanBytes(i.bytes):tr("Unknown");}
+    private String downloadType(DownloadFiles.Item i){int dot=i.name.lastIndexOf('.');return dot>=0&&dot+1<i.name.length()?i.name.substring(dot+1).toUpperCase(java.util.Locale.ROOT):i.mime;}
+    private String downloadDate(DownloadFiles.Item i){return i.modified>0?java.text.DateFormat.getDateInstance(java.text.DateFormat.MEDIUM,java.util.Locale.forLanguageTag(prefs.language())).format(new java.util.Date(i.modified)):tr("Unknown date");}
+    private int downloadColor(int type){return type==0?GREEN:type==1?0xffff9500:type==2?BLUE:GRAY;}
+    private String downloadGlyph(int type){return type==0?"apps":type==1?"folder":"document";}
+    private boolean downloadEligible(DownloadFiles.Item i){return i.canDelete&&!downloadKeep.contains(i.uri.toString());}
+    private void downloadFooter(TextView count,TextView amount,TextView action){
+        long bytes=0;for(DownloadFiles.Item i:downloadItems)if(downloadSelected.contains(i.uri.toString())&&i.bytes>0)bytes+=i.bytes;
+        count.setText(downloadSelected.size()+" "+tr("selected"));amount.setText(scanBytes(bytes));action.setEnabled(!downloadSelected.isEmpty());action.setAlpha(downloadSelected.isEmpty()?.45f:1f);
+    }
+    private void showDownloads(){
+        downloadsVisible=true;downloadsReview=false;
+        LinearLayout root=scanShell("Downloads",this::showClean),body=scanBody(root);
+        LinearLayout hero=card(),summary=row(),labels=column();add(labels,txt("Accessible downloads storage",13,GRAY,400),-1,-2);space(labels,6);
+        add(labels,txt(downloadItems.isEmpty()?"—":scanBytes(downloadBytes(-1)),32,INK,700),-1,-2);space(labels,5);add(labels,txt(downloadItems.size()+" "+tr("files available for review"),12,GRAY,400),-1,-2);weight(summary,labels);
+        FrameLayout mark=new FrameLayout(this);mark.setBackground(round(PALE,32));mark.addView(new Glyph(this,"folder_down",BLUE),new FrameLayout.LayoutParams(dp(36),dp(36),Gravity.CENTER));add(summary,mark,dp(76),dp(76));add(hero,summary,-1,-2);space(hero,12);
+        scanButton(hero,downloadItems.isEmpty()?"Choose downloaded files":"Add downloaded files",true,this::pickDownloads);add(body,hero,-1,-2);space(body,10);
+        add(body,txt("Only files you choose in Android Files are listed. Some files may be read-only.",12,GRAY,400),-1,-2);space(body,13);
+        LinearLayout cats=row();String[] categories={"APK","Archives","Docs"};for(int i=0;i<3;i++){final int category=i;if(i>0)gap(cats,7);LinearLayout tile=column();pad(tile,10,12);add(tile,new Glyph(this,downloadGlyph(i),downloadColor(i)),dp(24),dp(24));space(tile,8);add(tile,txt(categories[i],13,INK,600),-1,-2);space(tile,4);add(tile,txt(scanBytes(downloadBytes(i)),11,GRAY,400),-1,-2);tap(tile,downloadsFilter==i?PALE:WHITE,15,()->{downloadsFilter=downloadsFilter==category?-1:category;downloadsPage=0;downloadSelected.clear();showDownloads();});cats.addView(tile,new LinearLayout.LayoutParams(0,-2,1f));}add(body,cats,-1,-2);space(body,13);
+        LinearLayout search=row();search.setBackground(round(surface(0xffe8e8ed),12));pad(search,10,3);add(search,new Glyph(this,"search",GRAY),dp(20),dp(20));gap(search,8);
+        android.widget.EditText input=new android.widget.EditText(this);input.setSingleLine(true);input.setTextSize(14);input.setTextColor(INK);input.setHintTextColor(GRAY);input.setHint(tr("Search downloads"));input.setBackgroundColor(Color.TRANSPARENT);input.setText(downloadsQuery);input.setPadding(0,0,0,0);search.addView(input,new LinearLayout.LayoutParams(0,dp(42),1f));add(body,search,-1,-2);space(body,12);
+        LinearLayout listHost=column();add(body,listHost,-1,-2);
+        TextView count=txt("",12,GRAY,400),amount=txt("",22,INK,700),review=centered("Review & clean",14,Color.WHITE,600);
+        LinearLayout footer=row();footer.setBackground(round(WHITE,18));pad(footer,13,10);LinearLayout selected=column();add(selected,count,-1,-2);space(selected,4);add(selected,amount,-1,-2);weight(footer,selected);gap(footer,8);tap(review,BLUE,24,this::showDownloadReview);review.setPadding(dp(13),0,dp(13),0);add(footer,review,-2,dp(46));add(root,footer,-1,-2);space(root,7);add(root,centered("Nothing removed without your approval.",12,GRAY,400),-1,-2);
+        Runnable render=()->renderDownloadList(listHost,count,amount,review);
+        input.addTextChangedListener(new android.text.TextWatcher(){public void beforeTextChanged(CharSequence q,int start,int n,int after){}public void onTextChanged(CharSequence q,int start,int before,int n){downloadsQuery=q.toString();downloadsPage=0;downloadSelected.clear();render.run();}public void afterTextChanged(android.text.Editable e){}});
+        render.run();root.setFocusableInTouchMode(true);root.requestFocus();setContentView(root);
+    }
+    private void renderDownloadList(LinearLayout host,TextView count,TextView amount,TextView action){
+        host.removeAllViews();java.util.List<DownloadFiles.Item> visible=new java.util.ArrayList<>();String query=downloadsQuery.trim().toLowerCase(java.util.Locale.ROOT);
+        for(DownloadFiles.Item i:downloadItems)if((downloadsFilter<0||i.type==downloadsFilter)&&(i.name+" "+i.mime).toLowerCase(java.util.Locale.ROOT).contains(query))visible.add(i);
+        java.util.Comparator<DownloadFiles.Item> cmp=downloadsSort==1?java.util.Comparator.comparingLong((DownloadFiles.Item i)->i.bytes).reversed():downloadsSort==2?java.util.Comparator.comparing((DownloadFiles.Item i)->i.name,String.CASE_INSENSITIVE_ORDER):java.util.Comparator.comparingLong((DownloadFiles.Item i)->i.modified).reversed();visible.sort(cmp.thenComparing(i->i.id));
+        LinearLayout heading=row(),label=column();add(label,txt(downloadsFilter<0?"All files":new String[]{"APK","Archives","Docs"}[downloadsFilter],17,INK,600),-1,-2);space(label,4);add(label,txt(visible.size()+" "+tr("files"),12,GRAY,400),-1,-2);weight(heading,label);
+        int eligible=0;for(DownloadFiles.Item i:visible)if(downloadEligible(i))eligible++;
+        TextView select=txt(downloadSelected.isEmpty()?(eligible>DownloadFiles.DELETE_LIMIT?"Select 50":"Select all"):"Deselect all",12,BLUE,600);tap(select,BG,8,()->{if(!downloadSelected.isEmpty())downloadSelected.clear();else for(DownloadFiles.Item i:visible){if(downloadSelected.size()>=DownloadFiles.DELETE_LIMIT)break;if(downloadEligible(i))downloadSelected.add(i.uri.toString());}renderDownloadList(host,count,amount,action);});select.setEnabled(eligible>0||!downloadSelected.isEmpty());add(heading,select,-2,dp(44));gap(heading,8);
+        FrameLayout sort=new FrameLayout(this);sort.addView(new Glyph(this,"more",BLUE),new FrameLayout.LayoutParams(dp(20),dp(20),Gravity.CENTER));sort.setContentDescription(tr("Sort files"));tap(sort,WHITE,18,()->privacyDialog().setTitle(tr("Sort files")).setSingleChoiceItems(new String[]{tr("Newest first"),tr("Largest first"),tr("Name")},downloadsSort,(d,i)->{downloadsSort=i;downloadsPage=0;d.dismiss();renderDownloadList(host,count,amount,action);}).setNegativeButton(tr("Cancel"),null).show());add(heading,sort,dp(38),dp(38));add(host,heading,-1,-2);space(host,7);
+        LinearLayout list=card();pad(list,12,5);int pages=Math.max(1,(visible.size()+19)/20);downloadsPage=Math.max(0,Math.min(downloadsPage,pages-1));
+        if(visible.isEmpty()){pad(list,14,20);add(list,centered(downloadItems.isEmpty()?"Choose files to get started":"No matching files",15,INK,600),-1,-2);space(list,6);add(list,centered(downloadItems.isEmpty()?"Choose files from Downloads in the system picker.":"Try a different search or category.",12,GRAY,400),-1,-2);}
+        for(int n=downloadsPage*20;n<Math.min(visible.size(),(downloadsPage+1)*20);n++){
+            DownloadFiles.Item i=visible.get(n);if(n>downloadsPage*20)thinRule(list);LinearLayout line=row();line.setMinimumHeight(dp(66));line.setPadding(0,dp(8),0,dp(8));
+            FrameLayout icon=new FrameLayout(this);icon.setBackground(round(BG,10));icon.addView(new Glyph(this,downloadGlyph(i.type),downloadColor(i.type)),new FrameLayout.LayoutParams(dp(22),dp(22),Gravity.CENTER));add(line,icon,dp(40),dp(40));gap(line,9);
+            LinearLayout details=column();TextView name=txt(i.name,13,INK,600);name.setMaxLines(1);name.setEllipsize(android.text.TextUtils.TruncateAt.END);add(details,name,-1,-2);space(details,4);add(details,txt(downloadType(i)+" · "+downloadDate(i),11,GRAY,400),-1,-2);
+            if(!downloadEligible(i)){space(details,3);add(details,txt(i.protectedItem||downloadKeep.contains(i.uri.toString())?"Keep":"Read-only",10,GREEN,500),-1,-2);}
+            tap(details,WHITE,8,()->showDownloadSheet(i));weight(line,details);gap(line,5);add(line,txt(downloadSize(i),11,INK,600),-2,-2);
+            android.widget.CheckBox check=new android.widget.CheckBox(this);check.setButtonTintList(ColorStateList.valueOf(BLUE));check.setChecked(downloadSelected.contains(i.uri.toString()));check.setEnabled(downloadEligible(i));check.setContentDescription(i.name);check.setOnCheckedChangeListener((v,checked)->{String id=i.uri.toString();if(checked&&downloadSelected.size()>=DownloadFiles.DELETE_LIMIT&&!downloadSelected.contains(id)){v.setChecked(false);folderToast("Select up to 50 files at a time");return;}if(checked)downloadSelected.add(id);else downloadSelected.remove(id);downloadFooter(count,amount,action);});add(line,check,dp(42),dp(42));add(list,line,-1,-2);
+        }add(host,list,-1,-2);
+        if(pages>1){space(host,8);LinearLayout pager=row();TextView prev=centered("Previous",13,BLUE,600),next=centered("Next",13,BLUE,600);tap(prev,WHITE,12,()->{downloadsPage--;renderDownloadList(host,count,amount,action);});prev.setEnabled(downloadsPage>0);prev.setAlpha(downloadsPage>0?1:.4f);tap(next,WHITE,12,()->{downloadsPage++;renderDownloadList(host,count,amount,action);});next.setEnabled(downloadsPage+1<pages);next.setAlpha(downloadsPage+1<pages?1:.4f);weight(pager,prev);weight(pager,centered((downloadsPage+1)+" / "+pages,13,GRAY,400));weight(pager,next);add(host,pager,-1,dp(48));}
+        downloadFooter(count,amount,action);
+    }
+    private void showDownloadSheet(DownloadFiles.Item item){
+        if(downloadSheet!=null)downloadSheet.dismiss();android.app.Dialog dialog=new android.app.Dialog(this);downloadSheet=dialog;dialog.requestWindowFeature(android.view.Window.FEATURE_NO_TITLE);
+        LinearLayout sheet=column();GradientDrawable bg=new GradientDrawable();bg.setColor(WHITE);float r=dp(26);bg.setCornerRadii(new float[]{r,r,r,r,0,0,0,0});sheet.setBackground(bg);pad(sheet,20,12);
+        FrameLayout handle=new FrameLayout(this);View bar=new View(this);bar.setBackground(round(0xffc7c7cc,4));handle.addView(bar,new FrameLayout.LayoutParams(dp(36),dp(4),Gravity.CENTER));add(sheet,handle,-1,dp(22));space(sheet,7);
+        LinearLayout title=row();FrameLayout mark=new FrameLayout(this);mark.setBackground(round(PALE,15));mark.addView(new Glyph(this,downloadGlyph(item.type),downloadColor(item.type)),new FrameLayout.LayoutParams(dp(28),dp(28),Gravity.CENTER));add(title,mark,dp(58),dp(58));gap(title,12);LinearLayout labels=column();TextView name=txt(item.name,17,INK,700);name.setMaxLines(3);add(labels,name,-1,-2);space(labels,5);add(labels,txt(downloadSize(item)+" · "+downloadType(item),13,GRAY,400),-1,-2);weight(title,labels);add(sheet,title,-1,-2);space(sheet,14);thinRule(sheet);
+        for(String[] data:new String[][]{{"Location",item.verifiedLocation?tr("Downloads"):tr("Downloads provider · location unverified")},{"Modified",downloadDate(item)},{"Access",item.canDelete?tr("Read and remove"):tr("Read-only")}}){LinearLayout line=row();line.setMinimumHeight(dp(42));weight(line,txt(data[0],13,GRAY,400));TextView value=txt(data[1],12,INK,500);value.setMaxLines(2);line.addView(value,new LinearLayout.LayoutParams(0,-2,1f));add(sheet,line,-1,-2);}thinRule(sheet);space(sheet,10);
+        // Never launch APK installers from a cleanup manager.
+        if(item.type!=DownloadFiles.APK)scanButton(sheet,"Open file",false,()->{dialog.dismiss();openDownloadFile(item);});
+        String id=item.uri.toString();scanButton(sheet,downloadKeep.contains(id)?"Remove keep mark":"Keep this file",false,()->{if(!downloadKeep.remove(id)){downloadKeep.add(id);downloadSelected.remove(id);}dialog.dismiss();showDownloads();});space(sheet,6);
+        if(downloadEligible(item))scanButton(sheet,downloadSelected.contains(id)?"Deselect file":"Select for cleanup",true,()->{if(!downloadSelected.remove(id)){if(downloadSelected.size()>=DownloadFiles.DELETE_LIMIT){folderToast("Select up to 50 files at a time");return;}downloadSelected.add(id);}dialog.dismiss();showDownloads();});
+        else add(sheet,txt("Protected or read-only files cannot be removed here.",12,GRAY,400),-1,-2);
+        space(sheet,7);scanButton(sheet,"Done",false,dialog::dismiss);dialog.setContentView(sheet);dialog.setOnDismissListener(d->{if(downloadSheet==dialog)downloadSheet=null;});
+        android.view.Window window=dialog.getWindow();if(window!=null){window.setBackgroundDrawableResource(android.R.color.transparent);window.setGravity(Gravity.BOTTOM);window.addFlags(android.view.WindowManager.LayoutParams.FLAG_DIM_BEHIND);}
+        dialog.show();if(window!=null)window.setLayout(-1,-2);
+    }
+    private void openDownloadFile(DownloadFiles.Item item){
+        if(item.type==DownloadFiles.APK)return;
+        android.content.Intent intent=new android.content.Intent(android.content.Intent.ACTION_VIEW);intent.setDataAndType(item.uri,item.mime);intent.addFlags(android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION);
+        try{downloadsOpening=true;startActivity(intent);}catch(RuntimeException e){downloadsOpening=false;folderToast("No app available to open this file");}
+    }
+    private void showDownloadReview(){
+        if(downloadSelected.isEmpty()){showDownloads();return;}downloadsReview=true;
+        LinearLayout root=scanShell("Review cleanup",this::showDownloads),body=scanBody(root);add(body,txt(downloadSelected.size()+" "+tr("files selected"),22,INK,700),-1,-2);space(body,8);
+        add(body,txt("These documents do not support Android media Trash. Removing them may be permanent. Review every file and keep a backup.",14,GRAY,400),-1,-2);space(body,12);
+        LinearLayout list=card();int n=0;long size=0;for(DownloadFiles.Item item:downloadItems)if(downloadSelected.contains(item.uri.toString())&&downloadEligible(item)){if(n++>0)thinRule(list);LinearLayout line=row();line.setMinimumHeight(dp(52));TextView name=txt(item.name,13,INK,500);name.setMaxLines(2);weight(line,name);gap(line,7);add(line,txt(downloadSize(item),12,GRAY,500),-2,-2);add(list,line,-1,-2);size+=Math.max(0,item.bytes);}add(body,list,-1,-2);space(body,10);add(body,txt(scanBytes(size)+" · "+tr("Selected size"),15,INK,600),-1,-2);
+        TextView remove=centered("Permanently remove files",15,Color.WHITE,600);tap(remove,0xffd92d20,25,()->privacyDialog().setTitle(tr("Permanently remove files?")).setMessage(tr("The selected files may not be recoverable. This does not uninstall any apps. Continue only after reviewing and backing up important files.")).setNegativeButton(tr("Cancel"),null).setPositiveButton(tr("Remove permanently"),(d,w)->removeDownloads()).show());add(root,remove,-1,dp(52));setContentView(root);
+    }
+    private void removeDownloads(){
+        if(downloadsBusy||downloadSelected.isEmpty())return;
+        java.util.List<DownloadFiles.Item> selected=new java.util.ArrayList<>();for(DownloadFiles.Item i:downloadItems)if(downloadSelected.contains(i.uri.toString())&&downloadEligible(i))selected.add(i);
+        if(selected.size()!=downloadSelected.size()||selected.size()>DownloadFiles.DELETE_LIMIT){downloadSelected.clear();refreshDownloads();return;}
+        downloadsBusy=true;LinearLayout root=scanShell("Removing files",()->{}),body=scanBody(root);add(body,centered("Checking and removing approved files",18,INK,600),-1,-2);space(body,12);add(body,new android.widget.ProgressBar(this),dp(40),dp(40));setContentView(root);
+        new Thread(()->{int[] result;try{result=downloadEngine().remove(selected);}catch(Exception e){result=new int[]{0,selected.size()};}final int removed=result[0],failed=result[1];
+            runOnUiThread(()->{if(isDestroyed())return;downloadsBusy=false;downloadSelected.clear();refreshDownloads();folderToast(removed+" "+tr("files removed")+" · "+failed+" "+tr("not removed"));});
+        },"Clenova-downloads-remove").start();
+    }
+
     private void cleanPending(String label){
         // Main dashboard is implemented first. Never route manual actions to simulated Home cleanup.
         privacyDialog().setTitle(tr(label)).setMessage(tr("This cleaning tool is not available in this preview yet. No files have been scanned or changed.")).setPositiveButton(tr("Done"),null).show();
@@ -1163,6 +1294,7 @@ public final class MainActivity extends Activity {
     }
     @Override protected void onResume(){
         super.onResume();
+        if(downloadsOpening){downloadsOpening=false;if(downloadsVisible)refreshDownloads();}
         if(permissionsVisible&&devicePermissions!=null)openAppPermissions();
     }
     @Override public void onRequestPermissionsResult(int requestCode,String[] permissions,int[] grantResults){
@@ -2290,6 +2422,7 @@ public final class MainActivity extends Activity {
     }
     @Override protected void onActivityResult(int requestCode,int resultCode,android.content.Intent data){
         super.onActivityResult(requestCode,resultCode,data);
+        if(requestCode==PICK_DOWNLOAD_FILES){downloadsPicking=false;if(resultCode==RESULT_OK&&data!=null)loadPickedDownloads(data);else if(downloadsVisible)showDownloads();return;}
         if(requestCode==REQUEST_DUP_TRASH||requestCode==REQUEST_SIMILAR_TRASH||requestCode==REQUEST_VIDEO_TRASH||requestCode==REQUEST_SCREENSHOT_TRASH){dupTrashPending=false;scanResult=null;realDupSelected.clear();dupCache.evictAll();showClean();folderToast(resultCode==RESULT_OK?"Android trash request approved. Scan again to refresh.":"Trash request cancelled");return;}
         if(requestCode==EXPORT_ACTIVITY_HISTORY){if(resultCode==RESULT_OK&&data!=null&&data.getData()!=null)writeHistoryExport(data.getData());return;}
         if(requestCode==PICK_PROTECTED_FILES){if(resultCode==RESULT_OK&&data!=null)handleProtectedFiles(data);return;}
@@ -2566,7 +2699,9 @@ public final class MainActivity extends Activity {
         setContentView(reviewScreen());
     }
     @Override public void onBackPressed() {
-        if(cleaning)return;
+        if(cleaning||downloadsBusy)return;
+        if(downloadsReview){showDownloads();return;}
+        if(downloadsVisible){showClean();return;}
         if(realShotPreview){showRealScreenshots();return;}
         if(realShotReview){if(runningScan!=null){runningScan.cancel();runningScan=null;}showRealScreenshots();return;}
         if(realShotVisible){leaveRealScreenshots();return;}

@@ -5,6 +5,22 @@ import java.util.Map;
 final class AppStrings {
  private static final Map<String,String[]> TEXT=new HashMap<>();
  static {
+  TEXT.put("Accessible downloads storage",new String[]{"उपलब्ध डाउनलोड स्टोरेज","Almacenamiento de descargas accesibles","Stockage des téléchargements accessibles","Zugänglicher Download-Speicher"});
+  TEXT.put("files available for review",new String[]{"फ़ाइलें समीक्षा के लिए","archivos para revisar","fichiers à examiner","Dateien zur Prüfung"});
+  TEXT.put("Choose downloaded files",new String[]{"डाउनलोड फ़ाइलें चुनें","Elegir descargas","Choisir des téléchargements","Downloads auswählen"});
+  TEXT.put("Add downloaded files",new String[]{"डाउनलोड फ़ाइलें जोड़ें","Añadir descargas","Ajouter des téléchargements","Downloads hinzufügen"});
+  TEXT.put("Only files you choose in Android Files are listed. Some files may be read-only.",new String[]{"सिर्फ Android Files में चुनी फ़ाइलें दिखती हैं। कुछ केवल पढ़ने के लिए हैं।","Solo se muestran los archivos que elijas en Android. Algunos son de solo lectura.","Seuls les fichiers choisis dans Android sont listés. Certains sont en lecture seule.","Nur in Android ausgewählte Dateien werden angezeigt. Einige sind schreibgeschützt."});
+  TEXT.put("Search downloads",new String[]{"डाउनलोड खोजें","Buscar descargas","Rechercher des téléchargements","Downloads suchen"});
+  TEXT.put("Reading selected files",new String[]{"चुनी फ़ाइलें पढ़ रहे हैं","Leyendo archivos","Lecture des fichiers","Ausgewählte Dateien lesen"});
+  TEXT.put("Archives",new String[]{"आर्काइव","Archivos comprimidos","Archives","Archive"});
+  TEXT.put("Docs",new String[]{"दस्तावेज़","Documentos","Documents","Dokumente"});
+  TEXT.put("All files",new String[]{"सभी फ़ाइलें","Todos los archivos","Tous les fichiers","Alle Dateien"});
+  TEXT.put("Sort files",new String[]{"फ़ाइल क्रम","Ordenar archivos","Trier les fichiers","Dateien sortieren"});
+  TEXT.put("Keep this file",new String[]{"यह फ़ाइल रखें","Conservar archivo","Conserver ce fichier","Datei behalten"});
+  TEXT.put("Read-only",new String[]{"केवल पढ़ने के लिए","Solo lectura","Lecture seule","Schreibgeschützt"});
+  TEXT.put("Permanently remove files",new String[]{"फ़ाइलें स्थायी रूप से हटाएँ","Eliminar archivos permanentemente","Supprimer définitivement","Dateien endgültig entfernen"});
+  TEXT.put("Permanently remove files?",new String[]{"फ़ाइलें स्थायी रूप से हटाएँ?","¿Eliminar archivos permanentemente?","Supprimer définitivement ?","Dateien endgültig entfernen?"});
+  TEXT.put("Remove permanently",new String[]{"स्थायी रूप से हटाएँ","Eliminar definitivamente","Supprimer définitivement","Endgültig entfernen"});
   TEXT.put("Screenshot storage",new String[]{"स्क्रीनशॉट स्टोरेज","Almacenamiento de capturas","Stockage des captures","Screenshot-Speicher"});
   TEXT.put("screenshots available for review",new String[]{"स्क्रीनशॉट समीक्षा के लिए","capturas para revisar","captures à examiner","Screenshots zur Prüfung"});
   TEXT.put("Protected items excluded",new String[]{"सुरक्षित आइटम अलग","Elementos protegidos excluidos","Éléments protégés exclus","Geschützte Elemente ausgeschlossen"});
