@@ -55,3 +55,6 @@ Real Android ACTION_OPEN_DOCUMENT_TREE picker, empty initial state, locally pers
 
 ## Protected files
 Native ACTION_OPEN_DOCUMENT multi-selection, real provider metadata (name, MIME, size when available), local persisted canonical document URI exclusions, duplicate prevention and confirmed exclusion removal. No persistent read or write grant and no file contents read or deleted. Alternate URI aliases, moved files, or provider identity changes need resolution in the future scanner. Actual cleanup enforcement remains pending; saved exclusions are not a filesystem lock. No sample files are inserted.
+
+## Activity history
+Settings > Activity history shows a local, initially empty event journal grouped by device-local date, with anchored All activity/Scans/Cleanups/Protection filter. Records successful protection changes and actual interactions with sample recommendations/approved cleanup previews, using real timestamps. Preview completion totals are explicitly simulated, never actual recovered storage. Approval and completion use stable operation IDs to prevent duplicate completion on recreation. No past history is fabricated or backfilled. Activity Details is deferred; rows are read-only in this phase. No real scan events until the scanner exists.
