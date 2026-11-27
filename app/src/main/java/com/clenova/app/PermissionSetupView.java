@@ -77,14 +77,29 @@ final class PermissionSetupView extends ScrollView {
         primary=action;secondary=alternate;feedback.setText(message);feedback.setVisibility(message.isEmpty()?GONE:VISIBLE);
         if(step==index){updateButtons();return;}
         int old=index;index=step;
-        if(front!=null)front.animate().cancel();
+        final LinearLayout outgoing=front;
+        if(outgoing!=null)outgoing.animate().cancel();
         deck.removeAllViews();
-        if(old>=0&&old<step&&!previous.isEmpty()){
-            LinearLayout past=historyCard(old,previous);deck.addView(past,new FrameLayout.LayoutParams(-1,-1));
+        boolean forward=old>=0&&old<step&&!previous.isEmpty();
+        final LinearLayout past=forward?historyCard(old,previous):null;
+        if(past!=null){
+            deck.addView(past,new FrameLayout.LayoutParams(-1,-1));
             past.setScaleX(.82f);past.setScaleY(.82f);past.setTranslationY(-dp(45));past.setAlpha(.82f);
         }
+        final boolean motion=!reduce()&&old>=0;
+        if(forward&&motion&&outgoing!=null){
+            // Animate the actual former front card behind the new card, then keep its verified status.
+            past.setAlpha(0f);
+            deck.addView(outgoing,new FrameLayout.LayoutParams(-1,-1));
+            outgoing.setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_NO_HIDE_DESCENDANTS);
+            outgoing.setTranslationY(0);outgoing.setScaleX(1);outgoing.setScaleY(1);outgoing.setAlpha(1);
+            outgoing.animate().translationY(-dp(45)).scaleX(.82f).scaleY(.82f).alpha(0f)
+                .setDuration(520).setInterpolator(new DecelerateInterpolator(1.8f))
+                .withEndAction(()->{if(outgoing.getParent()==deck)deck.removeView(outgoing);if(past.getParent()==deck)past.setAlpha(.82f);}).start();
+            past.animate().alpha(.82f).setStartDelay(220).setDuration(300).start();
+        }
         front=card(step);deck.addView(front,new FrameLayout.LayoutParams(-1,-1));
-        if(!reduce()&&old>=0){
+        if(motion){
             transitioning=true;front.setTranslationY(dp(150));front.setScaleX(.92f);front.setScaleY(.92f);front.setAlpha(0f);
             final LinearLayout incoming=front;
             front.animate().translationY(0).scaleX(1).scaleY(1).alpha(1).setDuration(600).setInterpolator(new DecelerateInterpolator(1.8f)).withEndAction(()->{if(front==incoming){transitioning=false;updateButtons();}}).start();
@@ -93,7 +108,7 @@ final class PermissionSetupView extends ScrollView {
     }
     void setBusy(boolean busy){locked=busy;updateButtons();}
     private void updateButtons(){allow.setText(primary);allow.setEnabled(!locked&&!transitioning);skip.setText(secondary);skip.setVisibility(secondary.isEmpty()?INVISIBLE:VISIBLE);skip.setEnabled(!locked&&!transitioning&&!secondary.isEmpty());}
-    @Override protected void onDetachedFromWindow(){if(front!=null)front.animate().cancel();transitioning=false;super.onDetachedFromWindow();}
+    @Override protected void onDetachedFromWindow(){for(int i=0;i<deck.getChildCount();i++)deck.getChildAt(i).animate().cancel();transitioning=false;super.onDetachedFromWindow();}
     private static final class Mark extends View{
         private final int kind;private final Paint p=new Paint(Paint.ANTI_ALIAS_FLAG);private final Path path=new Path();
         Mark(Context c,int k){super(c);kind=k;setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_NO);}
