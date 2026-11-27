@@ -22,7 +22,7 @@ final class DuplicateApproval {
                     if(id.equals(key))candidate=check;
                     if(!selected.contains(id)&&check.protectedItem)kept=true;
                 }
-                if(!kept||candidate==null||candidate.protectedItem||candidate.bytes!=item.bytes||!seen.add(key))return Collections.emptyList();
+                if(!kept||candidate==null||candidate.protectedItem||candidate.bytes!=item.bytes||item.generation<=0||item.generation!=candidate.generation||item.modified!=candidate.modified||!seen.add(key))return Collections.emptyList();
                 result.add(candidate.uri);
             }
         }

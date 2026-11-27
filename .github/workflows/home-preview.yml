@@ -1,4 +1,4 @@
-name: Home preview build
+name: Android build and Clean QA
 on:
   push:
     branches: [main]
@@ -14,10 +14,7 @@ jobs:
         with:
           distribution: temurin
           java-version: '17'
-      - uses: android-actions/setup-android@v3
-      - run: sdkmanager "platforms;android-35" "build-tools;35.0.0"
-      - uses: gradle/actions/setup-gradle@v4
-      - name: Verify sample selection logic
+      - name: JVM regression tests
         run: |
           javac -d /tmp/clenova-tests app/src/main/java/com/clenova/app/ReviewPlan.java app/src/main/java/com/clenova/app/CleanupPreview.java app/src/main/java/com/clenova/app/StoragePreview.java tests/ReviewPlanTest.java app/src/main/java/com/clenova/app/AppStrings.java tests/AppStringsTest.java app/src/main/java/com/clenova/app/ProtectionPolicy.java tests/ProtectionPolicyTest.java app/src/main/java/com/clenova/app/FolderExclusion.java tests/FolderExclusionTest.java app/src/main/java/com/clenova/app/FaqSearch.java tests/FaqSearchTest.java app/src/main/java/com/clenova/app/FeedbackDraft.java tests/FeedbackDraftTest.java
           java -cp /tmp/clenova-tests com.clenova.app.ReviewPlanTest
@@ -26,25 +23,39 @@ jobs:
           java -cp /tmp/clenova-tests com.clenova.app.FolderExclusionTest
           java -cp /tmp/clenova-tests com.clenova.app.FaqSearchTest
           java -cp /tmp/clenova-tests com.clenova.app.FeedbackDraftTest
-      - run: ./gradlew :app:assembleDebug :app:lintDebug
+      - name: Verify clutter rules
+        run: |
+          javac -d /tmp/clenova-tests app/src/main/java/com/clenova/app/ClutterRules.java tests/ClutterRulesTest.java
+          java -cp /tmp/clenova-tests com.clenova.app.ClutterRulesTest
+      - name: Install required SDK packages
+        run: |
+          set -e
+          SDKMANAGER="$(command -v sdkmanager || true)"
+          if [ -z "$SDKMANAGER" ]; then SDKMANAGER="$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager"; fi
+          "$SDKMANAGER" --version
+          "$SDKMANAGER" "platforms;android-35" "build-tools;35.0.0"
+      - uses: gradle/actions/setup-gradle@v4
+      - run: bash ./gradlew :app:assembleDebug :app:lintDebug
       - uses: actions/upload-artifact@v4
         with:
-          name: Clenova-Home-debug
+          name: Clenova-debug
           path: app/build/outputs/apk/debug/app-debug.apk
       - name: Enable KVM access
         run: |
           echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
           sudo udevadm control --reload-rules
           sudo udevadm trigger --name-match=kvm
-      - name: Home smoke test and screenshots
+      - name: Home and Clean smoke test and screenshots
         uses: reactivecircus/android-emulator-runner@v2
         with:
           api-level: 34
           arch: x86_64
           disable-animations: true
-          script: bash scripts/home-smoke.sh
+          script: bash scripts/home-smoke.sh && bash scripts/clean-smoke.sh
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: Home-emulator-evidence
-          path: build/home-evidence/
+          name: Emulator-evidence
+          path: |
+            build/home-evidence/
+            build/clean-evidence/

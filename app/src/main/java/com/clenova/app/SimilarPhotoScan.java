@@ -92,7 +92,7 @@ final class SimilarPhotoScan {
                 SmartMediaScan.Item target=null,retained=null;
                 for(SmartMediaScan.Item i:current.items){if(i.uri.equals(item.uri))target=i;if(i.uri.equals(g.best.uri))retained=i;}
                 if(target!=null&&retained!=null&&candidate(current,target)&&!selected.contains(retained.uri.toString())
-                    &&target.bytes==item.bytes&&target.modified==item.modified&&retained.bytes==g.best.bytes&&retained.modified==g.best.modified
+                    &&target.bytes==item.bytes&&target.modified==item.modified&&item.generation>0&&target.generation==item.generation&&retained.bytes==g.best.bytes&&retained.modified==g.best.modified&&g.best.generation>0&&retained.generation==g.best.generation
                     &&sameSignature(g.signatures.get(id),current.signatures.get(id))
                     &&sameSignature(g.signatures.get(g.best.uri.toString()),current.signatures.get(g.best.uri.toString()))){valid=true;break;}
             }

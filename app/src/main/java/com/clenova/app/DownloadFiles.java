@@ -100,6 +100,7 @@ final class DownloadFiles {
             boolean media=mime.startsWith("image/")||mime.startsWith("video/")||mime.startsWith("audio/")||name.toLowerCase(Locale.ROOT).matches(".*\\.(jpg|jpeg|png|webp|heic|heif|gif|bmp|dng|mp4|mkv|mov|avi|webm|3gp|mp3|wav|flac|m4a|ogg|aac)$");
             // Opaque downloads provider IDs and media are review-only. No removal via ambiguous aliases.
             boolean delete=verified&&!protectedItem&&!media&&bytes>=0&&modified>0
+                &&(type!=OTHER||clutterMode&&clutter==ClutterRules.TEMP)
                 &&(!largeMode||(!DocumentsContract.isTreeUri(uri)&&safeRemovalPath(id)&&type!=OTHER))
                 &&(!clutterMode||(!DocumentsContract.isTreeUri(uri)&&externalDownload(id)&&ClutterRules.removalType(clutter)))
                 &&(flags&DocumentsContract.Document.FLAG_SUPPORTS_DELETE)!=0
@@ -121,13 +122,13 @@ final class DownloadFiles {
             &&before.name.equals(after.name)&&before.mime.equals(after.mime)&&before.bytes==after.bytes&&before.modified==after.modified;
     }
     /** Recheck all files before any removal; recheck each one again immediately before provider operation. */
-    int[] remove(List<Item> selected){
+    int[] remove(List<Item> selected,CancellationSignal signal){
         if(selected.isEmpty()||selected.size()>DELETE_LIMIT)return new int[]{0,selected.size()};
-        CancellationSignal signal=new CancellationSignal();
-        for(Item i:selected)if(!unchanged(i,read(i.uri,signal)))return new int[]{0,selected.size()};
+        for(Item i:selected){if(signal.isCanceled())return new int[]{0,selected.size()};try{if(!unchanged(i,read(i.uri,signal)))return new int[]{0,selected.size()};}catch(android.os.OperationCanceledException e){return new int[]{0,selected.size()};}}
         int removed=0,failed=0;
         for(Item i:selected){
-            try{if(unchanged(i,read(i.uri,signal))&&DocumentsContract.deleteDocument(resolver,i.uri))removed++;else failed++;}
+            if(signal.isCanceled()){failed=selected.size()-removed;break;}
+            try{if(unchanged(i,read(i.uri,signal))&&!signal.isCanceled()&&DocumentsContract.deleteDocument(resolver,i.uri))removed++;else failed++;}
             catch(Exception e){failed++;}
         }
         return new int[]{removed,failed};

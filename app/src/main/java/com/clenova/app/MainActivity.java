@@ -207,9 +207,9 @@ public final class MainActivity extends Activity {
         super.onStop();
         stopRealVideo();
         if(unusedVisible){if(unusedExternal||unusedUninstallPending)return;showClean();}
-        if(downloadsVisible){if(downloadsPicking||downloadsOpening||downloadsBusy)return;showClean();}
+        if(downloadsVisible){if(downloadsBusy){if(downloadsSignal!=null)downloadsSignal.cancel();return;}if(downloadsPicking||downloadsOpening)return;showClean();}
         // Do not retain visible media results across backgrounding; selected-photo access may change.
-        if(dupTrashPending)return;
+        if(dupTrashPending||requestingScan)return;
         if(runningScan!=null){runningScan.cancel();runningScan=null;scanVisible=false;scanReviewVisible=false;scanResult=null;showClean();}
         else if(scanResult!=null){scanResult=null;if(cleanVisible&&!settingsVisible)showClean();}
     }
@@ -526,7 +526,7 @@ public final class MainActivity extends Activity {
                 TextView name=txt(item.name,13,INK,500);name.setMaxLines(2);weight(line,name);gap(line,8);add(line,txt(scanBytes(item.bytes),12,GRAY,400),-2,-2);add(group,line,-1,-2);
             }
             int remaining=scanResult.groups.get(i).size()-shown;if(remaining>0){space(group,8);add(group,txt(remaining+" "+tr("more items not shown"),12,GRAY,400),-1,-2);}
-            add(body,group,-1,-2);space(body,15);
+            add(body,group,-1,-2);space(body,8);final int category=i;scanButton(body,"Open "+SmartMediaScan.LABELS[i],false,()->{if(category==0)openRealDuplicates(true);else if(category==1)openRealVideos(true);else if(category==2)openRealScreenshots(true);else openRealSimilar(true);});space(body,15);
         }
         scanButton(root,"Done",true,this::showScanResults);setContentView(root);
     }
@@ -608,7 +608,7 @@ public final class MainActivity extends Activity {
         review.setEnabled(!realDupSelected.isEmpty());review.setAlpha(realDupSelected.isEmpty()?.45f:1f);
     }
     private void loadDupThumb(android.widget.ImageView image,SmartMediaScan.Item item,int size,int generation){
-        String key=item.uri.toString()+":"+size;android.graphics.Bitmap cached=dupCache.get(key);if(cached!=null){image.setImageBitmap(cached);return;}
+        String key=item.uri.toString()+":"+item.modified+":"+item.bytes+":"+item.generation+":"+size;android.graphics.Bitmap cached=dupCache.get(key);if(cached!=null){image.setImageBitmap(cached);return;}
         try{dupThumbs.execute(()->{
             if(generation!=dupThumbGeneration)return;android.graphics.Bitmap bitmap=null;
             try{
@@ -669,7 +669,7 @@ public final class MainActivity extends Activity {
                 SmartMediaScan.Result fresh=job.run((stage,done,total)->{});java.util.List<android.net.Uri> approved=DuplicateApproval.verified(before,fresh,selected);
                 runOnUiThread(()->{
                     if(runningScan!=job||isDestroyed()||isFinishing())return;runningScan=null;
-                    if(approved.isEmpty()){scanResult=fresh;realDupSelected.clear();showRealDuplicates();folderToast("Files or protection changed. Review again.");return;}
+                    if(approved.isEmpty()){java.util.Arrays.fill(scanSelected,false);dupCache.evictAll();scanResult=fresh;realDupSelected.clear();showRealDuplicates();folderToast("Files or protection changed. Review again.");return;}
                     try{
                         android.app.PendingIntent pending=android.provider.MediaStore.createTrashRequest(getContentResolver(),approved,true);
                         dupTrashPending=true;startIntentSenderForResult(pending.getIntentSender(),REQUEST_DUP_TRASH,null,0,0,0);
@@ -768,7 +768,7 @@ public final class MainActivity extends Activity {
         new Thread(()->{try{
             SmartMediaScan.Result fresh=job.run((stage,done,total)->{});java.util.List<android.net.Uri> approved=SimilarPhotoScan.verify(before,fresh,selected,keep);
             runOnUiThread(()->{if(runningScan!=job||isDestroyed()||isFinishing())return;runningScan=null;
-                if(approved.isEmpty()){scanResult=fresh;realSimilarSelected.clear();showRealSimilar();folderToast("Files or protection changed. Review again.");return;}
+                if(approved.isEmpty()){java.util.Arrays.fill(scanSelected,false);dupCache.evictAll();scanResult=fresh;realSimilarSelected.clear();showRealSimilar();folderToast("Files or protection changed. Review again.");return;}
                 try{android.app.PendingIntent pending=android.provider.MediaStore.createTrashRequest(getContentResolver(),approved,true);dupTrashPending=true;startIntentSenderForResult(pending.getIntentSender(),REQUEST_SIMILAR_TRASH,null,0,0,0);}
                 catch(Exception e){dupTrashPending=false;showRealSimilar();folderToast("Could not open Android trash approval");}
             });
@@ -876,7 +876,7 @@ public final class MainActivity extends Activity {
         new Thread(()->{try{
             SmartMediaScan.Result fresh=job.runVideos((stage,done,total)->{});java.util.List<android.net.Uri> approved=VideoApproval.verify(before,fresh,selected,keep);
             runOnUiThread(()->{if(runningScan!=job||isDestroyed()||isFinishing())return;runningScan=null;
-                if(approved.isEmpty()){scanResult=fresh;realVideoSelected.clear();showRealVideos();folderToast("Files or protection changed. Review again.");return;}
+                if(approved.isEmpty()){java.util.Arrays.fill(scanSelected,false);dupCache.evictAll();scanResult=fresh;realVideoSelected.clear();showRealVideos();folderToast("Files or protection changed. Review again.");return;}
                 try{android.app.PendingIntent pending=android.provider.MediaStore.createTrashRequest(getContentResolver(),approved,true);dupTrashPending=true;startIntentSenderForResult(pending.getIntentSender(),REQUEST_VIDEO_TRASH,null,0,0,0);}
                 catch(Exception e){dupTrashPending=false;showRealVideos();folderToast("Could not open Android trash approval");}
             });
@@ -991,7 +991,7 @@ public final class MainActivity extends Activity {
         new Thread(()->{try{
             SmartMediaScan.Result fresh=job.run((stage,done,total)->{});java.util.List<android.net.Uri> approved=ScreenshotApproval.verify(before,fresh,selected,keep);
             runOnUiThread(()->{if(runningScan!=job||isDestroyed()||isFinishing())return;runningScan=null;
-                if(approved.isEmpty()){scanResult=fresh;shotSelected.clear();showRealScreenshots();folderToast("Files or protection changed. Review again.");return;}
+                if(approved.isEmpty()){java.util.Arrays.fill(scanSelected,false);dupCache.evictAll();scanResult=fresh;shotSelected.clear();showRealScreenshots();folderToast("Files or protection changed. Review again.");return;}
                 try{android.app.PendingIntent pending=android.provider.MediaStore.createTrashRequest(getContentResolver(),approved,true);dupTrashPending=true;startIntentSenderForResult(pending.getIntentSender(),REQUEST_SCREENSHOT_TRASH,null,0,0,0);}
                 catch(Exception e){dupTrashPending=false;showRealScreenshots();folderToast("Could not open Android trash approval");}
             });
@@ -1147,9 +1147,10 @@ public final class MainActivity extends Activity {
         if(downloadsBusy||downloadSelected.isEmpty())return;
         java.util.List<DownloadFiles.Item> selected=new java.util.ArrayList<>();for(DownloadFiles.Item i:downloadItems)if(downloadSelected.contains(i.uri.toString())&&downloadEligible(i))selected.add(i);
         if(selected.size()!=downloadSelected.size()||selected.size()>DownloadFiles.DELETE_LIMIT){downloadSelected.clear();refreshDownloads();return;}
-        downloadsBusy=true;LinearLayout root=scanShell("Removing files",()->{}),body=scanBody(root);add(body,centered("Checking and removing approved files",18,INK,600),-1,-2);space(body,12);add(body,new android.widget.ProgressBar(this),dp(40),dp(40));setContentView(root);
-        new Thread(()->{int[] result;try{result=downloadEngine().remove(selected);}catch(Exception e){result=new int[]{0,selected.size()};}final int removed=result[0],failed=result[1];
-            runOnUiThread(()->{if(isDestroyed())return;downloadsBusy=false;downloadSelected.clear();refreshDownloads();folderToast(removed+" "+tr("files removed")+" · "+failed+" "+tr("not removed"));});
+        final DownloadFiles engine=downloadEngine();final android.os.CancellationSignal removalSignal=new android.os.CancellationSignal();downloadsSignal=removalSignal;
+        downloadsBusy=true;LinearLayout root=scanShell("Removing files",removalSignal::cancel),body=scanBody(root);add(body,centered("Checking and removing approved files",18,INK,600),-1,-2);space(body,12);add(body,new android.widget.ProgressBar(this),dp(40),dp(40));space(body,12);scanButton(body,"Cancel remaining",false,removalSignal::cancel);setContentView(root);
+        new Thread(()->{int[] result;try{result=engine.remove(selected,removalSignal);}catch(Exception e){result=new int[]{0,selected.size()};}final int removed=result[0],failed=result[1];
+            runOnUiThread(()->{if(isDestroyed())return;downloadsBusy=false;downloadsSignal=null;downloadSelected.clear();refreshDownloads();folderToast(removed+" "+tr("files removed")+" · "+failed+" "+tr("not removed"));});
         },"Clenova-downloads-remove").start();
     }
 
@@ -1490,7 +1491,7 @@ public final class MainActivity extends Activity {
     }
     @Override public void onRequestPermissionsResult(int requestCode,String[] permissions,int[] grantResults){
         super.onRequestPermissionsResult(requestCode,permissions,grantResults);
-        if(requestCode==REQUEST_SCAN_MEDIA){requestingScan=false;if(videoAfterScan?SmartMediaScan.hasVideoAccess(this):shotAfterScan?SmartMediaScan.hasPhotoAccess(this):SmartMediaScan.hasAccess(this))startSmartScan();else {dupAfterScan=false;similarAfterScan=false;videoAfterScan=false;shotAfterScan=false;privacyDialog().setTitle(tr("Media access needed")).setMessage(tr("Allow access to photos or videos to scan them. No files were scanned.")).setPositiveButton(tr("Done"),null).show();}return;}
+        if(requestCode==REQUEST_SCAN_MEDIA){requestingScan=false;if(videoAfterScan?SmartMediaScan.hasVideoAccess(this):(shotAfterScan||dupAfterScan||similarAfterScan)?SmartMediaScan.hasPhotoAccess(this):SmartMediaScan.hasAccess(this))startSmartScan();else {dupAfterScan=false;similarAfterScan=false;videoAfterScan=false;shotAfterScan=false;privacyDialog().setTitle(tr("Media access needed")).setMessage(tr("Allow access to photos or videos to scan them. No files were scanned.")).setPositiveButton(tr("Done"),null).show();}return;}
         if(requestCode==REQUEST_NOTIFICATION_ACCESS&&permissionsVisible)openAppPermissions();
     }
     private static final String[] RATING_LABELS={"Tap to rate your experience","Very poor","Could be better","It's okay","Pretty good","Love it!"};
@@ -2894,7 +2895,8 @@ public final class MainActivity extends Activity {
         setContentView(reviewScreen());
     }
     @Override public void onBackPressed() {
-        if(cleaning||downloadsBusy||unusedUninstallPending)return;
+        if(downloadsBusy){if(downloadsSignal!=null)downloadsSignal.cancel();return;}
+        if(cleaning||unusedUninstallPending)return;
         if(unusedReview){if(unusedSignal!=null){unusedSignal.cancel();unusedSignal=null;unusedGeneration++;}showUnusedApps();return;}
         if(unusedVisible){showClean();return;}
         if(downloadsReview){showDownloads();return;}

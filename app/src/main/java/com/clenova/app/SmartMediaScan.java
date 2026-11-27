@@ -110,13 +110,13 @@ final class SmartMediaScan {
                 else if(i.image&&isScreenshot(i)){
                     // Screenshot review is manual; best-shot protection applies to similar-photo groups.
                     // Exact-match group members remain reserved for the duplicate workflow.
-                    if(!exactMembers.contains(i.uri.toString())){allocated.add(i.uri.toString());r.groups.get(SCREENSHOTS).add(i); }
+                    if(!exactMembers.contains(i.uri.toString())&&(!r.partial||bySize.get(i.bytes).size()==1)){allocated.add(i.uri.toString());r.groups.get(SCREENSHOTS).add(i); }
                 }
             }
             if(++classified%128==0||classified==all.size())progress.update(2,classified,all.size());
         }
         if(r.imagesScanned){
-            List<Item> visual=new ArrayList<>();for(Item i:all)if(i.image&&!exactMembers.contains(i.uri.toString())&&!isScreenshot(i)&&!allocated.contains(i.uri.toString())&&i.path!=null&&i.modified>0)visual.add(i);
+            List<Item> visual=new ArrayList<>();for(Item i:all)if(i.image&&!exactMembers.contains(i.uri.toString())&&(!r.partial||bySize.get(i.bytes).size()==1)&&!isScreenshot(i)&&!allocated.contains(i.uri.toString())&&i.path!=null&&i.modified>0)visual.add(i);
             r.similarScanned=true;r.similarGroups.addAll(SimilarPhotoScan.run(resolver,visual,cancel,r,progress));
             for(SimilarPhotoScan.Group g:r.similarGroups)for(Item i:g.items)if(SimilarPhotoScan.candidate(g,i)&&allocated.add(i.uri.toString()))r.groups.get(SIMILAR).add(i);
             if(r.similarPartial)r.partial=true;
