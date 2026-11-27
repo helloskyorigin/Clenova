@@ -52,3 +52,6 @@ Settings > Cleanup protection provides four persisted smart switches, all enable
 
 ## Protected folders
 Real Android ACTION_OPEN_DOCUMENT_TREE picker, empty initial state, locally persisted URI exclusions and display metadata, duplicate prevention, removable entries with confirmation and no file deletion. The app reads only selected folder name using a temporary read grant; no persistent file access is required and no write grant is requested. External-storage document IDs have boundary-safe descendant matching. Opaque providers require ancestry resolution in future scanner integration. OS picker restrictions apply. No active scanner/deletion engine yet; saved exclusions are not a filesystem lock. CI includes folder match tests.
+
+## Protected files
+Native ACTION_OPEN_DOCUMENT multi-selection, real provider metadata (name, MIME, size when available), local persisted canonical document URI exclusions, duplicate prevention and confirmed exclusion removal. No persistent read or write grant and no file contents read or deleted. Alternate URI aliases, moved files, or provider identity changes need resolution in the future scanner. Actual cleanup enforcement remains pending; saved exclusions are not a filesystem lock. No sample files are inserted.

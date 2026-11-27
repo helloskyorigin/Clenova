@@ -5,6 +5,22 @@ import java.util.Map;
 final class AppStrings {
  private static final Map<String,String[]> TEXT=new HashMap<>();
  static {
+  TEXT.put("Add files",new String[]{"फ़ाइलें जोड़ें","Añadir archivos","Ajouter des fichiers","Dateien hinzufügen"});
+  TEXT.put("Too important to lose.",new String[]{"खोने के लिए बहुत ज़रूरी।","Demasiado importantes para perderlos.","Trop importants pour les perdre.","Zu wichtig, um sie zu verlieren."});
+  TEXT.put("Keep your important files out of cleanup.",new String[]{"ज़रूरी फ़ाइलें सफाई से बाहर रखें।","Excluye tus archivos importantes.","Excluez vos fichiers importants.","Wichtige Dateien von der Bereinigung ausschließen."});
+  TEXT.put("No protected files yet",new String[]{"अभी कोई सुरक्षित फ़ाइल नहीं","Sin archivos protegidos","Aucun fichier protégé","Noch keine geschützten Dateien"});
+  TEXT.put("Add files you want to keep.",new String[]{"वे फ़ाइलें जोड़ें जिन्हें रखना है।","Añade archivos que quieras conservar.","Ajoutez les fichiers à conserver.","Dateien hinzufügen, die du behalten möchtest."});
+  TEXT.put("File options",new String[]{"फ़ाइल विकल्प","Opciones de archivo","Options du fichier","Dateioptionen"});
+  TEXT.put("Saved for exclusion from future cleanup.",new String[]{"भविष्य की सफाई से बाहर रखने के लिए सहेजा गया।","Guardado para futuras exclusiones.","Enregistré pour exclusion future.","Für künftige Ausnahmen gespeichert."});
+  TEXT.put("File picker unavailable",new String[]{"फ़ाइल चयन उपलब्ध नहीं","Selector no disponible","Sélecteur indisponible","Dateiauswahl nicht verfügbar"});
+  TEXT.put("Some files could not be saved",new String[]{"कुछ फ़ाइलें सहेजी नहीं जा सकीं","No se guardaron algunos archivos","Certains fichiers n’ont pas été enregistrés","Einige Dateien konnten nicht gespeichert werden"});
+  TEXT.put("Files added",new String[]{"फ़ाइलें जोड़ी गईं","Archivos añadidos","Fichiers ajoutés","Dateien hinzugefügt"});
+  TEXT.put("Files already protected",new String[]{"फ़ाइलें पहले से सुरक्षित हैं","Archivos ya protegidos","Fichiers déjà protégés","Dateien bereits geschützt"});
+  TEXT.put("This removes the exclusion, not the file.",new String[]{"इससे केवल सुरक्षा हटेगी, फ़ाइल नहीं।","Solo elimina la exclusión, no el archivo.","Seule l’exclusion est retirée, pas le fichier.","Nur die Ausnahme wird entfernt, nicht die Datei."});
+  TEXT.put("Photo",new String[]{"फ़ोटो","Foto","Photo","Foto"});
+  TEXT.put("Video",new String[]{"वीडियो","Vídeo","Vidéo","Video"});
+  TEXT.put("Audio",new String[]{"ऑडियो","Audio","Audio","Audio"});
+  TEXT.put("File",new String[]{"फ़ाइल","Archivo","Fichier","Datei"});
   TEXT.put("Add folder",new String[]{"फ़ोल्डर जोड़ें","Añadir carpeta","Ajouter un dossier","Ordner hinzufügen"});
   TEXT.put("Off limits.",new String[]{"सुरक्षित रखें।","Zona protegida.","Zone protégée.","Geschützter Bereich."});
   TEXT.put("Exclude these folders and their subfolders from future cleanup.",new String[]{"इन फ़ोल्डरों और सबफ़ोल्डरों को भविष्य की सफाई से बाहर रखें।","Excluye estas carpetas y subcarpetas de futuras limpiezas.","Excluez ces dossiers et sous-dossiers des futurs nettoyages.","Diese Ordner und Unterordner von künftiger Bereinigung ausschließen."});
