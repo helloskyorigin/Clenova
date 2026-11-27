@@ -16,6 +16,7 @@
     </queries>
     <application android:label="Clenova" android:theme="@style/ClenovaTheme"
         android:allowBackup="false" android:usesCleartextTraffic="false" android:supportsRtl="true">
+        <activity android:name=".SwipePhotosActivity" android:exported="false" />
         <activity android:name=".MainActivity" android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
