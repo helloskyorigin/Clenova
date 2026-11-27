@@ -39,6 +39,9 @@ public final class MainActivity extends Activity {
     private boolean duplicateViewing;
     private int duplicateTab;
     private boolean[] duplicateDraft;
+    private boolean similarViewing;
+    private int similarTab;
+    private boolean[] similarDraft;
 
     @Override public void onCreate(Bundle state) {
         super.onCreate(state);
@@ -203,7 +206,7 @@ public final class MainActivity extends Activity {
         setContentView(reviewScreen());
     }
     @Override public void onBackPressed() {
-        if (duplicateViewing) leaveDuplicates(false); else if (reviewing) showHome(); else super.onBackPressed();
+        if (similarViewing) leaveSimilar(false); else if (duplicateViewing) leaveDuplicates(false); else if (reviewing) showHome(); else super.onBackPressed();
     }
     private LinearLayout reviewScreen() {
         LinearLayout root = column(); root.setBackgroundColor(BG);
@@ -245,14 +248,14 @@ public final class MainActivity extends Activity {
             add(category,mark,dp(44),dp(44)); gap(category,12);
             LinearLayout info=column();
             add(info,txt(ReviewPlan.NAMES[i],16,INK,600),-1,-2); space(info,4);
-            add(info,txt(i==0 && reviewPlan.isSelected(0)?ReviewPlan.selectedCount(reviewPlan.draftCopies())+" extra copies selected":ReviewPlan.DETAILS[i],13,GRAY,400),-1,-2); space(info,5);
+            add(info,txt(i==0 && reviewPlan.isSelected(0)?ReviewPlan.selectedCount(reviewPlan.draftCopies())+" extra copies selected":i==1 && reviewPlan.isSelected(1)?ReviewPlan.selectedCount(reviewPlan.draftSimilar())+" photos selected":ReviewPlan.DETAILS[i],13,GRAY,400),-1,-2); space(info,5);
             TextView review=txt("Review items",13,BLUE,600);
             review.setMinHeight(dp(32)); review.setGravity(Gravity.CENTER_VERTICAL);
             review.setContentDescription("Review items: "+ReviewPlan.NAMES[i]);
             tap(review,WHITE,8,()->reviewCategory(index));
             add(info,review,-1,-2); weight(category,info); gap(category,8);
             LinearLayout right=column(); right.setGravity(Gravity.END|Gravity.CENTER_VERTICAL);
-            add(right,txt(ReviewPlan.gb(i==0 && reviewPlan.isSelected(0)?reviewPlan.categoryMb(0):ReviewPlan.MB[i]),15,INK,600),-2,-2);
+            add(right,txt(ReviewPlan.gb(i<2 && reviewPlan.isSelected(i)?reviewPlan.categoryMb(i):ReviewPlan.MB[i]),15,INK,600),-2,-2);
             FrameLayout choice=new FrameLayout(this);
             choice.addView(new Glyph(this,reviewPlan.isSelected(i)?"selected":"unselected",
                     reviewPlan.isSelected(i)?BLUE:0xffc7c7cc),
@@ -290,6 +293,7 @@ public final class MainActivity extends Activity {
     }
     private void reviewCategory(int index) {
         if(index==0){openDuplicates();return;}
+        if(index==1){openSimilar();return;}
         new AlertDialog.Builder(this).setTitle(ReviewPlan.NAMES[index])
                 .setMessage("Sample category: "+ReviewPlan.DETAILS[index]+" · "+
                         ReviewPlan.gb(ReviewPlan.MB[index])+
@@ -300,6 +304,111 @@ public final class MainActivity extends Activity {
                     setContentView(reviewScreen());
                 }).show();
     }
+    private void openSimilar() {
+        similarDraft=reviewPlan.draftSimilar();similarViewing=true;similarTab=0;
+        setContentView(similarScreen(0));
+    }
+    private void leaveSimilar(boolean confirm) {
+        if(confirm)reviewPlan.confirmSimilar(similarDraft);
+        similarViewing=false;similarDraft=null;setContentView(reviewScreen());
+    }
+    private LinearLayout similarScreen(int offset) {
+        LinearLayout root=column();root.setBackgroundColor(BG);
+        root.setPadding(dp(18),v(12),dp(18),v(12));
+        FrameLayout header=new FrameLayout(this);
+        header.addView(centered("Similar photos",17,INK,600),new FrameLayout.LayoutParams(-1,-1));
+        FrameLayout back=new FrameLayout(this);
+        back.addView(new Glyph(this,"back",INK),new FrameLayout.LayoutParams(dp(24),dp(24),Gravity.CENTER));
+        back.setContentDescription("Back to Review cleanup");
+        tap(back,WHITE,22,()->leaveSimilar(false));
+        header.addView(back,new FrameLayout.LayoutParams(dp(44),dp(44),Gravity.START|Gravity.CENTER_VERTICAL));
+        add(root,header,-1,dp(44));space(root,14);
+        int count=ReviewPlan.selectedCount(similarDraft);
+        String amount=ReviewPlan.gb(count*ReviewPlan.SIMILAR_MB);
+        add(root,txt(amount,36,INK,700),-1,-2);space(root,5);
+        LinearLayout status=row();
+        add(status,new Glyph(this,"sparkles",BLUE),dp(16),dp(16));gap(status,5);
+        add(status,txt("80 photos recommended",14,BLUE,500),-2,-2);
+        add(root,status,-1,-2);space(root,16);
+        LinearLayout tabs=row();tabs.setBackground(round(0xffe7e7ec,14));
+        tabs.setPadding(dp(3),dp(3),dp(3),dp(3));
+        String[] labels={"Agent Picks","View All"};
+        for(int i=0;i<2;i++){
+            final int tab=i;
+            TextView label=centered(labels[i],14,similarTab==i?INK:GRAY,600);
+            tap(label,similarTab==i?WHITE:0xffe7e7ec,11,()->{similarTab=tab;setContentView(similarScreen(0));});
+            label.setSelected(similarTab==i);tabs.addView(label,new LinearLayout.LayoutParams(0,dp(39),1f));
+        }
+        add(root,tabs,-1,-2);space(root,12);
+        ScrollView scroll=new ScrollView(this);
+        scroll.setVerticalScrollBarEnabled(false);scroll.setOverScrollMode(View.OVER_SCROLL_NEVER);
+        LinearLayout body=column();body.setPadding(0,0,0,v(10));
+        scroll.addView(body,new ScrollView.LayoutParams(-1,-2));
+        root.addView(scroll,new LinearLayout.LayoutParams(-1,0,1f));
+        if(similarTab==0){
+            LinearLayout stats=row();stats.setPadding(0,v(6),0,v(6));
+            LinearLayout left=column();add(left,txt("80",25,INK,700),-1,-2);space(left,5);
+            add(left,txt("Suggested to remove",12,GRAY,400),-1,-2);weight(stats,left);
+            View divider=new View(this);divider.setBackgroundColor(0xffdcdce1);add(stats,divider,dp(1),dp(36));gap(stats,15);
+            LinearLayout right=column();add(right,txt("32",25,GREEN,700),-1,-2);space(right,5);
+            add(right,txt("Best shots to keep",12,GRAY,400),-1,-2);weight(stats,right);
+            add(body,stats,-1,-2);space(body,12);thinRule(body);space(body,6);
+        }
+        LinearLayout options=row();
+        add(options,txt(similarTab==0?"Preview":"32 similar groups",14,GRAY,500),-2,-2);stretch(options);
+        TextView all=txt(similarTab==0?"View all":count==80?"Deselect all":"Select all",14,BLUE,600);
+        all.setGravity(Gravity.CENTER_VERTICAL);
+        tap(all,BG,8,()->{
+            if(similarTab==0){similarTab=1;setContentView(similarScreen(0));}
+            else{java.util.Arrays.fill(similarDraft,count!=80);setContentView(similarScreen(scroll.getScrollY()));}
+        });
+        add(options,all,-2,dp(40));add(body,options,-1,-2);
+        int limit=similarTab==0?1:ReviewPlan.SIMILAR_GROUPS;
+        for(int group=0;group<limit;group++){
+            addSimilarGroup(body,group,scroll);
+            if(group<limit-1){space(body,14);thinRule(body);space(body,14);}
+        }
+        if(offset>0)scroll.post(()->scroll.scrollTo(0,offset));
+        space(root,8);thinRule(root);space(root,12);
+        LinearLayout total=row();add(total,txt(count+" photos selected",14,GRAY,500),-2,-2);stretch(total);
+        add(total,txt(amount,21,INK,700),-2,-2);add(root,total,-1,-2);space(root,12);
+        TextView confirm=centered("Confirm selection",17,WHITE,600);
+        tap(confirm,BLUE,26,()->leaveSimilar(true));add(root,confirm,-1,dp(52));return root;
+    }
+    private void addSimilarGroup(LinearLayout body,int group,ScrollView scroll){
+        int size=group<16?4:3, columns=size==4?2:3;
+        add(body,txt(size+" similar photos",14,INK,600),-1,-2);space(body,9);
+        for(int first=0;first<size;first+=columns){
+            LinearLayout gallery=row();gallery.setGravity(Gravity.TOP);
+            for(int p=first;p<Math.min(first+columns,size);p++){
+                final int photo=p;
+                FrameLayout tile=new FrameLayout(this);tile.setBackground(round(0xffe4e8ee,10));tile.setClipToOutline(true);
+                SamplePhoto image=new SamplePhoto(this,group,photo);
+                tile.addView(image,new FrameLayout.LayoutParams(-1,-1));
+                image.setContentDescription("Preview similar group "+(group+1)+", photo "+(photo+1));
+                image.setOnClickListener(w->showPhotoPreview(group,photo,scroll,true));
+                if(photo==0){
+                    TextView keep=centered("Best shot",11,GREEN,600);keep.setBackground(round(WHITE,6));
+                    keep.setPadding(dp(7),dp(4),dp(7),dp(4));
+                    FrameLayout.LayoutParams lp=new FrameLayout.LayoutParams(-2,-2,Gravity.TOP|Gravity.START);
+                    lp.setMargins(dp(7),dp(7),0,0);tile.addView(keep,lp);
+                }else{
+                    int index=ReviewPlan.similarIndex(group,photo);
+                    FrameLayout choice=new FrameLayout(this);
+                    choice.addView(new Glyph(this,similarDraft[index]?"selected":"unselected",similarDraft[index]?BLUE:WHITE),
+                            new FrameLayout.LayoutParams(dp(24),dp(24),Gravity.CENTER));
+                    choice.setContentDescription("Group "+(group+1)+" photo "+(photo+1)+(similarDraft[index]?", selected":", not selected"));
+                    choice.setSelected(similarDraft[index]);
+                    tap(choice,0x55000000,22,()->{similarDraft[index]=!similarDraft[index];setContentView(similarScreen(scroll.getScrollY()));});
+                    tile.addView(choice,new FrameLayout.LayoutParams(dp(44),dp(44),Gravity.TOP|Gravity.END));
+                }
+                LinearLayout.LayoutParams lp=new LinearLayout.LayoutParams(0,dp(columns==2?132:110),1f);
+                if(p>first)lp.leftMargin=dp(7);gallery.addView(tile,lp);
+            }
+            add(body,gallery,-1,-2);if(first+columns<size)space(body,7);
+        }
+    }
+
     private void openDuplicates() {
         duplicateDraft = reviewPlan.draftCopies();
         duplicateViewing = true;
@@ -429,11 +538,14 @@ public final class MainActivity extends Activity {
         add(body,gallery,-1,-2);
     }
     private void showSamplePhoto(int group,int photo,ScrollView scroll) {
+        showPhotoPreview(group,photo,scroll,false);
+    }
+    private void showPhotoPreview(int group,int photo,ScrollView scroll,boolean similar) {
         android.app.Dialog dialog=new android.app.Dialog(this,android.R.style.Theme_Material_Light_NoActionBar_Fullscreen);
         LinearLayout layout=column();layout.setBackgroundColor(BG);
         layout.setPadding(dp(18),v(12),dp(18),v(16));
         FrameLayout header=new FrameLayout(this);
-        header.addView(centered(photo==0?"Protected original":"Duplicate copy",17,INK,600),
+        header.addView(centered(photo==0?(similar?"Best shot":"Protected original"):(similar?"Similar photo":"Duplicate copy"),17,INK,600),
                 new FrameLayout.LayoutParams(-1,-1));
         FrameLayout close=new FrameLayout(this);
         close.addView(new Glyph(this,"back",INK),new FrameLayout.LayoutParams(dp(24),dp(24),Gravity.CENTER));
@@ -442,7 +554,7 @@ public final class MainActivity extends Activity {
         header.addView(close,new FrameLayout.LayoutParams(dp(44),dp(44),Gravity.START|Gravity.CENTER_VERTICAL));
         add(layout,header,-1,dp(44));
         FrameLayout preview=new FrameLayout(this);
-        SamplePhoto image=new SamplePhoto(this,group);
+        SamplePhoto image=new SamplePhoto(this,group,similar?photo:0);
         image.setContentDescription("Sample photo, group "+(group+1));
         preview.addView(image,new FrameLayout.LayoutParams(1,1,Gravity.CENTER));
         preview.addOnLayoutChangeListener((view,left,top,right,bottom,ol,ot,or,ob)->{
@@ -454,13 +566,14 @@ public final class MainActivity extends Activity {
         });
         layout.addView(preview,new LinearLayout.LayoutParams(-1,0,1f));
         if(photo==0){
-            add(layout,centered("Keep · Protected by Agent",15,GREEN,600),-1,dp(52));
+            add(layout,centered(similar?"Best shot · Recommended to keep":"Keep · Protected by Agent",15,GREEN,600),-1,dp(52));
         }else{
-            int index=group*2+photo-1;
-            TextView toggle=centered(duplicateDraft[index]?"Keep this copy":"Select copy",17,WHITE,600);
+            int index=similar?ReviewPlan.similarIndex(group,photo):group*2+photo-1;
+            boolean[] draft=similar?similarDraft:duplicateDraft;
+            TextView toggle=centered(draft[index]?"Keep this copy":"Select copy",17,WHITE,600);
             tap(toggle,BLUE,26,()->{
-                duplicateDraft[index]=!duplicateDraft[index];
-                int offset=scroll.getScrollY();dialog.dismiss();setContentView(duplicateScreen(offset));
+                draft[index]=!draft[index];
+                int offset=scroll.getScrollY();dialog.dismiss();setContentView(similar?similarScreen(offset):duplicateScreen(offset));
             });
             add(layout,toggle,-1,dp(52));
         }
@@ -476,17 +589,18 @@ public final class MainActivity extends Activity {
     /** Procedural sample thumbnails: each group repeats the exact same illustration. */
     private static final class SamplePhoto extends View {
         private final Paint paint=new Paint(Paint.ANTI_ALIAS_FLAG);
-        private final int group;
-        SamplePhoto(Context context,int group){super(context);this.group=group;}
+        private final int group,variant;
+        SamplePhoto(Context context,int group){this(context,group,0);}
+        SamplePhoto(Context context,int group,int variant){super(context);this.group=group;this.variant=variant;}
         private void color(int c){paint.setColor(c);paint.setStyle(Paint.Style.FILL);}
         @Override protected void onDraw(Canvas c){
             super.onDraw(c);c.save();c.scale(getWidth()/110f,getHeight()/125f);
             int[] skies={0xffbcd9e7,0xffe7d4bf,0xffc3d6ca,0xffd5c9e3,0xffead2ce,0xffc9ddea};
             int[] hills={0xff819ca7,0xffa99079,0xff789c89,0xff9292ae,0xffa67e78,0xff758fa8};
             color(skies[group%6]);c.drawRect(0,0,110,125,paint);
-            color(0xffffefca);c.drawCircle(72+(group%4)*5,21+(group%3)*4,12,paint);
+            color(0xffffefca);c.drawCircle(72+(group%4)*5+variant*3,21+(group%3)*4,12,paint);
             color(hills[group%6]);
-            Path mountain=new Path();mountain.moveTo(-10,95);mountain.lineTo(26+group%12,30+group%9);
+            Path mountain=new Path();mountain.moveTo(-10,95);mountain.lineTo(26+group%12+variant*4,30+group%9+variant*3);
             mountain.lineTo(74,85);mountain.lineTo(96,48);mountain.lineTo(120,90);mountain.lineTo(120,125);
             mountain.lineTo(-10,125);mountain.close();c.drawPath(mountain,paint);
             color(0xff60877b);Path foreground=new Path();foreground.moveTo(0,102);

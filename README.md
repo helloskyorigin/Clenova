@@ -25,3 +25,6 @@ Home → Review & Approve opens a dedicated screen (no bottom navbar). Exact dup
 Review Cleanup → Duplicate photos → Review items. Agent Picks provides a compact overview; View All shows all 24 groups, 72 sample thumbnails, 48 selectable copies and 24 protected originals. Each copy is 25 decimal MB. Selections are shared across tabs, with exact totals; Confirm selection commits the draft to the cleanup plan, Back discards unconfirmed changes. Sample images are procedural illustrations, not device photos. Full-size sample preview opens on image tap. No media permission or deletion. Other categories remain placeholders.
 
 Pure Java selection check: `javac -d /tmp/clenova-tests app/src/main/java/com/clenova/app/ReviewPlan.java tests/ReviewPlanTest.java && java -cp /tmp/clenova-tests com.clenova.app.ReviewPlanTest`.
+
+## Similar photos preview
+Agent Picks uses inline statistics and a single group preview. View All shows 32 groups (16 groups of four and 16 of three), with 32 protected best shots and 80 selectable sample photos at 12.5 MB each. Selection drafts update both tabs, are committed only on Confirm selection, and are discarded on Back. All totals use exact half-MB sample increments. No device media is accessed or removed.
