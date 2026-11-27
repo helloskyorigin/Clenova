@@ -373,7 +373,7 @@ public final class MainActivity extends Activity {
     private void clearAgentSession(){
         agentSessionHandler.removeCallbacks(agentExpiry);
         if(agentScan!=null){agentScan.cancel();agentScan=null;}agentCloudBusy=false;agentGeneration++;agentPermissionPending=false;
-        agentLiveResult=null;agentResultChat="";scanResult=null;agentTaskVisible=false;
+        agentLiveResult=null;agentResultChat="";if(agentVisible&&!agentTaskOrigin)scanResult=null;agentTaskVisible=false;
         if(agentChats!=null&&!agentChats.clear())folderToast("Could not clear saved conversation");
         activeChat=null;
     }
