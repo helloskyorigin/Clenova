@@ -83,7 +83,7 @@ final class PhotoCompressionEngine {
         try(InputStream in=open(c,s.uri)){BitmapFactory.decodeStream(in,null,options);}
         if(options.outWidth<=0||options.outHeight<=0)throw new IOException("Unreadable photo");
         options.inSampleSize=1;while(Math.max(options.outWidth,options.outHeight)/options.inSampleSize>preset.edge*2)options.inSampleSize*=2;
-        options.inJustDecodeBounds=false;options.inPreferredConfig=Bitmap.Config.ARGB_8888;
+        options.inJustDecodeBounds=false;options.inPreferredConfig=Bitmap.Config.ARGB_8888;options.inPreferredColorSpace=ColorSpace.get(ColorSpace.Named.SRGB);
         Bitmap b;try(InputStream in=open(c,s.uri)){b=BitmapFactory.decodeStream(in,null,options);}
         if(b==null)throw new IOException("Unreadable photo");
         try{
@@ -112,6 +112,8 @@ final class PhotoCompressionEngine {
             check();if(file.length()<=0)throw new IOException("Empty output");
             BitmapFactory.Options verified=new BitmapFactory.Options();verified.inJustDecodeBounds=true;BitmapFactory.decodeFile(file.getAbsolutePath(),verified);
             if(verified.outWidth!=b.getWidth()||verified.outHeight!=b.getHeight()||!mime.equals(verified.outMimeType))throw new IOException("Invalid output dimensions or format");
+            BitmapFactory.Options small=new BitmapFactory.Options();small.inSampleSize=1;while(Math.max(verified.outWidth,verified.outHeight)/small.inSampleSize>512)small.inSampleSize*=2;
+            Bitmap sample=BitmapFactory.decodeFile(file.getAbsolutePath(),small);if(sample==null)throw new IOException("Output could not be decoded");sample.recycle();
             if(!MessageDigest.isEqual(inputHash,hash(c,s.uri)))throw new IOException("Source changed during compression");
             byte[] outputHash;try(InputStream in=new FileInputStream(file)){outputHash=digest(in);}
             Output result=new Output(s,file,mime,b.getWidth(),b.getHeight(),inputHash,outputHash);ok=true;return result;
@@ -128,7 +130,7 @@ final class PhotoCompressionEngine {
         if(copied!=out.bytes||!MessageDigest.isEqual(out.hash,hash(c,uri)))throw new IOException("Saved copy did not verify");
     }
     static Uri save(Context c,Output out,Uri tree)throws Exception{
-        check();ContentResolver r=c.getContentResolver();Uri uri=null;boolean published=false;
+        check();ContentResolver r=c.getContentResolver();Uri uri=null;boolean published=false,created=false;
         try{
             if(tree==null){
                 if(Build.VERSION.SDK_INT<29)throw new IOException("Choose a folder");
@@ -138,11 +140,12 @@ final class PhotoCompressionEngine {
                 Uri parent=DocumentsContract.buildDocumentUriUsingTree(tree,DocumentsContract.getTreeDocumentId(tree));uri=DocumentsContract.createDocument(r,parent,out.mime,name(out));
             }
             if(uri==null||uri.equals(out.source.uri))throw new IOException("Cannot create new photo");
-            if(tree!=null){long bytes=-1;try(Cursor cur=r.query(uri,new String[]{OpenableColumns.SIZE},null,null,null)){if(cur!=null&&cur.moveToFirst()&&!cur.isNull(0))bytes=cur.getLong(0);}if(bytes!=0)throw new IOException("Destination must be a new empty document");}
+            if(tree==null)created=true;
+            if(tree!=null){long bytes=-1;try(Cursor cur=r.query(uri,new String[]{OpenableColumns.SIZE},null,null,null)){if(cur!=null&&cur.moveToFirst()&&!cur.isNull(0))bytes=cur.getLong(0);}if(bytes!=0)throw new IOException("Destination must be a new empty document");created=true;}
             copy(c,out,uri);check();
             if(tree==null){ContentValues done=new ContentValues();done.put(MediaStore.MediaColumns.IS_PENDING,0);if(r.update(uri,done,null,null)!=1)throw new IOException("Cannot publish photo");}
             published=true;return uri;
-        }finally{if(!published&&uri!=null&&!uri.equals(out.source.uri))try{if(tree==null)r.delete(uri,null,null);else DocumentsContract.deleteDocument(r,uri);}catch(Exception ignored){}}
+        }finally{if(!published&&created&&uri!=null&&!uri.equals(out.source.uri))try{if(tree==null)r.delete(uri,null,null);else DocumentsContract.deleteDocument(r,uri);}catch(Exception ignored){}}
     }
     private PhotoCompressionEngine(){}
 }
