@@ -35,6 +35,9 @@ public final class MainActivity extends Activity {
     private float density;
     private float compact = 1f;
     private boolean reviewing;
+    private boolean toolsVisible;
+    private ScrollView toolsScroll;
+    private int toolsScrollY;
     private boolean cleanVisible,agentVisible,agentTaskVisible,agentTaskOrigin,agentShortcut;
     private String agentCommand="";
     private int agentTask=-1;
@@ -149,7 +152,7 @@ public final class MainActivity extends Activity {
         protectedFiles=new ProtectedFiles(this);
         history=new ActivityHistory(this);
         devicePermissions=new DevicePermissions(this);
-        if(state!=null){agentVisible=state.getBoolean("agent_visible");agentShortcut=state.getBoolean("agent_shortcut");largeFilesMode=state.getBoolean("large_files_mode");clutterMode=state.getBoolean("clutter_mode");dupTrashPending=state.getBoolean("dup_trash_pending");cleanVisible=state.getBoolean("clean_visible");cleanScrollY=state.getInt("clean_scroll_y");historyFilter=state.getInt("history_filter");cleanupEventId=state.getString("cleanup_event_id");cleanupCategoryCounts=state.getIntArray("cleanup_category_counts");historyDetailId=state.getString("history_detail_id");historyScrollY=state.getInt("history_scroll_y");}
+        if(state!=null){toolsVisible=state.getBoolean("tools_visible");toolsScrollY=state.getInt("tools_scroll_y");agentVisible=state.getBoolean("agent_visible");agentShortcut=state.getBoolean("agent_shortcut");largeFilesMode=state.getBoolean("large_files_mode");clutterMode=state.getBoolean("clutter_mode");dupTrashPending=state.getBoolean("dup_trash_pending");cleanVisible=state.getBoolean("clean_visible");cleanScrollY=state.getInt("clean_scroll_y");historyFilter=state.getInt("history_filter");cleanupEventId=state.getString("cleanup_event_id");cleanupCategoryCounts=state.getIntArray("cleanup_category_counts");historyDetailId=state.getString("history_detail_id");historyScrollY=state.getInt("history_scroll_y");}
         applyPalette();
         density = getResources().getDisplayMetrics().density;
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
@@ -178,6 +181,7 @@ public final class MainActivity extends Activity {
         if(state!=null && state.getBoolean("agent_prefs_visible")){openAgentPreferences();return;}
         if(state!=null && state.getBoolean("settings_visible")){openSettings();if(state.getBoolean("rating_open")){ratingStars=Math.max(0,Math.min(5,state.getInt("rating_stars")));showRatingSheet();}return;}
         if(state!=null && state.getBoolean("storage_visible")){openStorage();return;}
+        if(toolsVisible){showTools();return;}
         if(agentVisible){showAgent();return;}
         if(cleanVisible){showClean();return;}
         setContentView(home());
@@ -185,6 +189,8 @@ public final class MainActivity extends Activity {
     @Override protected void onSaveInstanceState(Bundle state){
         super.onSaveInstanceState(state);
         state.putBoolean("storage_visible",storageVisible);
+        state.putBoolean("tools_visible",toolsVisible);
+        state.putInt("tools_scroll_y",toolsScroll==null?toolsScrollY:toolsScroll.getScrollY());
         state.putBoolean("clean_visible",cleanVisible);state.putBoolean("agent_visible",agentVisible);state.putBoolean("agent_shortcut",agentShortcut);
         state.putBoolean("large_files_mode",largeFilesMode);state.putBoolean("clutter_mode",clutterMode);
         state.putBoolean("dup_trash_pending",dupTrashPending);
@@ -354,7 +360,7 @@ public final class MainActivity extends Activity {
         return root;
     }
     private void returnToDashboard(){
-        if(agentVisible)showAgent();else if(cleanVisible)showClean();else showHome();
+        if(toolsVisible)showTools();else if(agentVisible)showAgent();else if(cleanVisible)showClean();else showHome();
     }
     private void restoreAgentWindow(){
         if(agentInput!=null){
@@ -388,6 +394,7 @@ public final class MainActivity extends Activity {
         scheduleAgentExpiry();
     }
     private void showAgent(){
+        toolsVisible=false;toolsScroll=null;toolsScrollY=0;
         expireAgentSession();scheduleAgentExpiry();
         if(runningScan!=null){runningScan.cancel();runningScan=null;}
         if(downloadsSignal!=null){downloadsSignal.cancel();downloadsSignal=null;}downloadsGeneration++;
@@ -526,6 +533,7 @@ public final class MainActivity extends Activity {
     }
 
     private void showClean(){
+        toolsVisible=false;toolsScroll=null;toolsScrollY=0;
         agentVisible=false;agentTaskVisible=false;agentShortcut=false;restoreAgentWindow();
         unusedVisible=false;unusedReview=false;unusedExternal=false;unusedGeneration++;if(unusedSignal!=null){unusedSignal.cancel();unusedSignal=null;}unusedResult=null;unusedSelected.clear();unusedKeep.clear();if(unusedSheet!=null)unusedSheet.dismiss();
         downloadsVisible=false;downloadsReview=false;downloadsGeneration++;if(downloadsSignal!=null){downloadsSignal.cancel();downloadsSignal=null;}if(!downloadsBusy){downloadItems.clear();downloadSelected.clear();downloadKeep.clear();}
@@ -539,6 +547,73 @@ public final class MainActivity extends Activity {
         setContentView(cleanScreen());
         final ScrollView scroll=cleanScroll;if(scroll!=null)scroll.post(()->scroll.scrollTo(0,cleanScrollY));
     }
+    // Phase 38: landing interface only. No utility actions or permissions are requested.
+    private void showTools(){
+        if(agentBusy())return;
+        restoreAgentWindow();
+        agentVisible=false;agentTaskVisible=false;agentTaskOrigin=false;agentShortcut=false;
+        cleanVisible=false;cleanScroll=null;cleanScrollY=0;
+        scanResult=null;scanVisible=false;scanReviewVisible=false;
+        settingsVisible=false;storageVisible=false;reviewing=false;completionVisible=false;
+        aboutVisible=false;policyVisible=false;termsVisible=false;feedbackVisible=false;helpVisible=false;
+        permissionsVisible=false;privacyVisible=false;historyVisible=false;agentPrefsVisible=false;
+        protectionVisible=false;foldersVisible=false;filesVisible=false;
+        toolsVisible=true;
+        setContentView(toolsScreen());
+        final ScrollView scroll=toolsScroll;
+        if(scroll!=null)scroll.post(()->scroll.scrollTo(0,toolsScrollY));
+    }
+    private LinearLayout toolsScreen(){
+        LinearLayout root=column();root.setBackgroundColor(BG);
+        root.setPadding(dp(18),v(12),dp(18),v(10));
+        add(root,header(),-1,dp(44));space(root,8);
+
+        ScrollView scroll=new ScrollView(this);toolsScroll=scroll;
+        scroll.setVerticalScrollBarEnabled(false);scroll.setOverScrollMode(View.OVER_SCROLL_NEVER);
+        scroll.setClipToPadding(false);
+        LinearLayout body=column();body.setPadding(0,v(4),0,v(8));
+        scroll.addView(body,new ScrollView.LayoutParams(-1,-2));
+        root.addView(scroll,new LinearLayout.LayoutParams(-1,0,1f));
+
+        add(body,txt("Tools",29,INK,700),-1,-2);space(body,4);
+        add(body,txt("Make more of your phone.",13,GRAY,400),-1,-2);space(body,19);
+        add(body,txt("PHOTOS & VIDEOS",11,GRAY,600),-1,-2);space(body,8);
+        LinearLayout media=card();pad(media,13,3);
+        toolRow(media,"Swipe Photos","Keep what matters","tool_swipe",BLUE,PALE,true);
+        toolRow(media,"Video Compressor","Reduce video size","video",BLUE,PALE,true);
+        toolRow(media,"Photo Compressor","Save space effortlessly","images",BLUE,PALE,false);
+        add(body,media,-1,-2);space(body,18);
+        add(body,txt("PHONE UTILITIES",11,GRAY,600),-1,-2);space(body,8);
+        LinearLayout utilities=card();pad(utilities,13,3);
+        toolRow(utilities,"Contacts Cleaner","","users",dark?0xff55d5ac:0xff139b78,dark?0xff193b34:0xffe7f6f0,true);
+        toolRow(utilities,"App Manager","","apps",dark?0xffb5a0ff:0xff7657db,dark?0xff302747:0xfff0ebff,true);
+        toolRow(utilities,"Speaker Cleaner","","tool_speaker",BLUE,PALE,true);
+        toolRow(utilities,"Internet Speed Test","","tool_speed",BLUE,PALE,false);
+        add(body,utilities,-1,-2);space(body,14);
+        LinearLayout footer=row();footer.setGravity(Gravity.CENTER);
+        add(footer,new Glyph(this,"shield",GRAY),dp(15),dp(15));gap(footer,5);
+        add(footer,txt("Always in your control.",12,GRAY,400),-2,-2);
+        add(body,footer,-1,-2);
+        space(root,6);add(root,navigation(),-1,dp(64));return root;
+    }
+    private void toolRow(LinearLayout parent,String title,String subtitle,String glyph,int tint,int iconBg,boolean divider){
+        boolean detailed=!subtitle.isEmpty();
+        LinearLayout line=row();line.setMinimumHeight(dp(detailed?63:54));
+        line.setPadding(0,v(7),0,v(7));
+        int iconSize=dp(detailed?42:38);
+        FrameLayout mark=new FrameLayout(this);mark.setBackground(round(iconBg,11));
+        mark.addView(new Glyph(this,glyph,tint),new FrameLayout.LayoutParams(dp(22),dp(22),Gravity.CENTER));
+        add(line,mark,iconSize,iconSize);gap(line,12);
+        LinearLayout copy=column();add(copy,txt(title,15,INK,600),-1,-2);
+        if(detailed){space(copy,4);add(copy,txt(subtitle,12,GRAY,400),-1,-2);}
+        weight(line,copy);gap(line,8);add(line,new Glyph(this,"chevron",GRAY),dp(14),dp(14));
+        tap(line,WHITE,12,()->privacyDialog().setTitle(tr(title))
+            .setMessage(tr("This tool is not available yet. No action has been performed."))
+            .setPositiveButton(tr("Done"),null).show());
+        line.setContentDescription(tr(title)+(detailed?", "+tr(subtitle):""));
+        add(parent,line,-1,-2);if(divider)thinRule(parent);
+    }
+
     private LinearLayout cleanScreen(){
         LinearLayout root=column();root.setBackgroundColor(BG);root.setPadding(dp(18),v(12),dp(18),v(10));
         LinearLayout header=row();LinearLayout heading=column();add(heading,txt("Clean",29,INK,700),-1,-2);space(heading,4);
@@ -1522,6 +1597,7 @@ public final class MainActivity extends Activity {
         restoreAgentWindow();
         if(agentVisible&&agentShortcut){agentShortcut=false;scanResult=null;agentLiveResult=null;agentResultChat="";showAgent();return;}
         scanResult=null; // protection rules may change in settings; re-scan before recommending again.
+        if(toolsScroll!=null){toolsScrollY=toolsScroll.getScrollY();toolsScroll=null;}
         if(cleanScroll!=null){cleanScrollY=cleanScroll.getScrollY();cleanScroll=null;}
         aboutVisible=false;aboutScroll=null;policyVisible=false;termsVisible=false;policyScroll=null;feedbackVisible=false;helpVisible=false;hideHelpKeyboard();permissionsVisible=false;privacyVisible=false;
         historyDetailId=null;historyScroll=null;historyScrollY=0;historyVisible=false;filesVisible=false;foldersVisible=false;protectionVisible=false;agentPrefsVisible=false;settingsVisible=true;setContentView(settingsScreen());
@@ -1533,7 +1609,7 @@ public final class MainActivity extends Activity {
         header.addView(centered("Settings",17,INK,600),new FrameLayout.LayoutParams(-1,-1));
         FrameLayout back=new FrameLayout(this);
         back.addView(new Glyph(this,"back",INK),new FrameLayout.LayoutParams(dp(24),dp(24),Gravity.CENTER));
-        back.setContentDescription(tr(agentVisible?"Back to Agent":cleanVisible?"Back to Clean":"Back to Home"));tap(back,WHITE,22,this::returnToDashboard);
+        back.setContentDescription(tr(toolsVisible?"Back to Tools":agentVisible?"Back to Agent":cleanVisible?"Back to Clean":"Back to Home"));tap(back,WHITE,22,this::returnToDashboard);
         header.addView(back,new FrameLayout.LayoutParams(dp(44),dp(44),Gravity.START|Gravity.CENTER_VERTICAL));
         add(root,header,-1,dp(44));
         ScrollView scroll=new ScrollView(this);scroll.setVerticalScrollBarEnabled(false);
@@ -3070,6 +3146,7 @@ public final class MainActivity extends Activity {
         add(c,approve,-1,dp(51)); return c;
     }
     private void showHome() {
+        toolsVisible=false;toolsScroll=null;toolsScrollY=0;
         if(agentBusy())cancelAgentWork();agentVisible=false;agentTaskVisible=false;agentTaskOrigin=false;agentShortcut=false;restoreAgentWindow();
         scanResult=null;scanVisible=false;scanReviewVisible=false;
         cleanVisible=false;cleanScroll=null;cleanScrollY=0;
@@ -3118,6 +3195,7 @@ public final class MainActivity extends Activity {
         if(protectionVisible || agentPrefsVisible){openSettings();return;}
         if(settingsVisible || storageVisible){returnToDashboard();return;}
         if(completionVisible){showHome();return;}
+        if(toolsVisible){showHome();return;}
         if(agentVisible&&agentBusy()){cancelAgentWork();return;}
         if(agentTaskVisible||agentVisible&&activeChat!=null){showHome();return;}
         if(agentVisible){showHome();return;}
@@ -3842,10 +3920,10 @@ public final class MainActivity extends Activity {
         pad(pill,4,4); outer.addView(pill,new LinearLayout.LayoutParams(0,dp(64),1f));
         String[] labels={"Home","Clean","Agent"}; String[] icons={"home","sparkles","bot"};
         for(int i=0;i<labels.length;i++){
-            final String label=labels[i]; LinearLayout item=navItem(label,icons[i],agentVisible?i==2:cleanVisible?i==1:i==0);
+            final String label=labels[i]; LinearLayout item=navItem(label,icons[i],!toolsVisible&&(agentVisible?i==2:cleanVisible?i==1:i==0));
             pill.addView(item,new LinearLayout.LayoutParams(0,-1,1f));
         }
-        gap(outer,8); LinearLayout tools=navItem("Tools","tools",false);
+        gap(outer,8); LinearLayout tools=navItem("Tools","tools",toolsVisible);
         add(outer,tools,dp(64),dp(64)); return outer;
     }
     private LinearLayout navItem(String label,String icon,boolean active) {
@@ -3858,7 +3936,7 @@ public final class MainActivity extends Activity {
             if(label.equals("Home"))showHome();
             else if(label.equals("Clean")){agentTaskOrigin=false;showClean();}
             else if(label.equals("Agent"))showAgent();
-            else demo(label,label+" is reserved for the next design phase.");
+            else if(label.equals("Tools"))showTools();
         });
         l.setContentDescription(tr(label)+(active?", selected":"")); return l;
     }
@@ -3926,6 +4004,9 @@ public final class MainActivity extends Activity {
                 case "bot": c.drawRoundRect(new RectF(4,7,20,19),4,4,p);path(c,12,7,12,3);
                     p.setStyle(Paint.Style.FILL);c.drawCircle(9,13,1.3f,p);c.drawCircle(15,13,1.3f,p);break;
                 case "tools": for(int i=0;i<2;i++)for(int j=0;j<2;j++)c.drawCircle(6+i*12,6+j*12,3.4f,p);break;
+                case "tool_swipe": c.drawRoundRect(new RectF(7,4,21,20),3,3,p);path(c,4,7,3,7,3,21,17,21);path(c,10,15,13,12,16,15,18,13);c.drawCircle(11,9,1,p);break;
+                case "tool_speaker": path(c,3,9,7,9,12,5,12,19,7,15,3,15,3,9);c.drawArc(new RectF(8,7,19,17),-55,110,false,p);c.drawArc(new RectF(5,3,23,21),-55,110,false,p);break;
+                case "tool_speed": c.drawArc(new RectF(3,3,21,21),145,250,false,p);path(c,12,12,17,7);c.drawCircle(12,12,1.3f,p);path(c,8,18,16,18);break;
                 case "crown":path(c,2,6,7,11,12,4,17,11,22,6,19,17,5,17,2,6);path(c,5,21,19,21);break;
                 case "back":path(c,15,5,8,12,15,19);break;
                 case "copy": c.drawRoundRect(new RectF(7,7,21,21),3,3,p);path(c,17,3,3,3,3,17);break;
