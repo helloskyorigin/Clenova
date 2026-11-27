@@ -1,0 +1,6 @@
+<resources>
+    <style name="ClenovaLaunchTheme" parent="@style/ClenovaTheme">
+        <item name="android:windowBackground">#FEFEFE</item>
+        <item name="android:navigationBarColor">#FEFEFE</item>
+    </style>
+</resources>

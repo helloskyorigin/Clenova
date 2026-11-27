@@ -143,8 +143,13 @@ public final class MainActivity extends Activity {
     private AppPreferences prefs;
     private android.widget.PopupWindow preferencePopup;
     private boolean dark;
+    private LaunchSplashView launchSplash;
+    private final android.os.Handler splashHandler=new android.os.Handler(android.os.Looper.getMainLooper());
+    private long splashDeadline;
+    private final Runnable finishSplash=()->{if(launchSplash==null||isFinishing()||isDestroyed())return;launchSplash=null;applyPalette();setContentView(home());};
 
     @Override public void onCreate(Bundle state) {
+        setTheme(R.style.ClenovaTheme);
         super.onCreate(state);
         prefs=new AppPreferences(this);
         agentChats=new AgentChatStore(this);activeChat=agentChats.current();
@@ -184,7 +189,11 @@ public final class MainActivity extends Activity {
         if(toolsVisible){showTools();return;}
         if(agentVisible){showAgent();return;}
         if(cleanVisible){showClean();return;}
-        setContentView(home());
+        if(state==null){
+            getWindow().setNavigationBarColor(LaunchSplashView.BACKGROUND);
+            if(android.os.Build.VERSION.SDK_INT>=27)getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR);
+            launchSplash=new LaunchSplashView(this);setContentView(launchSplash);
+        }else setContentView(home());
     }
     @Override protected void onSaveInstanceState(Bundle state){
         super.onSaveInstanceState(state);
@@ -240,6 +249,7 @@ public final class MainActivity extends Activity {
         else if(scanResult!=null){scanResult=null;if(cleanVisible&&!settingsVisible)showClean();}
     }
     @Override protected void onDestroy(){
+        splashHandler.removeCallbacks(finishSplash);launchSplash=null;
         agentSessionHandler.removeCallbacks(agentExpiry);
         if(agentScan!=null){agentScan.cancel();agentScan=null;}agentGeneration++;if(agentDrawer!=null)agentDrawer.dismiss();relayToken="";
         if(cleanupAnimation!=null){
@@ -1762,8 +1772,14 @@ public final class MainActivity extends Activity {
     private void openAgentPreferences(){
         settingsVisible=true;agentPrefsVisible=true;setContentView(agentPreferencesScreen());
     }
+    @Override protected void onPause(){splashHandler.removeCallbacks(finishSplash);super.onPause();}
     @Override protected void onResume(){
-        super.onResume();agentForeground=true;boolean expired=expireAgentSession();scheduleAgentExpiry();if(agentVisible&&!settingsVisible&&!agentPermissionPending&&!agentTaskOrigin&&(expired||activeChat!=null)&&!agentCloudBusy&&agentScan==null)showAgent();
+        super.onResume();
+        if(launchSplash!=null){
+            if(splashDeadline==0){splashDeadline=android.os.SystemClock.elapsedRealtime()+(android.animation.ValueAnimator.areAnimatorsEnabled()?700:0);launchSplash.reveal();}
+            splashHandler.removeCallbacks(finishSplash);splashHandler.postDelayed(finishSplash,Math.max(0,splashDeadline-android.os.SystemClock.elapsedRealtime()));
+        }
+        agentForeground=true;boolean expired=expireAgentSession();scheduleAgentExpiry();if(agentVisible&&!settingsVisible&&!agentPermissionPending&&!agentTaskOrigin&&(expired||activeChat!=null)&&!agentCloudBusy&&agentScan==null)showAgent();
         if(unusedExternal){unusedExternal=false;if(unusedVisible&&!unusedUninstallPending)refreshUnusedApps();}
         if(downloadsOpening){downloadsOpening=false;if(downloadsVisible)refreshDownloads();}
         if(permissionsVisible&&devicePermissions!=null)openAppPermissions();
@@ -3180,6 +3196,7 @@ public final class MainActivity extends Activity {
         setContentView(reviewScreen());
     }
     @Override public void onBackPressed() {
+        if(launchSplash!=null){splashHandler.removeCallbacks(finishSplash);launchSplash=null;finish();return;}
         if(downloadsBusy){if(downloadsSignal!=null)downloadsSignal.cancel();return;}
         if(cleaning||unusedUninstallPending)return;
         if(unusedReview){if(unusedSignal!=null){unusedSignal.cancel();unusedSignal=null;unusedGeneration++;}showUnusedApps();return;}

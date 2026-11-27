@@ -1,0 +1,9 @@
+<resources>
+    <style name="ClenovaLaunchTheme" parent="@style/ClenovaTheme">
+        <item name="android:windowBackground">#FEFEFE</item>
+        <item name="android:windowSplashScreenBackground">#FEFEFE</item>
+        <item name="android:windowSplashScreenAnimatedIcon">@drawable/clenova_logo</item>
+        <item name="android:navigationBarColor">#FEFEFE</item>
+        <item name="android:windowLightNavigationBar">true</item>
+    </style>
+</resources>
