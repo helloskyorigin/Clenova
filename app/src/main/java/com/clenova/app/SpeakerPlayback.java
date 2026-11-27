@@ -78,11 +78,11 @@ final class SpeakerPlayback {
                     .setEncoding(AudioFormat.ENCODING_PCM_16BIT).setChannelMask(AudioFormat.CHANNEL_OUT_MONO).build())
                 .setBufferSizeInBytes(pcm.length*2).setTransferMode(AudioTrack.MODE_STATIC).build();
             if(track.getState()!=AudioTrack.STATE_NO_STATIC_DATA&&track.getState()!=AudioTrack.STATE_INITIALIZED)throw new IllegalStateException("AudioTrack unavailable");
-            if(track.write(pcm,0,pcm.length,AudioTrack.WRITE_BLOCKING)!=pcm.length)throw new IllegalStateException("Audio buffer incomplete");
+            if(track.write(pcm,0,pcm.length,AudioTrack.WRITE_BLOCKING)!=pcm.length||track.getState()!=AudioTrack.STATE_INITIALIZED)throw new IllegalStateException("Audio buffer incomplete");
             frames=pcm.length;
             // Start muted; only enable sound once the actual built-in speaker route is confirmed.
             if(track.setVolume(0f)!=AudioTrack.SUCCESS)throw new IllegalStateException("Could not mute initial playback");
-            routing=router->{if(!active||epoch!=token)return;if(audible&&!speakerRoute())stop("Audio output changed. Playback stopped.");};
+            routing=router->{if(!active||epoch!=token)return;checkDevices(token);};
             track.addOnRoutingChangedListener(routing,main);
             devices=new AudioDeviceCallback(){
                 @Override public void onAudioDevicesAdded(AudioDeviceInfo[] added){checkDevices(token);}
@@ -100,8 +100,8 @@ final class SpeakerPlayback {
         }catch(RuntimeException e){stop("Could not play through the built-in speaker.");}
     }
     private void checkDevices(int token){
-        if(!active||epoch!=token)return;String reason=readyReason();
-        if(!reason.isEmpty())stop(reason);else if(audible&&!speakerRoute())stop("Audio output changed. Playback stopped.");
+        if(!active||epoch!=token)return;try{String reason=readyReason();
+        if(!reason.isEmpty())stop(reason);else if(audible&&!speakerRoute())stop("Audio output changed. Playback stopped.");}catch(RuntimeException e){stop("Audio route could not be verified.");}
     }
     private final Runnable tick=new Runnable(){@Override public void run(){
         if(!active||track==null)return;
