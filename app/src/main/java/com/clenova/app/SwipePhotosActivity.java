@@ -39,7 +39,8 @@ public final class SwipePhotosActivity extends Activity {
     private LinearLayout controls;
     private SmartMediaScan.Item shown;
     private float downX,downY;
-    private boolean dragging;
+    private boolean dragging, resumed;
+    private TextView swipeHint;
     private int dp(float n){return Math.round(n*getResources().getDisplayMetrics().density);}
     @Override public void onCreate(Bundle state){
         super.onCreate(state);
@@ -105,8 +106,10 @@ public final class SwipePhotosActivity extends Activity {
     private void load(){
         clear();loading=true;status("Loading your photos…",null);final int token=epoch;final SmartMediaScan current=scan();job=current;
         worker.execute(()->{try{
-            SmartMediaScan.Gallery result=current.gallery();Map<String,String> snapshot=new HashMap<>();
-            if(Build.VERSION.SDK_INT>=30)for(SmartMediaScan.Item i:result.items)if(i.volume!=null&&!snapshot.containsKey(i.volume)){try{snapshot.put(i.volume,MediaStore.getVersion(this,i.volume));}catch(RuntimeException e){snapshot.put(i.volume,"");}}
+            Map<String,String> snapshot=new HashMap<>();
+            if(Build.VERSION.SDK_INT>=30)for(String volume:MediaStore.getExternalVolumeNames(this)){try{snapshot.put(volume,MediaStore.getVersion(this,volume));}catch(RuntimeException e){snapshot.put(volume,"");}}
+            SmartMediaScan.Gallery result=current.gallery();
+            if(Build.VERSION.SDK_INT>=30)for(String volume:new ArrayList<>(snapshot.keySet())){try{if(!snapshot.get(volume).equals(MediaStore.getVersion(this,volume)))snapshot.put(volume,"");}catch(RuntimeException e){snapshot.put(volume,"");}}
             runOnUiThread(()->{if(destroyed||token!=epoch)return;job=null;loading=false;items.addAll(result.items);versions.putAll(snapshot);partial=result.partial;render();});
         }catch(Exception e){runOnUiThread(()->{if(destroyed||token!=epoch)return;job=null;loading=false;if(!SmartMediaScan.hasPhotoAccess(this))accessScreen();else status("Could not read your photos.",this::load);});}});
     }
@@ -142,8 +145,10 @@ public final class SwipePhotosActivity extends Activity {
             FrameLayout frame=new FrameLayout(this);frame.setBackground(rounded(card,24));frame.setClipToOutline(true);
             photo=new ImageView(this);photo.setScaleType(ImageView.ScaleType.FIT_CENTER);photo.setContentDescription("Current photo");frame.addView(photo,new FrameLayout.LayoutParams(-1,-1));
             photoStatus=label("Loading photo…",15,muted,true);photoStatus.setGravity(Gravity.CENTER);frame.addView(photoStatus,new FrameLayout.LayoutParams(-1,-1));
+            swipeHint=label("",17,0xffffffff,true);swipeHint.setGravity(Gravity.CENTER);swipeHint.setPadding(dp(16),dp(8),dp(16),dp(8));swipeHint.setVisibility(View.GONE);
+            FrameLayout.LayoutParams hintParams=new FrameLayout.LayoutParams(-2,-2,Gravity.TOP|Gravity.CENTER_HORIZONTAL);hintParams.topMargin=dp(18);frame.addView(swipeHint,hintParams);
             l.addView(frame,new LinearLayout.LayoutParams(-1,0,1));gap(l,6);
-            LinearLayout info=row();weight(info,label(date(current)+(eligible(current)?"":" · Protected / read-only"),12,muted,false));TextView zoom=button("⤢",blue,card,()->showPreview(current));zoom.setContentDescription("Expand photo");add(info,zoom,dp(44),dp(44));add(l,info,-1,dp(44));
+            LinearLayout info=row();weight(info,label("Modified "+date(current)+(eligible(current)?"":" · Protected / read-only"),12,muted,false));TextView zoom=button("⤢",blue,card,()->showPreview(current));zoom.setContentDescription("Expand photo");add(info,zoom,dp(44),dp(44));add(l,info,-1,dp(44));
             controls=row();controls.setGravity(Gravity.CENTER);removeButton=decisionControl(controls,"×","Remove",red,card,REMOVE);gap(controls,24);decisionControl(controls,"»","Skip",muted,card,SKIP);gap(controls,24);decisionControl(controls,"✓","Keep",0xffffffff,0xff34c759,KEEP);add(l,controls,-1,-2);
             removeButton.setEnabled(false);removeButton.setAlpha(.35f);
             photo.setOnTouchListener((v,event)->gesture(event,current));
@@ -178,19 +183,19 @@ public final class SwipePhotosActivity extends Activity {
         if(animating||shown!=current||!previewReady)return false;
         switch(e.getActionMasked()){
             case MotionEvent.ACTION_DOWN:downX=e.getRawX();downY=e.getRawY();dragging=false;return true;
-            case MotionEvent.ACTION_MOVE:float dx=e.getRawX()-downX;if(Math.abs(dx)>dp(12)&&Math.abs(dx)>Math.abs(e.getRawY()-downY))dragging=true;if(dragging){photo.setTranslationX(dx*.75f);photo.setRotation(dx/dp(18));photo.setAlpha(Math.max(.5f,1-Math.abs(dx)/(float)Math.max(1,photo.getWidth())));}return true;
+            case MotionEvent.ACTION_MOVE:float dx=e.getRawX()-downX;if(Math.abs(dx)>dp(12)&&Math.abs(dx)>Math.abs(e.getRawY()-downY))dragging=true;if(dragging){photo.setTranslationX(dx*.75f);photo.setRotation(dx/dp(18));photo.setAlpha(Math.max(.5f,1-Math.abs(dx)/(float)Math.max(1,photo.getWidth())));swipeHint.setText(dx>0?"KEEP":eligible(current)?"REMOVE":"PROTECTED");swipeHint.setBackground(rounded(dx>0?0xff249d42:eligible(current)?0xffe23c32:0xff777777,10));swipeHint.setVisibility(View.VISIBLE);}return true;
             case MotionEvent.ACTION_UP:float delta=e.getRawX()-downX;if(dragging&&Math.abs(delta)>dp(82)){if(delta>0){decide(KEEP);return true;}if(eligible(current)){decide(REMOVE);return true;}toast("This photo is protected or read-only");}else if(!dragging)showPreview(current);
                 resetDrag();return true;
             case MotionEvent.ACTION_CANCEL:resetDrag();return true;
             default:return true;
         }
     }
-    private void resetDrag(){photo.animate().translationX(0).rotation(0).alpha(1).setDuration(150).start();dragging=false;}
+    private void resetDrag(){if(swipeHint!=null)swipeHint.setVisibility(View.GONE);photo.animate().translationX(0).rotation(0).alpha(1).setDuration(150).start();dragging=false;}
     private void decide(int action){
         if(animating||reviewing||shown==null||loading)return;SmartMediaScan.Item current=shown;
         if(action==REMOVE&&(!previewReady||!eligible(current))){toast("Review an eligible photo first");return;}
         if(action==REMOVE&&selected().size()>=MAX_SELECTION){toast("Review up to 100 selected photos first");resetDrag();return;}
-        decisions.put(key(current),action);undo.addLast(current);animating=true;photo.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP);
+        decisions.put(key(current),action);undo.addLast(current);animating=true;if(swipeHint!=null&&action!=SKIP){swipeHint.setText(action==KEEP?"KEEP":"REMOVE");swipeHint.setBackground(rounded(action==KEEP?0xff249d42:0xffe23c32,10));swipeHint.setVisibility(View.VISIBLE);}photo.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP);
         final int token=imageEpoch;float direction=action==REMOVE?-1:action==KEEP?1:0;
         photo.animate().translationX(direction*photo.getWidth()).rotation(direction*12).alpha(0).setDuration(160).withEndAction(()->{if(!destroyed&&token==imageEpoch)render();}).start();
     }
@@ -224,7 +229,7 @@ public final class SwipePhotosActivity extends Activity {
             SmartMediaScan.Gallery fresh=current.gallery();Map<String,SmartMediaScan.Item> map=new HashMap<>();for(SmartMediaScan.Item i:fresh.items)map.put(key(i),i);
             ArrayList<Uri> uris=new ArrayList<>();
             for(SmartMediaScan.Item i:request){String version=i.volume==null?"":versions.getOrDefault(i.volume,"");if(version.isEmpty()||!version.equals(MediaStore.getVersion(this,i.volume))||!SmartMediaScan.sameGalleryItem(i,map.get(key(i))))throw new IllegalStateException("Selection changed");uris.add(i.uri);}
-            runOnUiThread(()->{if(destroyed||token!=epoch)return;job=null;loading=false;if(!SmartMediaScan.hasPhotoAccess(this)){clear();accessScreen();return;}
+            runOnUiThread(()->{if(destroyed||token!=epoch)return;job=null;loading=false;if(!resumed){clear();reload=true;return;}if(!SmartMediaScan.hasPhotoAccess(this)){clear();accessScreen();return;}
                 try{PendingIntent intent=MediaStore.createTrashRequest(getContentResolver(),uris,true);approvedPending=true;startIntentSenderForResult(intent.getIntentSender(),TRASH,null,0,0,0);}
                 catch(Exception e){approvedPending=false;toast("Android could not open trash approval");review();}
             });
@@ -241,6 +246,7 @@ public final class SwipePhotosActivity extends Activity {
         new AlertDialog.Builder(this,dialogTheme()).setTitle("Leave photo review?").setMessage("Your current choices will be discarded. Nothing will be removed.").setNegativeButton("Stay",null).setPositiveButton("Leave",(d,w)->finish()).show();
     }
     @Override protected void onStop(){super.onStop();if(!permissionPending&&!approvedPending&&!isFinishing()){clear();reload=true;}}
-    @Override protected void onResume(){super.onResume();if(reload&&!approvedPending&&!permissionPending){reload=false;open();}}
+    @Override protected void onPause(){resumed=false;super.onPause();}
+    @Override protected void onResume(){super.onResume();resumed=true;if(reload&&!approvedPending&&!permissionPending){reload=false;open();}}
     @Override protected void onDestroy(){destroyed=true;cancelWork();worker.shutdownNow();previews.shutdownNow();super.onDestroy();}
 }
