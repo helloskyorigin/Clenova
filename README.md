@@ -3,7 +3,7 @@
 Native Android Java prototype. Launches directly into the approved Home screen. Uses sample data only: score 92, 42.8 GB available, 12.4 GB recovered, 4.8 GB proposed recovery. No device permissions or network access. No real scanning, deletion, Agent, billing or other screens yet.
 
 ## Build
-JDK 17, Android SDK 35, Gradle 8.9 (AGP 8.7.3). From the repository root run `gradle :app:assembleDebug`. APK: `app/build/outputs/apk/debug/app-debug.apk`. Import the project in Android Studio using Gradle 8.9. 
+JDK 17, Android SDK 35, Gradle 8.9 (AGP 8.7.3). Run `./gradlew :app:assembleDebug` from the repository root. Windows: `gradlew.bat :app:assembleDebug`. APK: `app/build/outputs/apk/debug/app-debug.apk`. The repository can be imported into Android Studio.
 
 ## Visual acceptance
 - Light gray background, black header, blue Pro pill, circular Settings.
