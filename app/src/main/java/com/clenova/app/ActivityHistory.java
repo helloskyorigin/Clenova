@@ -51,6 +51,12 @@ final class ActivityHistory {
         out.sort(Comparator.comparingLong((Entry e)->e.timestamp).reversed());
         return out;
     }
+    synchronized boolean clear(){return store.edit().remove("events").commit();}
+    synchronized String exportJson() throws JSONException{
+        JSONObject result=new JSONObject();
+        result.put("schemaVersion",1);result.put("exportedAt",System.currentTimeMillis());
+        result.put("events",read());return result.toString(2);
+    }
     synchronized Entry find(String id){
         if(id==null)return null;
         for(Entry e:entries())if(id.equals(e.id))return e;

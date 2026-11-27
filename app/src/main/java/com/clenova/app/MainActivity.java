@@ -47,7 +47,8 @@ public final class MainActivity extends Activity {
     private boolean[] videoDraft;
     private CleanupPreview cleanup;
     private boolean cleaning, completed, completionVisible;
-    private boolean storageVisible, settingsVisible, agentPrefsVisible, protectionVisible, foldersVisible, filesVisible, historyVisible, permissionsVisible;
+    private boolean storageVisible, settingsVisible, agentPrefsVisible, protectionVisible, foldersVisible, filesVisible, historyVisible, permissionsVisible, privacyVisible;
+    private static final int EXPORT_ACTIVITY_HISTORY=95;
     private DevicePermissions devicePermissions;
     private static final int REQUEST_NOTIFICATION_ACCESS=94;
     private ActivityHistory history;
@@ -87,6 +88,7 @@ public final class MainActivity extends Activity {
             if(state.getBoolean("cleanup_running")){startCleanupAnimation();return;}
             if(completed && state.getBoolean("cleanup_visible")){showCompletion(false);return;}
         }
+        if(state!=null && state.getBoolean("privacy_visible")){openPrivacyData();return;}
         if(state!=null && state.getBoolean("permissions_visible")){openAppPermissions();return;}
         if(state!=null && state.getBoolean("history_visible")){if(historyDetailId!=null){openHistoryDetails(historyDetailId);}else openHistory();return;}
         if(state!=null && state.getBoolean("files_visible")){openProtectedFiles();return;}
@@ -107,6 +109,7 @@ public final class MainActivity extends Activity {
         state.putBoolean("files_visible",filesVisible);
         state.putBoolean("history_visible",historyVisible);
         state.putBoolean("permissions_visible",permissionsVisible);
+        state.putBoolean("privacy_visible",privacyVisible);
         state.putInt("history_filter",historyFilter);
         state.putString("cleanup_event_id",cleanupEventId);
         state.putIntArray("cleanup_category_counts",cleanupCategoryCounts);
@@ -247,7 +250,7 @@ public final class MainActivity extends Activity {
         add(l,settings,dp(44),dp(44)); return l;
     }
     private void openSettings(){
-        permissionsVisible=false;
+        permissionsVisible=false;privacyVisible=false;
         historyDetailId=null;historyScroll=null;historyScrollY=0;historyVisible=false;filesVisible=false;foldersVisible=false;protectionVisible=false;agentPrefsVisible=false;settingsVisible=true;setContentView(settingsScreen());
     }
     private LinearLayout settingsScreen(){
@@ -303,6 +306,7 @@ public final class MainActivity extends Activity {
             else if(item[1].equals("Cleanup protection"))tap(line,WHITE,0,this::openProtection);
             else if(item[1].equals("Activity history"))tap(line,WHITE,0,()->{historyFilter=0;historyScrollY=0;openHistory();});
             else if(item[1].equals("App permissions"))tap(line,WHITE,0,this::openAppPermissions);
+            else if(item[1].equals("Privacy & data"))tap(line,WHITE,0,this::openPrivacyData);
             add(group,line,-1,-2);
             if(i<items.length-1){
                 View divider=new View(this);divider.setBackgroundColor(surface(0xffeeeef0));
@@ -401,6 +405,113 @@ public final class MainActivity extends Activity {
         super.onRequestPermissionsResult(requestCode,permissions,grantResults);
         if(requestCode==REQUEST_NOTIFICATION_ACCESS&&permissionsVisible)openAppPermissions();
     }
+    private AlertDialog.Builder privacyDialog(){
+        return new AlertDialog.Builder(this,dark?android.R.style.Theme_Material_Dialog_Alert:android.R.style.Theme_Material_Light_Dialog_Alert);
+    }
+    private void openPrivacyData(){
+        privacyVisible=true;permissionsVisible=false;settingsVisible=true;setContentView(privacyDataScreen());
+    }
+    private LinearLayout privacyDataScreen(){
+        LinearLayout root=column();root.setBackgroundColor(BG);root.setPadding(dp(18),v(12),dp(18),v(12));
+        FrameLayout header=new FrameLayout(this);
+        header.addView(centered("Privacy & data",17,INK,600),new FrameLayout.LayoutParams(-1,-1));
+        FrameLayout back=new FrameLayout(this);
+        back.addView(new Glyph(this,"back",INK),new FrameLayout.LayoutParams(dp(24),dp(24),Gravity.CENTER));
+        back.setContentDescription(tr("Back to Settings"));tap(back,WHITE,22,this::openSettings);
+        header.addView(back,new FrameLayout.LayoutParams(dp(44),dp(44),Gravity.START|Gravity.CENTER_VERTICAL));add(root,header,-1,dp(44));
+        ScrollView scroll=new ScrollView(this);scroll.setVerticalScrollBarEnabled(false);scroll.setOverScrollMode(View.OVER_SCROLL_NEVER);
+        LinearLayout body=column();body.setPadding(0,v(18),0,v(12));scroll.addView(body,new ScrollView.LayoutParams(-1,-2));
+        root.addView(scroll,new LinearLayout.LayoutParams(-1,0,1f));
+        LinearLayout hero=column();hero.setGravity(Gravity.CENTER_HORIZONTAL);
+        FrameLayout mark=new FrameLayout(this);mark.setBackground(round(PALE,20));
+        mark.addView(new Glyph(this,"lock",BLUE),new FrameLayout.LayoutParams(dp(35),dp(35),Gravity.CENTER));
+        add(hero,mark,dp(68),dp(68));space(hero,13);
+        add(hero,centered("Private by design.",25,INK,700),-1,-2);space(hero,7);
+        add(hero,centered("Your device. Your data. Your control.",14,GRAY,400),-1,-2);
+        add(body,hero,-1,-2);space(body,24);
+        LinearLayout principles=card();pad(principles,13,5);
+        add(principles,privacyPrinciple("phone","On-device storage","Preferences and history stored locally"),-1,-2);thinRule(principles);
+        add(principles,privacyPrinciple("cloud_off","No automatic cloud uploads","Clenova does not upload personal files"),-1,-2);thinRule(principles);
+        add(principles,privacyPrinciple("shield","Approval first","No cleanup without your permission"),-1,-2);
+        add(body,principles,-1,-2);space(body,23);
+        add(body,txt("Manage your data",14,GRAY,500),-1,-2);space(body,9);
+        LinearLayout manage=card();pad(manage,13,4);
+        add(manage,privacyAction("database","Local app data",false,this::showLocalData),-1,-2);thinRule(manage);
+        add(manage,privacyAction("download","Export activity history",false,this::confirmHistoryExport),-1,-2);thinRule(manage);
+        add(manage,privacyAction("history","Clear activity history",false,this::confirmClearHistory),-1,-2);thinRule(manage);
+        add(manage,privacyAction("trash","Reset Clenova data",true,this::confirmResetData),-1,-2);
+        add(body,manage,-1,-2);space(body,21);
+        LinearLayout footer=row();footer.setGravity(Gravity.CENTER);
+        add(footer,new Glyph(this,"lock",GRAY),dp(16),dp(16));gap(footer,7);
+        add(footer,txt("Privacy isn't optional.",12,GRAY,400),-2,-2);add(body,footer,-1,-2);
+        return root;
+    }
+    private LinearLayout privacyPrinciple(String icon,String name,String description){
+        LinearLayout line=row();line.setMinimumHeight(dp(64));line.setPadding(0,dp(10),0,dp(10));
+        add(line,new Glyph(this,icon,GREEN),dp(24),dp(24));gap(line,12);
+        LinearLayout copy=column();add(copy,txt(name,15,INK,600),-1,-2);space(copy,5);
+        add(copy,txt(description,12,GRAY,400),-1,-2);weight(line,copy);return line;
+    }
+    private LinearLayout privacyAction(String icon,String name,boolean destructive,Runnable action){
+        int tint=destructive?(dark?0xffff6961:0xffff3b30):BLUE;
+        LinearLayout line=row();line.setMinimumHeight(dp(55));line.setPadding(0,dp(8),0,dp(8));
+        add(line,new Glyph(this,icon,tint),dp(23),dp(23));gap(line,12);
+        weight(line,txt(name,15,destructive?tint:INK,500));gap(line,9);add(line,new Glyph(this,"chevron",GRAY),dp(14),dp(14));
+        line.setContentDescription(tr(name));tap(line,WHITE,10,action);return line;
+    }
+    private void showLocalData(){
+        String message;
+        LocalAppData.Size size=LocalAppData.measure(this);
+        if(size.bytes<0)message=tr("Storage size unavailable");
+        else message=tr(size.complete?"App data including cache":"Saved settings and history on disk")+": "+android.text.format.Formatter.formatFileSize(this,size.bytes);
+        message+="\n\n"+tr("Activity records")+": "+history.entries().size()+"\n"+tr("Protected folders")+": "+protectedFolders.entries().size()+"\n"+tr("Protected files")+": "+protectedFiles.entries().size();
+        privacyDialog().setTitle(tr("Local app data")).setMessage(message).setPositiveButton(tr("Done"),null).show();
+    }
+    private void confirmHistoryExport(){
+        privacyDialog().setTitle(tr("Export activity history"))
+            .setMessage(tr("Export a JSON copy of your history, including recorded file and folder names. Choose where to save it."))
+            .setNegativeButton(tr("Cancel"),null).setPositiveButton(tr("Export"),(d,w)->pickHistoryExport()).show();
+    }
+    private void pickHistoryExport(){
+        android.content.Intent intent=new android.content.Intent(android.content.Intent.ACTION_CREATE_DOCUMENT);
+        intent.addCategory(android.content.Intent.CATEGORY_OPENABLE);intent.setType("application/json");
+        intent.putExtra(android.content.Intent.EXTRA_TITLE,"clenova-activity-"+java.time.LocalDate.now()+".json");
+        try{startActivityForResult(intent,EXPORT_ACTIVITY_HISTORY);}
+        catch(android.content.ActivityNotFoundException e){folderToast("Export picker unavailable");}
+    }
+    private void writeHistoryExport(android.net.Uri uri){
+        try{
+            byte[] payload=history.exportJson().getBytes(java.nio.charset.StandardCharsets.UTF_8);
+            try(java.io.OutputStream out=getContentResolver().openOutputStream(uri,"wt")){
+                if(out==null)throw new java.io.IOException("No output stream");out.write(payload);
+            }
+            folderToast("Activity history exported");
+        }catch(java.io.IOException|org.json.JSONException|RuntimeException e){folderToast("Could not export activity history");}
+    }
+    private void confirmClearHistory(){
+        privacyDialog().setTitle(tr("Clear activity history"))
+            .setMessage(tr("Permanently remove local activity records? Preferences and protection settings will stay unchanged. Exported copies are not affected."))
+            .setNegativeButton(tr("Cancel"),null).setPositiveButton(tr("Clear"),(d,w)->{
+                if(history.clear()){historyDetailId=null;historyScrollY=0;historyScroll=null;folderToast("Activity history cleared");}
+                else folderToast("Could not clear activity history");openPrivacyData();
+            }).show();
+    }
+    private void confirmResetData(){
+        privacyDialog().setTitle(tr("Reset Clenova data"))
+            .setMessage(tr("Reset preferences, protection exclusions and activity history? Personal files, Android permissions and previously exported copies will not be removed."))
+            .setNegativeButton(tr("Cancel"),null).setPositiveButton(tr("Reset"),(d,w)->resetClenovaData()).show();
+    }
+    private void resetClenovaData(){
+        boolean ok=LocalAppData.reset(this);
+        if(cleanupAnimation!=null){cleanupAnimation.removeAllListeners();cleanupAnimation.removeAllUpdateListeners();cleanupAnimation.cancel();cleanupAnimation=null;}
+        cleanup=null;cleanupCategoryCounts=null;cleanupEventId=null;reviewPlan=null;
+        duplicateDraft=null;similarDraft=null;videoDraft=null;
+        duplicateViewing=false;similarViewing=false;videoViewing=false;reviewing=false;
+        cleaning=false;completed=false;completionVisible=false;historyDetailId=null;historyScroll=null;historyScrollY=0;historyFilter=0;
+        prefs=new AppPreferences(this);protectedFolders=new ProtectedFolders(this);protectedFiles=new ProtectedFiles(this);history=new ActivityHistory(this);
+        applyPalette();openPrivacyData();folderToast(ok?"Clenova data reset":"Some app data could not be reset");
+    }
+
     private void openAppPermissions(){
         permissionsVisible=true;settingsVisible=true;setContentView(appPermissionsScreen());
     }
@@ -915,6 +1026,7 @@ public final class MainActivity extends Activity {
     }
     @Override protected void onActivityResult(int requestCode,int resultCode,android.content.Intent data){
         super.onActivityResult(requestCode,resultCode,data);
+        if(requestCode==EXPORT_ACTIVITY_HISTORY){if(resultCode==RESULT_OK&&data!=null&&data.getData()!=null)writeHistoryExport(data.getData());return;}
         if(requestCode==PICK_PROTECTED_FILES){if(resultCode==RESULT_OK&&data!=null)handleProtectedFiles(data);return;}
         if(requestCode!=PICK_PROTECTED_FOLDER||resultCode!=RESULT_OK||data==null||data.getData()==null)return;
         try{
@@ -1169,7 +1281,7 @@ public final class MainActivity extends Activity {
         add(c,approve,-1,dp(51)); return c;
     }
     private void showHome() {
-        permissionsVisible=false;
+        permissionsVisible=false;privacyVisible=false;
         storageVisible=false;
         settingsVisible=false;agentPrefsVisible=false;protectionVisible=false;foldersVisible=false;filesVisible=false;historyVisible=false;
         completionVisible=false;
@@ -1188,7 +1300,7 @@ public final class MainActivity extends Activity {
     }
     @Override public void onBackPressed() {
         if(cleaning)return;
-        if(permissionsVisible){openSettings();return;}
+        if(privacyVisible||permissionsVisible){openSettings();return;}
         if(historyVisible&&historyDetailId!=null){openHistory();return;}
         if(historyVisible){openSettings();return;}
         if(filesVisible || foldersVisible){openProtection();return;}
@@ -2009,6 +2121,10 @@ public final class MainActivity extends Activity {
                 case "more":p.setStyle(Paint.Style.FILL);for(int i=0;i<3;i++)c.drawCircle(12,5+i*7,1.6f,p);break;
                 case "users":c.drawCircle(9,7,3.4f,p);c.drawArc(new RectF(2,12,16,25),180,180,false,p);c.drawArc(new RectF(14,3,21,10),-90,180,false,p);c.drawArc(new RectF(14,12,23,24),-90,90,false,p);break;
                 case "activity":path(c,2,12,6,12,9,5,13,19,16,12,22,12);break;
+                case "cloud_off":path(c,3,3,21,21);c.drawArc(new RectF(2,9,12,19),80,200,false,p);c.drawArc(new RectF(7,3,19,15),180,160,false,p);path(c,18,10,21,12,22,15,20,18);path(c,6,19,15,19);break;
+                case "database":c.drawOval(new RectF(4,2,20,9),p);path(c,4,5,4,19);path(c,20,5,20,19);c.drawArc(new RectF(4,9,20,16),0,180,false,p);c.drawArc(new RectF(4,15,20,22),0,180,false,p);break;
+                case "download":path(c,12,3,12,15,7,10);path(c,12,15,17,10);path(c,3,16,3,21,21,21,21,16);break;
+                case "trash":path(c,3,6,21,6);path(c,9,6,9,3,15,3,15,6);path(c,5,6,6,21,18,21,19,6);path(c,10,10,10,17);path(c,14,10,14,17);break;
                 case "folder":path(c,3,5,10,5,12,8,21,8,21,20,3,20,3,5);break;
                 case "folder_lock":path(c,3,18,3,5,10,5,12,8,21,8,21,12);
                     path(c,3,18,10,18);c.drawRoundRect(new RectF(13,15,22,22),2,2,p);c.drawArc(new RectF(15,10,20,18),180,180,false,p);break;

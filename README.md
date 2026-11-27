@@ -64,3 +64,6 @@ Tap a history row to open a dynamic receipt with recorded timestamp, status, siz
 
 ## App permissions
 Settings > App permissions reads Android runtime permission, notification channel and background restriction status. Refreshes on resume and notification permission result. Notification row requests POST_NOTIFICATIONS on Android 13+ or opens notification settings; app-settings shortcut allows revocation. Media and contacts are not requested in this preview, and files use the Android picker, not broad storage access. Background row explains limitations and opens app settings, without requesting battery exemptions. No new manifest permissions or background scanning added.
+
+## Privacy & data
+Native privacy page with OS-reported app UID data bytes (including cache), labeled fallback to saved preference-file bytes, and real record/exclusion counts. Explicitly confirmed activity history JSON export through ACTION_CREATE_DOCUMENT; destination may be a user-selected cloud provider. Clear history removes local journal only. Reset clears five known Clenova preference stores and in-memory cleanup previews, leaving personal files, Android permissions, system notification channel settings and exported copies untouched. No broad storage permission or automatic uploads added. Errors are reported without claiming success.
