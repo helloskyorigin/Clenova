@@ -88,7 +88,25 @@ adb shell input keyevent 4
 sleep 1
 tools_dump tools_after_photo
 grep -F 'Tools, selected' build/home-evidence/tools_after_photo.xml
-tools_tap build/home-evidence/tools_after_photo.xml 'Internet Speed Test'
+tools_tap build/home-evidence/tools_after_photo.xml 'Contacts Cleaner'
+tools_dump contacts_cleaner
+grep -F 'Contacts Cleaner' build/home-evidence/contacts_cleaner.xml
+grep -F 'Contacts history' build/home-evidence/contacts_cleaner.xml
+if grep -F 'Allow contact access' build/home-evidence/contacts_cleaner.xml; then
+  grep -F 'Nothing is changed or uploaded during scanning.' build/home-evidence/contacts_cleaner.xml
+fi
+tools_tap build/home-evidence/contacts_cleaner.xml 'Contacts history'
+tools_dump contacts_history
+grep -F 'Contacts history' build/home-evidence/contacts_history.xml
+adb shell input keyevent 4
+sleep 1
+tools_dump contacts_return
+grep -F 'Contacts Cleaner' build/home-evidence/contacts_return.xml
+adb shell input keyevent 4
+sleep 1
+tools_dump tools_after_contacts
+grep -F 'Tools, selected' build/home-evidence/tools_after_contacts.xml
+tools_tap build/home-evidence/tools_after_contacts.xml 'Internet Speed Test'
 tools_dump tools_pending
 grep -F 'No action has been performed.' build/home-evidence/tools_pending.xml
 adb shell input keyevent 4
