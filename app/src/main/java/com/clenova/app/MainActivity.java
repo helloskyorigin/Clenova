@@ -371,7 +371,7 @@ public final class MainActivity extends Activity {
     }
     private void requestSmartScan(){
         if(requestingScan||runningScan!=null)return;
-        if(SmartMediaScan.hasAccess(this)){startSmartScan();return;}
+        if(SmartMediaScan.hasAccess(this)&&(!dupAfterScan||SmartMediaScan.hasPhotoAccess(this))){startSmartScan();return;}
         privacyDialog().setTitle(tr("Media access needed"))
             .setMessage(tr("Smart Scan reads only the photos and videos you allow. Nothing is deleted."))
             .setNegativeButton(tr("Cancel"),null).setPositiveButton(tr("Continue"),(d,w)->{
@@ -468,7 +468,7 @@ public final class MainActivity extends Activity {
         if(scanResult==null){showClean();return;}
         scanReviewVisible=true;scanVisible=true;LinearLayout root=scanShell("Review cleanup",this::showScanResults),body=scanBody(root);
         add(body,txt("Review selected media",21,INK,700),-1,-2);space(body,8);
-        add(body,txt("Read-only review. File deletion will be enabled in a later phase.",13,GRAY,400),-1,-2);space(body,14);
+        add(body,txt("This combined review is read-only. Open Duplicate photos for the separate Android trash workflow.",13,GRAY,400),-1,-2);space(body,14);
         for(int i=0;i<3;i++)if(scanSelected[i]){
             add(body,txt(SmartMediaScan.LABELS[i],15,INK,600),-1,-2);space(body,8);
             LinearLayout group=card();int shown=0;
@@ -512,11 +512,11 @@ public final class MainActivity extends Activity {
         // Bound UI work: paginate groups, and each group can reveal its remaining photos by a separate dialog.
         int pages=Math.max(1,(groups.size()+5)/6);dupPage=Math.max(0,Math.min(dupPage,pages-1));
         LinearLayout section=row();weight(section,txt("Duplicate groups",17,INK,600));
-        TextView select=txt(realDupSelected.isEmpty()?"Select all":"Deselect all",13,BLUE,600);
+        TextView select=txt(realDupSelected.isEmpty()?(scanResult.groups.get(0).size()>DuplicateApproval.MAX_BATCH?"Select 100":"Select all"):"Deselect all",13,BLUE,600);
         tap(select,BG,8,()->{if(!realDupSelected.isEmpty())realDupSelected.clear();else for(SmartMediaScan.Item i:scanResult.groups.get(0)){if(realDupSelected.size()>=DuplicateApproval.MAX_BATCH)break;realDupSelected.add(i.uri.toString());}showRealDuplicates();});add(section,select,-2,dp(44));add(body,section,-1,-2);
         TextView count=txt("",12,GRAY,400),amount=txt("",22,INK,700),review=centered("Review & clean",14,Color.WHITE,600);
         if(groups.isEmpty()){
-            LinearLayout empty=card();add(empty,centered("No removable duplicates found",17,INK,600),-1,-2);space(empty,8);add(empty,centered("Only verified identical copies are suggested.",13,GRAY,400),-1,-2);add(body,empty,-1,-2);
+            LinearLayout empty=card();add(empty,centered(scanResult.imagesScanned?"No removable duplicates found":"Photo access needed",17,INK,600),-1,-2);space(empty,8);add(empty,centered("Only verified identical copies are suggested.",13,GRAY,400),-1,-2);add(body,empty,-1,-2);
         }
         for(int g=dupPage*6;g<Math.min(groups.size(),(dupPage+1)*6);g++){
             SmartMediaScan.DuplicateGroup group=groups.get(g);LinearLayout card=card();pad(card,12,12);
@@ -980,7 +980,7 @@ public final class MainActivity extends Activity {
         LinearLayout intro=card();add(intro,txt("A smarter phone experience.",19,INK,700),-1,-2);space(intro,9);
         TextView message=txt("Clenova is built to make phone management effortless, intelligent and personal. Less clutter, more space, and complete control over what matters to you.",14,GRAY,400);
         message.setLineSpacing(dp(4),1f);add(intro,message,-1,-2);
-        if(PUBLIC_LISTING_URL.isEmpty()){space(intro,9);add(intro,txt("Preview build · Manual media scan is read-only. Home cleanup is simulated.",12,GRAY,400),-1,-2);}
+        if(PUBLIC_LISTING_URL.isEmpty()){space(intro,9);add(intro,txt("Preview build · Manual media scanning and approved duplicate trash are available. Home cleanup is simulated.",12,GRAY,400),-1,-2);}
         add(body,intro,-1,-2);space(body,15);
         LinearLayout principles=card();pad(principles,14,5);
         add(principles,aboutPrinciple("shield","Privacy by design"),-1,-2);thinRule(principles);
@@ -1203,7 +1203,7 @@ public final class MainActivity extends Activity {
     }
 
     private static final String[][] HELP_FAQS={{"How does the AI Agent work?","The Agent is designed to find cleanup opportunities for your approval. Home shows sample recommendations; Smart Scan reads accessible media on request. Automatic scanning is not active yet."},
-        {"Can Clenova delete files automatically?","No. Cleanup requires your approval. In this preview, cleanup is simulated and no personal files are deleted."},
+        {"Can Clenova delete files automatically?","No. Home cleanup is simulated. Duplicate copies can be moved to Android trash only after your review and Android approval on Android 11 or later."},
         {"How do I protect important files?","Open Settings > Cleanup protection > Protected files or Protected folders. Select items with the Android picker. Exclusions are saved locally; the real cleanup engine is not active yet."},
         {"Why does Clenova need permissions?","Permissions support specific features. Open Settings > App permissions to manage access. Smart Scan requests optional photo and video access. Notification access is separate; file selection uses the Android picker."},
         {"Is my personal data safe?","Preferences, exclusions and activity history are stored locally. Clenova does not automatically upload personal files. You can export or clear your history in Privacy & data."},

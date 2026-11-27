@@ -43,6 +43,10 @@ final class SmartMediaScan {
     void cancel(){cancel.cancel();}
     private void check(){cancel.throwIfCanceled();}
     private boolean granted(String p){return context.checkSelfPermission(p)==android.content.pm.PackageManager.PERMISSION_GRANTED;}
+    static boolean hasPhotoAccess(Context c){
+        if(Build.VERSION.SDK_INT>=33)return c.checkSelfPermission(android.Manifest.permission.READ_MEDIA_IMAGES)==0||(Build.VERSION.SDK_INT>=34&&c.checkSelfPermission(android.Manifest.permission.READ_MEDIA_VISUAL_USER_SELECTED)==0);
+        return c.checkSelfPermission(android.Manifest.permission.READ_EXTERNAL_STORAGE)==0;
+    }
     static boolean hasAccess(Context c){
         if(Build.VERSION.SDK_INT>=33)return c.checkSelfPermission(android.Manifest.permission.READ_MEDIA_IMAGES)==0||c.checkSelfPermission(android.Manifest.permission.READ_MEDIA_VIDEO)==0||(Build.VERSION.SDK_INT>=34&&c.checkSelfPermission(android.Manifest.permission.READ_MEDIA_VISUAL_USER_SELECTED)==0);
         return c.checkSelfPermission(android.Manifest.permission.READ_EXTERNAL_STORAGE)==0;
