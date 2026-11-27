@@ -47,7 +47,7 @@ public final class MainActivity extends Activity {
     private boolean[] videoDraft;
     private CleanupPreview cleanup;
     private boolean cleaning, completed, completionVisible;
-    private boolean storageVisible;
+    private boolean storageVisible, settingsVisible;
     private ValueAnimator cleanupAnimation;
 
     @Override public void onCreate(Bundle state) {
@@ -65,12 +65,14 @@ public final class MainActivity extends Activity {
             if(state.getBoolean("cleanup_running")){startCleanupAnimation();return;}
             if(completed && state.getBoolean("cleanup_visible")){showCompletion(false);return;}
         }
+        if(state!=null && state.getBoolean("settings_visible")){openSettings();return;}
         if(state!=null && state.getBoolean("storage_visible")){openStorage();return;}
         setContentView(home());
     }
     @Override protected void onSaveInstanceState(Bundle state){
         super.onSaveInstanceState(state);
         state.putBoolean("storage_visible",storageVisible);
+        state.putBoolean("settings_visible",settingsVisible);
         if(cleanup!=null){
             state.putDoubleArray("cleanup_amounts",cleanup.amounts());
             state.putInt("cleanup_count",cleanup.count);
@@ -176,9 +178,71 @@ public final class MainActivity extends Activity {
         FrameLayout settings=new FrameLayout(this);
         settings.addView(new Glyph(this,"settings",INK),new FrameLayout.LayoutParams(dp(23),dp(23),Gravity.CENTER));
         settings.setContentDescription("Settings");
-        tap(settings,WHITE,24,()->demo("Settings","Settings will be implemented in a later screen."));
+        tap(settings,WHITE,24,this::openSettings);
         add(l,settings,dp(44),dp(44)); return l;
     }
+    private void openSettings(){
+        settingsVisible=true;setContentView(settingsScreen());
+    }
+    private LinearLayout settingsScreen(){
+        LinearLayout root=column();root.setBackgroundColor(BG);
+        root.setPadding(dp(18),v(12),dp(18),v(12));
+        FrameLayout header=new FrameLayout(this);
+        header.addView(centered("Settings",17,INK,600),new FrameLayout.LayoutParams(-1,-1));
+        FrameLayout back=new FrameLayout(this);
+        back.addView(new Glyph(this,"back",INK),new FrameLayout.LayoutParams(dp(24),dp(24),Gravity.CENTER));
+        back.setContentDescription("Back to Home");tap(back,WHITE,22,this::showHome);
+        header.addView(back,new FrameLayout.LayoutParams(dp(44),dp(44),Gravity.START|Gravity.CENTER_VERTICAL));
+        add(root,header,-1,dp(44));
+        ScrollView scroll=new ScrollView(this);scroll.setVerticalScrollBarEnabled(false);
+        scroll.setOverScrollMode(View.OVER_SCROLL_NEVER);
+        LinearLayout body=column();body.setPadding(0,v(15),0,v(12));
+        scroll.addView(body,new ScrollView.LayoutParams(-1,-2));
+        root.addView(scroll,new LinearLayout.LayoutParams(-1,0,1f));
+        addSettingsGroup(body,"Preferences",new String[][]{
+            {"moon","Appearance","System"},{"language","Language","English"},{"bell","Notifications",""}
+        });
+        addSettingsGroup(body,"AI Agent",new String[][]{
+            {"bot","Agent preferences",""},{"shield","Cleanup protection",""},{"history","Activity history",""}
+        });
+        addSettingsGroup(body,"Privacy & security",new String[][]{
+            {"lock","App permissions",""},{"shield","Privacy & data",""}
+        });
+        addSettingsGroup(body,"Support",new String[][]{
+            {"help","Help & support",""},{"message","Send feedback",""},{"star","Rate Clenova",""}
+        });
+        addSettingsGroup(body,"About",new String[][]{
+            {"document","Privacy policy",""},{"document_check","Terms of use",""},{"info","About Clenova",""}
+        });
+        space(body,8);
+        add(body,centered("Clenova",19,INK,700),-1,-2);space(body,5);
+        add(body,centered("Version 1.0.0",12,GRAY,400),-1,-2);space(body,5);
+        add(body,centered("Your phone. On autopilot.",12,GRAY,400),-1,-2);
+        return root;
+    }
+    private void addSettingsGroup(LinearLayout body,String title,String[][] items){
+        add(body,txt(title,14,GRAY,500),-1,-2);space(body,8);
+        LinearLayout group=column();group.setBackground(round(WHITE,16));group.setClipToOutline(true);
+        for(int i=0;i<items.length;i++){
+            String[] item=items[i];LinearLayout line=row();
+            line.setPadding(dp(13),dp(8),dp(13),dp(8));line.setMinimumHeight(dp(52));
+            add(line,new Glyph(this,item[0],BLUE),dp(22),dp(22));gap(line,12);
+            weight(line,txt(item[1],15,INK,500));
+            if(!item[2].isEmpty()){gap(line,6);add(line,txt(item[2],12,GRAY,400),-2,-2);}
+            gap(line,9);add(line,new Glyph(this,"chevron",0xffc7c7cc),dp(14),dp(14));
+            // Only the main Settings page is implemented in this phase.
+            // No settings value, permission or external account is changed.
+            line.setContentDescription(item[1]+(item[2].isEmpty()?"":", "+item[2])+", preview");
+            add(group,line,-1,-2);
+            if(i<items.length-1){
+                View divider=new View(this);divider.setBackgroundColor(0xffeeeef0);
+                LinearLayout.LayoutParams lp=new LinearLayout.LayoutParams(-1,dp(1));
+                lp.leftMargin=dp(47);group.addView(divider,lp);
+            }
+        }
+        add(body,group,-1,-2);space(body,18);
+    }
+
     private LinearLayout hero() {
         LinearLayout l=column(); l.setGravity(Gravity.CENTER_HORIZONTAL);
         LinearLayout state=row(); state.setGravity(Gravity.CENTER);
@@ -324,6 +388,7 @@ public final class MainActivity extends Activity {
     }
     private void showHome() {
         storageVisible=false;
+        settingsVisible=false;
         completionVisible=false;
         reviewing = false;
         setContentView(home());
@@ -336,7 +401,7 @@ public final class MainActivity extends Activity {
     }
     @Override public void onBackPressed() {
         if(cleaning)return;
-        if(storageVisible){showHome();return;}
+        if(settingsVisible || storageVisible){showHome();return;}
         if(completionVisible){showHome();return;}
         if (videoViewing) leaveVideos(false); else if (similarViewing) leaveSimilar(false); else if (duplicateViewing) leaveDuplicates(false); else if (reviewing) showHome(); else super.onBackPressed();
     }
@@ -1136,6 +1201,23 @@ public final class MainActivity extends Activity {
                 case "apps": for(int i=0;i<2;i++)for(int j=0;j<2;j++)c.drawRoundRect(new RectF(3+i*10,3+j*10,10+i*10,10+j*10),2,2,p);break;
                 case "document":path(c,5,2,14,2,20,8,20,22,5,22,5,2);path(c,14,2,14,8,20,8);path(c,8,13,17,13);path(c,8,17,17,17);break;
                 case "phone":c.drawRoundRect(new RectF(6,2,18,22),3,3,p);path(c,10,18,14,18);break;
+                case "chevron":path(c,9,5,16,12,9,19);break;
+                case "moon":{
+                    Path a=new Path();a.moveTo(13,2);a.cubicTo(3,1,0,14,7,19);a.cubicTo(14,25,22,18,22,12);
+                    a.cubicTo(15,16,8,9,13,2);a.close();c.drawPath(a,p);break;}
+                case "language":path(c,2,5,13,5);path(c,7,2,7,5);path(c,4,8,10,14);path(c,11,5,10,10,3,16);
+                    path(c,12,21,17,9,22,21);path(c,14,17,20,17);break;
+                case "bell":{
+                    Path a=new Path();a.moveTo(5,17);a.lineTo(6,14);a.lineTo(6,9);a.cubicTo(6,1,18,1,18,9);
+                    a.lineTo(18,14);a.lineTo(20,17);a.close();c.drawPath(a,p);path(c,10,20,12,22,14,20);break;}
+                case "history":c.drawArc(new RectF(3,3,21,21),-135,290,false,p);path(c,3,3,3,9,9,9);path(c,12,6,12,12,16,14);break;
+                case "lock":c.drawRoundRect(new RectF(4,10,20,22),3,3,p);c.drawArc(new RectF(7,2,17,15),180,180,false,p);path(c,12,15,12,18);break;
+                case "help":c.drawCircle(12,12,10,p);c.drawArc(new RectF(8,5,16,12),180,235,false,p);path(c,12,12,12,14);p.setStyle(Paint.Style.FILL);c.drawCircle(12,17,1,p);break;
+                case "message":path(c,3,3,21,3,21,17,9,17,3,21,3,3);path(c,7,8,17,8);path(c,7,12,14,12);break;
+                case "star":{
+                    Path a=new Path();for(int i=0;i<10;i++){double ang=Math.PI*i/5-Math.PI/2;float r=i%2==0?10:4.8f;float x=12+r*(float)Math.cos(ang),y=12+r*(float)Math.sin(ang);if(i==0)a.moveTo(x,y);else a.lineTo(x,y);}a.close();c.drawPath(a,p);break;}
+                case "document_check":path(c,5,2,14,2,20,8,20,22,5,22,5,2);path(c,14,2,14,8,20,8);path(c,8,14,11,17,17,11);break;
+                case "info":c.drawCircle(12,12,10,p);path(c,12,11,12,17);p.setStyle(Paint.Style.FILL);c.drawCircle(12,7,1.2f,p);break;
                 case "video": c.drawRoundRect(new RectF(3,6,16,18),3,3,p);path(c,16,10,21,7,21,17,16,14);break;
                 case "selected": p.setStyle(Paint.Style.FILL);c.drawCircle(12,12,11,p);p.setStyle(Paint.Style.STROKE);p.setColor(Color.WHITE);path(c,7,12,10.5f,15.5f,17,9);break;
                 case "unselected": c.drawCircle(12,12,10,p);break;

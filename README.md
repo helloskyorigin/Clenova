@@ -37,3 +37,6 @@ Explicit approval snapshots only selected sample items. A 2.8-second simulated p
 
 ## Storage Details
 Tap Home's storage card to open Storage. Shared sample data drives Home and Storage; the six-part bar includes available space and five storage categories. Only approved photo/video amounts reduce their respective categories after simulated cleanup. Back returns to Home; navigation is restored on activity recreation. No scan or cleaning button, no real storage access. CI includes initial, full and partial storage reconciliation checks.
+
+## Settings landing preview
+Home gear opens the scrollable Settings screen with five groups and fourteen rows, native blue line icons and a centered Clenova footer. System appearance and English are illustrative labels. Rows are intentionally non-interactive until their detail screens are implemented. Footer 1.0.0 is approved design placeholder; actual preview build version remains unchanged. Back and system Back return Home; landing state restores on activity recreation. No new account, billing, privacy or permission functionality.
