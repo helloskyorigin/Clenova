@@ -35,6 +35,9 @@ public final class MainActivity extends Activity {
     private float density;
     private float compact = 1f;
     private boolean reviewing;
+    private boolean cleanVisible;
+    private ScrollView cleanScroll;
+    private int cleanScrollY;
     private ReviewPlan reviewPlan;
     private boolean duplicateViewing;
     private int duplicateTab;
@@ -86,7 +89,7 @@ public final class MainActivity extends Activity {
         protectedFiles=new ProtectedFiles(this);
         history=new ActivityHistory(this);
         devicePermissions=new DevicePermissions(this);
-        if(state!=null){historyFilter=state.getInt("history_filter");cleanupEventId=state.getString("cleanup_event_id");cleanupCategoryCounts=state.getIntArray("cleanup_category_counts");historyDetailId=state.getString("history_detail_id");historyScrollY=state.getInt("history_scroll_y");}
+        if(state!=null){cleanVisible=state.getBoolean("clean_visible");cleanScrollY=state.getInt("clean_scroll_y");historyFilter=state.getInt("history_filter");cleanupEventId=state.getString("cleanup_event_id");cleanupCategoryCounts=state.getIntArray("cleanup_category_counts");historyDetailId=state.getString("history_detail_id");historyScrollY=state.getInt("history_scroll_y");}
         applyPalette();
         density = getResources().getDisplayMetrics().density;
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
@@ -115,11 +118,14 @@ public final class MainActivity extends Activity {
         if(state!=null && state.getBoolean("agent_prefs_visible")){openAgentPreferences();return;}
         if(state!=null && state.getBoolean("settings_visible")){openSettings();if(state.getBoolean("rating_open")){ratingStars=Math.max(0,Math.min(5,state.getInt("rating_stars")));showRatingSheet();}return;}
         if(state!=null && state.getBoolean("storage_visible")){openStorage();return;}
+        if(cleanVisible){showClean();return;}
         setContentView(home());
     }
     @Override protected void onSaveInstanceState(Bundle state){
         super.onSaveInstanceState(state);
         state.putBoolean("storage_visible",storageVisible);
+        state.putBoolean("clean_visible",cleanVisible);
+        state.putInt("clean_scroll_y",cleanScroll==null?cleanScrollY:cleanScroll.getScrollY());
         state.putBoolean("settings_visible",settingsVisible);
         state.putBoolean("rating_open",ratingDialog!=null&&ratingDialog.isShowing());
         state.putInt("rating_stars",ratingStars);
@@ -266,6 +272,89 @@ public final class MainActivity extends Activity {
         space(root,6); add(root,navigation(),-1,dp(64));
         return root;
     }
+    private void returnToDashboard(){
+        if(cleanVisible)showClean();else showHome();
+    }
+    private void showClean(){
+        cleanVisible=true;settingsVisible=false;storageVisible=false;reviewing=false;
+        aboutVisible=false;policyVisible=false;termsVisible=false;feedbackVisible=false;helpVisible=false;
+        permissionsVisible=false;privacyVisible=false;historyVisible=false;agentPrefsVisible=false;protectionVisible=false;foldersVisible=false;filesVisible=false;
+        setContentView(cleanScreen());
+        final ScrollView scroll=cleanScroll;if(scroll!=null)scroll.post(()->scroll.scrollTo(0,cleanScrollY));
+    }
+    private LinearLayout cleanScreen(){
+        LinearLayout root=column();root.setBackgroundColor(BG);root.setPadding(dp(18),v(12),dp(18),v(10));
+        LinearLayout header=row();LinearLayout heading=column();add(heading,txt("Clean",29,INK,700),-1,-2);space(heading,4);
+        add(heading,txt("Make room for what matters.",12,GRAY,400),-1,-2);weight(header,heading);gap(header,10);
+        FrameLayout settings=new FrameLayout(this);
+        settings.addView(new Glyph(this,"settings",INK),new FrameLayout.LayoutParams(dp(23),dp(23),Gravity.CENTER));
+        settings.setContentDescription(tr("Settings"));tap(settings,WHITE,24,this::openSettings);add(header,settings,dp(44),dp(44));
+        add(root,header,-1,-2);space(root,14);
+        ScrollView scroll=new ScrollView(this);cleanScroll=scroll;scroll.setVerticalScrollBarEnabled(false);scroll.setOverScrollMode(View.OVER_SCROLL_NEVER);
+        LinearLayout body=column();body.setPadding(0,0,0,v(10));scroll.addView(body,new ScrollView.LayoutParams(-1,-2));
+        root.addView(scroll,new LinearLayout.LayoutParams(-1,0,1f));
+        LinearLayout hero=card();pad(hero,17,16);
+        LinearLayout top=row();LinearLayout copy=column();
+        LinearLayout kicker=row();add(kicker,new Glyph(this,"sparkles",BLUE),dp(15),dp(15));gap(kicker,5);weight(kicker,txt("SMART CLEANUP",11,BLUE,600));add(copy,kicker,-1,-2);space(copy,11);
+        add(copy,txt("—",35,INK,700),-1,-2);space(copy,5);add(copy,txt("Space you could recover",13,GRAY,400),-1,-2);
+        space(copy,5);add(copy,txt("Not scanned yet",12,GRAY,500),-1,-2);weight(top,copy);gap(top,10);
+        FrameLayout ring=new FrameLayout(this);ring.addView(new CleanScanMark(this),new FrameLayout.LayoutParams(-1,-1));add(top,ring,dp(92),dp(92));add(hero,top,-1,-2);space(hero,17);
+        LinearLayout scan=row();scan.setGravity(Gravity.CENTER);add(scan,new Glyph(this,"scan",Color.WHITE),dp(21),dp(21));gap(scan,8);add(scan,txt("Smart Scan",16,Color.WHITE,600),-2,-2);
+        tap(scan,BLUE,26,()->cleanPending("Smart Scan"));add(hero,scan,-1,dp(50));
+        add(body,hero,-1,-2);space(body,20);
+        LinearLayout section=row();weight(section,txt("Media cleanup",20,INK,700));add(section,txt("Gallery",12,GRAY,400),-2,-2);add(body,section,-1,-2);space(body,10);
+        String[][] media={{"copy","Duplicates"},{"images","Similar photos"},{"video","Large videos"},{"screenshot","Screenshots"}};
+        for(int pair=0;pair<2;pair++){
+            if(pair>0)space(body,9);
+            LinearLayout tiles=row();tiles.setGravity(Gravity.TOP);
+            for(int j=0;j<2;j++){
+                if(j>0)gap(tiles,9);
+                String[] item=media[pair*2+j];
+                LinearLayout tile=column();pad(tile,13,12);tile.setMinimumHeight(dp(132));
+                LinearLayout title=row();FrameLayout icon=new FrameLayout(this);icon.setBackground(round(PALE,11));
+                icon.addView(new Glyph(this,item[0],BLUE),new FrameLayout.LayoutParams(dp(21),dp(21),Gravity.CENTER));add(title,icon,dp(36),dp(36));stretch(title);
+                add(title,new Glyph(this,"up",GRAY),dp(15),dp(15));add(tile,title,-1,-2);space(tile,9);
+                add(tile,txt("—",23,INK,700),-1,-2);space(tile,5);add(tile,txt(item[1],14,INK,600),-1,-2);space(tile,4);
+                add(tile,txt("Scan to find",12,GRAY,400),-1,-2);
+                tap(tile,WHITE,18,()->cleanPending(item[1]));tile.setContentDescription(tr(item[1])+", "+tr("Not scanned yet"));
+                tiles.addView(tile,new LinearLayout.LayoutParams(0,-2,1f));
+            }
+            add(body,tiles,-1,-2);
+        }
+        space(body,21);add(body,txt("Files & apps",20,INK,700),-1,-2);space(body,10);
+        LinearLayout files=card();pad(files,13,4);
+        String[][] options={{"folder_down","Downloads","Review downloaded files"},{"document","Large files","Find files taking up space"},{"apps","Unused apps","Review rarely used apps"},{"file_x","Unnecessary files","Find removable clutter"}};
+        for(int i=0;i<options.length;i++){
+            String[] item=options[i];if(i>0)thinRule(files);
+            LinearLayout line=row();line.setMinimumHeight(dp(63));line.setPadding(0,dp(9),0,dp(9));
+            FrameLayout icon=new FrameLayout(this);icon.setBackground(round(PALE,11));icon.addView(new Glyph(this,item[0],BLUE),new FrameLayout.LayoutParams(dp(22),dp(22),Gravity.CENTER));
+            add(line,icon,dp(38),dp(38));gap(line,12);LinearLayout labels=column();add(labels,txt(item[1],15,INK,600),-1,-2);space(labels,4);add(labels,txt(item[2],12,GRAY,400),-1,-2);
+            weight(line,labels);gap(line,8);add(line,new Glyph(this,"chevron",GRAY),dp(14),dp(14));tap(line,WHITE,10,()->cleanPending(item[1]));add(files,line,-1,-2);
+        }
+        add(body,files,-1,-2);space(body,17);
+        LinearLayout footer=row();footer.setGravity(Gravity.CENTER);
+        add(footer,new Glyph(this,"shield",GREEN),dp(16),dp(16));gap(footer,6);add(footer,txt("Always protected. Always your choice.",12,GRAY,400),-2,-2);add(body,footer,-1,-2);
+        space(root,6);add(root,navigation(),-1,dp(64));return root;
+    }
+    private void cleanPending(String label){
+        // Main dashboard is implemented first. Never route manual actions to simulated Home cleanup.
+        privacyDialog().setTitle(tr(label)).setMessage(tr("This cleaning tool is not available in this preview yet. No files have been scanned or changed.")).setPositiveButton(tr("Done"),null).show();
+    }
+    private final class CleanScanMark extends View{
+        private final Paint paint=new Paint(Paint.ANTI_ALIAS_FLAG);
+        CleanScanMark(Context context){super(context);setContentDescription(tr("Not scanned yet"));}
+        @Override protected void onDraw(Canvas canvas){
+            super.onDraw(canvas);float scale=Math.min(getWidth(),getHeight())/100f;canvas.save();
+            canvas.translate((getWidth()-100*scale)/2,(getHeight()-100*scale)/2);canvas.scale(scale,scale);
+            paint.setStyle(Paint.Style.STROKE);paint.setStrokeWidth(7);paint.setColor(PALE);canvas.drawCircle(50,50,42,paint);
+            paint.setStyle(Paint.Style.FILL);paint.setColor(PALE);canvas.drawCircle(50,50,31,paint);
+            paint.setStyle(Paint.Style.STROKE);paint.setColor(BLUE);paint.setStrokeWidth(2.7f);paint.setStrokeCap(Paint.Cap.ROUND);paint.setStrokeJoin(Paint.Join.ROUND);
+            Path path=new Path();path.moveTo(37,41);path.lineTo(37,34);path.lineTo(44,34);path.moveTo(56,34);path.lineTo(63,34);path.lineTo(63,41);
+            path.moveTo(63,59);path.lineTo(63,66);path.lineTo(56,66);path.moveTo(44,66);path.lineTo(37,66);path.lineTo(37,59);path.moveTo(37,50);path.lineTo(63,50);
+            canvas.drawPath(path,paint);canvas.restore();
+        }
+    }
+
     private LinearLayout header() {
         LinearLayout l=row(); add(l,txt("Clenova",29,INK,700),-2,-2); stretch(l);
         LinearLayout pro=row(); pro.setGravity(Gravity.CENTER); pad(pro,11,5);
@@ -280,6 +369,7 @@ public final class MainActivity extends Activity {
         add(l,settings,dp(44),dp(44)); return l;
     }
     private void openSettings(){
+        if(cleanScroll!=null){cleanScrollY=cleanScroll.getScrollY();cleanScroll=null;}
         aboutVisible=false;aboutScroll=null;policyVisible=false;termsVisible=false;policyScroll=null;feedbackVisible=false;helpVisible=false;hideHelpKeyboard();permissionsVisible=false;privacyVisible=false;
         historyDetailId=null;historyScroll=null;historyScrollY=0;historyVisible=false;filesVisible=false;foldersVisible=false;protectionVisible=false;agentPrefsVisible=false;settingsVisible=true;setContentView(settingsScreen());
     }
@@ -290,7 +380,7 @@ public final class MainActivity extends Activity {
         header.addView(centered("Settings",17,INK,600),new FrameLayout.LayoutParams(-1,-1));
         FrameLayout back=new FrameLayout(this);
         back.addView(new Glyph(this,"back",INK),new FrameLayout.LayoutParams(dp(24),dp(24),Gravity.CENTER));
-        back.setContentDescription("Back to Home");tap(back,WHITE,22,this::showHome);
+        back.setContentDescription(tr(cleanVisible?"Back to Clean":"Back to Home"));tap(back,WHITE,22,this::returnToDashboard);
         header.addView(back,new FrameLayout.LayoutParams(dp(44),dp(44),Gravity.START|Gravity.CENTER_VERTICAL));
         add(root,header,-1,dp(44));
         ScrollView scroll=new ScrollView(this);scroll.setVerticalScrollBarEnabled(false);
@@ -1817,6 +1907,7 @@ public final class MainActivity extends Activity {
         add(c,approve,-1,dp(51)); return c;
     }
     private void showHome() {
+        cleanVisible=false;cleanScroll=null;cleanScrollY=0;
         aboutVisible=false;aboutScroll=null;policyVisible=false;termsVisible=false;policyScroll=null;feedbackVisible=false;helpVisible=false;permissionsVisible=false;privacyVisible=false;
         storageVisible=false;
         settingsVisible=false;agentPrefsVisible=false;protectionVisible=false;foldersVisible=false;filesVisible=false;historyVisible=false;
@@ -1843,8 +1934,9 @@ public final class MainActivity extends Activity {
         if(historyVisible){openSettings();return;}
         if(filesVisible || foldersVisible){openProtection();return;}
         if(protectionVisible || agentPrefsVisible){openSettings();return;}
-        if(settingsVisible || storageVisible){showHome();return;}
+        if(settingsVisible || storageVisible){returnToDashboard();return;}
         if(completionVisible){showHome();return;}
+        if(cleanVisible){showHome();return;}
         if (videoViewing) leaveVideos(false); else if (similarViewing) leaveSimilar(false); else if (duplicateViewing) leaveDuplicates(false); else if (reviewing) showHome(); else super.onBackPressed();
     }
     private LinearLayout reviewScreen() {
@@ -2565,7 +2657,7 @@ public final class MainActivity extends Activity {
         pad(pill,4,4); outer.addView(pill,new LinearLayout.LayoutParams(0,dp(64),1f));
         String[] labels={"Home","Clean","AI Agent"}; String[] icons={"home","sparkles","bot"};
         for(int i=0;i<labels.length;i++){
-            final String label=labels[i]; LinearLayout item=navItem(label,icons[i],i==0);
+            final String label=labels[i]; LinearLayout item=navItem(label,icons[i],cleanVisible?i==1:i==0);
             pill.addView(item,new LinearLayout.LayoutParams(0,-1,1f));
         }
         gap(outer,8); LinearLayout tools=navItem("Tools","tools",false);
@@ -2577,7 +2669,10 @@ public final class MainActivity extends Activity {
         add(l,new Glyph(this,icon,tint),dp(24),dp(24)); space(l,4);
         add(l,centered(label,11,tint,600),-1,-2);
         tap(l,active?PALE:WHITE,32,()->{
-            if(!active) demo(label,label+" is reserved for the next design phase.");
+            if(active)return;
+            if(label.equals("Home"))showHome();
+            else if(label.equals("Clean"))showClean();
+            else demo(label,label+" is reserved for the next design phase.");
         });
         l.setContentDescription(label+(active?", selected":"")); return l;
     }
@@ -2676,6 +2771,10 @@ public final class MainActivity extends Activity {
                 case "share":c.drawCircle(5,12,2.5f,p);c.drawCircle(19,5,2.5f,p);c.drawCircle(19,19,2.5f,p);path(c,7.5f,10.8f,16.5f,6.2f);path(c,7.5f,13.2f,16.5f,17.8f);break;
                 case "mail":c.drawRoundRect(new RectF(3,5,21,19),2,2,p);path(c,3,7,12,13,21,7);break;
                 case "fingerprint":c.drawArc(new RectF(3,2,21,20),190,205,false,p);c.drawArc(new RectF(6,5,18,17),180,190,false,p);c.drawArc(new RectF(9,8,15,14),180,180,false,p);path(c,12,11,12,16,10,21);path(c,16,13,16,18,14,22);path(c,6,12,6,16,4,19);break;
+                case "scan":path(c,3,8,3,3,8,3);path(c,16,3,21,3,21,8);path(c,21,16,21,21,16,21);path(c,8,21,3,21,3,16);path(c,5,12,19,12);break;
+                case "screenshot":c.drawRoundRect(new RectF(5,2,19,22),3,3,p);path(c,8,10,8,7,11,7);path(c,13,7,16,7,16,10);path(c,16,14,16,17,13,17);path(c,11,17,8,17,8,14);break;
+                case "folder_down":path(c,3,5,10,5,12,8,21,8,21,21,3,21,3,5);path(c,12,10,12,17,8,13);path(c,12,17,16,13);break;
+                case "file_x":path(c,5,2,14,2,20,8,20,22,5,22,5,2);path(c,14,2,14,8,20,8);path(c,9,12,15,18);path(c,15,12,9,18);break;
                 case "folder":path(c,3,5,10,5,12,8,21,8,21,20,3,20,3,5);break;
                 case "folder_lock":path(c,3,18,3,5,10,5,12,8,21,8,21,12);
                     path(c,3,18,10,18);c.drawRoundRect(new RectF(13,15,22,22),2,2,p);c.drawArc(new RectF(15,10,20,18),180,180,false,p);break;

@@ -85,3 +85,6 @@ Settings > Terms of use opens a native offline preview terms document (v0.1, rev
 
 ## About Clenova
 Native About page with By Skyorigin branding, existing blue sparkle glyph (final logo asset not yet in repository), actual installed version, localized purpose and preview disclosure, share-sheet text without an unpublished URL, update information dialog until a real public listing is configured, and native support email. Settings footer also uses the installed version rather than a placeholder and displays By Skyorigin. Light/dark palette and scroll restoration included. Set PUBLIC_LISTING_URL only after publication; the app does not claim to check for updates in preview. All Settings groups now have implemented navigation, subject to build/device validation and future real scan/billing integration.
+
+## Clean dashboard — Phase 24
+Manual cleanup landing page with Smart Scan hero, media 2x2 grid, files/apps list, shared 3+1 navigation, settings access and return to Clean, scroll and tab state restoration, five languages and light/dark palette. Before a real scan, sizes are unknown (dash), with no fake results or progress. The eight category actions and Smart Scan explicitly show a preview availability notice until internal screens and scanner are built; none routes to the simulated Home cleanup. No new permissions or file operations.

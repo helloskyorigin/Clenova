@@ -5,6 +5,27 @@ import java.util.Map;
 final class AppStrings {
  private static final Map<String,String[]> TEXT=new HashMap<>();
  static {
+  TEXT.put("Make room for what matters.",new String[]{"ज़रूरी चीज़ों के लिए जगह बनाएँ।","Haz espacio para lo importante.","Faites de la place pour l’essentiel.","Platz für das Wichtige schaffen."});
+  TEXT.put("SMART CLEANUP",new String[]{"स्मार्ट सफाई","LIMPIEZA INTELIGENTE","NETTOYAGE INTELLIGENT","SMART-BEREINIGUNG"});
+  TEXT.put("Space you could recover",new String[]{"संभावित खाली जगह","Espacio recuperable","Espace récupérable","Möglicher freier Speicher"});
+  TEXT.put("Not scanned yet",new String[]{"अभी स्कैन नहीं हुआ","Aún sin analizar","Pas encore analysé","Noch nicht gescannt"});
+  TEXT.put("Smart Scan",new String[]{"स्मार्ट स्कैन","Análisis inteligente","Analyse intelligente","Smart-Scan"});
+  TEXT.put("Media cleanup",new String[]{"मीडिया सफाई","Limpieza multimedia","Nettoyage des médias","Medienbereinigung"});
+  TEXT.put("Gallery",new String[]{"गैलरी","Galería","Galerie","Galerie"});
+  TEXT.put("Duplicates",new String[]{"डुप्लिकेट","Duplicados","Doublons","Duplikate"});
+  TEXT.put("Screenshots",new String[]{"स्क्रीनशॉट","Capturas","Captures d’écran","Screenshots"});
+  TEXT.put("Scan to find",new String[]{"खोजने के लिए स्कैन करें","Analiza para buscar","Analyser pour trouver","Zum Finden scannen"});
+  TEXT.put("Files & apps",new String[]{"फ़ाइलें और ऐप्स","Archivos y apps","Fichiers et apps","Dateien und Apps"});
+  TEXT.put("Downloads",new String[]{"डाउनलोड","Descargas","Téléchargements","Downloads"});
+  TEXT.put("Large files",new String[]{"बड़ी फ़ाइलें","Archivos grandes","Gros fichiers","Große Dateien"});
+  TEXT.put("Unused apps",new String[]{"अप्रयुक्त ऐप्स","Apps sin usar","Apps inutilisées","Ungenutzte Apps"});
+  TEXT.put("Review downloaded files",new String[]{"डाउनलोड फ़ाइलें देखें","Revisa tus descargas","Vérifier les téléchargements","Downloads prüfen"});
+  TEXT.put("Find files taking up space",new String[]{"जगह लेने वाली फ़ाइलें खोजें","Encuentra archivos que ocupan espacio","Trouver les fichiers volumineux","Speicherintensive Dateien finden"});
+  TEXT.put("Review rarely used apps",new String[]{"कम इस्तेमाल वाले ऐप्स देखें","Revisa apps poco usadas","Vérifier les apps rarement utilisées","Selten genutzte Apps prüfen"});
+  TEXT.put("Find removable clutter",new String[]{"हटाने योग्य अव्यवस्था खोजें","Encuentra archivos prescindibles","Trouver les fichiers superflus","Entfernbare Dateien finden"});
+  TEXT.put("Always protected. Always your choice.",new String[]{"हमेशा सुरक्षा। हमेशा आपकी पसंद।","Siempre protegido. Tú decides.","Toujours protégé. Toujours votre choix.","Immer geschützt. Immer deine Wahl."});
+  TEXT.put("This cleaning tool is not available in this preview yet. No files have been scanned or changed.",new String[]{"यह सफाई सुविधा अभी प्रीव्यू में उपलब्ध नहीं है। कोई फ़ाइल स्कैन या बदली नहीं गई।","Esta herramienta aún no está disponible en la vista previa. No se ha analizado ni cambiado ningún archivo.","Cet outil n’est pas encore disponible dans la préversion. Aucun fichier n’a été analysé ni modifié.","Dieses Werkzeug ist in der Vorschau noch nicht verfügbar. Keine Dateien wurden gescannt oder geändert."});
+  TEXT.put("Back to Clean",new String[]{"सफाई पर लौटें","Volver a Limpieza","Retour au nettoyage","Zurück zu Clean"});
   TEXT.put("A smarter phone experience.",new String[]{"फ़ोन का एक बेहतर अनुभव।","Una experiencia de móvil más inteligente.","Une expérience mobile plus intelligente.","Ein intelligenteres Smartphone-Erlebnis."});
   TEXT.put("Clenova is built to make phone management effortless, intelligent and personal. Less clutter, more space, and complete control over what matters to you.",new String[]{"Clenova फ़ोन प्रबंधन को आसान, स्मार्ट और व्यक्तिगत बनाने के लिए है। कम अव्यवस्था, अधिक जगह और ज़रूरी चीज़ों पर आपका पूरा नियंत्रण।","Clenova busca facilitar la gestión de tu teléfono de forma inteligente y personal. Menos desorden, más espacio y control sobre lo que te importa.","Clenova vise à rendre la gestion du téléphone simple, intelligente et personnelle. Moins d’encombrement, plus d’espace et le contrôle de ce qui compte.","Clenova soll die Smartphone-Verwaltung einfach, intelligent und persönlich machen. Weniger Unordnung, mehr Platz und Kontrolle über das Wichtige."});
   TEXT.put("Preview build · Cleanup and scanning are simulated or not active yet.",new String[]{"प्रीव्यू बिल्ड · सफाई और स्कैन अभी सिमुलेटेड या निष्क्रिय हैं।","Versión de prueba · Limpieza y análisis simulados o aún inactivos.","Préversion · Nettoyage et analyse simulés ou encore inactifs.","Vorschau · Bereinigung und Scans sind simuliert oder noch inaktiv."});
