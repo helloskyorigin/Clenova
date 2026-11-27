@@ -46,7 +46,8 @@ public final class MainActivity extends Activity {
     private AgentChatStore agentChats;
     private AgentChatStore.Chat activeChat;
     private final android.os.Handler agentSessionHandler=new android.os.Handler(android.os.Looper.getMainLooper());
-    private final Runnable agentExpiry=()->{boolean expired=expireAgentSession();if(expired&&agentVisible&&!settingsVisible){if(agentDrawer!=null)agentDrawer.dismiss();showAgent();}else scheduleAgentExpiry();};
+    private final Runnable agentExpiry=this::handleAgentExpiry;
+    private void handleAgentExpiry(){boolean expired=expireAgentSession();if(expired&&agentVisible&&!settingsVisible){if(agentDrawer!=null)agentDrawer.dismiss();showAgent();}else scheduleAgentExpiry();}
     private SmartMediaScan agentScan;
     private SmartMediaScan.Result agentLiveResult;
     private String agentResultChat="",agentStage="",relayEndpoint="",relayToken="";

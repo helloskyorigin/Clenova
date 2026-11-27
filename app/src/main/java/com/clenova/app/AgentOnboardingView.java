@@ -156,7 +156,7 @@ final class AgentOnboardingView extends OnboardingStoryView {
             float a=phase(.23f,.31f);if(a<=0)return;
             c.saveLayerAlpha(24,24,340,98,Math.round(a*255));c.translate(9*(1-a),0);
             left(c,"Your Agent",86,48,17,INK,headline);
-            color(0xff2ca86b);p.setAlpha(Math.round(190+65*Math.sin(Math.PI*t*8)*Math.sin(Math.PI*t*8)));
+            color(0xff2ca86b);p.setAlpha((int)Math.round(190+65*Math.sin(Math.PI*t*8)*Math.sin(Math.PI*t*8)));
             c.drawCircle(90,65,3,p);p.setAlpha(255);
             left(c,"Here to help",100,69,11,MUTED,medium);line(c,28,91,332,91,0xffdfe4ec,1);
             c.restore();
