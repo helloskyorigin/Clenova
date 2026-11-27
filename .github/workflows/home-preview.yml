@@ -35,6 +35,10 @@ jobs:
         run: |
           javac -d /tmp/clenova-tests app/src/main/java/com/clenova/app/AgentActions.java tests/AgentActionsTest.java
           java -cp /tmp/clenova-tests com.clenova.app.AgentActionsTest
+      - name: Verify preview memory and queue policy
+        run: |
+          javac -d /tmp/clenova-tests app/src/main/java/com/clenova/app/PreviewWork.java tests/PreviewWorkTest.java
+          java -cp /tmp/clenova-tests com.clenova.app.PreviewWorkTest
       - name: Verify Autopilot scheduling policy
         run: |
           javac -d /tmp/clenova-tests app/src/main/java/com/clenova/app/AutopilotPolicy.java tests/AutopilotPolicyTest.java

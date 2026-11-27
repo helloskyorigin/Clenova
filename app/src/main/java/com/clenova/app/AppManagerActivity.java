@@ -18,7 +18,8 @@ import java.util.concurrent.*;
 public final class AppManagerActivity extends Activity {
     private static final int MANAGE=241,USAGE=242,UNINSTALL=243,OPEN=244,PAGE=24;
     private static final int HOME=0,DETAIL=1,REVIEW=2,PERMISSIONS=3,INFO=4,HISTORY=5;
-    private final ExecutorService io=Executors.newSingleThreadExecutor(),icons=Executors.newSingleThreadExecutor();
+    private final ExecutorService io=Executors.newSingleThreadExecutor();
+    private final java.util.concurrent.ThreadPoolExecutor icons=PreviewWork.pool(1);
     private final List<Future<?>> iconJobs=new ArrayList<>();
     private final android.util.LruCache<String,Bitmap> iconCache=new android.util.LruCache<String,Bitmap>(96);
     private AppManagerEngine engine;private AppManagerEngine.Result result;
@@ -63,7 +64,7 @@ public final class AppManagerActivity extends Activity {
     private String date(long t){return t<=0?"Unavailable":android.text.format.DateFormat.getMediumDateFormat(this).format(new Date(t));}
     private String used(AppManagerEngine.Item i){if(i.lastUsed<=0)return result!=null&&result.usage?"Usage not observed":"Usage access off";long d=Math.max(0,(System.currentTimeMillis()-i.lastUsed)/AppManagerEngine.DAY);return d==0?"Used within 24 hours":d==1?"Last used 1 day ago":"Last used "+d+" days ago";}
     private void status(String msg){LinearLayout l=root();header(l,"App Manager",false);LinearLayout c=col();c.setGravity(Gravity.CENTER);ProgressBar p=new ProgressBar(this);add(c,p,dp(44),dp(44));gap(c,15);add(c,center(msg,14,gray,false),-1,-2);l.addView(c,new LinearLayout.LayoutParams(-1,0,1));setContentView(l);}
-    private void cancelIcons(){iconEpoch++;for(Future<?> f:iconJobs)f.cancel(true);iconJobs.clear();}
+    private void cancelIcons(){iconEpoch++;for(Future<?> f:iconJobs)f.cancel(true);iconJobs.clear();icons.purge();}
     private void icon(ImageView view,AppManagerEngine.Item item){String key=item.pkg+":"+item.updated;Bitmap cached=iconCache.get(key);if(cached!=null){view.setImageBitmap(cached);return;}final int token=iconEpoch;iconJobs.add(icons.submit(()->{Bitmap b=engine.icon(item.pkg);runOnUiThread(()->{if(b==null)return;if(destroyed||token!=iconEpoch||!view.isAttachedToWindow()){b.recycle();return;}iconCache.put(key,b);view.setImageBitmap(b);});}));}
     private ImageView appIcon(AppManagerEngine.Item i){ImageView v=new ImageView(this);v.setScaleType(ImageView.ScaleType.FIT_CENTER);v.setBackground(shape(pale,12));v.setContentDescription(null);icon(v,i);return v;}
     private AppManagerEngine.Item current(){if(result!=null)for(AppManagerEngine.Item i:result.items)if(i.pkg.equals(selectedPkg))return i;return null;}
@@ -147,5 +148,6 @@ public final class AppManagerActivity extends Activity {
     @Override protected void onResume(){super.onResume();foreground=true;boolean refreshNeeded=returnRefresh;returnRefresh=false;if(!initial&&!busy&&!pending&&(refreshNeeded||result!=null&&result.usage!=AppManagerEngine.usageAllowed(this)))refresh(phase!=HOME&&phase!=HISTORY);}
     @Override protected void onStop(){super.onStop();if(!isFinishing()&&!pending)returnRefresh=true;}
     @Override protected void onPause(){foreground=false;super.onPause();}
+    @Override public void onTrimMemory(int level){super.onTrimMemory(level);if(level>=android.content.ComponentCallbacks2.TRIM_MEMORY_RUNNING_LOW)iconCache.evictAll();}
     @Override protected void onDestroy(){destroyed=true;epoch++;cancelIcons();if(signal!=null)signal.cancel();if(task!=null)task.cancel(true);io.shutdownNow();icons.shutdownNow();iconCache.evictAll();super.onDestroy();}
 }

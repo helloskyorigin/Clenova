@@ -20,7 +20,7 @@
         <intent><action android:name="android.intent.action.VIEW"/><category android:name="android.intent.category.BROWSABLE"/><data android:scheme="https"/></intent>
         <intent><action android:name="android.intent.action.SENDTO"/><data android:scheme="smsto"/></intent>
     </queries>
-    <application android:label="Clenova" android:theme="@style/ClenovaTheme"
+    <application android:label="Clenova" android:icon="@drawable/clenova_logo" android:roundIcon="@drawable/clenova_logo" android:theme="@style/ClenovaTheme"
         android:allowBackup="false" android:usesCleartextTraffic="false" android:supportsRtl="true">
         <service android:name=".AutopilotJobService" android:permission="android.permission.BIND_JOB_SERVICE" android:exported="true" />
         <activity android:name=".SwipePhotosActivity" android:exported="false" />

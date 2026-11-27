@@ -24,7 +24,8 @@ import java.util.concurrent.*;
 public final class VideoCompressorActivity extends Activity {
     private static final int ACCESS=211, PICK=212, SAVE=213, TRASH=214, PAGE=24;
     private static final int GALLERY=0, SETTINGS=1, ENCODING=2, RESULT=3, HISTORY=4;
-    private final ExecutorService io=Executors.newSingleThreadExecutor(), thumbs=Executors.newSingleThreadExecutor();
+    private final ExecutorService io=Executors.newSingleThreadExecutor();
+    private final java.util.concurrent.ThreadPoolExecutor thumbs=PreviewWork.pool(1);
     private final Handler handler=new Handler(Looper.getMainLooper());
     private final List<SmartMediaScan.Item> videos=new ArrayList<>();
     private final List<Future<?>> thumbnailJobs=new ArrayList<>();
@@ -99,7 +100,7 @@ public final class VideoCompressorActivity extends Activity {
     private String size(long bytes){if(bytes<0)return "Unknown";return bytes>=1073741824L?String.format(Locale.getDefault(),"%.2f GB",bytes/1073741824d):bytes>=1048576?String.format(Locale.getDefault(),"%.1f MB",bytes/1048576d):String.format(Locale.getDefault(),"%.0f KB",bytes/1024d);}
     private String duration(long ms){if(ms<=0)return "Unknown duration";long s=ms/1000;return s>=3600?String.format(Locale.getDefault(),"%d:%02d:%02d",s/3600,s/60%60,s%60):String.format(Locale.getDefault(),"%02d:%02d",s/60,s%60);}
     private void status(String message){LinearLayout l=root();header(l,"Video Compressor",false);LinearLayout b=col();b.setGravity(Gravity.CENTER);ProgressBar p=new ProgressBar(this);add(b,p,dp(44),dp(44));gap(b,16);add(b,centered(message,15,gray,false),-1,-2);l.addView(b,new LinearLayout.LayoutParams(-1,0,1));setContentView(l);}
-    private void cancelThumbs(){thumbEpoch++;for(Future<?> f:thumbnailJobs)f.cancel(true);thumbnailJobs.clear();}
+    private void cancelThumbs(){thumbEpoch++;for(Future<?> f:thumbnailJobs)f.cancel(true);thumbnailJobs.clear();thumbs.purge();}
     private void thumb(ImageView view,Uri uri,int max){
         final int token=thumbEpoch;
         thumbnailJobs.add(thumbs.submit(()->{Bitmap b=null;try{if(Build.VERSION.SDK_INT>=29)b=getContentResolver().loadThumbnail(uri,new android.util.Size(max,max),null);else b=VideoCompressionEngine.thumb(this,uri,max).bitmap;}catch(Exception ignored){}

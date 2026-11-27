@@ -95,8 +95,8 @@ public final class MainActivity extends Activity {
     private int dupPage;
     private volatile int dupThumbGeneration;
     private final java.util.Set<String> realDupSelected=new java.util.LinkedHashSet<>();
-    private final java.util.concurrent.ExecutorService dupThumbs=java.util.concurrent.Executors.newFixedThreadPool(2);
-    private final android.util.LruCache<String,android.graphics.Bitmap> dupCache=new android.util.LruCache<String,android.graphics.Bitmap>(12*1024*1024){@Override protected int sizeOf(String key,android.graphics.Bitmap value){return value.getByteCount();}};
+    private final java.util.concurrent.ThreadPoolExecutor dupThumbs=PreviewWork.pool(2);
+    private final android.util.LruCache<String,android.graphics.Bitmap> dupCache=new android.util.LruCache<String,android.graphics.Bitmap>(PreviewWork.cacheBytes(Runtime.getRuntime().maxMemory())){@Override protected int sizeOf(String key,android.graphics.Bitmap value){return value.getByteCount();}};
     private SmartMediaScan.Result scanResult;
     private boolean scanVisible, scanReviewVisible, requestingScan;
     private final boolean[] scanSelected=new boolean[4];
@@ -425,7 +425,7 @@ public final class MainActivity extends Activity {
         }
     }
     @Override protected void onStop(){
-        super.onStop();overviewHandler.removeCallbacks(finishPreparation);cancelOverview();deviceOverview=null;preparationReady=false;agentForeground=false;agentSessionHandler.removeCallbacks(agentExpiry);agentLiveResult=null;agentResultChat="";
+        super.onStop();nextThumbGeneration();dupCache.evictAll();overviewHandler.removeCallbacks(finishPreparation);cancelOverview();deviceOverview=null;preparationReady=false;agentForeground=false;agentSessionHandler.removeCallbacks(agentExpiry);agentLiveResult=null;agentResultChat="";
         if(agentScan!=null){agentScan.cancel();agentScan=null;appendAgent(false,"Analysis interrupted. Start a fresh review when you return.",-1);}
         if(agentCloudBusy){agentCloudBusy=false;agentGeneration++;appendAgent(false,"Request interrupted. Please send it again.",-1);}
         stopRealVideo();
@@ -530,10 +530,6 @@ public final class MainActivity extends Activity {
     private LinearLayout card() {
         LinearLayout l=column(); l.setBackground(round(WHITE,22)); pad(l,16,14); return l;
     }
-    private void demo(String title, String message) {
-        new AlertDialog.Builder(this,dark?android.R.style.Theme_Material_Dialog_Alert:android.R.style.Theme_Material_Light_Dialog_Alert).setTitle(tr(title)).setMessage(tr(message))
-                .setPositiveButton(tr("OK"),null).show();
-    }
     private LinearLayout home() {
         LinearLayout root=column(); root.setBackgroundColor(BG);
         root.setPadding(dp(18),v(12),dp(18),v(10));
@@ -604,7 +600,7 @@ public final class MainActivity extends Activity {
         unusedVisible=false;unusedReview=false;unusedResult=null;unusedSelected.clear();unusedKeep.clear();
         stopRealVideo();realShotVisible=false;realShotReview=false;realShotPreview=false;realVideoVisible=false;realVideoReview=false;realVideoPreview=false;
         realSimilarVisible=false;realSimilarReview=false;realDupVisible=false;realDupReview=false;scanVisible=false;scanReviewVisible=false;
-        dupAfterScan=false;similarAfterScan=false;videoAfterScan=false;shotAfterScan=false;dupThumbGeneration++;
+        dupAfterScan=false;similarAfterScan=false;videoAfterScan=false;shotAfterScan=false;nextThumbGeneration();
         settingsVisible=false;agentPrefsVisible=false;historyVisible=false;protectionVisible=false;filesVisible=false;foldersVisible=false;permissionsVisible=false;privacyVisible=false;helpVisible=false;feedbackVisible=false;aboutVisible=false;termsVisible=false;policyVisible=false;
         storageVisible=false;reviewing=false;cleanVisible=false;agentVisible=true;agentTaskVisible=activeChat!=null;agentTaskOrigin=false;agentShortcut=false;cleanScroll=null;
         restoreAgentWindow();getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);getWindow().setStatusBarColor(BG);
@@ -753,7 +749,7 @@ public final class MainActivity extends Activity {
         realShotVisible=false;realShotReview=false;realShotPreview=false;shotAfterScan=false;shotSelected.clear();shotKeep.clear();
         stopRealVideo();realVideoVisible=false;realVideoReview=false;realVideoPreview=false;videoAfterScan=false;realVideoSelected.clear();realVideoKeep.clear();
         realSimilarVisible=false;realSimilarReview=false;similarAfterScan=false;realSimilarSelected.clear();realSimilarKeep.clear();
-        realDupVisible=false;realDupReview=false;dupAfterScan=false;realDupSelected.clear();dupThumbGeneration++;dupCache.evictAll();
+        realDupVisible=false;realDupReview=false;dupAfterScan=false;realDupSelected.clear();nextThumbGeneration();dupCache.evictAll();
         scanVisible=false;scanReviewVisible=false;cleanVisible=true;settingsVisible=false;storageVisible=false;reviewing=false;
         aboutVisible=false;policyVisible=false;termsVisible=false;feedbackVisible=false;helpVisible=false;
         permissionsVisible=false;privacyVisible=false;historyVisible=false;agentPrefsVisible=false;protectionVisible=false;foldersVisible=false;filesVisible=false;
@@ -981,7 +977,7 @@ public final class MainActivity extends Activity {
         realShotVisible=false;realShotReview=false;realShotPreview=false;
         stopRealVideo();realVideoVisible=false;realVideoReview=false;realVideoPreview=false;
         realSimilarVisible=false;realSimilarReview=false;
-        realDupVisible=false;realDupReview=false;dupThumbGeneration++;
+        realDupVisible=false;realDupReview=false;nextThumbGeneration();
         scanVisible=true;scanReviewVisible=false;
         LinearLayout root=scanShell("Scan results",this::cancelSmartScan),body=scanBody(root);
         LinearLayout hero=column();hero.setGravity(Gravity.CENTER_HORIZONTAL);add(hero,new Glyph(this,"selected",BLUE),dp(62),dp(62));space(hero,12);
@@ -1038,7 +1034,7 @@ public final class MainActivity extends Activity {
         dupAfterScan=true;requestSmartScan();
     }
     private void leaveRealDuplicates(){
-        realDupVisible=false;realDupReview=false;dupThumbGeneration++;realDupSelected.clear();
+        realDupVisible=false;realDupReview=false;nextThumbGeneration();realDupSelected.clear();
         if(dupFromResults&&scanResult!=null)showScanResults();else if(agentTaskOrigin)showAgent();else showClean();
     }
     private long duplicateSelectedBytes(){
@@ -1047,7 +1043,7 @@ public final class MainActivity extends Activity {
     private void showRealDuplicates(){
         if(scanResult==null){showClean();return;}
         realDupVisible=true;realDupReview=false;scanVisible=false;scanReviewVisible=false;
-        final int generation=++dupThumbGeneration;
+        final int generation=nextThumbGeneration();
         LinearLayout root=scanShell("Duplicate photos",this::leaveRealDuplicates),body=scanBody(root);
         LinearLayout hero=card(),summary=row(),copy=column();add(copy,txt("Recoverable space",13,GRAY,400),-1,-2);space(copy,6);
         add(copy,txt(scanBytes(scanResult.bytes(0)),32,INK,700),-1,-2);space(copy,6);
@@ -1108,10 +1104,15 @@ public final class MainActivity extends Activity {
         count.setText(realDupSelected.size()+" "+tr("photos selected"));amount.setText(scanBytes(duplicateSelectedBytes()));
         review.setEnabled(!realDupSelected.isEmpty());review.setAlpha(realDupSelected.isEmpty()?.45f:1f);
     }
+    private int nextThumbGeneration(){dupThumbs.getQueue().clear();return ++dupThumbGeneration;}
+    @Override public void onTrimMemory(int level){super.onTrimMemory(level);if(level>=android.content.ComponentCallbacks2.TRIM_MEMORY_RUNNING_LOW)dupCache.evictAll();}
+    @Override public void onLowMemory(){super.onLowMemory();dupCache.evictAll();}
+    private boolean thumbAccess(SmartMediaScan.Item item){return item.image?SmartMediaScan.hasPhotoAccess(this):SmartMediaScan.hasVideoAccess(this);}
     private void loadDupThumb(android.widget.ImageView image,SmartMediaScan.Item item,int size,int generation){
+        if(generation!=dupThumbGeneration||!thumbAccess(item))return;
         String key=item.uri.toString()+":"+item.modified+":"+item.bytes+":"+item.generation+":"+size;android.graphics.Bitmap cached=dupCache.get(key);if(cached!=null){image.setImageBitmap(cached);return;}
         try{dupThumbs.execute(()->{
-            if(generation!=dupThumbGeneration)return;android.graphics.Bitmap bitmap=null;
+            if(generation!=dupThumbGeneration||!thumbAccess(item))return;android.graphics.Bitmap bitmap=null;
             try{
                 if(android.os.Build.VERSION.SDK_INT>=29)bitmap=getContentResolver().loadThumbnail(item.uri,new android.util.Size(size,size),null);
                 else if(!item.image){
@@ -1124,7 +1125,7 @@ public final class MainActivity extends Activity {
                 }
             }catch(Exception ignored){}
             if(bitmap==null)return;final android.graphics.Bitmap loaded=bitmap;
-            runOnUiThread(()->{if(generation!=dupThumbGeneration||isDestroyed())return;dupCache.put(key,loaded);image.setImageBitmap(loaded);});
+            runOnUiThread(()->{if(generation!=dupThumbGeneration||isDestroyed()||!thumbAccess(item)||!image.isAttachedToWindow()){loaded.recycle();return;}if(loaded.getByteCount()<=dupCache.maxSize()/2)dupCache.put(key,loaded);image.setImageBitmap(loaded);});
         });}catch(java.util.concurrent.RejectedExecutionException ignored){}
     }
     private void showRealPhoto(SmartMediaScan.Item item){
@@ -1186,7 +1187,7 @@ public final class MainActivity extends Activity {
         similarAfterScan=true;dupAfterScan=false;videoAfterScan=false;shotAfterScan=false;requestSmartScan();
     }
     private void leaveRealSimilar(){
-        realSimilarVisible=false;realSimilarReview=false;dupThumbGeneration++;realSimilarSelected.clear();realSimilarKeep.clear();
+        realSimilarVisible=false;realSimilarReview=false;nextThumbGeneration();realSimilarSelected.clear();realSimilarKeep.clear();
         if(similarFromResults&&scanResult!=null)showScanResults();else if(agentTaskOrigin)showAgent();else showClean();
     }
     private long similarBytes(){long bytes=0;if(scanResult!=null)for(SmartMediaScan.Item item:scanResult.groups.get(3))if(realSimilarSelected.contains(item.uri.toString()))bytes+=item.bytes;return bytes;}
@@ -1196,7 +1197,7 @@ public final class MainActivity extends Activity {
     }
     private void showRealSimilar(){
         if(scanResult==null){showClean();return;}
-        realSimilarVisible=true;realSimilarReview=false;realDupVisible=false;scanVisible=false;scanReviewVisible=false;int generation=++dupThumbGeneration;
+        realSimilarVisible=true;realSimilarReview=false;realDupVisible=false;scanVisible=false;scanReviewVisible=false;int generation=nextThumbGeneration();
         LinearLayout root=scanShell("Similar photos",this::leaveRealSimilar),body=scanBody(root);
         LinearLayout hero=card(),summary=row(),labels=column();add(labels,txt("Potential space to recover",13,GRAY,400),-1,-2);space(labels,6);
         add(labels,txt(scanBytes(scanResult.bytes(3)),32,INK,700),-1,-2);space(labels,5);add(labels,txt(scanResult.groups.get(3).size()+" "+tr("similar photos")+" · "+scanResult.similarGroups.size()+" "+tr("groups"),12,GRAY,400),-1,-2);weight(summary,labels);
@@ -1285,7 +1286,7 @@ public final class MainActivity extends Activity {
         if(activeVideoPlayer!=null){try{activeVideoPlayer.stopPlayback();}catch(RuntimeException ignored){}activeVideoPlayer=null;}
     }
     private void leaveRealVideos(){
-        stopRealVideo();realVideoVisible=false;realVideoPreview=false;realVideoReview=false;dupThumbGeneration++;realVideoSelected.clear();realVideoKeep.clear();
+        stopRealVideo();realVideoVisible=false;realVideoPreview=false;realVideoReview=false;nextThumbGeneration();realVideoSelected.clear();realVideoKeep.clear();
         if(videoFromResults&&scanResult!=null)showScanResults();else if(agentTaskOrigin)showAgent();else showClean();
     }
     private String videoDuration(long millis){
@@ -1305,7 +1306,7 @@ public final class MainActivity extends Activity {
     private void showRealVideos(){
         stopRealVideo();if(scanResult==null){showClean();return;}
         realVideoVisible=true;realVideoReview=false;realVideoPreview=false;realDupVisible=false;realSimilarVisible=false;scanVisible=false;scanReviewVisible=false;
-        final int generation=++dupThumbGeneration;
+        final int generation=nextThumbGeneration();
         LinearLayout root=scanShell("Large videos",this::leaveRealVideos),body=scanBody(root);
         LinearLayout hero=card(),summary=row(),labels=column();
         add(labels,txt("Potential space to recover",13,GRAY,400),-1,-2);space(labels,6);
@@ -1390,7 +1391,7 @@ public final class MainActivity extends Activity {
         shotAfterScan=true;dupAfterScan=false;similarAfterScan=false;videoAfterScan=false;requestSmartScan();
     }
     private void leaveRealScreenshots(){
-        realShotVisible=false;realShotReview=false;realShotPreview=false;dupThumbGeneration++;shotSelected.clear();shotKeep.clear();
+        realShotVisible=false;realShotReview=false;realShotPreview=false;nextThumbGeneration();shotSelected.clear();shotKeep.clear();
         if(shotFromResults&&scanResult!=null)showScanResults();else if(agentTaskOrigin)showAgent();else showClean();
     }
     private long selectedShotBytes(){long bytes=0;if(scanResult!=null)for(SmartMediaScan.Item i:scanResult.groups.get(2))if(shotSelected.contains(i.uri.toString()))bytes+=i.bytes;return bytes;}
@@ -1405,7 +1406,7 @@ public final class MainActivity extends Activity {
     private void showRealScreenshots(){
         if(scanResult==null){showClean();return;}
         realShotVisible=true;realShotReview=false;realShotPreview=false;realVideoVisible=false;realSimilarVisible=false;realDupVisible=false;scanVisible=false;scanReviewVisible=false;
-        final int generation=++dupThumbGeneration;
+        final int generation=nextThumbGeneration();
         LinearLayout root=scanShell("Screenshots",this::leaveRealScreenshots),body=scanBody(root);
         LinearLayout hero=card(),summary=row(),labels=column();
         add(labels,txt("Screenshot storage",13,GRAY,400),-1,-2);space(labels,6);add(labels,txt(scanBytes(scanResult.bytes(2)),32,INK,700),-1,-2);space(labels,5);
@@ -1456,7 +1457,7 @@ public final class MainActivity extends Activity {
         select.setOnClickListener(v->{if(locked)return;if(!shotSelected.remove(id)){if(shotSelected.size()>=100){folderToast("Select up to 100 screenshots at a time");return;}shotSelected.add(id);}refresh.run();changed.run();});select.setEnabled(!locked);refresh.run();return tile;
     }
     private void showShotPreview(SmartMediaScan.Item item){
-        if(scanResult==null){showClean();return;}realShotPreview=true;realShotReview=false;final int generation=++dupThumbGeneration;
+        if(scanResult==null){showClean();return;}realShotPreview=true;realShotReview=false;final int generation=nextThumbGeneration();
         LinearLayout root=scanShell("Screenshot preview",this::showRealScreenshots);
         FrameLayout viewer=new FrameLayout(this);viewer.setBackgroundColor(dark?0xff09090b:0xffe7e7ec);viewer.setClipChildren(true);
         android.widget.ImageView image=new android.widget.ImageView(this);image.setScaleType(android.widget.ImageView.ScaleType.FIT_CENTER);image.setContentDescription(item.name);
@@ -1829,11 +1830,6 @@ public final class MainActivity extends Activity {
 
     private LinearLayout header() {
         LinearLayout l=row(); add(l,txt("Clenova",29,INK,700),-2,-2); stretch(l);
-        LinearLayout pro=row(); pro.setGravity(Gravity.CENTER); pad(pro,11,5);
-        add(pro,new Glyph(this,"crown",BLUE),dp(18),dp(18)); gap(pro,4);
-        add(pro,txt("Pro",14,BLUE,600),-2,-2);
-        tap(pro,PALE,24,()->demo("Clenova Pro","Preview only. Subscription is not implemented."));
-        add(l,pro,-2,dp(38)); gap(l,8);
         FrameLayout settings=new FrameLayout(this);
         settings.addView(new Glyph(this,"settings",INK),new FrameLayout.LayoutParams(dp(23),dp(23),Gravity.CENTER));
         settings.setContentDescription("Settings");
@@ -2166,9 +2162,7 @@ public final class MainActivity extends Activity {
         LinearLayout body=column();body.setPadding(0,v(20),0,v(16));scroll.addView(body,new ScrollView.LayoutParams(-1,-2));
         root.addView(scroll,new LinearLayout.LayoutParams(-1,0,1f));
         LinearLayout hero=column();hero.setGravity(Gravity.CENTER_HORIZONTAL);
-        FrameLayout mark=new FrameLayout(this);mark.setBackground(round(BLUE,24));
-        // Use the existing in-app brand glyph until the final logo asset is added to the project.
-        mark.addView(new Glyph(this,"sparkles",Color.WHITE),new FrameLayout.LayoutParams(dp(50),dp(50),Gravity.CENTER));
+        android.widget.ImageView mark=new android.widget.ImageView(this);mark.setImageResource(R.drawable.clenova_logo);mark.setScaleType(android.widget.ImageView.ScaleType.FIT_CENTER);
         mark.setContentDescription("Clenova");add(hero,mark,dp(92),dp(92));space(hero,16);
         add(hero,centered("Clenova",30,INK,700),-1,-2);space(hero,6);
         add(hero,centered("Your phone. On autopilot.",14,GRAY,400),-1,-2);space(hero,8);
@@ -2180,7 +2174,7 @@ public final class MainActivity extends Activity {
         LinearLayout intro=card();add(intro,txt("A smarter phone experience.",19,INK,700),-1,-2);space(intro,9);
         TextView message=txt("Clenova is built to make phone management effortless, intelligent and personal. Less clutter, more space, and complete control over what matters to you.",14,GRAY,400);
         message.setLineSpacing(dp(4),1f);add(intro,message,-1,-2);
-        if(PUBLIC_LISTING_URL.isEmpty()){space(intro,9);add(intro,txt("Preview build · Manual media scanning and approved media trash are available. Home cleanup is simulated.",12,GRAY,400),-1,-2);}
+        if(PUBLIC_LISTING_URL.isEmpty()){space(intro,9);add(intro,txt("Development build · Media scans and cleanup reviews use accessible device data. You approve every removal.",12,GRAY,400),-1,-2);}
         add(body,intro,-1,-2);space(body,15);
         LinearLayout principles=card();pad(principles,14,5);
         add(principles,aboutPrinciple("shield","Privacy by design"),-1,-2);thinRule(principles);

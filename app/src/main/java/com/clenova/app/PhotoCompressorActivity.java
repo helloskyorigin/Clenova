@@ -21,7 +21,8 @@ import java.util.concurrent.*;
 public final class PhotoCompressorActivity extends Activity {
     private static final int ACCESS=221,PICK=222,FOLDER=223,TRASH=224,PAGE=60,MAX=PhotoCompressionEngine.MAX_SELECTION;
     private static final int GALLERY=0,SETTINGS=1,ENCODING=2,RESULT=3,HISTORY=4;
-    private final ExecutorService io=Executors.newSingleThreadExecutor(), thumbnails=Executors.newSingleThreadExecutor();
+    private final ExecutorService io=Executors.newSingleThreadExecutor();
+    private final java.util.concurrent.ThreadPoolExecutor thumbnails=PreviewWork.pool(1);
     private final List<Future<?>> thumbJobs=new ArrayList<>();
     private final List<PhotoCompressionEngine.Source> gallery=new ArrayList<>();
     private final LinkedHashMap<String,PhotoCompressionEngine.Source> selected=new LinkedHashMap<>();
@@ -79,7 +80,7 @@ public final class PhotoCompressorActivity extends Activity {
     private String key(PhotoCompressionEngine.Source s){return s.uri.toString();}
     private String monthOf(PhotoCompressionEngine.Source s){return months.computeIfAbsent(key(s),k->s.original==null?"Picked files":s.original.modified<=0?"Unknown date":new java.text.SimpleDateFormat("MMMM yyyy",Locale.getDefault()).format(new Date(s.original.modified)));}
     private void status(String msg){LinearLayout l=root();header(l,"Photo Compressor",false);LinearLayout c=col();c.setGravity(Gravity.CENTER);ProgressBar p=new ProgressBar(this);add(c,p,dp(42),dp(42));gap(c,15);add(c,center(msg,14,gray,false),-1,-2);l.addView(c,new LinearLayout.LayoutParams(-1,0,1));setContentView(l);}
-    private void cancelThumbs(){thumbEpoch++;for(Future<?> f:thumbJobs)f.cancel(true);thumbJobs.clear();}
+    private void cancelThumbs(){thumbEpoch++;for(Future<?> f:thumbJobs)f.cancel(true);thumbJobs.clear();thumbnails.purge();}
     private void thumbnail(ImageView view,Uri uri,int max){final int token=thumbEpoch;
         thumbJobs.add(thumbnails.submit(()->{Bitmap b=null;try{
             if(Build.VERSION.SDK_INT>=29)b=getContentResolver().loadThumbnail(uri,new android.util.Size(max,max),null);

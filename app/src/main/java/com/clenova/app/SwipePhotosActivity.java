@@ -22,7 +22,7 @@ public final class SwipePhotosActivity extends Activity {
     private static final int PHOTO_ACCESS=201, TRASH=202, MAX_SELECTION=100;
     private static final int REMOVE=1, KEEP=2, SKIP=3;
     private final ExecutorService worker=Executors.newSingleThreadExecutor();
-    private final ExecutorService previews=Executors.newSingleThreadExecutor();
+    private final java.util.concurrent.ThreadPoolExecutor previews=PreviewWork.pool(1);
     private final Map<String,Integer> decisions=new LinkedHashMap<>();
     private final ArrayDeque<SmartMediaScan.Item> undo=new ArrayDeque<>();
     private final List<SmartMediaScan.Item> items=new ArrayList<>();
@@ -101,7 +101,7 @@ public final class SwipePhotosActivity extends Activity {
         permissionPending=false;if(SmartMediaScan.hasPhotoAccess(this))load();else accessScreen();
     }
     private SmartMediaScan scan(){return new SmartMediaScan(this,prefs,new ProtectedFiles(this),new ProtectedFolders(this));}
-    private void cancelWork(){epoch++;imageEpoch++;if(job!=null){job.cancel();job=null;}if(previewTask!=null){previewTask.cancel(true);previewTask=null;}loading=false;animating=false;previewReady=false;}
+    private void cancelWork(){epoch++;imageEpoch++;if(job!=null){job.cancel();job=null;}if(previewTask!=null){previewTask.cancel(true);previewTask=null;}previews.purge();loading=false;animating=false;previewReady=false;}
     private void clear(){cancelWork();items.clear();decisions.clear();undo.clear();versions.clear();monthsByUri.clear();shown=null;reviewing=false;month="All photos";}
     private void load(){
         clear();loading=true;status("Loading your photos…",null);final int token=epoch;final SmartMediaScan current=scan();job=current;
