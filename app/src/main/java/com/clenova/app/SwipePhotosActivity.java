@@ -26,7 +26,7 @@ public final class SwipePhotosActivity extends Activity {
     private final Map<String,Integer> decisions=new LinkedHashMap<>();
     private final ArrayDeque<SmartMediaScan.Item> undo=new ArrayDeque<>();
     private final List<SmartMediaScan.Item> items=new ArrayList<>();
-    private final Map<String,String> versions=new HashMap<>();
+    private final Map<String,String> versions=new HashMap<>(), monthsByUri=new HashMap<>();
     private SmartMediaScan job;
     private Future<?> previewTask;
     private int epoch, imageEpoch;
@@ -101,7 +101,7 @@ public final class SwipePhotosActivity extends Activity {
     }
     private SmartMediaScan scan(){return new SmartMediaScan(this,prefs,new ProtectedFiles(this),new ProtectedFolders(this));}
     private void cancelWork(){epoch++;imageEpoch++;if(job!=null){job.cancel();job=null;}if(previewTask!=null){previewTask.cancel(true);previewTask=null;}loading=false;animating=false;previewReady=false;}
-    private void clear(){cancelWork();items.clear();decisions.clear();undo.clear();versions.clear();shown=null;reviewing=false;month="All photos";}
+    private void clear(){cancelWork();items.clear();decisions.clear();undo.clear();versions.clear();monthsByUri.clear();shown=null;reviewing=false;month="All photos";}
     private void load(){
         clear();loading=true;status("Loading your photos…",null);final int token=epoch;final SmartMediaScan current=scan();job=current;
         worker.execute(()->{try{
@@ -111,7 +111,7 @@ public final class SwipePhotosActivity extends Activity {
         }catch(Exception e){runOnUiThread(()->{if(destroyed||token!=epoch)return;job=null;loading=false;if(!SmartMediaScan.hasPhotoAccess(this))accessScreen();else status("Could not read your photos.",this::load);});}});
     }
     private String key(SmartMediaScan.Item i){return i.uri.toString();}
-    private String monthOf(SmartMediaScan.Item i){return i.modified<=0?"Unknown date":new SimpleDateFormat("MMMM yyyy",Locale.getDefault()).format(new Date(i.modified));}
+    private String monthOf(SmartMediaScan.Item i){return monthsByUri.computeIfAbsent(key(i),k->i.modified<=0?"Unknown date":new SimpleDateFormat("MMMM yyyy",Locale.getDefault()).format(new Date(i.modified)));}
     private String date(SmartMediaScan.Item i){return i.modified<=0?"Unknown date":new SimpleDateFormat("d MMMM · h:mm a",Locale.getDefault()).format(new Date(i.modified));}
     private String size(long bytes){return bytes>=1073741824L?String.format(Locale.getDefault(),"%.2f GB",bytes/1073741824d):bytes>=1048576?String.format(Locale.getDefault(),"%.1f MB",bytes/1048576d):String.format(Locale.getDefault(),"%.0f KB",bytes/1024d);}
     private List<SmartMediaScan.Item> group(){List<SmartMediaScan.Item> out=new ArrayList<>();for(SmartMediaScan.Item i:items)if(month.equals("All photos")||month.equals(monthOf(i)))out.add(i);return out;}
@@ -177,9 +177,9 @@ public final class SwipePhotosActivity extends Activity {
     private boolean gesture(MotionEvent e,SmartMediaScan.Item current){
         if(animating||shown!=current||!previewReady)return false;
         switch(e.getActionMasked()){
-            case MotionEvent.ACTION_DOWN:downX=e.getX();downY=e.getY();dragging=false;return true;
-            case MotionEvent.ACTION_MOVE:float dx=e.getX()-downX;if(Math.abs(dx)>dp(12)&&Math.abs(dx)>Math.abs(e.getY()-downY))dragging=true;if(dragging){photo.setTranslationX(dx*.75f);photo.setRotation(dx/dp(18));photo.setAlpha(Math.max(.5f,1-Math.abs(dx)/(float)Math.max(1,photo.getWidth())));}return true;
-            case MotionEvent.ACTION_UP:float delta=e.getX()-downX;if(dragging&&Math.abs(delta)>dp(82)){if(delta>0){decide(KEEP);return true;}if(eligible(current)){decide(REMOVE);return true;}toast("This photo is protected or read-only");}else if(!dragging)showPreview(current);
+            case MotionEvent.ACTION_DOWN:downX=e.getRawX();downY=e.getRawY();dragging=false;return true;
+            case MotionEvent.ACTION_MOVE:float dx=e.getRawX()-downX;if(Math.abs(dx)>dp(12)&&Math.abs(dx)>Math.abs(e.getRawY()-downY))dragging=true;if(dragging){photo.setTranslationX(dx*.75f);photo.setRotation(dx/dp(18));photo.setAlpha(Math.max(.5f,1-Math.abs(dx)/(float)Math.max(1,photo.getWidth())));}return true;
+            case MotionEvent.ACTION_UP:float delta=e.getRawX()-downX;if(dragging&&Math.abs(delta)>dp(82)){if(delta>0){decide(KEEP);return true;}if(eligible(current)){decide(REMOVE);return true;}toast("This photo is protected or read-only");}else if(!dragging)showPreview(current);
                 resetDrag();return true;
             case MotionEvent.ACTION_CANCEL:resetDrag();return true;
             default:return true;
@@ -198,7 +198,7 @@ public final class SwipePhotosActivity extends Activity {
     private void confirmReset(){new AlertDialog.Builder(this,dialogTheme()).setTitle("Restart review?").setMessage("Your current choices will be cleared. No files will be changed.").setNegativeButton("Cancel",null).setPositiveButton("Restart",(d,w)->load()).show();}
     private void showPreview(SmartMediaScan.Item i){
         if(destroyed||loading||approvedPending)return;
-        LinearLayout box=col();box.setPadding(dp(12),dp(12),dp(12),dp(12));ImageView image=new ImageView(this);image.setScaleType(ImageView.ScaleType.FIT_CENTER);add(box,image,-1,dp(Math.min(420,getResources().getConfiguration().screenHeightDp-200)));
+        LinearLayout box=col();box.setPadding(dp(12),dp(12),dp(12),dp(12));ImageView image=new ImageView(this);image.setScaleType(ImageView.ScaleType.FIT_CENTER);add(box,image,-1,dp(Math.max(100,Math.min(420,getResources().getConfiguration().screenHeightDp-200))));
         TextView message=label(date(i)+" · "+size(i.bytes),13,muted,false);add(box,message,-1,-2);
         AlertDialog dialog=new AlertDialog.Builder(this,dialogTheme()).setTitle("Photo preview").setView(box).setPositiveButton("Done",null).create();dialog.show();
         previews.submit(()->{Bitmap b=null;try{b=decode(i,1800);}catch(Exception ignored){}final Bitmap bitmap=b;runOnUiThread(()->{if(!dialog.isShowing()||destroyed){if(bitmap!=null)bitmap.recycle();return;}if(bitmap!=null)image.setImageBitmap(bitmap);else message.setText("Photo unavailable");});});
