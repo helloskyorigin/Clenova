@@ -11,6 +11,7 @@ import java.util.*;
 /** Session-only SAF downloads. No broad storage permission or persistent URI grants. */
 final class DownloadFiles {
     static final int LIMIT=200, DELETE_LIMIT=50;
+    static final long LARGE_MIN=100L*1024*1024;
     static final String EXTERNAL="com.android.externalstorage.documents", DOWNLOADS="com.android.providers.downloads.documents";
     static final int APK=0,ARCHIVE=1,DOC=2,OTHER=3;
     static final class Item {
@@ -20,8 +21,9 @@ final class DownloadFiles {
             this.uri=uri;this.id=id;this.name=name;this.mime=mime;this.bytes=bytes;this.modified=modified;this.flags=flags;this.type=type;this.verifiedLocation=verifiedLocation;this.protectedItem=protectedItem;this.canDelete=canDelete;
         }
     }
-    private final Context context;private final ContentResolver resolver;private final AppPreferences prefs;private final ProtectedFiles files;private final ProtectedFolders folders;
-    DownloadFiles(Context c,AppPreferences p,ProtectedFiles f,ProtectedFolders d){context=c;resolver=c.getContentResolver();prefs=p;files=f;folders=d;}
+    private final Context context;private final ContentResolver resolver;private final AppPreferences prefs;private final ProtectedFiles files;private final ProtectedFolders folders;private final boolean largeMode;
+    DownloadFiles(Context c,AppPreferences p,ProtectedFiles f,ProtectedFolders d){this(c,p,f,d,false);}
+    DownloadFiles(Context c,AppPreferences p,ProtectedFiles f,ProtectedFolders d,boolean large){context=c;resolver=c.getContentResolver();prefs=p;files=f;folders=d;largeMode=large;}
     static int type(String name,String mime){
         String n=name.toLowerCase(Locale.ROOT),m=mime.toLowerCase(Locale.ROOT);
         if(n.endsWith(".apk")||m.equals("application/vnd.android.package-archive"))return APK;
@@ -35,12 +37,43 @@ final class DownloadFiles {
         if(parts.length<2||!parts[0].equalsIgnoreCase("Download"))return false;
         for(String part:parts)if(part.isEmpty()||part.equals(".")||part.equals(".."))return false;return true;
     }
+    private static boolean externalPath(String id){
+        if(id==null)return false;int colon=id.indexOf(':');if(colon<=0)return false;
+        String[] parts=id.substring(colon+1).split("/",-1);if(parts.length<2)return false;
+        for(String part:parts)if(part.isEmpty()||part.equals(".")||part.equals(".."))return false;
+        return !parts[0].equalsIgnoreCase("Android");
+    }
+    private static boolean safeRemovalPath(String id){
+        if(!externalPath(id))return false;
+        String root=id.substring(id.indexOf(':')+1).split("/")[0];
+        return root.equalsIgnoreCase("Download")||root.equalsIgnoreCase("Documents");
+    }
+    // Scan only a folder explicitly granted by the system picker; no automatic whole-device traversal.
+    List<Uri> largeFolderUris(Uri tree,CancellationSignal signal){
+        List<Uri> result=new ArrayList<>();if(!largeMode||tree==null||!EXTERNAL.equals(tree.getAuthority())||!DocumentsContract.isTreeUri(tree))return result;
+        String root=DocumentsContract.getTreeDocumentId(tree);
+        if(root==null||root.endsWith(":")||root.substring(root.indexOf(':')+1).toLowerCase(Locale.ROOT).startsWith("android"))return result;
+        ArrayDeque<String> dirs=new ArrayDeque<>();Set<String> seen=new HashSet<>();dirs.add(root);int inspected=0;
+        while(!dirs.isEmpty()&&inspected<2000&&result.size()<LIMIT){
+            signal.throwIfCanceled();String parent=dirs.remove();if(!seen.add(parent))continue;
+            Uri children=DocumentsContract.buildChildDocumentsUriUsingTree(tree,parent);
+            try(Cursor c=resolver.query(children,new String[]{"document_id","mime_type","_size"},null,null,null,signal)){
+                if(c==null)continue;
+                while(c.moveToNext()&&inspected++<2000&&result.size()<LIMIT){
+                    signal.throwIfCanceled();String id=c.getString(0),mime=c.getString(1);
+                    if(id==null||!id.startsWith(root+"/")||!externalPath(id))continue;
+                    if(DocumentsContract.Document.MIME_TYPE_DIR.equals(mime)){if(dirs.size()<200)dirs.add(id);}
+                    else if(!c.isNull(2)&&c.getLong(2)>=LARGE_MIN)result.add(DocumentsContract.buildDocumentUriUsingTree(tree,id));
+                }
+            }catch(android.os.OperationCanceledException e){throw e;}catch(RuntimeException ignored){}
+        }return result;
+    }
     private boolean granted(Uri uri,int mode){return context.checkUriPermission(uri,android.os.Process.myPid(),android.os.Process.myUid(),mode)==PackageManager.PERMISSION_GRANTED;}
     Item read(Uri uri,CancellationSignal signal){
         if(uri==null||!"content".equals(uri.getScheme())||!DocumentsContract.isDocumentUri(context,uri))return null;
         String authority=uri.getAuthority();if(!EXTERNAL.equals(authority)&&!DOWNLOADS.equals(authority))return null;
         String id;try{id=DocumentsContract.getDocumentId(uri);}catch(RuntimeException e){return null;}
-        boolean verified=EXTERNAL.equals(authority)&&externalDownload(id);
+        boolean verified=EXTERNAL.equals(authority)&&(largeMode?externalPath(id):externalDownload(id));
         if(EXTERNAL.equals(authority)&&!verified)return null;
         if(!granted(uri,Intent.FLAG_GRANT_READ_URI_PERMISSION))return null;
         String[] cols={"_display_name","mime_type","_size","last_modified","flags"};
@@ -48,6 +81,7 @@ final class DownloadFiles {
             if(c==null||!c.moveToFirst())return null;
             String name=c.getString(0),mime=c.getString(1);if(name==null||mime==null||DocumentsContract.Document.MIME_TYPE_DIR.equals(mime))return null;
             long bytes=c.isNull(2)?-1:c.getLong(2),modified=c.isNull(3)?-1:c.getLong(3),flags=c.isNull(4)?0:c.getLong(4);
+            if(largeMode&&bytes<LARGE_MIN)return null;
             int type=type(name,mime);boolean protectedItem=files.excludes(uri);
             // Resolve known external-storage paths; unknown aliases fail closed.
             for(ProtectedFiles.Entry e:files.entries()){
@@ -61,9 +95,10 @@ final class DownloadFiles {
             if(prefs.protection(1)&&(modified<=0||modified>=System.currentTimeMillis()-ProtectionPolicy.RECENT_WINDOW_MS))protectedItem=true;
             // Only known APK/archive types are eligible with important-document protection enabled.
             if(prefs.protection(2)&&(type==DOC||type==OTHER))protectedItem=true;
-            boolean media=mime.startsWith("image/")||mime.startsWith("video/")||mime.startsWith("audio/");
+            boolean media=mime.startsWith("image/")||mime.startsWith("video/")||mime.startsWith("audio/")||name.toLowerCase(Locale.ROOT).matches(".*\\.(jpg|jpeg|png|webp|heic|heif|gif|bmp|dng|mp4|mkv|mov|avi|webm|3gp|mp3|wav|flac|m4a|ogg|aac)$");
             // Opaque downloads provider IDs and media are review-only. No removal via ambiguous aliases.
             boolean delete=verified&&!protectedItem&&!media&&bytes>=0&&modified>0
+                &&(!largeMode||(!DocumentsContract.isTreeUri(uri)&&safeRemovalPath(id)&&type!=OTHER))
                 &&(flags&DocumentsContract.Document.FLAG_SUPPORTS_DELETE)!=0
                 &&(flags&DocumentsContract.Document.FLAG_VIRTUAL_DOCUMENT)==0
                 &&granted(uri,Intent.FLAG_GRANT_WRITE_URI_PERMISSION);

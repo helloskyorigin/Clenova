@@ -5,6 +5,13 @@ import java.util.Map;
 final class AppStrings {
  private static final Map<String,String[]> TEXT=new HashMap<>();
  static {
+  TEXT.put("Storage occupied",new String[]{"उपयोग किया गया स्टोरेज","Espacio ocupado","Espace occupé","Belegter Speicher"});
+  TEXT.put("Choose files",new String[]{"फ़ाइलें चुनें","Elegir archivos","Choisir des fichiers","Dateien auswählen"});
+  TEXT.put("Scan selected folder",new String[]{"चुना फ़ोल्डर स्कैन करें","Escanear carpeta elegida","Analyser le dossier choisi","Ausgewählten Ordner scannen"});
+  TEXT.put("Scanning selected folder",new String[]{"चुना फ़ोल्डर जाँच रहे हैं","Escaneando carpeta","Analyse du dossier","Ordner wird gescannt"});
+  TEXT.put("Only selected files and accessible folders are checked. Folder scan results are read-only.",new String[]{"सिर्फ चुनी फ़ाइलें और उपलब्ध फ़ोल्डर जाँचे जाते हैं। फ़ोल्डर परिणाम केवल पढ़ने के लिए हैं।","Solo se revisan archivos y carpetas elegidos. Los resultados de carpeta son de solo lectura.","Seuls les fichiers et dossiers choisis sont vérifiés. Les résultats du dossier sont en lecture seule.","Nur ausgewählte Dateien und Ordner werden geprüft. Ordnerergebnisse sind schreibgeschützt."});
+  TEXT.put("Search files",new String[]{"फ़ाइलें खोजें","Buscar archivos","Rechercher des fichiers","Dateien suchen"});
+  TEXT.put("Choose files or scan an accessible folder.",new String[]{"फ़ाइलें चुनें या उपलब्ध फ़ोल्डर स्कैन करें।","Elige archivos o escanea una carpeta accesible.","Choisissez des fichiers ou analysez un dossier accessible.","Dateien wählen oder einen zugänglichen Ordner scannen."});
   TEXT.put("Accessible downloads storage",new String[]{"उपलब्ध डाउनलोड स्टोरेज","Almacenamiento de descargas accesibles","Stockage des téléchargements accessibles","Zugänglicher Download-Speicher"});
   TEXT.put("files available for review",new String[]{"फ़ाइलें समीक्षा के लिए","archivos para revisar","fichiers à examiner","Dateien zur Prüfung"});
   TEXT.put("Choose downloaded files",new String[]{"डाउनलोड फ़ाइलें चुनें","Elegir descargas","Choisir des téléchargements","Downloads auswählen"});
