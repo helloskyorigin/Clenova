@@ -73,7 +73,7 @@ final class ContactsCleanerEngine {
         }
         try(Cursor c=resolver.query(Data.CONTENT_URI,new String[]{Data.CONTACT_ID,Data.MIMETYPE,Data.DATA1,Data.DATA2,Data.DATA3,Data.DATA4,Data.DATA5,Data.DATA6},null,null,Data._ID+" ASC",cancel)){
             if(c==null)throw new IllegalStateException("Contact details unavailable");int rows=0;
-            while(c.moveToNext()){check();if(++rows>MAX_ROWS){out.partial=true;break;}Contact x=out.contacts.get(c.getLong(0));if(x==null)continue;String mime=c.getString(1),value=c.getString(2);
+            while(c.moveToNext()){check();if(++rows>MAX_ROWS){out.partial=true;break;}Contact x=out.contacts.get(c.getLong(0));if(x==null)continue;String mime=c.getString(1),value=c.getType(2)==Cursor.FIELD_TYPE_BLOB?null:c.getString(2);
                 if(StructuredName.CONTENT_ITEM_TYPE.equals(mime)){if(value!=null&&!value.trim().isEmpty()){x.names.add(value);x.detail("Name",value);}continue;}
                 x.nonNameData=true;
                 if(Phone.CONTENT_ITEM_TYPE.equals(mime)&&value!=null&&!value.trim().isEmpty()){x.phones.add(value);String key=numberKey(value,c.getString(5));if(!key.isEmpty())x.numbers.add(key);x.detail("Phone",value);}
@@ -103,7 +103,7 @@ final class ContactsCleanerEngine {
     private void assertContact(ArrayList<ContentProviderOperation> ops,Contact c){
         ops.add(ContentProviderOperation.newAssertQuery(RawContacts.CONTENT_URI).withSelection(RawContacts.CONTACT_ID+"=? AND "+RawContacts.DELETED+"=0",new String[]{Long.toString(c.id)}).withExpectedCount(c.raw.size()).build());
         for(Raw r:c.raw)ops.add(ContentProviderOperation.newAssertQuery(ContentUris.withAppendedId(RawContacts.CONTENT_URI,r.id))
-            .withValue(RawContacts.VERSION,r.version).withValue(RawContacts.CONTACT_ID,r.contact).withValue(RawContacts.DELETED,0).withValue(RawContacts.RAW_CONTACT_IS_READ_ONLY,0).withExpectedCount(1).build());
+            .withValue(RawContacts.VERSION,r.version).withValue(RawContacts.CONTACT_ID,r.contact).withValue(RawContacts.ACCOUNT_NAME,r.account).withValue(RawContacts.ACCOUNT_TYPE,r.type).withValue(RawContacts.DATA_SET,r.dataset).withValue(RawContacts.DELETED,0).withValue(RawContacts.RAW_CONTACT_IS_READ_ONLY,0).withExpectedCount(1).build());
         ops.add(ContentProviderOperation.newAssertQuery(ContentUris.withAppendedId(Contacts.CONTENT_URI,c.id)).withValue(Contacts.STARRED,c.starred?1:0).withExpectedCount(1).build());
     }
     /** Non-destructive Android aggregation: preserve each raw contact and its account. */
@@ -123,7 +123,12 @@ final class ContactsCleanerEngine {
         for(int attempt=0;attempt<5;attempt++){check();Set<Long> contactIds=new HashSet<>();int count=0;
             try(Cursor c=resolver.query(RawContacts.CONTENT_URI,new String[]{RawContacts.CONTACT_ID},RawContacts._ID+" IN ("+ids(all)+") AND "+RawContacts.DELETED+"=0",null,null,cancel)){
                 if(c==null)throw new IOException("Could not verify link");while(c.moveToNext()){count++;contactIds.add(c.getLong(0));}}
-            if(count==all.size()&&contactIds.size()==1&&!contactIds.contains(0L))return true;
+            if(count==all.size()&&contactIds.size()==1&&!contactIds.contains(0L)){
+                try(Cursor c=resolver.query(RawContacts.CONTENT_URI,new String[]{RawContacts._ID},RawContacts.CONTACT_ID+"=? AND "+RawContacts.DELETED+"=0",new String[]{Long.toString(contactIds.iterator().next())},null,cancel)){
+                    if(c==null)throw new IOException("Could not verify aggregate");Set<Long> expected=new HashSet<>();for(Raw r:all)expected.add(r.id);
+                    while(c.moveToNext())if(!expected.remove(c.getLong(0)))return false;return expected.isEmpty();
+                }
+            }
             Thread.sleep(200);
         }return false;
     }
@@ -147,7 +152,7 @@ final class ContactsCleanerEngine {
             if(stream==null)throw new IOException("Cannot open backup");
             byte[] buffer=new byte[65536];
             for(Contact x:snapshot.contacts.values()){check();if(x.lookup==null||x.lookup.isEmpty())throw new IOException("Missing contact key");
-                Uri vcard=Uri.withAppendedPath(Contacts.CONTENT_VCARD_URI,Uri.encode(x.lookup));
+                Uri vcard=Uri.withAppendedPath(Contacts.CONTENT_VCARD_URI,x.lookup);
                 ByteArrayOutputStream bytes=new ByteArrayOutputStream();try(InputStream in=resolver.openInputStream(vcard)){if(in==null)throw new IOException("Cannot export contact");int n;while((n=in.read(buffer))!=-1){check();if(bytes.size()+n>8*1024*1024)throw new IOException("Contact backup too large");bytes.write(buffer,0,n);}}
                 byte[] data=bytes.toByteArray();String value=new String(data,java.nio.charset.StandardCharsets.UTF_8).trim();if(!value.startsWith("BEGIN:VCARD")||!value.endsWith("END:VCARD"))throw new IOException("Invalid provider backup");
                 total+=data.length+2;if(total>256L*1024*1024)throw new IOException("Backup exceeds 256 MB");
