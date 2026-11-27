@@ -40,7 +40,18 @@ for label in 'Swipe Photos' 'Video Compressor' 'Photo Compressor' 'Contacts Clea
   grep -F "$label" build/home-evidence/tools.xml
 done
 if grep -F 'Email Cleaner' build/home-evidence/tools.xml; then exit 1; fi
-tools_tap build/home-evidence/tools.xml 'Internet Speed Test'
+tools_tap build/home-evidence/tools.xml 'Swipe Photos, Keep what matters'
+tools_dump swipe_entry
+grep -F 'Swipe Photos' build/home-evidence/swipe_entry.xml
+if grep -F 'Allow photo access' build/home-evidence/swipe_entry.xml; then
+  # Permission is intentionally not requested until the user taps Allow.
+  grep -F 'Nothing is uploaded or removed automatically.' build/home-evidence/swipe_entry.xml
+fi
+adb shell input keyevent 4
+sleep 1
+tools_dump tools_after_swipe
+grep -F 'Tools, selected' build/home-evidence/tools_after_swipe.xml
+tools_tap build/home-evidence/tools_after_swipe.xml 'Internet Speed Test'
 tools_dump tools_pending
 grep -F 'No action has been performed.' build/home-evidence/tools_pending.xml
 adb shell input keyevent 4
