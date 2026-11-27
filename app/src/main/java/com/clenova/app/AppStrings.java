@@ -5,6 +5,22 @@ import java.util.Map;
 final class AppStrings {
  private static final Map<String,String[]> TEXT=new HashMap<>();
  static {
+  TEXT.put("Add folder",new String[]{"फ़ोल्डर जोड़ें","Añadir carpeta","Ajouter un dossier","Ordner hinzufügen"});
+  TEXT.put("Off limits.",new String[]{"सुरक्षित रखें।","Zona protegida.","Zone protégée.","Geschützter Bereich."});
+  TEXT.put("Exclude these folders and their subfolders from future cleanup.",new String[]{"इन फ़ोल्डरों और सबफ़ोल्डरों को भविष्य की सफाई से बाहर रखें।","Excluye estas carpetas y subcarpetas de futuras limpiezas.","Excluez ces dossiers et sous-dossiers des futurs nettoyages.","Diese Ordner und Unterordner von künftiger Bereinigung ausschließen."});
+  TEXT.put("No protected folders yet",new String[]{"अभी कोई सुरक्षित फ़ोल्डर नहीं","Sin carpetas protegidas","Aucun dossier protégé","Noch keine geschützten Ordner"});
+  TEXT.put("Add a folder you want to keep.",new String[]{"वह फ़ोल्डर जोड़ें जिसे रखना है।","Añade una carpeta que quieras conservar.","Ajoutez un dossier à conserver.","Füge einen Ordner hinzu, den du behalten möchtest."});
+  TEXT.put("Subfolders are included in each exclusion.",new String[]{"सबफ़ोल्डर भी शामिल हैं।","Se incluyen las subcarpetas.","Les sous-dossiers sont inclus.","Unterordner sind enthalten."});
+  TEXT.put("Saved exclusions · Cleanup engine not active",new String[]{"अपवाद सहेजे गए · सफाई इंजन सक्रिय नहीं","Exclusiones guardadas · Motor inactivo","Exclusions enregistrées · Moteur inactif","Ausnahmen gespeichert · Bereinigung inaktiv"});
+  TEXT.put("Folder options",new String[]{"फ़ोल्डर विकल्प","Opciones de carpeta","Options du dossier","Ordneroptionen"});
+  TEXT.put("Remove protection",new String[]{"सुरक्षा हटाएँ","Quitar protección","Retirer la protection","Schutz entfernen"});
+  TEXT.put("This removes the exclusion, not the folder or its files.",new String[]{"इससे केवल सुरक्षा हटेगी, फ़ोल्डर या फ़ाइलें नहीं।","Solo elimina la exclusión, no la carpeta ni sus archivos.","Seule l’exclusion est retirée, pas le dossier ni ses fichiers.","Nur die Ausnahme wird entfernt, nicht der Ordner oder seine Dateien."});
+  TEXT.put("Remove",new String[]{"हटाएँ","Quitar","Retirer","Entfernen"});
+  TEXT.put("Folder picker unavailable",new String[]{"फ़ोल्डर चयन उपलब्ध नहीं","Selector no disponible","Sélecteur indisponible","Ordnerauswahl nicht verfügbar"});
+  TEXT.put("Folder added",new String[]{"फ़ोल्डर जोड़ा गया","Carpeta añadida","Dossier ajouté","Ordner hinzugefügt"});
+  TEXT.put("Folder already protected",new String[]{"फ़ोल्डर पहले से सुरक्षित है","Carpeta ya protegida","Dossier déjà protégé","Ordner bereits geschützt"});
+  TEXT.put("Could not save this folder",new String[]{"फ़ोल्डर सहेजा नहीं जा सका","No se pudo guardar la carpeta","Impossible d’enregistrer le dossier","Ordner konnte nicht gespeichert werden"});
+  TEXT.put("Could not update protection",new String[]{"सुरक्षा अपडेट नहीं हो सकी","No se pudo actualizar la protección","Impossible de modifier la protection","Schutz konnte nicht geändert werden"});
   TEXT.put("Back to Settings",new String[]{"सेटिंग्स पर वापस","Volver a ajustes","Retour aux réglages","Zurück zu Einstellungen"});
   TEXT.put("Keep what matters.",new String[]{"जो ज़रूरी है, उसे रखें।","Conserva lo importante.","Gardez ce qui compte.","Bewahre, was wichtig ist."});
   TEXT.put("Choose what your Agent should never remove.",new String[]{"चुनें कि एजेंट क्या कभी न हटाए।","Elige lo que tu agente nunca debe borrar.","Choisissez ce que votre agent ne doit jamais supprimer.","Wähle, was dein Agent nie löschen soll."});

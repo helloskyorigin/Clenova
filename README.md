@@ -49,3 +49,6 @@ Settings > Agent preferences has persisted autopilot, daily/3-day/weekly interva
 
 ## Cleanup protection landing
 Settings > Cleanup protection provides four persisted smart switches, all enabled by default, and protected folders/files rows reserved for subsequent screens. The pure rule evaluator uses a seven-day recent window, conservatively protects unknown metadata when enabled, preserves mandatory originals and personal exclusions regardless of switch values, and always requires approval. It is not yet connected to a real scanner or deletion engine; existing sample galleries continue protecting their originals. No device files are read. CI includes tests for all 16 switch combinations.
+
+## Protected folders
+Real Android ACTION_OPEN_DOCUMENT_TREE picker, empty initial state, locally persisted URI exclusions and display metadata, duplicate prevention, removable entries with confirmation and no file deletion. The app reads only selected folder name using a temporary read grant; no persistent file access is required and no write grant is requested. External-storage document IDs have boundary-safe descendant matching. Opaque providers require ancestry resolution in future scanner integration. OS picker restrictions apply. No active scanner/deletion engine yet; saved exclusions are not a filesystem lock. CI includes folder match tests.

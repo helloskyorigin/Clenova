@@ -47,7 +47,9 @@ public final class MainActivity extends Activity {
     private boolean[] videoDraft;
     private CleanupPreview cleanup;
     private boolean cleaning, completed, completionVisible;
-    private boolean storageVisible, settingsVisible, agentPrefsVisible, protectionVisible;
+    private boolean storageVisible, settingsVisible, agentPrefsVisible, protectionVisible, foldersVisible;
+    private ProtectedFolders protectedFolders;
+    private static final int PICK_PROTECTED_FOLDER=92;
     private ValueAnimator cleanupAnimation;
     private AppPreferences prefs;
     private android.widget.PopupWindow preferencePopup;
@@ -56,6 +58,7 @@ public final class MainActivity extends Activity {
     @Override public void onCreate(Bundle state) {
         super.onCreate(state);
         prefs=new AppPreferences(this);
+        protectedFolders=new ProtectedFolders(this);
         applyPalette();
         density = getResources().getDisplayMetrics().density;
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
@@ -70,6 +73,7 @@ public final class MainActivity extends Activity {
             if(state.getBoolean("cleanup_running")){startCleanupAnimation();return;}
             if(completed && state.getBoolean("cleanup_visible")){showCompletion(false);return;}
         }
+        if(state!=null && state.getBoolean("folders_visible")){openProtectedFolders();return;}
         if(state!=null && state.getBoolean("protection_visible")){openProtection();return;}
         if(state!=null && state.getBoolean("agent_prefs_visible")){openAgentPreferences();return;}
         if(state!=null && state.getBoolean("settings_visible")){openSettings();return;}
@@ -82,6 +86,7 @@ public final class MainActivity extends Activity {
         state.putBoolean("settings_visible",settingsVisible);
         state.putBoolean("agent_prefs_visible",agentPrefsVisible);
         state.putBoolean("protection_visible",protectionVisible);
+        state.putBoolean("folders_visible",foldersVisible);
         if(cleanup!=null){
             state.putDoubleArray("cleanup_amounts",cleanup.amounts());
             state.putInt("cleanup_count",cleanup.count);
@@ -217,7 +222,7 @@ public final class MainActivity extends Activity {
         add(l,settings,dp(44),dp(44)); return l;
     }
     private void openSettings(){
-        protectionVisible=false;agentPrefsVisible=false;settingsVisible=true;setContentView(settingsScreen());
+        foldersVisible=false;protectionVisible=false;agentPrefsVisible=false;settingsVisible=true;setContentView(settingsScreen());
     }
     private LinearLayout settingsScreen(){
         LinearLayout root=column();root.setBackgroundColor(BG);
@@ -361,7 +366,7 @@ public final class MainActivity extends Activity {
         settingsVisible=true;agentPrefsVisible=true;setContentView(agentPreferencesScreen());
     }
     private void openProtection(){
-        settingsVisible=true;agentPrefsVisible=false;protectionVisible=true;setContentView(protectionScreen());
+        foldersVisible=false;settingsVisible=true;agentPrefsVisible=false;protectionVisible=true;setContentView(protectionScreen());
     }
     private LinearLayout protectionScreen(){
         LinearLayout root=column();root.setBackgroundColor(BG);root.setPadding(dp(18),v(12),dp(18),v(12));
@@ -411,9 +416,103 @@ public final class MainActivity extends Activity {
         LinearLayout labels=column();add(labels,txt(name,15,INK,600),-1,-2);space(labels,5);
         add(labels,txt(description,12,GRAY,400),-1,-2);weight(line,labels);gap(line,8);
         add(line,new Glyph(this,"chevron",GRAY),dp(14),dp(14));
-        // The personal-protection detail screens are intentionally deferred.
+        if(name.equals("Protected folders"))tap(line,WHITE,8,this::openProtectedFolders);
         line.setContentDescription(tr(name)+", "+tr(description));
         return line;
+    }
+
+    private void openProtectedFolders(){
+        settingsVisible=true;agentPrefsVisible=false;protectionVisible=true;foldersVisible=true;
+        setContentView(protectedFoldersScreen());
+    }
+    private LinearLayout protectedFoldersScreen(){
+        LinearLayout root=column();root.setBackgroundColor(BG);root.setPadding(dp(18),v(12),dp(18),v(12));
+        FrameLayout header=new FrameLayout(this);
+        TextView title=centered("Protected folders",17,INK,600);title.setPadding(dp(46),0,dp(46),0);
+        header.addView(title,new FrameLayout.LayoutParams(-1,-1));
+        FrameLayout back=new FrameLayout(this),plus=new FrameLayout(this);
+        back.addView(new Glyph(this,"back",INK),new FrameLayout.LayoutParams(dp(24),dp(24),Gravity.CENTER));
+        back.setContentDescription(tr("Cleanup protection"));tap(back,WHITE,22,this::openProtection);
+        header.addView(back,new FrameLayout.LayoutParams(dp(44),dp(44),Gravity.START|Gravity.CENTER_VERTICAL));
+        plus.addView(new Glyph(this,"plus",BLUE),new FrameLayout.LayoutParams(dp(24),dp(24),Gravity.CENTER));
+        plus.setContentDescription(tr("Add folder"));tap(plus,WHITE,22,this::pickProtectedFolder);
+        header.addView(plus,new FrameLayout.LayoutParams(dp(44),dp(44),Gravity.END|Gravity.CENTER_VERTICAL));
+        add(root,header,-1,dp(44));
+        ScrollView scroll=new ScrollView(this);scroll.setVerticalScrollBarEnabled(false);scroll.setOverScrollMode(View.OVER_SCROLL_NEVER);
+        LinearLayout body=column();body.setPadding(0,v(18),0,v(12));
+        scroll.addView(body,new ScrollView.LayoutParams(-1,-2));root.addView(scroll,new LinearLayout.LayoutParams(-1,0,1f));
+        LinearLayout hero=column();hero.setGravity(Gravity.CENTER_HORIZONTAL);
+        FrameLayout mark=new FrameLayout(this);mark.setBackground(round(PALE,20));
+        mark.addView(new Glyph(this,"folder_lock",BLUE),new FrameLayout.LayoutParams(dp(35),dp(35),Gravity.CENTER));
+        add(hero,mark,dp(68),dp(68));space(hero,13);
+        add(hero,centered("Off limits.",25,INK,700),-1,-2);space(hero,7);
+        add(hero,centered("Exclude these folders and their subfolders from future cleanup.",14,GRAY,400),-1,-2);
+        add(body,hero,-1,-2);space(body,24);
+        java.util.List<ProtectedFolders.Entry> entries=protectedFolders.entries();
+        LinearLayout section=row();weight(section,txt("Protected folders",14,GRAY,500));
+        add(section,txt(Integer.toString(entries.size()),13,GRAY,500),-2,-2);add(body,section,-1,-2);space(body,10);
+        LinearLayout list=card();pad(list,13,6);
+        if(entries.isEmpty()){
+            LinearLayout empty=column();empty.setGravity(Gravity.CENTER_HORIZONTAL);pad(empty,8,24);
+            add(empty,new Glyph(this,"folder",GRAY),dp(35),dp(35));space(empty,12);
+            add(empty,centered("No protected folders yet",16,INK,600),-1,-2);space(empty,6);
+            add(empty,centered("Add a folder you want to keep.",13,GRAY,400),-1,-2);add(list,empty,-1,-2);
+        }else for(int i=0;i<entries.size();i++){
+            ProtectedFolders.Entry entry=entries.get(i);LinearLayout line=row();line.setPadding(0,dp(10),0,dp(10));
+            FrameLayout icon=new FrameLayout(this);icon.setBackground(round(PALE,12));
+            icon.addView(new Glyph(this,"folder",BLUE),new FrameLayout.LayoutParams(dp(25),dp(25),Gravity.CENTER));
+            add(line,icon,dp(44),dp(44));gap(line,10);
+            LinearLayout details=column();TextView name=txt(entry.name,15,INK,600);name.setText(entry.name);
+            name.setMaxLines(2);name.setEllipsize(android.text.TextUtils.TruncateAt.END);add(details,name,-1,-2);space(details,5);
+            TextView path=txt("",12,GRAY,400);path.setText(entry.location);path.setMaxLines(2);path.setEllipsize(android.text.TextUtils.TruncateAt.END);
+            add(details,path,-1,-2);weight(line,details);gap(line,6);
+            add(line,new Glyph(this,"shield",GREEN),dp(20),dp(20));
+            FrameLayout more=new FrameLayout(this);more.addView(new Glyph(this,"more",GRAY),new FrameLayout.LayoutParams(dp(20),dp(20),Gravity.CENTER));
+            more.setContentDescription(tr("Folder options")+", "+entry.name);tap(more,WHITE,20,()->showFolderMenu(more,entry));
+            add(line,more,dp(40),dp(44));add(list,line,-1,-2);
+            if(i<entries.size()-1)thinRule(list);
+        }
+        add(body,list,-1,-2);space(body,19);
+        LinearLayout addButton=row();addButton.setGravity(Gravity.CENTER);
+        add(addButton,new Glyph(this,"plus",Color.WHITE),dp(21),dp(21));gap(addButton,8);
+        add(addButton,txt("Add folder",16,Color.WHITE,600),-2,-2);
+        tap(addButton,BLUE,27,this::pickProtectedFolder);add(body,addButton,-1,dp(52));space(body,17);
+        add(body,centered("Subfolders are included in each exclusion.",12,GRAY,400),-1,-2);space(body,8);
+        add(body,centered("Saved exclusions · Cleanup engine not active",11,GRAY,400),-1,-2);
+        return root;
+    }
+    private void pickProtectedFolder(){
+        android.content.Intent intent=new android.content.Intent(android.content.Intent.ACTION_OPEN_DOCUMENT_TREE);
+        intent.addFlags(android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION|android.content.Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION|android.content.Intent.FLAG_GRANT_PREFIX_URI_PERMISSION);
+        try{startActivityForResult(intent,PICK_PROTECTED_FOLDER);}
+        catch(android.content.ActivityNotFoundException e){folderToast("Folder picker unavailable");}
+    }
+    @Override protected void onActivityResult(int requestCode,int resultCode,android.content.Intent data){
+        super.onActivityResult(requestCode,resultCode,data);
+        if(requestCode!=PICK_PROTECTED_FOLDER||resultCode!=RESULT_OK||data==null||data.getData()==null)return;
+        try{
+            boolean added=protectedFolders.add(data.getData());
+            folderToast(added?"Folder added":"Folder already protected");
+        }catch(RuntimeException e){folderToast("Could not save this folder");}
+        openProtectedFolders();
+    }
+    private void folderToast(String message){android.widget.Toast.makeText(this,tr(message),android.widget.Toast.LENGTH_SHORT).show();}
+    private void showFolderMenu(View anchor,ProtectedFolders.Entry entry){
+        if(preferencePopup!=null)preferencePopup.dismiss();
+        LinearLayout menu=column();menu.setPadding(dp(7),dp(6),dp(7),dp(6));
+        android.widget.PopupWindow popup=new android.widget.PopupWindow(menu,Math.min(dp(225),getResources().getDisplayMetrics().widthPixels-dp(32)),-2,true);
+        preferencePopup=popup;popup.setBackgroundDrawable(round(WHITE,16));popup.setElevation(dp(10));popup.setOutsideTouchable(true);
+        popup.setOnDismissListener(()->{if(preferencePopup==popup)preferencePopup=null;});
+        TextView remove=txt("Remove protection",14,0xffe05252,600);remove.setGravity(Gravity.CENTER_VERTICAL);pad(remove,12,8);
+        tap(remove,WHITE,10,()->{popup.dismiss();
+            new AlertDialog.Builder(this,dark?android.R.style.Theme_Material_Dialog_Alert:android.R.style.Theme_Material_Light_Dialog_Alert)
+                .setTitle(tr("Remove protection")).setMessage(tr("This removes the exclusion, not the folder or its files."))
+                .setNegativeButton(tr("Cancel"),null).setPositiveButton(tr("Remove"),(d,w)->{
+                    if(!protectedFolders.remove(entry.uri))folderToast("Could not update protection");
+                    openProtectedFolders();
+                }).show();
+        });
+        add(menu,remove,-1,dp(46));popup.showAsDropDown(anchor,0,-anchor.getHeight(),Gravity.END);
     }
 
     private LinearLayout agentPreferencesScreen(){
@@ -641,7 +740,7 @@ public final class MainActivity extends Activity {
     }
     private void showHome() {
         storageVisible=false;
-        settingsVisible=false;agentPrefsVisible=false;protectionVisible=false;
+        settingsVisible=false;agentPrefsVisible=false;protectionVisible=false;foldersVisible=false;
         completionVisible=false;
         reviewing = false;
         setContentView(home());
@@ -655,6 +754,7 @@ public final class MainActivity extends Activity {
     }
     @Override public void onBackPressed() {
         if(cleaning)return;
+        if(foldersVisible){openProtection();return;}
         if(protectionVisible || agentPrefsVisible){openSettings();return;}
         if(settingsVisible || storageVisible){showHome();return;}
         if(completionVisible){showHome();return;}
@@ -1461,6 +1561,9 @@ public final class MainActivity extends Activity {
                 case "heart":{
                     Path a=new Path();a.moveTo(12,21);a.cubicTo(8,17,2,13,2,8);a.cubicTo(2,2,9,1,12,6);
                     a.cubicTo(15,1,22,2,22,8);a.cubicTo(22,13,16,17,12,21);a.close();c.drawPath(a,p);break;}
+                case "plus":path(c,12,4,12,20);path(c,4,12,20,12);break;
+                case "more":p.setStyle(Paint.Style.FILL);for(int i=0;i<3;i++)c.drawCircle(12,5+i*7,1.6f,p);break;
+                case "folder":path(c,3,5,10,5,12,8,21,8,21,20,3,20,3,5);break;
                 case "folder_lock":path(c,3,18,3,5,10,5,12,8,21,8,21,12);
                     path(c,3,18,10,18);c.drawRoundRect(new RectF(13,15,22,22),2,2,p);c.drawArc(new RectF(15,10,20,18),180,180,false,p);break;
                 case "file_lock":path(c,5,2,14,2,20,8,20,11);path(c,14,2,14,8,20,8);path(c,5,2,5,22,10,22);
