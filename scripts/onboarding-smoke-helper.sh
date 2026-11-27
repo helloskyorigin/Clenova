@@ -1,10 +1,14 @@
 #!/usr/bin/env bash
-# Navigate both introductions and collect actual device evidence.
+# Navigate all three introductions and collect actual device evidence.
 onboarding_continue() {
   local name="${1:-onboarding}" xy stage heading cta
   mkdir -p build/onboarding-evidence
-  for stage in 01 02; do
-    if [[ "$stage" == "01" ]]; then heading="Meet your personal"; cta="Get Started"; else heading="One Agent."; cta="Continue"; fi
+  for stage in 01 02 03; do
+    case "$stage" in
+      01) heading="Meet your personal"; cta="Get Started" ;;
+      02) heading="One Agent."; cta="Continue" ;;
+      03) heading="On autopilot."; cta="Continue" ;;
+    esac
     adb shell uiautomator dump /sdcard/onboarding-qa.xml >/dev/null
     adb pull /sdcard/onboarding-qa.xml "build/onboarding-evidence/$name-$stage.xml" >/dev/null
     adb exec-out screencap -p > "build/onboarding-evidence/$name-$stage.png"
