@@ -106,7 +106,18 @@ adb shell input keyevent 4
 sleep 1
 tools_dump tools_after_contacts
 grep -F 'Tools, selected' build/home-evidence/tools_after_contacts.xml
-tools_tap build/home-evidence/tools_after_contacts.xml 'Internet Speed Test'
+tools_tap build/home-evidence/tools_after_contacts.xml 'App Manager'
+tools_dump app_manager
+grep -F 'App Manager' build/home-evidence/app_manager.xml
+grep -F 'Search apps' build/home-evidence/app_manager.xml
+grep -F 'All apps' build/home-evidence/app_manager.xml
+grep -F 'Refresh apps' build/home-evidence/app_manager.xml
+# No uninstall is requested by automated navigation checks.
+adb shell input keyevent 4
+sleep 1
+tools_dump tools_after_app_manager
+grep -F 'Tools, selected' build/home-evidence/tools_after_app_manager.xml
+tools_tap build/home-evidence/tools_after_app_manager.xml 'Internet Speed Test'
 tools_dump tools_pending
 grep -F 'No action has been performed.' build/home-evidence/tools_pending.xml
 adb shell input keyevent 4
