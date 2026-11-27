@@ -607,9 +607,12 @@ public final class MainActivity extends Activity {
         LinearLayout copy=column();add(copy,txt(title,15,INK,600),-1,-2);
         if(detailed){space(copy,4);add(copy,txt(subtitle,12,GRAY,400),-1,-2);}
         weight(line,copy);gap(line,8);add(line,new Glyph(this,"chevron",GRAY),dp(14),dp(14));
-        tap(line,WHITE,12,()->privacyDialog().setTitle(tr(title))
-            .setMessage(tr("This tool is not available yet. No action has been performed."))
-            .setPositiveButton(tr("Done"),null).show());
+        tap(line,WHITE,12,()->{
+            if(title.equals("Swipe Photos")){startActivity(new Intent(this,SwipePhotosActivity.class));return;}
+            privacyDialog().setTitle(tr(title))
+                .setMessage(tr("This tool is not available yet. No action has been performed."))
+                .setPositiveButton(tr("Done"),null).show();
+        });
         line.setContentDescription(tr(title)+(detailed?", "+tr(subtitle):""));
         add(parent,line,-1,-2);if(divider)thinRule(parent);
     }
