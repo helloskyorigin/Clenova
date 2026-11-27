@@ -17,6 +17,17 @@ public final class ReviewPlanTest {
   p.setSelected(0,true);Arrays.fill(sim,true);p.confirmSimilar(sim);Arrays.fill(vid,true);p.confirmVideos(vid);
   check(p.total()==4800&&p.count()==140&&ReviewPlan.gb(p.total()).equals("4.8 GB"));
   for(int mask=0;mask<(1<<12);mask++){int expected=0,n=0;for(int i=0;i<12;i++){vid[i]=(mask&(1<<i))!=0;if(vid[i]){expected+=ReviewPlan.VIDEO_MB[i];n++;}}p.confirmVideos(vid);check(p.categoryMb(2)==expected&&p.total()==2200+expected&&p.count()==128+n);}
-  System.out.println("All 4096 video selection masks and photo checks passed");
+  CleanupPreview cleanup=new CleanupPreview(p);
+  check(cleanup.total==4800 && cleanup.count==140 && cleanup.available()==47600 && cleanup.lifetimeRecovered()==17200 && cleanup.used()==80400);
+  check(cleanup.status(0,0)==1 && cleanup.status(1,0)==0 && cleanup.status(2,4800)==2);
+  check(cleanup.recovered(0f)==0 && cleanup.recovered(1f)==4800);
+  p.setSelected(0,false);p.setSelected(1,false);p.setSelected(2,false);
+  check(cleanup.total==4800 && p.total()==0);
+  boolean rejected=false;try{new CleanupPreview(p);}catch(IllegalArgumentException e){rejected=true;}check(rejected);
+  boolean[] only=p.draftCopies();only[0]=true;p.confirmCopies(only);
+  CleanupPreview partial=new CleanupPreview(p);
+  check(partial.total==25 && partial.count==1 && partial.available()==42825 && partial.status(1,25)==-1);
+  check(partial.status(0,25)==2);
+  System.out.println("Video, photo and cleanup snapshot checks passed");
  }
 }

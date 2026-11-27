@@ -31,3 +31,6 @@ Agent Picks uses inline statistics and a single group preview. View All shows 32
 
 ## Large videos preview
 Agent Picks shows four largest videos; View All shows all 12 sorted by size (2600 MB total). Tiles display illustrative thumbnails, sample durations and sizes. Full-screen preview displays a sample still, not playback, because no video assets or device media are accessed. Selection is shared across tabs and added to the review plan only on Confirm selection. Back discards drafts. Pure Java CI test covers all 4096 video selection masks.
+
+## Cleanup progress and completion preview
+Explicit approval snapshots only selected sample items. A 2.8-second simulated progress ring changes to a green success ring and tick. Category statuses and receipt use the snapshot; home storage, recovered total and agent update reflect the completed preview. One simulated cleanup per activity session; summary remains accessible and the same sample items cannot be processed twice. Unselected items remain untouched; no new scan is simulated. State is saved across activity recreation. No device file access or actual deletion. CI includes snapshot tests.

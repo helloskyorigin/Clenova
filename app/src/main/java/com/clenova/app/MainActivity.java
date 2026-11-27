@@ -45,6 +45,9 @@ public final class MainActivity extends Activity {
     private boolean videoViewing;
     private int videoTab;
     private boolean[] videoDraft;
+    private CleanupPreview cleanup;
+    private boolean cleaning, completed, completionVisible;
+    private ValueAnimator cleanupAnimation;
 
     @Override public void onCreate(Bundle state) {
         super.onCreate(state);
@@ -55,8 +58,34 @@ public final class MainActivity extends Activity {
         getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR);
         int height = getResources().getConfiguration().screenHeightDp;
         compact = height < 740 ? .88f : 1f;
+        if(state!=null && state.containsKey("cleanup_amounts")){
+            cleanup=new CleanupPreview(state.getDoubleArray("cleanup_amounts"),state.getInt("cleanup_count"));
+            completed=state.getBoolean("cleanup_completed");
+            if(state.getBoolean("cleanup_running")){startCleanupAnimation();return;}
+            if(completed && state.getBoolean("cleanup_visible")){showCompletion(false);return;}
+        }
         setContentView(home());
     }
+    @Override protected void onSaveInstanceState(Bundle state){
+        super.onSaveInstanceState(state);
+        if(cleanup!=null){
+            state.putDoubleArray("cleanup_amounts",cleanup.amounts());
+            state.putInt("cleanup_count",cleanup.count);
+            state.putBoolean("cleanup_completed",completed);
+            state.putBoolean("cleanup_running",cleaning);
+            state.putBoolean("cleanup_visible",completionVisible);
+        }
+    }
+    @Override protected void onDestroy(){
+        if(cleanupAnimation!=null){
+            cleanupAnimation.removeAllListeners();cleanupAnimation.removeAllUpdateListeners();cleanupAnimation.cancel();
+        }
+        super.onDestroy();
+    }
+    private double previewAvailable(){return completed?cleanup.available():42800;}
+    private double previewRecovered(){return completed?cleanup.lifetimeRecovered():12400;}
+    private double previewUsed(){return completed?cleanup.used():85200;}
+    private String gbNumber(double mb){return ReviewPlan.gb(mb).replace(" GB","");}
 
     private int dp(float n) { return Math.round(n * density); }
     private int v(float n) { return dp(n * compact); }
@@ -163,13 +192,13 @@ public final class MainActivity extends Activity {
     }
     private LinearLayout storage() {
         LinearLayout card=card(); LinearLayout metrics=row();
-        weight(metrics,metric("Available storage",HomePreviewData.AVAILABLE,false));
+        weight(metrics,metric("Available storage",gbNumber(previewAvailable()),false));
         View rule=new View(this); rule.setBackgroundColor(0xffe6e6eb);
         add(metrics,rule,dp(1),v(42)); gap(metrics,15);
-        weight(metrics,metric("Space recovered",HomePreviewData.RECOVERED,true));
+        weight(metrics,metric("Space recovered",gbNumber(previewRecovered()),true));
         add(card,metrics,-1,-2); space(card,12);
         add(card,new StorageBar(this),-1,dp(10)); space(card,9);
-        LinearLayout labels=row(); add(labels,txt(HomePreviewData.USED,12,GRAY,400),-2,-2);
+        LinearLayout labels=row(); add(labels,txt(ReviewPlan.gb(previewUsed())+" used",12,GRAY,400),-2,-2);
         stretch(labels); add(labels,txt(HomePreviewData.TOTAL,12,GRAY,400),-2,-2);
         add(card,labels,-1,-2); return card;
     }
@@ -181,6 +210,7 @@ public final class MainActivity extends Activity {
         add(l,value,-1,-2); space(l,1); add(l,txt("GB",14,GRAY,400),-2,-2); return l;
     }
     private LinearLayout agentCard() {
+        if(completed)return completedAgentCard();
         LinearLayout c=card(); LinearLayout top=row();
         FrameLayout mark=new FrameLayout(this); mark.setBackground(round(PALE,13));
         mark.addView(new Glyph(this,"sparkles",BLUE),new FrameLayout.LayoutParams(dp(27),dp(27),Gravity.CENTER));
@@ -200,15 +230,19 @@ public final class MainActivity extends Activity {
         add(c,approve,-1,dp(51)); return c;
     }
     private void showHome() {
+        completionVisible=false;
         reviewing = false;
         setContentView(home());
     }
     private void openReview() {
+        if(completed)return;
         reviewPlan = new ReviewPlan();
         reviewing = true;
         setContentView(reviewScreen());
     }
     @Override public void onBackPressed() {
+        if(cleaning)return;
+        if(completionVisible){showHome();return;}
         if (videoViewing) leaveVideos(false); else if (similarViewing) leaveSimilar(false); else if (duplicateViewing) leaveDuplicates(false); else if (reviewing) showHome(); else super.onBackPressed();
     }
     private LinearLayout reviewScreen() {
@@ -761,12 +795,158 @@ public final class MainActivity extends Activity {
     }
 
     private void confirmPreview() {
+        if(reviewPlan.total()<=0 || cleaning || completed)return;
         new AlertDialog.Builder(this).setTitle("Approve cleanup?")
                 .setMessage("Preview: "+reviewPlan.count()+" sample items · "+ReviewPlan.gb(reviewPlan.total())+
                         ". No real files will be deleted.")
                 .setNegativeButton("Cancel",null)
-                .setPositiveButton("Approve preview",(d,w)->demo("Approval preview","Selection confirmed. No files were changed."))
-                .show();
+                .setPositiveButton("Approve preview",(d,w)->{
+                    cleanup=new CleanupPreview(reviewPlan);startCleanupAnimation();
+                }).show();
+    }
+    private LinearLayout completedAgentCard(){
+        LinearLayout c=card(),top=row();
+        FrameLayout mark=new FrameLayout(this);mark.setBackground(round(0xffe5f5e9,13));
+        mark.addView(new Glyph(this,"shield",GREEN),new FrameLayout.LayoutParams(dp(27),dp(27),Gravity.CENTER));
+        add(top,mark,dp(43),dp(43));gap(top,10);
+        LinearLayout message=column();
+        add(message,txt("Cleanup complete.",16,INK,600),-1,-2);space(message,4);
+        add(message,txt("Simulated cleanup · Just now",12,GRAY,400),-1,-2);weight(top,message);
+        add(c,top,-1,-2);space(c,12);
+        LinearLayout amount=row();add(amount,txt(ReviewPlan.gb(cleanup.total),32,INK,700),-2,-2);gap(amount,7);
+        weight(amount,txt("recovered",13,GRAY,400));add(c,amount,-1,-2);space(c,12);
+        TextView receipt=centered("View summary",16,BLUE,600);
+        tap(receipt,PALE,26,()->showCompletion(false));add(c,receipt,-1,dp(51));return c;
+    }
+    private LinearLayout cleanupRoot(String heading){
+        LinearLayout root=column();root.setBackgroundColor(BG);
+        root.setPadding(dp(18),v(12),dp(18),v(12));
+        add(root,centered(heading,17,INK,600),-1,dp(44));
+        return root;
+    }
+    private LinearLayout cleanupBody(LinearLayout root){
+        ScrollView scroll=new ScrollView(this);scroll.setFillViewport(true);
+        scroll.setVerticalScrollBarEnabled(false);scroll.setOverScrollMode(View.OVER_SCROLL_NEVER);
+        LinearLayout body=column();body.setGravity(Gravity.CENTER_HORIZONTAL);
+        body.setPadding(0,v(14),0,v(12));
+        scroll.addView(body,new ScrollView.LayoutParams(-1,-2));
+        root.addView(scroll,new LinearLayout.LayoutParams(-1,0,1f));
+        return body;
+    }
+    private void startCleanupAnimation(){
+        cleaning=true;completionVisible=false;reviewing=false;
+        LinearLayout root=cleanupRoot("Cleaning up");
+        LinearLayout body=cleanupBody(root);
+        space(body,20);
+        CleanupRing ring=new CleanupRing(this,false);
+        add(body,ring,-1,v(238));space(body,12);
+        add(body,centered("Making more room.",26,INK,700),-1,-2);space(body,7);
+        add(body,centered("Your Agent is handling the cleanup.",14,GRAY,400),-1,-2);space(body,25);
+        LinearLayout stages=card();
+        TextView[] markers=new TextView[3], labels=new TextView[3];
+        boolean first=true;
+        for(int i=0;i<3;i++){
+            if(cleanup.amount(i)<=0)continue;
+            if(!first){space(stages,14);thinRule(stages);space(stages,14);}first=false;
+            LinearLayout line=row();
+            markers[i]=centered("○",23,GRAY,600);add(line,markers[i],dp(25),dp(30));gap(line,10);
+            weight(line,txt(ReviewPlan.NAMES[i],14,INK,600));gap(line,6);
+            labels[i]=txt("Waiting",12,GRAY,400);add(line,labels[i],-2,-2);
+            add(stages,line,-1,-2);
+        }
+        add(body,stages,-1,-2);
+        add(root,centered("Only your approved items are processed.",12,GRAY,400),-1,-2);space(root,6);
+        add(root,centered("Simulation · No files are deleted.",12,GRAY,400),-1,dp(22));
+        setContentView(root);
+        cleanupAnimation=ValueAnimator.ofFloat(0f,1f);
+        cleanupAnimation.setDuration(2800);
+        cleanupAnimation.setInterpolator(new android.view.animation.LinearInterpolator());
+        cleanupAnimation.addUpdateListener(a->{
+            float f=(float)a.getAnimatedValue();double recovered=cleanup.recovered(f);
+            ring.setFraction(f);
+            for(int i=0;i<3;i++){
+                if(markers[i]==null)continue;
+                int status=cleanup.status(i,recovered);
+                markers[i].setText(status==2?"✓":status==1?"◌":"○");
+                markers[i].setTextColor(status==2?GREEN:status==1?BLUE:GRAY);
+                labels[i].setText(status==2?"Completed":status==1?"Cleaning…":"Waiting");
+                labels[i].setTextColor(status==1?BLUE:GRAY);
+            }
+        });
+        cleanupAnimation.addListener(new android.animation.AnimatorListenerAdapter(){
+            @Override public void onAnimationEnd(android.animation.Animator animation){
+                if(isFinishing()||isDestroyed())return;
+                cleaning=false;completed=true;showCompletion(true);
+            }
+        });
+        cleanupAnimation.start();
+    }
+    private void showCompletion(boolean animate){
+        completionVisible=true;cleaning=false;reviewing=false;
+        LinearLayout root=cleanupRoot("Cleanup complete"),body=cleanupBody(root);
+        space(body,12);
+        CleanupRing ring=new CleanupRing(this,true);add(body,ring,-1,v(210));space(body,8);
+        add(body,centered(ReviewPlan.gb(cleanup.total),38,INK,700),-1,-2);space(body,5);
+        add(body,centered("Successfully recovered",15,GREEN,600),-1,-2);space(body,13);
+        add(body,centered("All clean. All yours.",25,INK,700),-1,-2);space(body,6);
+        add(body,centered("Your Agent took care of it.",14,GRAY,400),-1,-2);space(body,20);
+        LinearLayout metrics=card(),line=row();
+        LinearLayout left=column();add(left,txt("Items cleaned",12,GRAY,400),-1,-2);space(left,6);
+        add(left,txt(Integer.toString(cleanup.count),25,INK,700),-1,-2);weight(line,left);
+        View divider=new View(this);divider.setBackgroundColor(0xffe5e5ea);add(line,divider,dp(1),dp(44));gap(line,14);
+        LinearLayout right=column();add(right,txt("Available storage",12,GRAY,400),-1,-2);space(right,6);
+        add(right,txt(ReviewPlan.gb(cleanup.available()),22,INK,700),-1,-2);weight(line,right);
+        add(metrics,line,-1,-2);add(body,metrics,-1,-2);space(body,15);
+        LinearLayout shield=row();shield.setGravity(Gravity.CENTER);
+        add(shield,new Glyph(this,"shield",GREEN),dp(17),dp(17));gap(shield,6);
+        add(shield,txt("Your protected photos are safe.",12,GRAY,400),-2,-2);add(body,shield,-1,-2);
+        add(root,centered("Simulation · No files were deleted.",12,GRAY,400),-1,dp(26));space(root,6);
+        TextView home=centered("Back to Home",17,WHITE,600);
+        tap(home,BLUE,26,this::showHome);add(root,home,-1,dp(52));setContentView(root);
+        if(animate){
+            ring.setFraction(0f);
+            ring.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP);
+            cleanupAnimation=ValueAnimator.ofFloat(0f,1f);cleanupAnimation.setDuration(480);
+            cleanupAnimation.setInterpolator(new DecelerateInterpolator());
+            cleanupAnimation.addUpdateListener(a->ring.setFraction((float)a.getAnimatedValue()));
+            cleanupAnimation.start();
+        }
+    }
+    private final class CleanupRing extends View {
+        private final Paint paint=new Paint(Paint.ANTI_ALIAS_FLAG);
+        private final boolean success;
+        private float fraction;
+        CleanupRing(Context c,boolean success){super(c);this.success=success;fraction=success?1f:0f;}
+        void setFraction(float f){fraction=f;invalidate();}
+        private void label(Canvas c,String label,float y,int size,int color,boolean bold){
+            paint.setStyle(Paint.Style.FILL);paint.setColor(color);paint.setTextAlign(Paint.Align.CENTER);
+            paint.setTypeface(Typeface.create("sans-serif",bold?Typeface.BOLD:Typeface.NORMAL));
+            paint.setTextSize(size);c.drawText(label,130,y,paint);
+        }
+        @Override protected void onDraw(Canvas c){
+            super.onDraw(c);
+            float scale=Math.min(getWidth(),getHeight())/260f;
+            c.save();c.translate((getWidth()-260*scale)/2,(getHeight()-260*scale)/2);c.scale(scale,scale);
+            paint.setStyle(Paint.Style.STROKE);paint.setStrokeWidth(3.5f);paint.setStrokeCap(Paint.Cap.ROUND);
+            for(int i=0;i<80;i++){
+                double a=Math.toRadians(i*4.5-90);float x=(float)Math.cos(a),y=(float)Math.sin(a);
+                paint.setColor(success?0xff34c759:i<Math.round(80*fraction)?BLUE:0xffdfe2e8);
+                c.drawLine(130+x*104,130+y*104,130+x*117,130+y*117,paint);
+            }
+            if(success){
+                paint.setStyle(Paint.Style.FILL);paint.setColor(0xffe5f5e9);c.drawCircle(130,130,70,paint);
+                c.save();c.translate(130,130);float tick=.75f+.25f*fraction;c.scale(tick,tick);
+                paint.setStyle(Paint.Style.STROKE);paint.setStrokeWidth(9);paint.setColor(GREEN);
+                paint.setAlpha(Math.round(fraction*255));paint.setStrokeJoin(Paint.Join.ROUND);
+                Path path=new Path();path.moveTo(-33,0);path.lineTo(-10,23);path.lineTo(36,-25);c.drawPath(path,paint);
+                paint.setAlpha(255);c.restore();
+            }else{
+                label(c,"Cleaning",100,14,GRAY,false);
+                label(c,Math.min(100,(int)(fraction*100))+"%",151,53,INK,true);
+                label(c,ReviewPlan.gb(cleanup.recovered(fraction))+" recovered",180,13,BLUE,false);
+            }
+            c.restore();
+        }
     }
 
     private LinearLayout navigation() {
@@ -827,9 +1007,9 @@ public final class MainActivity extends Activity {
     }
     private final class StorageBar extends View {
         private final Paint p=new Paint(Paint.ANTI_ALIAS_FLAG);
-        StorageBar(Context c){super(c);setContentDescription("85.2 of 128 gigabytes used, 42.8 gigabytes available");}
+        StorageBar(Context c){super(c);setContentDescription(ReviewPlan.gb(previewUsed())+" used of 128 GB, "+ReviewPlan.gb(previewAvailable())+" available");}
         @Override protected void onDraw(Canvas c){
-            float[] parts={.45f,.215625f,.334375f}; int[] colors={BLUE,0xff91bdff,0xffe5e5ea};
+            float[] parts={.45f,(float)(previewUsed()/128000.0-.45),(float)(previewAvailable()/128000.0)}; int[] colors={BLUE,0xff91bdff,0xffe5e5ea};
             float available=getWidth()-dp(4), x=0;
             for(int i=0;i<3;i++){
                 float w=available*parts[i]; p.setColor(colors[i]);
