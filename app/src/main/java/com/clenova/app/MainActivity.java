@@ -35,7 +35,10 @@ public final class MainActivity extends Activity {
     private float density;
     private float compact = 1f;
     private boolean reviewing;
-    private boolean cleanVisible;
+    private boolean cleanVisible,agentVisible,agentTaskVisible,agentTaskOrigin,agentShortcut;
+    private String agentCommand="";
+    private int agentTask=-1;
+    private android.widget.EditText agentInput;
     private static final int REQUEST_SCAN_MEDIA=96;
     private static final int REQUEST_APP_UNINSTALL=103;
     private boolean unusedVisible,unusedReview,unusedExternal,unusedUninstallPending;
@@ -132,13 +135,13 @@ public final class MainActivity extends Activity {
         protectedFiles=new ProtectedFiles(this);
         history=new ActivityHistory(this);
         devicePermissions=new DevicePermissions(this);
-        if(state!=null){largeFilesMode=state.getBoolean("large_files_mode");clutterMode=state.getBoolean("clutter_mode");dupTrashPending=state.getBoolean("dup_trash_pending");cleanVisible=state.getBoolean("clean_visible");cleanScrollY=state.getInt("clean_scroll_y");historyFilter=state.getInt("history_filter");cleanupEventId=state.getString("cleanup_event_id");cleanupCategoryCounts=state.getIntArray("cleanup_category_counts");historyDetailId=state.getString("history_detail_id");historyScrollY=state.getInt("history_scroll_y");}
+        if(state!=null){agentVisible=state.getBoolean("agent_visible");agentShortcut=state.getBoolean("agent_shortcut");largeFilesMode=state.getBoolean("large_files_mode");clutterMode=state.getBoolean("clutter_mode");dupTrashPending=state.getBoolean("dup_trash_pending");cleanVisible=state.getBoolean("clean_visible");cleanScrollY=state.getInt("clean_scroll_y");historyFilter=state.getInt("history_filter");cleanupEventId=state.getString("cleanup_event_id");cleanupCategoryCounts=state.getIntArray("cleanup_category_counts");historyDetailId=state.getString("history_detail_id");historyScrollY=state.getInt("history_scroll_y");}
         applyPalette();
         density = getResources().getDisplayMetrics().density;
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
                 WindowManager.LayoutParams.FLAG_FULLSCREEN);
         getWindow().setNavigationBarColor(BG);
-        getWindow().getDecorView().setSystemUiVisibility(dark?0:View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR);
+        getWindow().getDecorView().setSystemUiVisibility(dark||android.os.Build.VERSION.SDK_INT<27?0:View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR);
         int height = getResources().getConfiguration().screenHeightDp;
         compact = height < 740 ? .88f : 1f;
         if(state!=null && state.containsKey("cleanup_amounts")){
@@ -161,13 +164,14 @@ public final class MainActivity extends Activity {
         if(state!=null && state.getBoolean("agent_prefs_visible")){openAgentPreferences();return;}
         if(state!=null && state.getBoolean("settings_visible")){openSettings();if(state.getBoolean("rating_open")){ratingStars=Math.max(0,Math.min(5,state.getInt("rating_stars")));showRatingSheet();}return;}
         if(state!=null && state.getBoolean("storage_visible")){openStorage();return;}
+        if(agentVisible){showAgent();return;}
         if(cleanVisible){showClean();return;}
         setContentView(home());
     }
     @Override protected void onSaveInstanceState(Bundle state){
         super.onSaveInstanceState(state);
         state.putBoolean("storage_visible",storageVisible);
-        state.putBoolean("clean_visible",cleanVisible);
+        state.putBoolean("clean_visible",cleanVisible);state.putBoolean("agent_visible",agentVisible);state.putBoolean("agent_shortcut",agentShortcut);
         state.putBoolean("large_files_mode",largeFilesMode);state.putBoolean("clutter_mode",clutterMode);
         state.putBoolean("dup_trash_pending",dupTrashPending);
         state.putInt("clean_scroll_y",cleanScroll==null?cleanScrollY:cleanScroll.getScrollY());
@@ -236,7 +240,7 @@ public final class MainActivity extends Activity {
         PALE=dark?0xff19334c:0xffe6f0ff;
         GREEN=dark?0xff61d883:0xff27984d;
         getWindow().setNavigationBarColor(BG);
-        getWindow().getDecorView().setSystemUiVisibility(dark?0:View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR);
+        getWindow().getDecorView().setSystemUiVisibility(dark||android.os.Build.VERSION.SDK_INT<27?0:View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR);
     }
     private int surface(int c){
         if(!dark)return c;
@@ -332,9 +336,104 @@ public final class MainActivity extends Activity {
         return root;
     }
     private void returnToDashboard(){
-        if(cleanVisible)showClean();else showHome();
+        if(agentVisible)showAgent();else if(cleanVisible)showClean();else showHome();
     }
+    private void restoreAgentWindow(){
+        if(agentInput!=null){
+            android.view.inputmethod.InputMethodManager ime=(android.view.inputmethod.InputMethodManager)getSystemService(INPUT_METHOD_SERVICE);
+            if(ime!=null)ime.hideSoftInputFromWindow(agentInput.getWindowToken(),0);
+            agentInput=null;
+        }
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
+        getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_UNSPECIFIED);
+    }
+    private void showAgent(){
+        if(runningScan!=null){runningScan.cancel();runningScan=null;}
+        if(downloadsSignal!=null){downloadsSignal.cancel();downloadsSignal=null;}downloadsGeneration++;
+        if(unusedSignal!=null){unusedSignal.cancel();unusedSignal=null;}unusedGeneration++;
+        downloadsVisible=false;downloadsReview=false;downloadItems.clear();downloadSelected.clear();downloadKeep.clear();
+        unusedVisible=false;unusedReview=false;unusedResult=null;unusedSelected.clear();unusedKeep.clear();
+        stopRealVideo();realShotVisible=false;realShotReview=false;realShotPreview=false;realVideoVisible=false;realVideoReview=false;realVideoPreview=false;
+        realSimilarVisible=false;realSimilarReview=false;realDupVisible=false;realDupReview=false;scanVisible=false;scanReviewVisible=false;
+        dupAfterScan=false;similarAfterScan=false;videoAfterScan=false;shotAfterScan=false;dupThumbGeneration++;
+        settingsVisible=false;agentPrefsVisible=false;historyVisible=false;protectionVisible=false;filesVisible=false;foldersVisible=false;permissionsVisible=false;privacyVisible=false;helpVisible=false;feedbackVisible=false;aboutVisible=false;termsVisible=false;policyVisible=false;
+        storageVisible=false;reviewing=false;cleanVisible=false;agentVisible=true;agentTaskVisible=false;agentTaskOrigin=false;agentShortcut=false;cleanScroll=null;
+        restoreAgentWindow();
+        getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
+        getWindow().setStatusBarColor(BG);
+        getWindow().getDecorView().setSystemUiVisibility((dark?0:View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR)|(dark||android.os.Build.VERSION.SDK_INT<27?0:View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR));
+        getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
+        LinearLayout root=column();root.setBackgroundColor(BG);root.setPadding(dp(18),v(10),dp(18),v(10));
+        LinearLayout header=row();weight(header,txt("Agent",29,INK,700));
+        add(header,agentHeaderButton("history","Activity history",()->{restoreAgentWindow();agentShortcut=true;historyFilter=0;historyScrollY=0;openHistory();}),dp(42),dp(42));gap(header,8);
+        add(header,agentHeaderButton("settings","Settings",this::openSettings),dp(42),dp(42));add(root,header,-1,-2);
+        ScrollView scroll=new ScrollView(this);scroll.setFillViewport(true);scroll.setVerticalScrollBarEnabled(false);scroll.setOverScrollMode(View.OVER_SCROLL_NEVER);
+        LinearLayout body=column();body.setGravity(Gravity.CENTER_VERTICAL);body.setPadding(0,v(12),0,v(12));scroll.addView(body,new ScrollView.LayoutParams(-1,-1));root.addView(scroll,new LinearLayout.LayoutParams(-1,0,1f));
+        LinearLayout hero=column();hero.setGravity(Gravity.CENTER_HORIZONTAL);
+        add(hero,new AgentOrb(this),dp(146),dp(124));space(hero,8);add(hero,centered("How can I help?",26,INK,700),-1,-2);space(hero,8);
+        LinearLayout ready=row();ready.setGravity(Gravity.CENTER);View dot=new View(this);dot.setBackground(round(GREEN,6));add(ready,dot,dp(6),dp(6));gap(ready,6);add(ready,txt("Ready for you",12,GRAY,500),-2,-2);add(hero,ready,-1,-2);add(body,hero,-1,-2);space(body,25);
+        add(body,txt("Suggested for your phone",12,GRAY,500),-1,-2);space(body,9);
+        long free=-1,total=-1;try{android.os.StatFs stat=new android.os.StatFs(getFilesDir().getAbsolutePath());free=stat.getAvailableBytes();total=stat.getTotalBytes();}catch(RuntimeException ignored){}
+        boolean low=free>=0&&total>0&&free/(double)total<0.15;
+        String spaceTitle=scanResult!=null&&scanResult.total()>0?tr("Review up to")+" "+scanBytes(scanResult.total()):low?"Free up storage": "Find space to recover";
+        String duplicateTitle=scanResult!=null&&scanResult.imagesScanned&&scanResult.groups.get(0).size()>0?tr("Review")+" "+scanResult.groups.get(0).size()+" "+tr("duplicate photos"):"Review my duplicate photos";
+        add(body,agentSuggestion("sparkles",spaceTitle,0),-1,dp(54));space(body,8);
+        add(body,agentSuggestion("images",duplicateTitle,1),-1,dp(54));space(body,8);
+        add(body,agentSuggestion("apps",UnusedAppScan.allowed(this)?"Find apps I rarely use":"Review unused apps",2),-1,dp(54));
+        space(root,8);
+        LinearLayout composer=row();composer.setBackground(round(WHITE,30));pad(composer,11,5);
+        android.widget.EditText input=new android.widget.EditText(this);agentInput=input;input.setSingleLine(true);input.setTextSize(15);input.setTextColor(INK);input.setHintTextColor(GRAY);input.setHint(tr("Ask Agent..."));input.setBackgroundColor(Color.TRANSPARENT);input.setPadding(dp(5),0,dp(5),0);input.setFilters(new android.text.InputFilter[]{new android.text.InputFilter.LengthFilter(300)});input.setImeOptions(android.view.inputmethod.EditorInfo.IME_ACTION_SEND);composer.addView(input,new LinearLayout.LayoutParams(0,dp(44),1f));gap(composer,6);
+        FrameLayout send=new FrameLayout(this);send.addView(new Glyph(this,"arrow_up",Color.WHITE),new FrameLayout.LayoutParams(dp(22),dp(22),Gravity.CENTER));send.setContentDescription(tr("Send"));tap(send,BLUE,24,()->submitAgentCommand(input.getText().toString()));send.setEnabled(false);send.setAlpha(.45f);
+        input.addTextChangedListener(new android.text.TextWatcher(){public void beforeTextChanged(CharSequence q,int st,int c,int a){}public void onTextChanged(CharSequence q,int st,int before,int count){boolean enabled=!q.toString().trim().isEmpty();send.setEnabled(enabled);send.setAlpha(enabled?1f:.45f);}public void afterTextChanged(android.text.Editable e){}});
+        input.setOnEditorActionListener((v,id,event)->{if(id==android.view.inputmethod.EditorInfo.IME_ACTION_SEND){submitAgentCommand(input.getText().toString());return true;}return false;});
+        add(composer,send,dp(42),dp(42));add(root,composer,-1,-2);space(root,8);add(root,navigation(),-1,dp(64));
+        root.setFocusableInTouchMode(true);root.requestFocus();setContentView(root);
+    }
+    private FrameLayout agentHeaderButton(String glyph,String label,Runnable action){
+        FrameLayout frame=new FrameLayout(this);frame.addView(new Glyph(this,glyph,INK),new FrameLayout.LayoutParams(dp(21),dp(21),Gravity.CENTER));frame.setContentDescription(tr(label));tap(frame,WHITE,23,action);return frame;
+    }
+    private LinearLayout agentSuggestion(String icon,String title,int task){
+        LinearLayout line=row();pad(line,14,8);add(line,new Glyph(this,icon,BLUE),dp(22),dp(22));gap(line,12);
+        TextView label=txt(title,14,INK,500);label.setMaxLines(2);weight(line,label);gap(line,6);add(line,new Glyph(this,"up",GRAY),dp(15),dp(15));
+        tap(line,WHITE,16,()->openAgentTask(task,title));line.setContentDescription(tr(title));return line;
+    }
+    private void submitAgentCommand(String text){
+        String request=text.trim();if(request.isEmpty())return;openAgentTask(AgentActions.route(request),request);
+    }
+    private void openAgentTask(int task,String request){
+        restoreAgentWindow();agentTask=task;agentCommand=request;agentTaskVisible=true;
+        LinearLayout root=scanShell("Agent",this::showAgent),body=scanBody(root);
+        space(body,12);LinearLayout bubble=card();add(bubble,txt(request,16,INK,500),-1,-2);add(body,bubble,-1,-2);space(body,18);
+        LinearLayout reply=column();add(reply,new AgentOrb(this),dp(58),dp(54));space(reply,8);
+        add(reply,txt(task<0?"Choose what you want to review":AgentActions.TITLES[task],22,INK,700),-1,-2);space(reply,8);
+        add(reply,txt(task<0?"I can open supported cleanup and protection tools. Free-form AI requests are not connected yet.":AgentActions.DESCRIPTIONS[task],14,GRAY,400),-1,-2);add(body,reply,-1,-2);space(body,17);
+        if(task>=0){scanButton(body,AgentActions.BUTTONS[task],true,()->startAgentTask(task));space(body,12);add(body,txt("Nothing will be removed without your review and approval.",12,GREEN,500),-1,-2);}
+        else for(int i=0;i<AgentActions.TITLES.length;i++){final int index=i;scanButton(body,AgentActions.TITLES[i],false,()->openAgentTask(index,AgentActions.TITLES[index]));space(body,7);}
+        setContentView(root);
+    }
+    private void startAgentTask(int task){
+        if(task==3){agentTaskVisible=false;agentShortcut=true;openProtection();return;}
+        agentVisible=false;agentTaskVisible=false;agentTaskOrigin=true;cleanVisible=true;restoreAgentWindow();
+        if(task==0){dupAfterScan=false;similarAfterScan=false;videoAfterScan=false;shotAfterScan=false;requestSmartScan();}
+        else if(task==1)openRealDuplicates(false);else if(task==2)openUnusedApps();else if(task==4)openDownloads();
+        else if(task==5)openRealVideos(false);else if(task==6)openRealScreenshots(false);else if(task==7)openRealSimilar(false);else if(task==8)openLargeFiles();else if(task==9)openClutter();
+    }
+    private final class AgentOrb extends View{
+        private final Paint paint=new Paint(Paint.ANTI_ALIAS_FLAG);
+        AgentOrb(Context c){super(c);setContentDescription("Agent");}
+        @Override protected void onDraw(Canvas c){
+            super.onDraw(c);float scale=Math.min(getWidth()/146f,getHeight()/124f);
+            c.save();c.translate((getWidth()-146*scale)/2,(getHeight()-124*scale)/2);c.scale(scale,scale);
+            paint.setStyle(Paint.Style.FILL);paint.setColor(dark?0xff182d44:0xffedf5ff);c.drawCircle(73,62,59,paint);
+            paint.setStyle(Paint.Style.STROKE);paint.setStrokeWidth(1.3f);paint.setColor(dark?0xff31557b:0xffc5ddff);c.drawCircle(73,62,47,paint);
+            paint.setStyle(Paint.Style.FILL);paint.setColor(dark?0xff244365:0xffd8eaff);c.drawCircle(73,62,36,paint);paint.setColor(BLUE);c.drawCircle(73,62,29,paint);
+            paint.setColor(Color.WHITE);Path star=new Path();star.moveTo(73,40);star.quadTo(76,58,95,62);star.quadTo(76,66,73,84);star.quadTo(70,66,51,62);star.quadTo(70,58,73,40);star.close();c.drawPath(star,paint);
+            paint.setColor(BLUE);c.drawCircle(73,3,3,paint);paint.setColor(0xff80baff);c.drawCircle(118,78,3.2f,paint);c.restore();
+        }
+    }
+
     private void showClean(){
+        agentVisible=false;agentTaskVisible=false;agentShortcut=false;restoreAgentWindow();
         unusedVisible=false;unusedReview=false;unusedExternal=false;unusedGeneration++;if(unusedSignal!=null){unusedSignal.cancel();unusedSignal=null;}unusedResult=null;unusedSelected.clear();unusedKeep.clear();if(unusedSheet!=null)unusedSheet.dismiss();
         downloadsVisible=false;downloadsReview=false;downloadsGeneration++;if(downloadsSignal!=null){downloadsSignal.cancel();downloadsSignal=null;}if(!downloadsBusy){downloadItems.clear();downloadSelected.clear();downloadKeep.clear();}
         realShotVisible=false;realShotReview=false;realShotPreview=false;shotAfterScan=false;shotSelected.clear();shotKeep.clear();
@@ -473,7 +572,7 @@ public final class MainActivity extends Activity {
     }
     private void cancelSmartScan(){
         if(runningScan!=null){runningScan.cancel();runningScan=null;}
-        scanVisible=false;scanReviewVisible=false;showClean();
+        scanVisible=false;scanReviewVisible=false;if(agentTaskOrigin)showAgent();else showClean();
     }
     private void showScanResults(){
         if(scanResult==null){showClean();return;}
@@ -538,7 +637,7 @@ public final class MainActivity extends Activity {
     }
     private void leaveRealDuplicates(){
         realDupVisible=false;realDupReview=false;dupThumbGeneration++;realDupSelected.clear();
-        if(dupFromResults&&scanResult!=null)showScanResults();else showClean();
+        if(dupFromResults&&scanResult!=null)showScanResults();else if(agentTaskOrigin)showAgent();else showClean();
     }
     private long duplicateSelectedBytes(){
         long size=0;if(scanResult!=null)for(SmartMediaScan.Item i:scanResult.groups.get(0))if(realDupSelected.contains(i.uri.toString()))size+=i.bytes;return size;
@@ -686,7 +785,7 @@ public final class MainActivity extends Activity {
     }
     private void leaveRealSimilar(){
         realSimilarVisible=false;realSimilarReview=false;dupThumbGeneration++;realSimilarSelected.clear();realSimilarKeep.clear();
-        if(similarFromResults&&scanResult!=null)showScanResults();else showClean();
+        if(similarFromResults&&scanResult!=null)showScanResults();else if(agentTaskOrigin)showAgent();else showClean();
     }
     private long similarBytes(){long bytes=0;if(scanResult!=null)for(SmartMediaScan.Item item:scanResult.groups.get(3))if(realSimilarSelected.contains(item.uri.toString()))bytes+=item.bytes;return bytes;}
     private void similarFooter(TextView count,TextView amount,TextView action){
@@ -785,7 +884,7 @@ public final class MainActivity extends Activity {
     }
     private void leaveRealVideos(){
         stopRealVideo();realVideoVisible=false;realVideoPreview=false;realVideoReview=false;dupThumbGeneration++;realVideoSelected.clear();realVideoKeep.clear();
-        if(videoFromResults&&scanResult!=null)showScanResults();else showClean();
+        if(videoFromResults&&scanResult!=null)showScanResults();else if(agentTaskOrigin)showAgent();else showClean();
     }
     private String videoDuration(long millis){
         if(millis<=0)return tr("Unknown");long sec=millis/1000;
@@ -890,7 +989,7 @@ public final class MainActivity extends Activity {
     }
     private void leaveRealScreenshots(){
         realShotVisible=false;realShotReview=false;realShotPreview=false;dupThumbGeneration++;shotSelected.clear();shotKeep.clear();
-        if(shotFromResults&&scanResult!=null)showScanResults();else showClean();
+        if(shotFromResults&&scanResult!=null)showScanResults();else if(agentTaskOrigin)showAgent();else showClean();
     }
     private long selectedShotBytes(){long bytes=0;if(scanResult!=null)for(SmartMediaScan.Item i:scanResult.groups.get(2))if(shotSelected.contains(i.uri.toString()))bytes+=i.bytes;return bytes;}
     private void shotFooter(TextView count,TextView amount,TextView action){
@@ -1327,6 +1426,8 @@ public final class MainActivity extends Activity {
         add(l,settings,dp(44),dp(44)); return l;
     }
     private void openSettings(){
+        restoreAgentWindow();
+        if(agentVisible&&agentShortcut){agentShortcut=false;showAgent();return;}
         scanResult=null; // protection rules may change in settings; re-scan before recommending again.
         if(cleanScroll!=null){cleanScrollY=cleanScroll.getScrollY();cleanScroll=null;}
         aboutVisible=false;aboutScroll=null;policyVisible=false;termsVisible=false;policyScroll=null;feedbackVisible=false;helpVisible=false;hideHelpKeyboard();permissionsVisible=false;privacyVisible=false;
@@ -1339,7 +1440,7 @@ public final class MainActivity extends Activity {
         header.addView(centered("Settings",17,INK,600),new FrameLayout.LayoutParams(-1,-1));
         FrameLayout back=new FrameLayout(this);
         back.addView(new Glyph(this,"back",INK),new FrameLayout.LayoutParams(dp(24),dp(24),Gravity.CENTER));
-        back.setContentDescription(tr(cleanVisible?"Back to Clean":"Back to Home"));tap(back,WHITE,22,this::returnToDashboard);
+        back.setContentDescription(tr(agentVisible?"Back to Agent":cleanVisible?"Back to Clean":"Back to Home"));tap(back,WHITE,22,this::returnToDashboard);
         header.addView(back,new FrameLayout.LayoutParams(dp(44),dp(44),Gravity.START|Gravity.CENTER_VERTICAL));
         add(root,header,-1,dp(44));
         ScrollView scroll=new ScrollView(this);scroll.setVerticalScrollBarEnabled(false);
@@ -1570,7 +1671,7 @@ public final class MainActivity extends Activity {
             window.setDimAmount(.44f);window.setGravity(Gravity.BOTTOM);
             window.setLayout(-1,-2);
             window.setNavigationBarColor(WHITE);
-            window.getDecorView().setSystemUiVisibility(dark?0:View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR);
+            window.getDecorView().setSystemUiVisibility(dark||android.os.Build.VERSION.SDK_INT<27?0:View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR);
             // Constrain tall sheets on short/landscape displays while keeping content scrollable.
             int maxHeight=Math.max(dp(160),getResources().getDisplayMetrics().heightPixels-dp(100));
             scroll.measure(View.MeasureSpec.makeMeasureSpec(Math.max(1,getResources().getDisplayMetrics().widthPixels-dp(44)),View.MeasureSpec.EXACTLY),View.MeasureSpec.makeMeasureSpec(0,View.MeasureSpec.UNSPECIFIED));
@@ -2875,6 +2976,7 @@ public final class MainActivity extends Activity {
         add(c,approve,-1,dp(51)); return c;
     }
     private void showHome() {
+        agentVisible=false;agentTaskVisible=false;agentTaskOrigin=false;agentShortcut=false;restoreAgentWindow();
         scanResult=null;scanVisible=false;scanReviewVisible=false;
         cleanVisible=false;cleanScroll=null;cleanScrollY=0;
         aboutVisible=false;aboutScroll=null;policyVisible=false;termsVisible=false;policyScroll=null;feedbackVisible=false;helpVisible=false;permissionsVisible=false;privacyVisible=false;
@@ -2898,9 +3000,9 @@ public final class MainActivity extends Activity {
         if(downloadsBusy){if(downloadsSignal!=null)downloadsSignal.cancel();return;}
         if(cleaning||unusedUninstallPending)return;
         if(unusedReview){if(unusedSignal!=null){unusedSignal.cancel();unusedSignal=null;unusedGeneration++;}showUnusedApps();return;}
-        if(unusedVisible){showClean();return;}
+        if(unusedVisible){if(agentTaskOrigin)showAgent();else showClean();return;}
         if(downloadsReview){showDownloads();return;}
-        if(downloadsVisible){showClean();return;}
+        if(downloadsVisible){if(agentTaskOrigin)showAgent();else showClean();return;}
         if(realShotPreview){showRealScreenshots();return;}
         if(realShotReview){if(runningScan!=null){runningScan.cancel();runningScan=null;}showRealScreenshots();return;}
         if(realShotVisible){leaveRealScreenshots();return;}
@@ -2922,7 +3024,9 @@ public final class MainActivity extends Activity {
         if(protectionVisible || agentPrefsVisible){openSettings();return;}
         if(settingsVisible || storageVisible){returnToDashboard();return;}
         if(completionVisible){showHome();return;}
-        if(cleanVisible){showHome();return;}
+        if(agentTaskVisible){showAgent();return;}
+        if(agentVisible){showHome();return;}
+        if(cleanVisible){if(agentTaskOrigin)showAgent();else showHome();return;}
         if (videoViewing) leaveVideos(false); else if (similarViewing) leaveSimilar(false); else if (duplicateViewing) leaveDuplicates(false); else if (reviewing) showHome(); else super.onBackPressed();
     }
     private LinearLayout reviewScreen() {
@@ -3137,7 +3241,7 @@ public final class MainActivity extends Activity {
             dialog.getWindow().setLayout(-1,-1);
             dialog.getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,WindowManager.LayoutParams.FLAG_FULLSCREEN);
             dialog.getWindow().setNavigationBarColor(BG);
-            dialog.getWindow().getDecorView().setSystemUiVisibility(dark?0:View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR);
+            dialog.getWindow().getDecorView().setSystemUiVisibility(dark||android.os.Build.VERSION.SDK_INT<27?0:View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR);
         }
     }
     private static final class VideoSample extends View {
@@ -3448,7 +3552,7 @@ public final class MainActivity extends Activity {
             dialog.getWindow().setLayout(-1,-1);
             dialog.getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,WindowManager.LayoutParams.FLAG_FULLSCREEN);
             dialog.getWindow().setNavigationBarColor(BG);
-            dialog.getWindow().getDecorView().setSystemUiVisibility(dark?0:View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR);
+            dialog.getWindow().getDecorView().setSystemUiVisibility(dark||android.os.Build.VERSION.SDK_INT<27?0:View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR);
         }
     }
 
@@ -3641,9 +3745,9 @@ public final class MainActivity extends Activity {
     private LinearLayout navigation() {
         LinearLayout outer=row(); LinearLayout pill=row(); pill.setBackground(round(WHITE,34));
         pad(pill,4,4); outer.addView(pill,new LinearLayout.LayoutParams(0,dp(64),1f));
-        String[] labels={"Home","Clean","AI Agent"}; String[] icons={"home","sparkles","bot"};
+        String[] labels={"Home","Clean","Agent"}; String[] icons={"home","sparkles","bot"};
         for(int i=0;i<labels.length;i++){
-            final String label=labels[i]; LinearLayout item=navItem(label,icons[i],cleanVisible?i==1:i==0);
+            final String label=labels[i]; LinearLayout item=navItem(label,icons[i],agentVisible?i==2:cleanVisible?i==1:i==0);
             pill.addView(item,new LinearLayout.LayoutParams(0,-1,1f));
         }
         gap(outer,8); LinearLayout tools=navItem("Tools","tools",false);
@@ -3651,16 +3755,17 @@ public final class MainActivity extends Activity {
     }
     private LinearLayout navItem(String label,String icon,boolean active) {
         LinearLayout l=column(); l.setGravity(Gravity.CENTER);
-        int tint=active?BLUE:INK;
+        int tint=active?BLUE:GRAY;
         add(l,new Glyph(this,icon,tint),dp(24),dp(24)); space(l,4);
         add(l,centered(label,11,tint,600),-1,-2);
         tap(l,active?PALE:WHITE,32,()->{
             if(active)return;
             if(label.equals("Home"))showHome();
-            else if(label.equals("Clean"))showClean();
+            else if(label.equals("Clean")){agentTaskOrigin=false;showClean();}
+            else if(label.equals("Agent"))showAgent();
             else demo(label,label+" is reserved for the next design phase.");
         });
-        l.setContentDescription(label+(active?", selected":"")); return l;
+        l.setContentDescription(tr(label)+(active?", selected":"")); return l;
     }
 
     private final class Gauge extends View {
@@ -3792,6 +3897,7 @@ public final class MainActivity extends Activity {
                 case "selected": p.setStyle(Paint.Style.FILL);c.drawCircle(12,12,11,p);p.setStyle(Paint.Style.STROKE);p.setColor(Color.WHITE);path(c,7,12,10.5f,15.5f,17,9);break;
                 case "unselected": c.drawCircle(12,12,10,p);break;
                 case "right":path(c,4,12,20,12);path(c,14,6,20,12,14,18);break;
+                case "arrow_up":path(c,12,20,12,4);path(c,5,11,12,4,19,11);break;
                 case "up":path(c,6,18,18,6);path(c,10,6,18,6,18,14);break;
                 case "shield":path(c,12,2,21,6,20,14,17,19,12,22,7,19,4,14,3,6,12,2);path(c,8,12,11,15,16,9);break;
                 case "settings":{

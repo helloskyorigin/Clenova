@@ -120,3 +120,6 @@ Separate picker-scoped clutter review with category summaries, actual known file
 
 ## Clean QA — Phase 34
 CI SDK setup no longer requests obsolete tools; JVM tests precede SDK installation. Added clutter rule regression assertions and initial emulator Clean navigation/permission smoke test. Hardened approval against stale generations, uncertain exact duplicate coverage, stale thumbnails and unknown document types; added cancellation of remaining document removals on backgrounding/back. Combined media review links to category-specific cleanup. Source changes are not evidence of a passing APK build or device test until CI reports results.
+
+## Agent — Phase 35
+Minimal Agent tab, local storage-pressure and available foreground scan suggestions, fixed composer and responsive scroll, history and settings shortcuts. Bounded English command routing and explicit action preview hand off to existing Clean or protection screens. No AI model, background tasks, fabricated recommendations or automatic destructive actions. Unsupported requests offer supported actions. Agent routing regression tests added; Android build/lint/device testing remains required.

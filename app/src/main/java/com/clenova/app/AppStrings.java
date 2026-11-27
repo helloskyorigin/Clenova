@@ -5,6 +5,15 @@ import java.util.Map;
 final class AppStrings {
  private static final Map<String,String[]> TEXT=new HashMap<>();
  static {
+  TEXT.put("Agent",new String[]{"एजेंट","Agente","Agent","Agent"});
+  TEXT.put("How can I help?",new String[]{"मैं कैसे मदद करूँ?","¿Cómo puedo ayudar?","Comment puis-je aider ?","Wie kann ich helfen?"});
+  TEXT.put("Ready for you",new String[]{"आपके लिए तैयार","Listo para ti","Prêt pour vous","Bereit für dich"});
+  TEXT.put("Suggested for your phone",new String[]{"आपके फ़ोन के लिए सुझाव","Sugerencias para tu teléfono","Suggestions pour votre téléphone","Vorschläge für dein Handy"});
+  TEXT.put("Ask Agent...",new String[]{"एजेंट से पूछें...","Pregunta al Agente...","Demandez à l’Agent...","Agent fragen..."});
+  TEXT.put("Find space to recover",new String[]{"खाली करने की जगह खोजें","Buscar espacio recuperable","Trouver de l’espace à récupérer","Freigebbaren Speicher finden"});
+  TEXT.put("Free up storage",new String[]{"स्टोरेज खाली करें","Liberar almacenamiento","Libérer du stockage","Speicher freigeben"});
+  TEXT.put("Review my duplicate photos",new String[]{"मेरी डुप्लिकेट फ़ोटो देखें","Revisar mis fotos duplicadas","Examiner mes photos en double","Meine doppelten Fotos prüfen"});
+  TEXT.put("Find apps I rarely use",new String[]{"कम उपयोग वाले ऐप खोजें","Buscar apps que apenas uso","Trouver les apps peu utilisées","Selten genutzte Apps finden"});
   TEXT.put("Temporary files",new String[]{"अस्थायी फ़ाइलें","Archivos temporales","Fichiers temporaires","Temporäre Dateien"});
   TEXT.put("Incomplete downloads",new String[]{"अधूरे डाउनलोड","Descargas incompletas","Téléchargements incomplets","Unvollständige Downloads"});
   TEXT.put("APK installers",new String[]{"APK इंस्टॉलर","Instaladores APK","Installateurs APK","APK-Installationsdateien"});

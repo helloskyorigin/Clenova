@@ -27,6 +27,10 @@ jobs:
         run: |
           javac -d /tmp/clenova-tests app/src/main/java/com/clenova/app/ClutterRules.java tests/ClutterRulesTest.java
           java -cp /tmp/clenova-tests com.clenova.app.ClutterRulesTest
+      - name: Verify Agent routing
+        run: |
+          javac -d /tmp/clenova-tests app/src/main/java/com/clenova/app/AgentActions.java tests/AgentActionsTest.java
+          java -cp /tmp/clenova-tests com.clenova.app.AgentActionsTest
       - name: Install required SDK packages
         run: |
           set -e
@@ -35,7 +39,16 @@ jobs:
           "$SDKMANAGER" --version
           "$SDKMANAGER" "platforms;android-35" "build-tools;35.0.0"
       - uses: gradle/actions/setup-gradle@v4
-      - run: bash ./gradlew :app:assembleDebug :app:lintDebug
+      - run: bash ./gradlew :app:assembleDebug
+      - name: Android lint
+        run: bash ./gradlew :app:lintDebug
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: Android-lint-report
+          path: |
+            app/build/reports/lint-results-debug.*
+            app/build/intermediates/lint_intermediate_text_report/debug/lintReportDebug/
       - uses: actions/upload-artifact@v4
         with:
           name: Clenova-debug
