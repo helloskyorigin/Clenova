@@ -117,7 +117,25 @@ adb shell input keyevent 4
 sleep 1
 tools_dump tools_after_app_manager
 grep -F 'Tools, selected' build/home-evidence/tools_after_app_manager.xml
-tools_tap build/home-evidence/tools_after_app_manager.xml 'Internet Speed Test'
+tools_tap build/home-evidence/tools_after_app_manager.xml 'Speaker Cleaner'
+tools_dump speaker_cleaner
+for label in 'Speaker Cleaner' 'Quick clean' 'Deep clean' 'Start cleaning'; do
+  grep -F "$label" build/home-evidence/speaker_cleaner.xml
+done
+tools_tap build/home-evidence/speaker_cleaner.xml 'Deep clean, 30-second sound cycle'
+tools_dump speaker_deep
+grep -F 'Deep clean, 30-second sound cycle, selected' build/home-evidence/speaker_deep.xml
+tools_tap build/home-evidence/speaker_deep.xml 'Speaker cleaner information'
+tools_dump speaker_info
+grep -F 'About speaker cleaning' build/home-evidence/speaker_info.xml
+adb shell input keyevent 4
+sleep 1
+# Navigation smoke checks intentionally do not emit sound.
+adb shell input keyevent 4
+sleep 1
+tools_dump tools_after_speaker
+grep -F 'Tools, selected' build/home-evidence/tools_after_speaker.xml
+tools_tap build/home-evidence/tools_after_speaker.xml 'Internet Speed Test'
 tools_dump tools_pending
 grep -F 'No action has been performed.' build/home-evidence/tools_pending.xml
 adb shell input keyevent 4
