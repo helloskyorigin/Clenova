@@ -34,6 +34,8 @@ public final class MainActivity extends Activity {
     private static final int GREEN = Color.rgb(39,152,77);
     private float density;
     private float compact = 1f;
+    private boolean reviewing;
+    private ReviewPlan reviewPlan;
 
     @Override public void onCreate(Bundle state) {
         super.onCreate(state);
@@ -185,9 +187,124 @@ public final class MainActivity extends Activity {
         LinearLayout approve=row(); approve.setGravity(Gravity.CENTER);
         add(approve,txt("Review & Approve",17,WHITE,600),-2,-2); gap(approve,8);
         add(approve,new Glyph(this,"right",WHITE),dp(17),dp(17));
-        tap(approve,BLUE,26,()->demo("Cleanup preview","Sample recommendation: 4.8 GB. This is the Home design phase; no files will be accessed or deleted."));
+        tap(approve,BLUE,26,this::openReview);
         add(c,approve,-1,dp(51)); return c;
     }
+    private void showHome() {
+        reviewing = false;
+        setContentView(home());
+    }
+    private void openReview() {
+        reviewPlan = new ReviewPlan();
+        reviewing = true;
+        setContentView(reviewScreen());
+    }
+    @Override public void onBackPressed() {
+        if (reviewing) showHome(); else super.onBackPressed();
+    }
+    private LinearLayout reviewScreen() {
+        LinearLayout root = column(); root.setBackgroundColor(BG);
+        root.setPadding(dp(18),v(12),dp(18),v(12));
+        FrameLayout header = new FrameLayout(this);
+        TextView title = centered("Review cleanup",17,INK,600);
+        header.addView(title,new FrameLayout.LayoutParams(-1,-1));
+        FrameLayout back = new FrameLayout(this);
+        back.addView(new Glyph(this,"back",INK),new FrameLayout.LayoutParams(dp(24),dp(24),Gravity.CENTER));
+        back.setContentDescription("Back to Home");
+        tap(back,WHITE,22,this::showHome);
+        header.addView(back,new FrameLayout.LayoutParams(dp(44),dp(44),Gravity.START|Gravity.CENTER_VERTICAL));
+        add(root,header,-1,dp(44));
+
+        ScrollView scroll = new ScrollView(this);
+        scroll.setVerticalScrollBarEnabled(false); scroll.setOverScrollMode(View.OVER_SCROLL_NEVER);
+        LinearLayout body = column();
+        body.setPadding(0,v(12),0,v(12));
+        scroll.addView(body,new ScrollView.LayoutParams(-1,-2));
+        root.addView(scroll,new LinearLayout.LayoutParams(-1,0,1f));
+
+        LinearLayout hero = column(); hero.setGravity(Gravity.CENTER_HORIZONTAL);
+        pad(hero,0,16);
+        add(hero,new Glyph(this,"sparkles",BLUE),dp(48),dp(48));
+        space(hero,14);
+        add(hero,centered("I've found 4.8 GB",33,INK,700),-1,-2);
+        space(hero,6);
+        add(hero,centered("Your cleanup is ready.",15,GRAY,400),-1,-2);
+        add(body,hero,-1,-2); space(body,16);
+        add(body,txt("Cleanup plan",14,GRAY,600),-1,-2); space(body,10);
+        LinearLayout plan = card(); pad(plan,16,4);
+        for(int i=0;i<ReviewPlan.NAMES.length;i++){
+            final int index=i;
+            LinearLayout category=row();
+            category.setPadding(0,v(15),0,v(15));
+            FrameLayout mark=new FrameLayout(this); mark.setBackground(round(PALE,12));
+            mark.addView(new Glyph(this,ReviewPlan.ICONS[i],BLUE),
+                    new FrameLayout.LayoutParams(dp(25),dp(25),Gravity.CENTER));
+            add(category,mark,dp(44),dp(44)); gap(category,12);
+            LinearLayout info=column();
+            add(info,txt(ReviewPlan.NAMES[i],16,INK,600),-1,-2); space(info,4);
+            add(info,txt(ReviewPlan.DETAILS[i],13,GRAY,400),-1,-2); space(info,5);
+            TextView review=txt("Review items",13,BLUE,600);
+            review.setMinHeight(dp(32)); review.setGravity(Gravity.CENTER_VERTICAL);
+            review.setContentDescription("Review items: "+ReviewPlan.NAMES[i]);
+            tap(review,WHITE,8,()->reviewCategory(index));
+            add(info,review,-1,-2); weight(category,info); gap(category,8);
+            LinearLayout right=column(); right.setGravity(Gravity.END|Gravity.CENTER_VERTICAL);
+            add(right,txt(ReviewPlan.gb(ReviewPlan.TENTHS[i]),15,INK,600),-2,-2);
+            FrameLayout choice=new FrameLayout(this);
+            choice.addView(new Glyph(this,reviewPlan.isSelected(i)?"selected":"unselected",
+                    reviewPlan.isSelected(i)?BLUE:0xffc7c7cc),
+                    new FrameLayout.LayoutParams(dp(25),dp(25),Gravity.CENTER));
+            choice.setContentDescription(ReviewPlan.NAMES[i]+(reviewPlan.isSelected(i)?", selected":", not selected"));
+            choice.setSelected(reviewPlan.isSelected(i));
+            tap(choice,WHITE,22,()->{
+                if(index!=0 && !reviewPlan.isSelected(index)) reviewCategory(index);
+                else {reviewPlan.setSelected(index,!reviewPlan.isSelected(index));setContentView(reviewScreen());}
+            });
+            add(right,choice,dp(44),dp(44)); add(category,right,-2,-2);
+            add(plan,category,-1,-2);
+            if(i<ReviewPlan.NAMES.length-1){
+                View divider=new View(this);divider.setBackgroundColor(0xffeeeef0);add(plan,divider,-1,dp(1));
+            }
+        }
+        add(body,plan,-1,-2); space(body,14);
+        LinearLayout privacy=row();privacy.setGravity(Gravity.CENTER);
+        add(privacy,new Glyph(this,"shield",GREEN),dp(17),dp(17)); gap(privacy,6);
+        add(privacy,txt("Nothing deleted without your approval.",12,GRAY,400),-2,-2);
+        add(body,privacy,-1,-2);
+
+        LinearLayout footer=card(); pad(footer,16,14);
+        add(footer,txt("You'll free up",14,GRAY,400),-1,-2);space(footer,5);
+        add(footer,txt(ReviewPlan.gb(reviewPlan.total()),34,INK,700),-1,-2);space(footer,13);
+        LinearLayout approve=row();approve.setGravity(Gravity.CENTER);
+        add(approve,txt("Approve "+ReviewPlan.gb(reviewPlan.total())+" Cleanup",16,WHITE,600),-2,-2);
+        gap(approve,8);add(approve,new Glyph(this,"right",WHITE),dp(17),dp(17));
+        if(reviewPlan.total()>0) tap(approve,BLUE,26,()->confirmPreview());
+        else {approve.setBackground(round(0xffc7c7cc,26));approve.setEnabled(false);}
+        add(footer,approve,-1,dp(52));space(footer,5);
+        TextView later=centered("Not now",14,GRAY,500);
+        tap(later,WHITE,20,this::showHome);add(footer,later,-1,dp(44));
+        space(root,6);add(root,footer,-1,-2);return root;
+    }
+    private void reviewCategory(int index) {
+        new AlertDialog.Builder(this).setTitle(ReviewPlan.NAMES[index])
+                .setMessage("Sample category: "+ReviewPlan.DETAILS[index]+" · "+
+                        ReviewPlan.gb(ReviewPlan.TENTHS[index])+
+                        ". Individual file review will be built next. No device files are accessed in this preview.")
+                .setNegativeButton("Cancel",null)
+                .setPositiveButton(reviewPlan.isSelected(index)?"Deselect":"Select for preview",(d,w)->{
+                    reviewPlan.setSelected(index,!reviewPlan.isSelected(index));
+                    setContentView(reviewScreen());
+                }).show();
+    }
+    private void confirmPreview() {
+        new AlertDialog.Builder(this).setTitle("Approve cleanup?")
+                .setMessage("Preview: "+reviewPlan.count()+" sample items · "+ReviewPlan.gb(reviewPlan.total())+
+                        ". No real files will be deleted.")
+                .setNegativeButton("Cancel",null)
+                .setPositiveButton("Approve preview",(d,w)->demo("Approval preview","Selection confirmed. No files were changed."))
+                .show();
+    }
+
     private LinearLayout navigation() {
         LinearLayout outer=row(); LinearLayout pill=row(); pill.setBackground(round(WHITE,34));
         pad(pill,4,4); outer.addView(pill,new LinearLayout.LayoutParams(0,dp(64),1f));
@@ -274,6 +391,12 @@ public final class MainActivity extends Activity {
                     p.setStyle(Paint.Style.FILL);c.drawCircle(9,13,1.3f,p);c.drawCircle(15,13,1.3f,p);break;
                 case "tools": for(int i=0;i<2;i++)for(int j=0;j<2;j++)c.drawCircle(6+i*12,6+j*12,3.4f,p);break;
                 case "crown":path(c,2,6,7,11,12,4,17,11,22,6,19,17,5,17,2,6);path(c,5,21,19,21);break;
+                case "back":path(c,15,5,8,12,15,19);break;
+                case "copy": c.drawRoundRect(new RectF(7,7,21,21),3,3,p);path(c,17,3,3,3,3,17);break;
+                case "images": c.drawRoundRect(new RectF(3,4,21,20),3,3,p);c.drawCircle(8,9,1.6f,p);path(c,4,17,10,12,14,16,17,13,21,17);break;
+                case "video": c.drawRoundRect(new RectF(3,6,16,18),3,3,p);path(c,16,10,21,7,21,17,16,14);break;
+                case "selected": p.setStyle(Paint.Style.FILL);c.drawCircle(12,12,11,p);p.setStyle(Paint.Style.STROKE);p.setColor(Color.WHITE);path(c,7,12,10.5f,15.5f,17,9);break;
+                case "unselected": c.drawCircle(12,12,10,p);break;
                 case "right":path(c,4,12,20,12);path(c,14,6,20,12,14,18);break;
                 case "up":path(c,6,18,18,6);path(c,10,6,18,6,18,14);break;
                 case "shield":path(c,12,2,21,6,20,14,17,19,12,22,7,19,4,14,3,6,12,2);path(c,8,12,11,15,16,9);break;

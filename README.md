@@ -17,3 +17,6 @@ JDK 17, Android SDK 35, Gradle 8.9 (AGP 8.7.3). Run `./gradlew :app:assembleDebu
 
 ## Scope
 Home only. Future screens and real-data integration are deliberately out of scope.
+
+## Review cleanup preview
+Home → Review & Approve opens a dedicated screen (no bottom navbar). Exact duplicates selected initially; other categories show a sample review dialog before selection. The selected total and approval label update together. Zero selection disables approval. Back and Not now return to Home. Confirmation is simulated; individual file review and completion screens are deferred. No Pro or billing changes.
