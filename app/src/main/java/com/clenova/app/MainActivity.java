@@ -156,6 +156,33 @@ public final class MainActivity extends Activity {
     private View dashboardView;
     private boolean dashboardStorage,renderingOverview,preparationReady;
     private final android.os.Handler overviewHandler=new android.os.Handler(android.os.Looper.getMainLooper());
+    private boolean overviewForeground,overviewObserverRegistered,overviewDirty;
+    private final Runnable refreshVisibleOverview=()->{
+        if(!overviewForeground||preparingPhone!=null||dashboardView==null||!dashboardView.isAttachedToWindow())return;
+        if(overviewJob!=null){overviewDirty=true;return;}
+        overviewDirty=false;beginOverview(false);
+    };
+    private final android.database.ContentObserver overviewObserver=new android.database.ContentObserver(overviewHandler){
+        @Override public void onChange(boolean selfChange){queueOverviewRefresh();}
+        @Override public void onChange(boolean selfChange,android.net.Uri uri){queueOverviewRefresh();}
+    };
+    private void queueOverviewRefresh(){
+        if(!overviewForeground||dashboardView==null||!dashboardView.isAttachedToWindow()||preparingPhone!=null)return;
+        overviewHandler.removeCallbacks(refreshVisibleOverview);
+        overviewHandler.postDelayed(refreshVisibleOverview,750);
+    }
+    private void observeOverview(){
+        if(overviewObserverRegistered)return;
+        try{
+            getContentResolver().registerContentObserver(android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI,true,overviewObserver);
+            getContentResolver().registerContentObserver(android.provider.MediaStore.Video.Media.EXTERNAL_CONTENT_URI,true,overviewObserver);
+            overviewObserverRegistered=true;
+        }catch(RuntimeException e){try{getContentResolver().unregisterContentObserver(overviewObserver);}catch(RuntimeException ignored){}}
+    }
+    private void stopOverviewObserver(){
+        overviewHandler.removeCallbacks(refreshVisibleOverview);overviewDirty=false;
+        if(overviewObserverRegistered){try{getContentResolver().unregisterContentObserver(overviewObserver);}catch(RuntimeException ignored){}overviewObserverRegistered=false;}
+    }
     private final Runnable finishPreparation=()->{
         if(preparingPhone==null||!preparationReady||isFinishing()||isDestroyed())return;
         if(!prefs.finishOnboarding()){preparationReady=false;preparingPhone.error("Could not save setup. Try again.");return;}
@@ -228,7 +255,7 @@ public final class MainActivity extends Activity {
     }
     private void cancelOverview(){if(overviewJob!=null){overviewJob.cancel();overviewJob=null;}}
     private void beginOverview(boolean initial){
-        if(overviewJob!=null||isFinishing()||isDestroyed())return;
+        if(overviewJob!=null||isFinishing()||isDestroyed()||!overviewForeground)return;
         final DeviceOverview job=new DeviceOverview(this,prefs);overviewJob=job;
         new Thread(()->{
             try{
@@ -239,21 +266,38 @@ public final class MainActivity extends Activity {
                         preparationReady=true;preparingPhone.update(DeviceOverview.STAGES,result);
                         // Only the completed visual confirmation has a short presentation delay.
                         overviewHandler.postDelayed(finishPreparation,ValueAnimator.areAnimatorsEnabled()?850:0);
-                    }else if(dashboardView!=null&&dashboardView.isAttachedToWindow())renderOverviewDashboard();
+                    }else if(dashboardView!=null&&dashboardView.isAttachedToWindow()){renderOverviewDashboard();if(overviewDirty){overviewDirty=false;queueOverviewRefresh();}}
                 });
             }catch(Exception e){runOnUiThread(()->{if(overviewJob!=job||isDestroyed())return;overviewJob=null;
                 if(initial&&preparingPhone!=null)preparingPhone.error("Please try again. No files were changed.");
-                else if(dashboardView!=null&&dashboardView.isAttachedToWindow()){deviceOverview=new DeviceOverview.Snapshot();renderOverviewDashboard();}
+                else if(dashboardView!=null&&dashboardView.isAttachedToWindow()){deviceOverview=new DeviceOverview.Snapshot();renderOverviewDashboard();if(overviewDirty){overviewDirty=false;queueOverviewRefresh();}}
             });}
         },"Clenova-device-overview").start();
     }
     private void attachOverviewDashboard(View root,boolean storage){
         dashboardView=root;dashboardStorage=storage;
+        root.addOnAttachStateChangeListener(new View.OnAttachStateChangeListener(){
+            public void onViewAttachedToWindow(View v){}
+            public void onViewDetachedFromWindow(View v){
+                if(dashboardView==v){dashboardView=null;overviewHandler.removeCallbacks(refreshVisibleOverview);overviewDirty=false;if(preparingPhone==null)cancelOverview();}
+                v.removeOnAttachStateChangeListener(this);
+            }
+        });
         if(!renderingOverview)root.post(()->{if(dashboardView==root&&root.isAttachedToWindow()&&preparingPhone==null)beginOverview(false);});
     }
     private void renderOverviewDashboard(){
         if(dashboardView==null||!dashboardView.isAttachedToWindow())return;
-        renderingOverview=true;try{setContentView(dashboardStorage?storageScreen():home());}finally{renderingOverview=false;}
+        int y=overviewScroll(dashboardView);boolean storage=dashboardStorage;
+        renderingOverview=true;try{setContentView(storage?storageScreen():home());}finally{renderingOverview=false;}
+        final View next=dashboardView;if(next!=null)next.post(()->{if(dashboardView==next)restoreOverviewScroll(next,y);});
+    }
+    private int overviewScroll(View v){
+        if(v instanceof ScrollView)return v.getScrollY();
+        if(v instanceof android.view.ViewGroup){android.view.ViewGroup g=(android.view.ViewGroup)v;for(int i=0;i<g.getChildCount();i++){int y=overviewScroll(g.getChildAt(i));if(y>0)return y;}}return 0;
+    }
+    private boolean restoreOverviewScroll(View v,int y){
+        if(v instanceof ScrollView){v.scrollTo(0,y);return true;}
+        if(v instanceof android.view.ViewGroup){android.view.ViewGroup g=(android.view.ViewGroup)v;for(int i=0;i<g.getChildCount();i++)if(restoreOverviewScroll(g.getChildAt(i),y))return true;}return false;
     }
     private DeviceOverview.Snapshot overview(){return deviceOverview==null?new DeviceOverview.Snapshot():deviceOverview;}
     @Override public void onCreate(Bundle state) {
@@ -383,7 +427,7 @@ public final class MainActivity extends Activity {
     }
     @Override protected void onDestroy(){
         splashHandler.removeCallbacks(finishSplash);launchSplash=null;
-        overviewHandler.removeCallbacks(finishPreparation);cancelOverview();preparingPhone=null;dashboardView=null;deviceOverview=null;
+        overviewForeground=false;stopOverviewObserver();overviewHandler.removeCallbacks(finishPreparation);cancelOverview();preparingPhone=null;dashboardView=null;deviceOverview=null;
         if(onboardingIntro!=null){onboardingIntro.setActive(false);onboardingIntro=null;}
         if(onboardingUnified!=null){onboardingUnified.setActive(false);onboardingUnified=null;}
         if(onboardingAutopilot!=null){onboardingAutopilot.setActive(false);onboardingAutopilot=null;}
@@ -1941,9 +1985,9 @@ public final class MainActivity extends Activity {
         settingsVisible=true;agentPrefsVisible=true;setContentView(agentPreferencesScreen());
     }
     @Override protected void onPause(){splashHandler.removeCallbacks(finishSplash);if(onboardingIntro!=null)onboardingIntro.setActive(false);if(onboardingUnified!=null)onboardingUnified.setActive(false);if(onboardingAutopilot!=null)onboardingAutopilot.setActive(false);if(onboardingAgent!=null)onboardingAgent.setActive(false);
-        overviewHandler.removeCallbacks(finishPreparation);cancelOverview();deviceOverview=null;preparationReady=false;super.onPause();}
+        overviewForeground=false;stopOverviewObserver();overviewHandler.removeCallbacks(finishPreparation);cancelOverview();deviceOverview=null;preparationReady=false;super.onPause();}
     @Override protected void onResume(){
-        super.onResume();
+        super.onResume();overviewForeground=true;observeOverview();
         if(onboardingIntro!=null)onboardingIntro.setActive(true);
         if(onboardingUnified!=null)onboardingUnified.setActive(true);
         if(onboardingAutopilot!=null)onboardingAutopilot.setActive(true);
