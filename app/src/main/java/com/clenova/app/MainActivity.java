@@ -47,7 +47,7 @@ public final class MainActivity extends Activity {
     private boolean[] videoDraft;
     private CleanupPreview cleanup;
     private boolean cleaning, completed, completionVisible;
-    private boolean storageVisible, settingsVisible, agentPrefsVisible;
+    private boolean storageVisible, settingsVisible, agentPrefsVisible, protectionVisible;
     private ValueAnimator cleanupAnimation;
     private AppPreferences prefs;
     private android.widget.PopupWindow preferencePopup;
@@ -70,6 +70,7 @@ public final class MainActivity extends Activity {
             if(state.getBoolean("cleanup_running")){startCleanupAnimation();return;}
             if(completed && state.getBoolean("cleanup_visible")){showCompletion(false);return;}
         }
+        if(state!=null && state.getBoolean("protection_visible")){openProtection();return;}
         if(state!=null && state.getBoolean("agent_prefs_visible")){openAgentPreferences();return;}
         if(state!=null && state.getBoolean("settings_visible")){openSettings();return;}
         if(state!=null && state.getBoolean("storage_visible")){openStorage();return;}
@@ -80,6 +81,7 @@ public final class MainActivity extends Activity {
         state.putBoolean("storage_visible",storageVisible);
         state.putBoolean("settings_visible",settingsVisible);
         state.putBoolean("agent_prefs_visible",agentPrefsVisible);
+        state.putBoolean("protection_visible",protectionVisible);
         if(cleanup!=null){
             state.putDoubleArray("cleanup_amounts",cleanup.amounts());
             state.putInt("cleanup_count",cleanup.count);
@@ -215,7 +217,7 @@ public final class MainActivity extends Activity {
         add(l,settings,dp(44),dp(44)); return l;
     }
     private void openSettings(){
-        agentPrefsVisible=false;settingsVisible=true;setContentView(settingsScreen());
+        protectionVisible=false;agentPrefsVisible=false;settingsVisible=true;setContentView(settingsScreen());
     }
     private LinearLayout settingsScreen(){
         LinearLayout root=column();root.setBackgroundColor(BG);
@@ -267,6 +269,7 @@ public final class MainActivity extends Activity {
             line.setContentDescription(tr(item[1])+(item[2].isEmpty()?"":", "+tr(item[2])));
             if(preference)tap(line,WHITE,0,()->showPreferencePopup(line,item[1]));
             else if(item[1].equals("Agent preferences"))tap(line,WHITE,0,this::openAgentPreferences);
+            else if(item[1].equals("Cleanup protection"))tap(line,WHITE,0,this::openProtection);
             add(group,line,-1,-2);
             if(i<items.length-1){
                 View divider=new View(this);divider.setBackgroundColor(surface(0xffeeeef0));
@@ -357,6 +360,62 @@ public final class MainActivity extends Activity {
     private void openAgentPreferences(){
         settingsVisible=true;agentPrefsVisible=true;setContentView(agentPreferencesScreen());
     }
+    private void openProtection(){
+        settingsVisible=true;agentPrefsVisible=false;protectionVisible=true;setContentView(protectionScreen());
+    }
+    private LinearLayout protectionScreen(){
+        LinearLayout root=column();root.setBackgroundColor(BG);root.setPadding(dp(18),v(12),dp(18),v(12));
+        FrameLayout header=new FrameLayout(this);
+        header.addView(centered("Cleanup protection",17,INK,600),new FrameLayout.LayoutParams(-1,-1));
+        FrameLayout back=new FrameLayout(this);
+        back.addView(new Glyph(this,"back",INK),new FrameLayout.LayoutParams(dp(24),dp(24),Gravity.CENTER));
+        back.setContentDescription(tr("Back to Settings"));tap(back,WHITE,22,this::openSettings);
+        header.addView(back,new FrameLayout.LayoutParams(dp(44),dp(44),Gravity.START|Gravity.CENTER_VERTICAL));
+        add(root,header,-1,dp(44));
+        ScrollView scroll=new ScrollView(this);scroll.setVerticalScrollBarEnabled(false);scroll.setOverScrollMode(View.OVER_SCROLL_NEVER);
+        LinearLayout body=column();body.setPadding(0,v(18),0,v(12));
+        scroll.addView(body,new ScrollView.LayoutParams(-1,-2));root.addView(scroll,new LinearLayout.LayoutParams(-1,0,1f));
+        LinearLayout hero=column();hero.setGravity(Gravity.CENTER_HORIZONTAL);
+        FrameLayout mark=new FrameLayout(this);mark.setBackground(round(PALE,20));
+        mark.addView(new Glyph(this,"shield",BLUE),new FrameLayout.LayoutParams(dp(35),dp(35),Gravity.CENTER));
+        add(hero,mark,dp(68),dp(68));space(hero,13);
+        add(hero,centered("Keep what matters.",25,INK,700),-1,-2);space(hero,7);
+        add(hero,centered("Choose what your Agent should never remove.",14,GRAY,400),-1,-2);
+        add(body,hero,-1,-2);space(body,24);
+        add(body,txt("Smart protection",14,GRAY,500),-1,-2);space(body,9);
+        LinearLayout smart=card();pad(smart,13,4);
+        String[] names={"Favorite photos","Recent files","Important documents","Best shots"};
+        String[] icons={"heart","clock","document","images"};
+        for(int i=0;i<names.length;i++){
+            final int index=i;
+            add(smart,agentToggle(icons[i],names[i],null,prefs.protection(i),value->prefs.setProtection(index,value)),-1,-2);
+            if(i<names.length-1)thinRule(smart);
+        }
+        add(body,smart,-1,-2);space(body,22);
+        add(body,txt("Personal protection",14,GRAY,500),-1,-2);space(body,9);
+        LinearLayout personal=card();pad(personal,13,5);
+        add(personal,protectionLink("folder_lock","Protected folders","Exclude from cleanup"),-1,-2);
+        thinRule(personal);
+        add(personal,protectionLink("file_lock","Protected files","Always keep selected files"),-1,-2);
+        add(body,personal,-1,-2);space(body,20);
+        LinearLayout safety=row();safety.setGravity(Gravity.CENTER);
+        add(safety,new Glyph(this,"lock",GREEN),dp(17),dp(17));gap(safety,7);
+        add(safety,txt("Your approval is always required.",12,GRAY,400),-2,-2);add(body,safety,-1,-2);
+        space(body,10);
+        add(body,centered("Preview mode · Protection preferences saved",11,GRAY,400),-1,-2);
+        return root;
+    }
+    private LinearLayout protectionLink(String icon,String name,String description){
+        LinearLayout line=row();line.setMinimumHeight(dp(62));line.setPadding(0,dp(10),0,dp(10));
+        add(line,new Glyph(this,icon,BLUE),dp(24),dp(24));gap(line,12);
+        LinearLayout labels=column();add(labels,txt(name,15,INK,600),-1,-2);space(labels,5);
+        add(labels,txt(description,12,GRAY,400),-1,-2);weight(line,labels);gap(line,8);
+        add(line,new Glyph(this,"chevron",GRAY),dp(14),dp(14));
+        // The personal-protection detail screens are intentionally deferred.
+        line.setContentDescription(tr(name)+", "+tr(description));
+        return line;
+    }
+
     private LinearLayout agentPreferencesScreen(){
         LinearLayout root=column();root.setBackgroundColor(BG);root.setPadding(dp(18),v(12),dp(18),v(12));
         FrameLayout header=new FrameLayout(this);
@@ -582,7 +641,7 @@ public final class MainActivity extends Activity {
     }
     private void showHome() {
         storageVisible=false;
-        settingsVisible=false;agentPrefsVisible=false;
+        settingsVisible=false;agentPrefsVisible=false;protectionVisible=false;
         completionVisible=false;
         reviewing = false;
         setContentView(home());
@@ -596,7 +655,7 @@ public final class MainActivity extends Activity {
     }
     @Override public void onBackPressed() {
         if(cleaning)return;
-        if(agentPrefsVisible){openSettings();return;}
+        if(protectionVisible || agentPrefsVisible){openSettings();return;}
         if(settingsVisible || storageVisible){showHome();return;}
         if(completionVisible){showHome();return;}
         if (videoViewing) leaveVideos(false); else if (similarViewing) leaveSimilar(false); else if (duplicateViewing) leaveDuplicates(false); else if (reviewing) showHome(); else super.onBackPressed();
@@ -1399,6 +1458,13 @@ public final class MainActivity extends Activity {
                 case "apps": for(int i=0;i<2;i++)for(int j=0;j<2;j++)c.drawRoundRect(new RectF(3+i*10,3+j*10,10+i*10,10+j*10),2,2,p);break;
                 case "document":path(c,5,2,14,2,20,8,20,22,5,22,5,2);path(c,14,2,14,8,20,8);path(c,8,13,17,13);path(c,8,17,17,17);break;
                 case "phone":c.drawRoundRect(new RectF(6,2,18,22),3,3,p);path(c,10,18,14,18);break;
+                case "heart":{
+                    Path a=new Path();a.moveTo(12,21);a.cubicTo(8,17,2,13,2,8);a.cubicTo(2,2,9,1,12,6);
+                    a.cubicTo(15,1,22,2,22,8);a.cubicTo(22,13,16,17,12,21);a.close();c.drawPath(a,p);break;}
+                case "folder_lock":path(c,3,18,3,5,10,5,12,8,21,8,21,12);
+                    path(c,3,18,10,18);c.drawRoundRect(new RectF(13,15,22,22),2,2,p);c.drawArc(new RectF(15,10,20,18),180,180,false,p);break;
+                case "file_lock":path(c,5,2,14,2,20,8,20,11);path(c,14,2,14,8,20,8);path(c,5,2,5,22,10,22);
+                    c.drawRoundRect(new RectF(13,15,22,22),2,2,p);c.drawArc(new RectF(15,10,20,18),180,180,false,p);break;
                 case "clock":c.drawCircle(12,12,9,p);path(c,12,6,12,12,16,14);break;
                 case "chevron":path(c,9,5,16,12,9,19);break;
                 case "select_arrows":path(c,8,9,12,5,16,9);path(c,8,15,12,19,16,15);break;

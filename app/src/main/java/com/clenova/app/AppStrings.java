@@ -5,6 +5,21 @@ import java.util.Map;
 final class AppStrings {
  private static final Map<String,String[]> TEXT=new HashMap<>();
  static {
+  TEXT.put("Back to Settings",new String[]{"सेटिंग्स पर वापस","Volver a ajustes","Retour aux réglages","Zurück zu Einstellungen"});
+  TEXT.put("Keep what matters.",new String[]{"जो ज़रूरी है, उसे रखें।","Conserva lo importante.","Gardez ce qui compte.","Bewahre, was wichtig ist."});
+  TEXT.put("Choose what your Agent should never remove.",new String[]{"चुनें कि एजेंट क्या कभी न हटाए।","Elige lo que tu agente nunca debe borrar.","Choisissez ce que votre agent ne doit jamais supprimer.","Wähle, was dein Agent nie löschen soll."});
+  TEXT.put("Smart protection",new String[]{"स्मार्ट सुरक्षा","Protección inteligente","Protection intelligente","Intelligenter Schutz"});
+  TEXT.put("Favorite photos",new String[]{"पसंदीदा फोटो","Fotos favoritas","Photos favorites","Lieblingsfotos"});
+  TEXT.put("Recent files",new String[]{"हाल की फ़ाइलें","Archivos recientes","Fichiers récents","Neue Dateien"});
+  TEXT.put("Important documents",new String[]{"ज़रूरी दस्तावेज़","Documentos importantes","Documents importants","Wichtige Dokumente"});
+  TEXT.put("Best shots",new String[]{"सबसे अच्छी फोटो","Mejores fotos","Meilleures photos","Beste Aufnahmen"});
+  TEXT.put("Personal protection",new String[]{"व्यक्तिगत सुरक्षा","Protección personal","Protection personnelle","Persönlicher Schutz"});
+  TEXT.put("Protected folders",new String[]{"सुरक्षित फ़ोल्डर","Carpetas protegidas","Dossiers protégés","Geschützte Ordner"});
+  TEXT.put("Exclude from cleanup",new String[]{"सफाई से बाहर रखें","Excluir de la limpieza","Exclure du nettoyage","Von Bereinigung ausschließen"});
+  TEXT.put("Protected files",new String[]{"सुरक्षित फ़ाइलें","Archivos protegidos","Fichiers protégés","Geschützte Dateien"});
+  TEXT.put("Always keep selected files",new String[]{"चुनी गई फ़ाइलें हमेशा रखें","Conservar archivos seleccionados","Toujours garder les fichiers choisis","Ausgewählte Dateien immer behalten"});
+  TEXT.put("Your approval is always required.",new String[]{"आपकी अनुमति हमेशा ज़रूरी है।","Tu aprobación siempre es necesaria.","Votre accord est toujours requis.","Deine Freigabe ist immer erforderlich."});
+  TEXT.put("Preview mode · Protection preferences saved",new String[]{"प्रीव्यू · सुरक्षा प्राथमिकताएँ सहेजी गईं","Vista previa · Preferencias guardadas","Aperçu · Préférences enregistrées","Vorschau · Schutzeinstellungen gespeichert"});
   TEXT.put("Autopilot",new String[]{"ऑटोपायलट","Piloto automático","Pilote automatique","Autopilot"});
   TEXT.put("AI Autopilot",new String[]{"AI ऑटोपायलट","Piloto automático IA","Pilote automatique IA","KI-Autopilot"});
   TEXT.put("Autopilot paused",new String[]{"ऑटोपायलट रुका है","Piloto automático en pausa","Pilote automatique en pause","Autopilot pausiert"});

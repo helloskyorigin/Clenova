@@ -32,6 +32,10 @@ final class AppPreferences {
         int total=0;for(int i=0;i<ReviewPlan.MB.length;i++)if(discovery(i))total+=ReviewPlan.MB[i];
         return total;
     }
+    private static final String[] PROTECTION_KEYS={"protect_favorites","protect_recent","protect_documents","protect_best_shots"};
+    boolean protection(int index){return store.getBoolean(PROTECTION_KEYS[index],true);}
+    void setProtection(int index,boolean enabled){store.edit().putBoolean(PROTECTION_KEYS[index],enabled).apply();}
+    ProtectionPolicy protectionPolicy(){return new ProtectionPolicy(protection(0),protection(1),protection(2),protection(3));}
     String appearance(){String value=store.getString("appearance","System");return value.equals("Dark")||value.equals("Light")?value:"System";}
     void setAppearance(String value){if(!value.equals("Light")&&!value.equals("Dark")&&!value.equals("System"))throw new IllegalArgumentException();store.edit().putString("appearance",value).apply();}
     String language(){String value=store.getString("language","en");for(String code:LANG_CODES)if(code.equals(value))return value;return "en";}

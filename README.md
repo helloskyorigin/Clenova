@@ -46,3 +46,6 @@ Native focusable PopupWindow overlays the tapped row without changing Settings l
 
 ## Agent preferences
 Settings > Agent preferences has persisted autopilot, daily/3-day/weekly interval in an anchored popup, and four discovery toggles. Home and the sample cleanup plan respect autopilot and the three implemented sample categories. Unnecessary-files discovery is saved but has no sample scanner yet. Scan interval is a saved preference, not an active scheduled job. Approval is mandatory, no deletion or real scans occur. Existing theme and translated labels are reused.
+
+## Cleanup protection landing
+Settings > Cleanup protection provides four persisted smart switches, all enabled by default, and protected folders/files rows reserved for subsequent screens. The pure rule evaluator uses a seven-day recent window, conservatively protects unknown metadata when enabled, preserves mandatory originals and personal exclusions regardless of switch values, and always requires approval. It is not yet connected to a real scanner or deletion engine; existing sample galleries continue protecting their originals. No device files are read. CI includes tests for all 16 switch combinations.
