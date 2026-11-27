@@ -1920,7 +1920,8 @@ public final class MainActivity extends Activity {
             }
             scroll.addView(options,new ScrollView.LayoutParams(-1,-2));add(menu,scroll,-1,dp(230));
         }else{
-            for(int i=0;i<AppPreferences.NOTIFICATION_KEYS.length;i++){
+            // Only Agent updates currently have a real delivery mechanism.
+            for(int i=0;i<1;i++){
                 final int index=i;LinearLayout option=row();option.setPadding(dp(8),0,dp(6),0);
                 weight(option,txt(AppPreferences.NOTIFICATION_LABELS[i],14,INK,500));gap(option,8);
                 android.widget.Switch toggle=new android.widget.Switch(this);
@@ -1937,6 +1938,7 @@ public final class MainActivity extends Activity {
                 });
                 add(option,toggle,-2,dp(44));add(menu,option,-1,dp(48));
             }
+            add(menu,txt("Agent updates notify you about scheduled media review candidates.",12,GRAY,400),-1,-2);
             if(!prefs.systemNotificationsAllowed()){
                 TextView settings=centered("Enable in Android settings",12,BLUE,600);
                 tap(settings,WHITE,8,()->{popup.dismiss();android.content.Intent intent=new android.content.Intent(android.provider.Settings.ACTION_APP_NOTIFICATION_SETTINGS);
