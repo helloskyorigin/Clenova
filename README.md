@@ -43,3 +43,6 @@ Home gear opens the scrollable Settings screen with five groups and fourteen row
 
 ## Preferences popups
 Native focusable PopupWindow overlays the tapped row without changing Settings layout. Appearance (Light/Dark/System) updates app surfaces and persists locally; app-local language selector translates common existing screen labels into English, Hindi, Spanish, French or German. Some dynamic sample text and accessibility descriptions remain English. Notification switches persist and create Android channels; enabling requests notification permission on Android 13+, and blocked permission links to Android settings. No automated notifications are emitted while Agent/storage remain simulated. Other Settings detail screens remain unimplemented.
+
+## Agent preferences
+Settings > Agent preferences has persisted autopilot, daily/3-day/weekly interval in an anchored popup, and four discovery toggles. Home and the sample cleanup plan respect autopilot and the three implemented sample categories. Unnecessary-files discovery is saved but has no sample scanner yet. Scan interval is a saved preference, not an active scheduled job. Approval is mandatory, no deletion or real scans occur. Existing theme and translated labels are reused.

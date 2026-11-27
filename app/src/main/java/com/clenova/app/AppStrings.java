@@ -5,6 +5,26 @@ import java.util.Map;
 final class AppStrings {
  private static final Map<String,String[]> TEXT=new HashMap<>();
  static {
+  TEXT.put("Autopilot",new String[]{"ऑटोपायलट","Piloto automático","Pilote automatique","Autopilot"});
+  TEXT.put("AI Autopilot",new String[]{"AI ऑटोपायलट","Piloto automático IA","Pilote automatique IA","KI-Autopilot"});
+  TEXT.put("Autopilot paused",new String[]{"ऑटोपायलट रुका है","Piloto automático en pausa","Pilote automatique en pause","Autopilot pausiert"});
+  TEXT.put("Your Agent is paused.",new String[]{"आपका एजेंट रुका है।","Tu agente está en pausa.","Votre agent est en pause.","Dein Agent pausiert."});
+  TEXT.put("Your Agent. Your rules.",new String[]{"आपका एजेंट। आपके नियम।","Tu agente. Tus reglas.","Votre agent. Vos règles.","Dein Agent. Deine Regeln."});
+  TEXT.put("Choose how Clenova works for you.",new String[]{"चुनें कि Clenova कैसे काम करे।","Elige cómo trabaja Clenova.","Choisissez comment Clenova fonctionne.","Bestimme, wie Clenova arbeitet."});
+  TEXT.put("Find cleanup opportunities automatically",new String[]{"सफाई के अवसर अपने आप खोजें","Buscar opciones de limpieza automáticamente","Trouver automatiquement des options de nettoyage","Bereinigungsmöglichkeiten automatisch finden"});
+  TEXT.put("Scan frequency",new String[]{"स्कैन की आवृत्ति","Frecuencia de análisis","Fréquence d’analyse","Scan-Intervall"});
+  TEXT.put("Daily",new String[]{"हर दिन","Diario","Chaque jour","Täglich"});
+  TEXT.put("Every 3 days",new String[]{"हर 3 दिन","Cada 3 días","Tous les 3 jours","Alle 3 Tage"});
+  TEXT.put("Weekly",new String[]{"हर सप्ताह","Semanal","Chaque semaine","Wöchentlich"});
+  TEXT.put("Smart discovery",new String[]{"स्मार्ट खोज","Detección inteligente","Détection intelligente","Intelligente Suche"});
+  TEXT.put("Unnecessary files",new String[]{"अनावश्यक फ़ाइलें","Archivos innecesarios","Fichiers inutiles","Unnötige Dateien"});
+  TEXT.put("Safety",new String[]{"सुरक्षा","Seguridad","Sécurité","Sicherheit"});
+  TEXT.put("Approval required",new String[]{"अनुमति आवश्यक","Aprobación necesaria","Accord requis","Freigabe erforderlich"});
+  TEXT.put("Nothing deleted without your permission.",new String[]{"बिना आपकी अनुमति कुछ नहीं हटेगा।","Nada se elimina sin tu permiso.","Rien ne sera supprimé sans votre accord.","Nichts wird ohne deine Erlaubnis gelöscht."});
+  TEXT.put("No sample recommendations",new String[]{"कोई नमूना सुझाव नहीं","Sin recomendaciones de ejemplo","Aucune suggestion d’exemple","Keine Beispielvorschläge"});
+  TEXT.put("Manage discovery preferences",new String[]{"खोज प्राथमिकताएँ बदलें","Gestionar preferencias de detección","Gérer les préférences de détection","Sucheinstellungen verwalten"});
+  TEXT.put("You can resume anytime.",new String[]{"आप कभी भी फिर शुरू कर सकते हैं।","Puedes reanudar cuando quieras.","Vous pouvez reprendre à tout moment.","Du kannst jederzeit fortfahren."});
+  TEXT.put("Preview mode · No automatic scans or deletion",new String[]{"प्रीव्यू · अपने आप स्कैन या हटाना नहीं","Vista previa · Sin análisis ni borrado automático","Aperçu · Aucun scan ni suppression automatique","Vorschau · Keine automatischen Scans oder Löschungen"});
   TEXT.put("Settings",new String[]{"सेटिंग्स","Ajustes","Réglages","Einstellungen"});
   TEXT.put("Preferences",new String[]{"प्राथमिकताएँ","Preferencias","Préférences","Präferenzen"});
   TEXT.put("Appearance",new String[]{"दिखावट","Apariencia","Apparence","Darstellung"});

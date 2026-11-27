@@ -47,7 +47,7 @@ public final class MainActivity extends Activity {
     private boolean[] videoDraft;
     private CleanupPreview cleanup;
     private boolean cleaning, completed, completionVisible;
-    private boolean storageVisible, settingsVisible;
+    private boolean storageVisible, settingsVisible, agentPrefsVisible;
     private ValueAnimator cleanupAnimation;
     private AppPreferences prefs;
     private android.widget.PopupWindow preferencePopup;
@@ -70,6 +70,7 @@ public final class MainActivity extends Activity {
             if(state.getBoolean("cleanup_running")){startCleanupAnimation();return;}
             if(completed && state.getBoolean("cleanup_visible")){showCompletion(false);return;}
         }
+        if(state!=null && state.getBoolean("agent_prefs_visible")){openAgentPreferences();return;}
         if(state!=null && state.getBoolean("settings_visible")){openSettings();return;}
         if(state!=null && state.getBoolean("storage_visible")){openStorage();return;}
         setContentView(home());
@@ -78,6 +79,7 @@ public final class MainActivity extends Activity {
         super.onSaveInstanceState(state);
         state.putBoolean("storage_visible",storageVisible);
         state.putBoolean("settings_visible",settingsVisible);
+        state.putBoolean("agent_prefs_visible",agentPrefsVisible);
         if(cleanup!=null){
             state.putDoubleArray("cleanup_amounts",cleanup.amounts());
             state.putInt("cleanup_count",cleanup.count);
@@ -213,7 +215,7 @@ public final class MainActivity extends Activity {
         add(l,settings,dp(44),dp(44)); return l;
     }
     private void openSettings(){
-        settingsVisible=true;setContentView(settingsScreen());
+        agentPrefsVisible=false;settingsVisible=true;setContentView(settingsScreen());
     }
     private LinearLayout settingsScreen(){
         LinearLayout root=column();root.setBackgroundColor(BG);
@@ -264,6 +266,7 @@ public final class MainActivity extends Activity {
             gap(line,9);add(line,new Glyph(this,preference?"select_arrows":"chevron",GRAY),dp(14),dp(14));
             line.setContentDescription(tr(item[1])+(item[2].isEmpty()?"":", "+tr(item[2])));
             if(preference)tap(line,WHITE,0,()->showPreferencePopup(line,item[1]));
+            else if(item[1].equals("Agent preferences"))tap(line,WHITE,0,this::openAgentPreferences);
             add(group,line,-1,-2);
             if(i<items.length-1){
                 View divider=new View(this);divider.setBackgroundColor(surface(0xffeeeef0));
@@ -341,19 +344,111 @@ public final class MainActivity extends Activity {
         return line;
     }
 
+    private LinearLayout inactiveAgentCard(){
+        LinearLayout card=card();LinearLayout top=row();
+        add(top,new Glyph(this,"bot",BLUE),dp(30),dp(30));gap(top,12);
+        LinearLayout info=column();
+        add(info,txt(prefs.autopilot()?"No sample recommendations":"Autopilot paused",16,INK,600),-1,-2);space(info,5);
+        add(info,txt(prefs.autopilot()?"Manage discovery preferences":"You can resume anytime.",13,GRAY,400),-1,-2);weight(top,info);
+        add(card,top,-1,-2);space(card,14);
+        TextView manage=centered("Agent preferences",15,BLUE,600);
+        tap(manage,PALE,24,this::openAgentPreferences);add(card,manage,-1,dp(48));return card;
+    }
+    private void openAgentPreferences(){
+        settingsVisible=true;agentPrefsVisible=true;setContentView(agentPreferencesScreen());
+    }
+    private LinearLayout agentPreferencesScreen(){
+        LinearLayout root=column();root.setBackgroundColor(BG);root.setPadding(dp(18),v(12),dp(18),v(12));
+        FrameLayout header=new FrameLayout(this);
+        header.addView(centered("Agent preferences",17,INK,600),new FrameLayout.LayoutParams(-1,-1));
+        FrameLayout back=new FrameLayout(this);
+        back.addView(new Glyph(this,"back",INK),new FrameLayout.LayoutParams(dp(24),dp(24),Gravity.CENTER));
+        back.setContentDescription("Back to Settings");tap(back,WHITE,22,this::openSettings);
+        header.addView(back,new FrameLayout.LayoutParams(dp(44),dp(44),Gravity.START|Gravity.CENTER_VERTICAL));
+        add(root,header,-1,dp(44));
+        ScrollView scroll=new ScrollView(this);scroll.setVerticalScrollBarEnabled(false);scroll.setOverScrollMode(View.OVER_SCROLL_NEVER);
+        LinearLayout body=column();body.setPadding(0,v(18),0,v(12));
+        scroll.addView(body,new ScrollView.LayoutParams(-1,-2));root.addView(scroll,new LinearLayout.LayoutParams(-1,0,1f));
+        LinearLayout hero=column();hero.setGravity(Gravity.CENTER_HORIZONTAL);
+        FrameLayout mark=new FrameLayout(this);mark.setBackground(round(PALE,20));
+        mark.addView(new Glyph(this,"bot",BLUE),new FrameLayout.LayoutParams(dp(32),dp(32),Gravity.CENTER));
+        add(hero,mark,dp(64),dp(64));space(hero,13);
+        add(hero,centered("Your Agent. Your rules.",24,INK,700),-1,-2);space(hero,7);
+        add(hero,centered("Choose how Clenova works for you.",14,GRAY,400),-1,-2);add(body,hero,-1,-2);space(body,22);
+        add(body,txt("Autopilot",14,GRAY,500),-1,-2);space(body,9);
+        LinearLayout auto=card();pad(auto,13,5);
+        LinearLayout enabled=agentToggle("sparkles","AI Autopilot","Find cleanup opportunities automatically",prefs.autopilot(),prefs::setAutopilot);
+        add(auto,enabled,-1,-2);thinRule(auto);
+        LinearLayout frequency=row();frequency.setMinimumHeight(dp(54));frequency.setPadding(0,dp(7),0,dp(7));
+        add(frequency,new Glyph(this,"clock",BLUE),dp(23),dp(23));gap(frequency,12);
+        weight(frequency,txt("Scan frequency",15,INK,500));gap(frequency,5);
+        TextView current=txt(scanLabel(prefs.scanDays()),12,GRAY,400);add(frequency,current,-2,-2);gap(frequency,6);
+        add(frequency,new Glyph(this,"select_arrows",GRAY),dp(14),dp(14));
+        frequency.setContentDescription(tr("Scan frequency")+", "+tr(scanLabel(prefs.scanDays())));
+        tap(frequency,WHITE,8,()->showScanFrequency(frequency,current));
+        add(auto,frequency,-1,-2);add(body,auto,-1,-2);space(body,20);
+        add(body,txt("Smart discovery",14,GRAY,500),-1,-2);space(body,9);
+        LinearLayout discover=card();pad(discover,13,4);
+        String[] names={"Duplicate photos","Similar photos","Large videos","Unnecessary files"};
+        String[] icons={"copy","images","video","document"};
+        for(int i=0;i<names.length;i++){
+            final int index=i;
+            add(discover,agentToggle(icons[i],names[i],null,prefs.discovery(i),value->prefs.setDiscovery(index,value)),-1,-2);
+            if(i<names.length-1)thinRule(discover);
+        }
+        add(body,discover,-1,-2);space(body,20);
+        add(body,txt("Safety",14,GRAY,500),-1,-2);space(body,9);
+        LinearLayout safety=card(),line=row();add(line,new Glyph(this,"shield",GREEN),dp(24),dp(24));gap(line,12);
+        LinearLayout text=column();add(text,txt("Approval required",15,INK,600),-1,-2);space(text,5);
+        add(text,txt("Nothing deleted without your permission.",12,GRAY,400),-1,-2);weight(line,text);gap(line,8);
+        add(line,new Glyph(this,"lock",GREEN),dp(20),dp(20));add(safety,line,-1,-2);
+        safety.setContentDescription(tr("Approval required")+", "+tr("Nothing deleted without your permission."));
+        add(body,safety,-1,-2);space(body,10);
+        add(body,centered("Preview mode · No automatic scans or deletion",11,GRAY,400),-1,-2);
+        return root;
+    }
+    private LinearLayout agentToggle(String icon,String name,String subtitle,boolean initial,java.util.function.Consumer<Boolean> change){
+        LinearLayout line=row();line.setMinimumHeight(dp(54));line.setPadding(0,dp(8),0,dp(8));
+        add(line,new Glyph(this,icon,BLUE),dp(23),dp(23));gap(line,12);
+        LinearLayout labels=column();add(labels,txt(name,15,INK,500),-1,-2);
+        if(subtitle!=null){space(labels,4);add(labels,txt(subtitle,12,GRAY,400),-1,-2);}
+        weight(line,labels);gap(line,8);
+        android.widget.Switch toggle=new android.widget.Switch(this);
+        toggle.setShowText(false);toggle.setChecked(initial);toggle.setContentDescription(tr(name));
+        toggle.setThumbTintList(ColorStateList.valueOf(Color.WHITE));
+        toggle.setTrackTintList(new ColorStateList(new int[][]{new int[]{android.R.attr.state_checked},new int[]{}},new int[]{BLUE,GRAY}));
+        toggle.setOnCheckedChangeListener((button,checked)->change.accept(checked));add(line,toggle,-2,dp(44));
+        line.setOnClickListener(view->toggle.setChecked(!toggle.isChecked()));return line;
+    }
+    private String scanLabel(int days){return days==3?"Every 3 days":days==7?"Weekly":"Daily";}
+    private void showScanFrequency(View anchor,TextView current){
+        if(preferencePopup!=null)preferencePopup.dismiss();
+        LinearLayout menu=column();menu.setPadding(dp(8),dp(6),dp(8),dp(6));menu.setBackground(round(WHITE,16));
+        android.widget.PopupWindow popup=new android.widget.PopupWindow(menu,Math.min(dp(205),getResources().getDisplayMetrics().widthPixels-dp(32)),-2,true);
+        preferencePopup=popup;popup.setBackgroundDrawable(round(WHITE,16));popup.setElevation(dp(10));popup.setOutsideTouchable(true);popup.setClippingEnabled(true);
+        popup.setOnDismissListener(()->{if(preferencePopup==popup)preferencePopup=null;});
+        for(int days:new int[]{1,3,7}){
+            LinearLayout option=preferenceOption("clock",scanLabel(days),prefs.scanDays()==days);
+            tap(option,WHITE,10,()->{prefs.setScanDays(days);current.setText(tr(scanLabel(days)));anchor.setContentDescription(tr("Scan frequency")+", "+tr(scanLabel(days)));popup.dismiss();});
+            add(menu,option,-1,dp(46));
+        }
+        popup.showAsDropDown(anchor,0,-anchor.getHeight(),Gravity.END);
+        menu.setAlpha(0f);menu.setScaleX(.97f);menu.setScaleY(.97f);menu.animate().alpha(1f).scaleX(1f).scaleY(1f).setDuration(140).start();
+    }
+
     private LinearLayout hero() {
         LinearLayout l=column(); l.setGravity(Gravity.CENTER_HORIZONTAL);
         LinearLayout state=row(); state.setGravity(Gravity.CENTER);
-        View dot=new View(this); dot.setBackground(round(0xff34c759,8));
+        View dot=new View(this); dot.setBackground(round(prefs.autopilot()?0xff34c759:GRAY,8));
         add(state,dot,dp(7),dp(7)); gap(state,6);
-        add(state,txt("Autopilot active",15,GREEN,600),-2,-2); add(l,state,-1,-2);
+        add(state,txt(prefs.autopilot()?"Autopilot active":"Autopilot paused",15,prefs.autopilot()?GREEN:GRAY,600),-2,-2); add(l,state,-1,-2);
         space(l,5);
         Gauge gauge=new Gauge(this);
         add(l,gauge,-1,v(207));
         space(l,4);
         add(l,centered("All under control.",27,INK,700),-1,-2);
         space(l,5);
-        add(l,centered("Your AI Agent is taking care of things.",14,GRAY,400),-1,-2);
+        add(l,centered(prefs.autopilot()?"Your AI Agent is taking care of things.":"Your Agent is paused.",14,GRAY,400),-1,-2);
         return l;
     }
     private LinearLayout storage() {
@@ -466,6 +561,7 @@ public final class MainActivity extends Activity {
     }
     private LinearLayout agentCard() {
         if(completed)return completedAgentCard();
+        if(prefs.recommendedMb()==0)return inactiveAgentCard();
         LinearLayout c=card(); LinearLayout top=row();
         FrameLayout mark=new FrameLayout(this); mark.setBackground(round(PALE,13));
         mark.addView(new Glyph(this,"sparkles",BLUE),new FrameLayout.LayoutParams(dp(27),dp(27),Gravity.CENTER));
@@ -475,7 +571,7 @@ public final class MainActivity extends Activity {
         add(message,txt("Awaiting your approval",12,GRAY,400),-1,-2); weight(top,message);
         add(c,top,-1,-2); space(c,12);
         LinearLayout amount=row(); amount.setBaselineAligned(true);
-        add(amount,txt(HomePreviewData.RECOVERABLE,32,INK,700),-2,-2); gap(amount,7);
+        add(amount,txt(ReviewPlan.gb(prefs.recommendedMb()),32,INK,700),-2,-2); gap(amount,7);
         weight(amount,txt("ready to recover",13,GRAY,400)); add(c,amount,-1,-2);
         space(c,12);
         LinearLayout approve=row(); approve.setGravity(Gravity.CENTER);
@@ -486,19 +582,21 @@ public final class MainActivity extends Activity {
     }
     private void showHome() {
         storageVisible=false;
-        settingsVisible=false;
+        settingsVisible=false;agentPrefsVisible=false;
         completionVisible=false;
         reviewing = false;
         setContentView(home());
     }
     private void openReview() {
-        if(completed)return;
+        if(completed||prefs.recommendedMb()==0)return;
         reviewPlan = new ReviewPlan();
+        if(!prefs.discovery(0))reviewPlan.setSelected(0,false);
         reviewing = true;
         setContentView(reviewScreen());
     }
     @Override public void onBackPressed() {
         if(cleaning)return;
+        if(agentPrefsVisible){openSettings();return;}
         if(settingsVisible || storageVisible){showHome();return;}
         if(completionVisible){showHome();return;}
         if (videoViewing) leaveVideos(false); else if (similarViewing) leaveSimilar(false); else if (duplicateViewing) leaveDuplicates(false); else if (reviewing) showHome(); else super.onBackPressed();
@@ -527,13 +625,14 @@ public final class MainActivity extends Activity {
         pad(hero,0,16);
         add(hero,new Glyph(this,"sparkles",BLUE),dp(48),dp(48));
         space(hero,14);
-        add(hero,centered("I've found 4.8 GB",33,INK,700),-1,-2);
+        add(hero,centered("I've found "+ReviewPlan.gb(prefs.recommendedMb()),33,INK,700),-1,-2);
         space(hero,6);
         add(hero,centered("Your cleanup is ready.",15,GRAY,400),-1,-2);
         add(body,hero,-1,-2); space(body,16);
         add(body,txt("Cleanup plan",14,GRAY,600),-1,-2); space(body,10);
         LinearLayout plan = card(); pad(plan,16,4);
         for(int i=0;i<ReviewPlan.NAMES.length;i++){
+            if(!prefs.discovery(i))continue;
             final int index=i;
             LinearLayout category=row();
             category.setPadding(0,v(15),0,v(15));
@@ -563,7 +662,8 @@ public final class MainActivity extends Activity {
             });
             add(right,choice,dp(44),dp(44)); add(category,right,-2,-2);
             add(plan,category,-1,-2);
-            if(i<ReviewPlan.NAMES.length-1){
+            boolean more=false;for(int next=i+1;next<ReviewPlan.NAMES.length;next++)if(prefs.discovery(next))more=true;
+            if(more){
                 View divider=new View(this);divider.setBackgroundColor(surface(0xffeeeef0));add(plan,divider,-1,dp(1));
             }
         }
@@ -1299,6 +1399,7 @@ public final class MainActivity extends Activity {
                 case "apps": for(int i=0;i<2;i++)for(int j=0;j<2;j++)c.drawRoundRect(new RectF(3+i*10,3+j*10,10+i*10,10+j*10),2,2,p);break;
                 case "document":path(c,5,2,14,2,20,8,20,22,5,22,5,2);path(c,14,2,14,8,20,8);path(c,8,13,17,13);path(c,8,17,17,17);break;
                 case "phone":c.drawRoundRect(new RectF(6,2,18,22),3,3,p);path(c,10,18,14,18);break;
+                case "clock":c.drawCircle(12,12,9,p);path(c,12,6,12,12,16,14);break;
                 case "chevron":path(c,9,5,16,12,9,19);break;
                 case "select_arrows":path(c,8,9,12,5,16,9);path(c,8,15,12,19,16,15);break;
                 case "check":path(c,5,12,10,17,20,7);break;

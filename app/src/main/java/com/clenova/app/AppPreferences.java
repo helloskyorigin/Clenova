@@ -20,6 +20,18 @@ final class AppPreferences {
             manager.createNotificationChannel(new NotificationChannel(NOTIFICATION_KEYS[i],NOTIFICATION_LABELS[i],NotificationManager.IMPORTANCE_DEFAULT));
         }
     }
+    private static final String[] DISCOVERY_KEYS={"discover_duplicates","discover_similar","discover_videos","discover_unnecessary"};
+    boolean autopilot(){return store.getBoolean("agent_autopilot",true);}
+    void setAutopilot(boolean enabled){store.edit().putBoolean("agent_autopilot",enabled).apply();}
+    int scanDays(){int days=store.getInt("agent_scan_days",1);return days==3||days==7?days:1;}
+    void setScanDays(int days){if(days!=1&&days!=3&&days!=7)throw new IllegalArgumentException("Invalid interval");store.edit().putInt("agent_scan_days",days).apply();}
+    boolean discovery(int index){return store.getBoolean(DISCOVERY_KEYS[index],true);}
+    void setDiscovery(int index,boolean enabled){store.edit().putBoolean(DISCOVERY_KEYS[index],enabled).apply();}
+    int recommendedMb(){
+        if(!autopilot())return 0;
+        int total=0;for(int i=0;i<ReviewPlan.MB.length;i++)if(discovery(i))total+=ReviewPlan.MB[i];
+        return total;
+    }
     String appearance(){String value=store.getString("appearance","System");return value.equals("Dark")||value.equals("Light")?value:"System";}
     void setAppearance(String value){if(!value.equals("Light")&&!value.equals("Dark")&&!value.equals("System"))throw new IllegalArgumentException();store.edit().putString("appearance",value).apply();}
     String language(){String value=store.getString("language","en");for(String code:LANG_CODES)if(code.equals(value))return value;return "en";}
