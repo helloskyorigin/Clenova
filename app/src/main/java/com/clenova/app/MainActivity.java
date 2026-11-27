@@ -45,10 +45,10 @@ public final class MainActivity extends Activity {
     private android.os.CancellationSignal unusedSignal;
     private android.app.Dialog unusedSheet;
     private static final int PICK_DOWNLOAD_FILES=101, PICK_LARGE_FOLDER=102;
-    private boolean largeFilesMode;
+    private boolean largeFilesMode,clutterMode;
     private int largeFileThreshold=0;
     private long largeMinimum(){return new long[]{100L*1024*1024,500L*1024*1024,1024L*1024*1024}[largeFileThreshold];}
-    private String fileManagerTitle(){return largeFilesMode?"Large files":"Downloads";}
+    private String fileManagerTitle(){return clutterMode?"Unnecessary files":largeFilesMode?"Large files":"Downloads";}
     private boolean downloadsVisible,downloadsReview,downloadsBusy,downloadsPicking,downloadsOpening;
     private int downloadsFilter,downloadsSort,downloadsPage,downloadsGeneration;
     private String downloadsQuery="";
@@ -132,7 +132,7 @@ public final class MainActivity extends Activity {
         protectedFiles=new ProtectedFiles(this);
         history=new ActivityHistory(this);
         devicePermissions=new DevicePermissions(this);
-        if(state!=null){largeFilesMode=state.getBoolean("large_files_mode");dupTrashPending=state.getBoolean("dup_trash_pending");cleanVisible=state.getBoolean("clean_visible");cleanScrollY=state.getInt("clean_scroll_y");historyFilter=state.getInt("history_filter");cleanupEventId=state.getString("cleanup_event_id");cleanupCategoryCounts=state.getIntArray("cleanup_category_counts");historyDetailId=state.getString("history_detail_id");historyScrollY=state.getInt("history_scroll_y");}
+        if(state!=null){largeFilesMode=state.getBoolean("large_files_mode");clutterMode=state.getBoolean("clutter_mode");dupTrashPending=state.getBoolean("dup_trash_pending");cleanVisible=state.getBoolean("clean_visible");cleanScrollY=state.getInt("clean_scroll_y");historyFilter=state.getInt("history_filter");cleanupEventId=state.getString("cleanup_event_id");cleanupCategoryCounts=state.getIntArray("cleanup_category_counts");historyDetailId=state.getString("history_detail_id");historyScrollY=state.getInt("history_scroll_y");}
         applyPalette();
         density = getResources().getDisplayMetrics().density;
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
@@ -168,7 +168,7 @@ public final class MainActivity extends Activity {
         super.onSaveInstanceState(state);
         state.putBoolean("storage_visible",storageVisible);
         state.putBoolean("clean_visible",cleanVisible);
-        state.putBoolean("large_files_mode",largeFilesMode);
+        state.putBoolean("large_files_mode",largeFilesMode);state.putBoolean("clutter_mode",clutterMode);
         state.putBoolean("dup_trash_pending",dupTrashPending);
         state.putInt("clean_scroll_y",cleanScroll==null?cleanScrollY:cleanScroll.getScrollY());
         state.putBoolean("settings_visible",settingsVisible);
@@ -396,7 +396,7 @@ public final class MainActivity extends Activity {
             LinearLayout line=row();line.setMinimumHeight(dp(63));line.setPadding(0,dp(9),0,dp(9));
             FrameLayout icon=new FrameLayout(this);icon.setBackground(round(PALE,11));icon.addView(new Glyph(this,item[0],BLUE),new FrameLayout.LayoutParams(dp(22),dp(22),Gravity.CENTER));
             add(line,icon,dp(38),dp(38));gap(line,12);LinearLayout labels=column();add(labels,txt(item[1],15,INK,600),-1,-2);space(labels,4);add(labels,txt(item[2],12,GRAY,400),-1,-2);
-            weight(line,labels);gap(line,8);add(line,new Glyph(this,"chevron",GRAY),dp(14),dp(14));tap(line,WHITE,10,()->{if(item[1].equals("Downloads"))openDownloads();else if(item[1].equals("Large files"))openLargeFiles();else if(item[1].equals("Unused apps"))openUnusedApps();else cleanPending(item[1]);});add(files,line,-1,-2);
+            weight(line,labels);gap(line,8);add(line,new Glyph(this,"chevron",GRAY),dp(14),dp(14));tap(line,WHITE,10,()->{if(item[1].equals("Downloads"))openDownloads();else if(item[1].equals("Large files"))openLargeFiles();else if(item[1].equals("Unused apps"))openUnusedApps();else if(item[1].equals("Unnecessary files"))openClutter();else cleanPending(item[1]);});add(files,line,-1,-2);
         }
         add(body,files,-1,-2);space(body,17);
         LinearLayout footer=row();footer.setGravity(Gravity.CENTER);
@@ -500,7 +500,7 @@ public final class MainActivity extends Activity {
         }
         add(body,list,-1,-2);space(body,14);
         LinearLayout scope=card();add(scope,txt("Scan coverage",15,INK,600),-1,-2);space(scope,8);
-        add(scope,txt("Downloads and Large files use separate user-selected file access and are not added to Smart Scan totals. Unused apps uses separate optional Usage Access and is not added to media totals. Similar-photo suggestions require visual review.",13,GRAY,400),-1,-2);
+        add(scope,txt("Downloads, Large files and Unnecessary files use separate user-selected file access and are not added to Smart Scan totals. Unused apps uses separate optional Usage Access and is not added to media totals. Similar-photo suggestions require visual review.",13,GRAY,400),-1,-2);
         if(scanResult.limited){space(scope,7);add(scope,txt("Limited media access. Only accessible items were checked.",13,GRAY,400),-1,-2);}
         if(scanResult.partial){space(scope,7);add(scope,txt("Some media could not be checked or the scan limit was reached.",13,GRAY,400),-1,-2);}
         space(scope,7);add(scope,txt("Large videos: 100 MiB or more. Screenshots: folder-based detection.",12,GRAY,400),-1,-2);
@@ -998,11 +998,12 @@ public final class MainActivity extends Activity {
         }catch(Exception e){runOnUiThread(()->{if(runningScan!=job||isDestroyed())return;runningScan=null;showRealScreenshots();folderToast("Safety recheck failed");});}},"Clenova-screenshot-recheck").start();
     }
 
-    private DownloadFiles downloadEngine(){return new DownloadFiles(this,prefs,protectedFiles,protectedFolders,largeFilesMode);}
-    private void openLargeFiles(){openFileManager(true);}
-    private void openDownloads(){openFileManager(false);}
-    private void openFileManager(boolean large){
-        largeFilesMode=large;largeFileThreshold=0;
+    private DownloadFiles downloadEngine(){return new DownloadFiles(this,prefs,protectedFiles,protectedFolders,largeFilesMode,clutterMode);}
+    private void openLargeFiles(){openFileManager(true,false);}
+    private void openDownloads(){openFileManager(false,false);}
+    private void openClutter(){openFileManager(false,true);}
+    private void openFileManager(boolean large,boolean clutter){
+        clutterMode=clutter;largeFilesMode=large;largeFileThreshold=0;
         if(cleanScroll!=null){cleanScrollY=cleanScroll.getScrollY();cleanScroll=null;}
         downloadsVisible=true;downloadsReview=false;downloadsFilter=-1;downloadsSort=large?1:0;downloadsPage=0;downloadsQuery="";downloadSelected.clear();downloadKeep.clear();downloadItems.clear();scanResult=null;showDownloads();
     }
@@ -1036,8 +1037,8 @@ public final class MainActivity extends Activity {
     private void loadPickedDownloads(android.content.Intent data){
         java.util.LinkedHashSet<android.net.Uri> uris=new java.util.LinkedHashSet<>();
         for(DownloadFiles.Item item:downloadItems)uris.add(item.uri);
-        if(data.getData()!=null&&uris.size()<DownloadFiles.LIMIT)uris.add(data.getData());
-        android.content.ClipData clip=data.getClipData();if(clip!=null)for(int i=0;i<clip.getItemCount()&&uris.size()<DownloadFiles.LIMIT;i++){android.net.Uri uri=clip.getItemAt(i).getUri();if(uri!=null)uris.add(uri);}
+        if(data.getData()!=null)uris.add(data.getData());
+        android.content.ClipData clip=data.getClipData();if(clip!=null)for(int i=0;i<clip.getItemCount()&&i<DownloadFiles.LIMIT;i++){android.net.Uri uri=clip.getItemAt(i).getUri();if(uri!=null)uris.add(uri);}
         readDownloads(uris);
     }
     private void refreshDownloads(){
@@ -1050,7 +1051,7 @@ public final class MainActivity extends Activity {
         final DownloadFiles engine=downloadEngine();
         new Thread(()->{try{
             java.util.List<DownloadFiles.Item> result=engine.readAll(uris,signal);
-            runOnUiThread(()->{if(generation!=downloadsGeneration||isDestroyed())return;downloadsSignal=null;downloadItems.clear();downloadItems.addAll(result);showDownloads();if(result.size()<uris.size())folderToast(largeFilesMode?"Some files were unavailable, too small or outside supported locations":"Some files were unavailable or outside supported Downloads locations");});
+            runOnUiThread(()->{if(generation!=downloadsGeneration||isDestroyed())return;downloadsSignal=null;downloadItems.clear();downloadItems.addAll(result);showDownloads();if(result.size()<uris.size())folderToast(clutterMode?"Some selected files did not match review categories":largeFilesMode?"Some files were unavailable, too small or outside supported locations":"Some files were unavailable or outside supported Downloads locations");});
         }catch(Exception e){runOnUiThread(()->{if(generation!=downloadsGeneration||isDestroyed())return;downloadsSignal=null;showDownloads();folderToast("Could not read selected files");});}},"Clenova-downloads-read").start();
     }
     private long downloadBytes(int category){long bytes=0;for(DownloadFiles.Item i:downloadItems)if((category<0||i.type==category)&&i.bytes>0)bytes+=i.bytes;return bytes;}
@@ -1066,6 +1067,7 @@ public final class MainActivity extends Activity {
     }
     private void showDownloads(){
         downloadsVisible=true;downloadsReview=false;
+        if(clutterMode){showClutterScreen();return;}
         LinearLayout root=scanShell(fileManagerTitle(),this::showClean),body=scanBody(root);
         LinearLayout hero=card(),summary=row(),labels=column();add(labels,txt(largeFilesMode?"Storage occupied":"Accessible downloads storage",13,GRAY,400),-1,-2);space(labels,6);
         add(labels,txt(downloadItems.isEmpty()?"—":scanBytes(downloadBytes(-1)),32,INK,700),-1,-2);space(labels,5);add(labels,txt(downloadItems.size()+" "+tr("files available for review"),12,GRAY,400),-1,-2);weight(summary,labels);
@@ -1092,19 +1094,19 @@ public final class MainActivity extends Activity {
     }
     private void renderDownloadList(LinearLayout host,TextView count,TextView amount,TextView action){
         host.removeAllViews();java.util.List<DownloadFiles.Item> visible=new java.util.ArrayList<>();String query=downloadsQuery.trim().toLowerCase(java.util.Locale.ROOT);
-        for(DownloadFiles.Item i:downloadItems)if((!largeFilesMode||i.bytes>=largeMinimum())&&(downloadsFilter<0||i.type==downloadsFilter)&&(i.name+" "+i.mime).toLowerCase(java.util.Locale.ROOT).contains(query))visible.add(i);
+        for(DownloadFiles.Item i:downloadItems)if((!largeFilesMode||i.bytes>=largeMinimum())&&(downloadsFilter<0||(clutterMode?ClutterRules.category(i.name,i.mime):i.type)==downloadsFilter)&&(i.name+" "+i.mime).toLowerCase(java.util.Locale.ROOT).contains(query))visible.add(i);
         java.util.Comparator<DownloadFiles.Item> cmp=downloadsSort==1?java.util.Comparator.comparingLong((DownloadFiles.Item i)->i.bytes).reversed():downloadsSort==2?java.util.Comparator.comparing((DownloadFiles.Item i)->i.name,String.CASE_INSENSITIVE_ORDER):java.util.Comparator.comparingLong((DownloadFiles.Item i)->i.modified).reversed();visible.sort(cmp.thenComparing(i->i.id));
-        LinearLayout heading=row(),label=column();add(label,txt(largeFilesMode?"Large files":downloadsFilter<0?"All files":new String[]{"APK","Archives","Docs"}[downloadsFilter],17,INK,600),-1,-2);space(label,4);long visibleBytes=0,maxBytes=1;for(DownloadFiles.Item file:visible){visibleBytes+=Math.max(0,file.bytes);maxBytes=Math.max(maxBytes,file.bytes);}final long barMax=maxBytes;
+        LinearLayout heading=row(),label=column();add(label,txt(clutterMode?(downloadsFilter<0?"All review files":ClutterRules.LABELS[downloadsFilter]):largeFilesMode?"Large files":downloadsFilter<0?"All files":new String[]{"APK","Archives","Docs"}[downloadsFilter],17,INK,600),-1,-2);space(label,4);long visibleBytes=0,maxBytes=1;for(DownloadFiles.Item file:visible){visibleBytes+=Math.max(0,file.bytes);maxBytes=Math.max(maxBytes,file.bytes);}final long barMax=maxBytes;
         add(label,txt(visible.size()+" "+tr("files")+(largeFilesMode?" · "+scanBytes(visibleBytes):""),12,GRAY,400),-1,-2);weight(heading,label);
         int eligible=0;for(DownloadFiles.Item i:visible)if(downloadEligible(i))eligible++;
         TextView select=txt(downloadSelected.isEmpty()?(eligible>DownloadFiles.DELETE_LIMIT?"Select 50":"Select all"):"Deselect all",12,BLUE,600);tap(select,BG,8,()->{if(!downloadSelected.isEmpty())downloadSelected.clear();else for(DownloadFiles.Item i:visible){if(downloadSelected.size()>=DownloadFiles.DELETE_LIMIT)break;if(downloadEligible(i))downloadSelected.add(i.uri.toString());}renderDownloadList(host,count,amount,action);});select.setEnabled(eligible>0||!downloadSelected.isEmpty());add(heading,select,-2,dp(44));gap(heading,8);
         FrameLayout sort=new FrameLayout(this);sort.addView(new Glyph(this,"more",BLUE),new FrameLayout.LayoutParams(dp(20),dp(20),Gravity.CENTER));sort.setContentDescription(tr("Sort files"));tap(sort,WHITE,18,()->privacyDialog().setTitle(tr("Sort files")).setSingleChoiceItems(new String[]{tr("Newest first"),tr("Largest first"),tr("Name")},downloadsSort,(d,i)->{downloadsSort=i;downloadsPage=0;d.dismiss();renderDownloadList(host,count,amount,action);}).setNegativeButton(tr("Cancel"),null).show());add(heading,sort,dp(38),dp(38));add(host,heading,-1,-2);space(host,7);
         LinearLayout list=card();pad(list,12,5);int pages=Math.max(1,(visible.size()+19)/20);downloadsPage=Math.max(0,Math.min(downloadsPage,pages-1));
-        if(visible.isEmpty()){pad(list,14,20);add(list,centered(downloadItems.isEmpty()?"Choose files to get started":"No matching files",15,INK,600),-1,-2);space(list,6);add(list,centered(downloadItems.isEmpty()?(largeFilesMode?"Choose files or scan an accessible folder.":"Choose files from Downloads in the system picker."):"Try a different search or filter.",12,GRAY,400),-1,-2);}
+        if(visible.isEmpty()){pad(list,14,20);add(list,centered(downloadItems.isEmpty()?"Choose files to get started":"No matching files",15,INK,600),-1,-2);space(list,6);add(list,centered(downloadItems.isEmpty()?((largeFilesMode||clutterMode)?"Choose files or scan an accessible folder.":"Choose files from Downloads in the system picker."):"Try a different search or filter.",12,GRAY,400),-1,-2);}
         for(int n=downloadsPage*20;n<Math.min(visible.size(),(downloadsPage+1)*20);n++){
             DownloadFiles.Item i=visible.get(n);if(n>downloadsPage*20)thinRule(list);LinearLayout line=row();line.setMinimumHeight(dp(66));line.setPadding(0,dp(8),0,dp(8));
             FrameLayout icon=new FrameLayout(this);icon.setBackground(round(BG,10));icon.addView(new Glyph(this,downloadGlyph(i.type),downloadColor(i.type)),new FrameLayout.LayoutParams(dp(22),dp(22),Gravity.CENTER));add(line,icon,dp(40),dp(40));gap(line,9);
-            LinearLayout details=column();TextView name=txt(i.name,13,INK,600);name.setMaxLines(1);name.setEllipsize(android.text.TextUtils.TruncateAt.END);add(details,name,-1,-2);space(details,4);add(details,txt(downloadType(i)+" · "+downloadDate(i),11,GRAY,400),-1,-2);
+            LinearLayout details=column();TextView name=txt(i.name,13,INK,600);name.setMaxLines(1);name.setEllipsize(android.text.TextUtils.TruncateAt.END);add(details,name,-1,-2);space(details,4);add(details,txt((clutterMode?tr(ClutterRules.REASONS[ClutterRules.category(i.name,i.mime)]):downloadType(i))+" · "+downloadDate(i),11,GRAY,400),-1,-2);
             if(!downloadEligible(i)){space(details,3);add(details,txt(i.protectedItem||downloadKeep.contains(i.uri.toString())?"Keep":"Read-only",10,GREEN,500),-1,-2);}
             tap(details,WHITE,8,()->showDownloadSheet(i));weight(line,details);gap(line,5);add(line,txt(downloadSize(i),11,INK,600),-2,-2);
             android.widget.CheckBox check=new android.widget.CheckBox(this);check.setButtonTintList(ColorStateList.valueOf(BLUE));check.setChecked(downloadSelected.contains(i.uri.toString()));check.setEnabled(downloadEligible(i));check.setContentDescription(i.name);check.setOnCheckedChangeListener((v,checked)->{String id=i.uri.toString();if(checked&&downloadSelected.size()>=DownloadFiles.DELETE_LIMIT&&!downloadSelected.contains(id)){v.setChecked(false);folderToast("Select up to 50 files at a time");return;}if(checked)downloadSelected.add(id);else downloadSelected.remove(id);downloadFooter(count,amount,action);});add(line,check,dp(42),dp(42));add(list,line,-1,-2);
@@ -1118,9 +1120,10 @@ public final class MainActivity extends Activity {
         LinearLayout sheet=column();GradientDrawable bg=new GradientDrawable();bg.setColor(WHITE);float r=dp(26);bg.setCornerRadii(new float[]{r,r,r,r,0,0,0,0});sheet.setBackground(bg);pad(sheet,20,12);
         FrameLayout handle=new FrameLayout(this);View bar=new View(this);bar.setBackground(round(0xffc7c7cc,4));handle.addView(bar,new FrameLayout.LayoutParams(dp(36),dp(4),Gravity.CENTER));add(sheet,handle,-1,dp(22));space(sheet,7);
         LinearLayout title=row();FrameLayout mark=new FrameLayout(this);mark.setBackground(round(PALE,15));mark.addView(new Glyph(this,downloadGlyph(item.type),downloadColor(item.type)),new FrameLayout.LayoutParams(dp(28),dp(28),Gravity.CENTER));add(title,mark,dp(58),dp(58));gap(title,12);LinearLayout labels=column();TextView name=txt(item.name,17,INK,700);name.setMaxLines(3);add(labels,name,-1,-2);space(labels,5);add(labels,txt(downloadSize(item)+" · "+downloadType(item),13,GRAY,400),-1,-2);weight(title,labels);add(sheet,title,-1,-2);space(sheet,14);thinRule(sheet);
-        for(String[] data:new String[][]{{"Location",item.verifiedLocation?(largeFilesMode?item.id:tr("Downloads")):tr("Downloads provider · location unverified")},{"Modified",downloadDate(item)},{"Access",item.canDelete?tr("Read and remove"):tr("Read-only")}}){LinearLayout line=row();line.setMinimumHeight(dp(42));weight(line,txt(data[0],13,GRAY,400));TextView value=txt(data[1],12,INK,500);value.setMaxLines(2);line.addView(value,new LinearLayout.LayoutParams(0,-2,1f));add(sheet,line,-1,-2);}thinRule(sheet);space(sheet,10);
+        for(String[] data:new String[][]{{"Location",item.verifiedLocation?((largeFilesMode||clutterMode)?item.id:tr("Downloads")):tr("Downloads provider · location unverified")},{"Modified",downloadDate(item)},{"Access",item.canDelete?tr("Read and remove"):tr("Read-only")}}){LinearLayout line=row();line.setMinimumHeight(dp(42));weight(line,txt(data[0],13,GRAY,400));TextView value=txt(data[1],12,INK,500);value.setMaxLines(2);line.addView(value,new LinearLayout.LayoutParams(0,-2,1f));add(sheet,line,-1,-2);}thinRule(sheet);space(sheet,10);
+        if(clutterMode){space(sheet,8);add(sheet,txt(ClutterRules.REASONS[ClutterRules.category(item.name,item.mime)],13,GRAY,400),-1,-2);space(sheet,6);add(sheet,txt("Filename hints do not prove a file is unnecessary.",12,GRAY,400),-1,-2);space(sheet,8);}
         // Never launch APK installers from a cleanup manager.
-        if(item.type!=DownloadFiles.APK)scanButton(sheet,"Open file",false,()->{dialog.dismiss();openDownloadFile(item);});
+        if(!clutterMode&&item.type!=DownloadFiles.APK)scanButton(sheet,"Open file",false,()->{dialog.dismiss();openDownloadFile(item);});
         String id=item.uri.toString();scanButton(sheet,downloadKeep.contains(id)?"Remove keep mark":"Keep this file",false,()->{if(!downloadKeep.remove(id)){downloadKeep.add(id);downloadSelected.remove(id);}dialog.dismiss();showDownloads();});space(sheet,6);
         if(downloadEligible(item))scanButton(sheet,downloadSelected.contains(id)?"Deselect file":"Select for cleanup",true,()->{if(!downloadSelected.remove(id)){if(downloadSelected.size()>=DownloadFiles.DELETE_LIMIT){folderToast("Select up to 50 files at a time");return;}downloadSelected.add(id);}dialog.dismiss();showDownloads();});
         else add(sheet,txt("Protected or read-only files cannot be removed here.",12,GRAY,400),-1,-2);
@@ -1254,6 +1257,40 @@ public final class MainActivity extends Activity {
                 android.content.Intent intent=new android.content.Intent(android.content.Intent.ACTION_DELETE,android.net.Uri.fromParts("package",item.pkg,null));intent.putExtra(android.content.Intent.EXTRA_RETURN_RESULT,true);
                 try{unusedUninstallPending=true;startActivityForResult(intent,REQUEST_APP_UNINSTALL);}catch(RuntimeException e){unusedUninstallPending=false;folderToast("Android uninstall unavailable");showUnusedReview();}
             });},"Clenova-app-recheck").start();
+    }
+
+    private int clutterColor(int i){return new int[]{0xffff9500,BLUE,GREEN,0xffaf52de}[i];}
+    private String clutterIcon(int i){return new String[]{"activity","folder_down","apps","document"}[i];}
+    private void showClutterScreen(){
+        LinearLayout root=scanShell("Unnecessary files",this::showClean),body=scanBody(root);
+        LinearLayout hero=card(),summary=row(),labels=column();long candidateBytes=0;int eligibleCount=0;
+        for(DownloadFiles.Item item:downloadItems)if(downloadEligible(item)){candidateBytes+=Math.max(0,item.bytes);eligibleCount++;}
+        add(labels,txt("Potential space to recover",13,GRAY,400),-1,-2);space(labels,6);
+        add(labels,txt(downloadItems.isEmpty()?"—":scanBytes(candidateBytes),32,INK,700),-1,-2);space(labels,5);
+        add(labels,txt(downloadItems.size()+" "+tr("files to review")+" · "+eligibleCount+" "+tr("eligible"),12,GRAY,400),-1,-2);weight(summary,labels);gap(summary,8);
+        FrameLayout mark=new FrameLayout(this);mark.setBackground(round(PALE,23));mark.addView(new Glyph(this,"file_x",BLUE),new FrameLayout.LayoutParams(dp(34),dp(34),Gravity.CENTER));add(summary,mark,dp(70),dp(70));add(hero,summary,-1,-2);space(hero,12);thinRule(hero);space(hero,10);
+        LinearLayout safety=row();add(safety,new Glyph(this,"shield",GREEN),dp(19),dp(19));gap(safety,7);weight(safety,txt("Protected files excluded from cleanup",12,GREEN,600));add(hero,safety,-1,-2);space(hero,12);
+        scanButton(hero,"Choose files",true,this::pickDownloads);space(hero,7);scanButton(hero,"Scan selected folder",false,this::pickLargeFolder);add(body,hero,-1,-2);space(body,12);
+        add(body,txt("Only selected files and folders are checked. Folder results, incomplete downloads and logs are read-only.",12,GRAY,400),-1,-2);space(body,14);
+        LinearLayout heading=row();weight(heading,txt("Cleanup opportunities",18,INK,600));
+        if(downloadsFilter>=0){TextView all=txt("All files",12,BLUE,600);tap(all,BG,8,()->{downloadsFilter=-1;downloadSelected.clear();downloadsPage=0;showDownloads();});add(heading,all,-2,dp(44));}add(body,heading,-1,-2);space(body,8);
+        LinearLayout categories=card();pad(categories,12,5);
+        for(int j=0;j<4;j++){final int category=j;if(j>0)thinRule(categories);int count=0,removable=0;long bytes=0;
+            for(DownloadFiles.Item i:downloadItems)if(ClutterRules.category(i.name,i.mime)==j){count++;bytes+=Math.max(0,i.bytes);if(downloadEligible(i))removable++;}
+            LinearLayout line=row();line.setMinimumHeight(dp(72));line.setPadding(0,dp(8),0,dp(8));
+            FrameLayout icon=new FrameLayout(this);icon.setBackground(round(BG,12));icon.addView(new Glyph(this,clutterIcon(j),clutterColor(j)),new FrameLayout.LayoutParams(dp(23),dp(23),Gravity.CENTER));add(line,icon,dp(44),dp(44));gap(line,11);
+            LinearLayout label=column();add(label,txt(ClutterRules.LABELS[j],14,INK,600),-1,-2);space(label,4);
+            add(label,txt(count+" "+tr("files")+" · "+scanBytes(bytes),12,GRAY,400),-1,-2);space(label,4);
+            add(label,txt(removable>0?removable+" "+tr("eligible"):tr("Review only"),11,BLUE,500),-1,-2);weight(line,label);
+            add(line,new Glyph(this,downloadsFilter==j?"selected":"chevron",downloadsFilter==j?BLUE:GRAY),dp(20),dp(20));
+            tap(line,downloadsFilter==j?PALE:WHITE,10,()->{downloadsFilter=downloadsFilter==category?-1:category;downloadsPage=0;downloadSelected.clear();showDownloads();});add(categories,line,-1,-2);
+        }add(body,categories,-1,-2);space(body,12);
+        LinearLayout notice=row();notice.setBackground(round(PALE,15));pad(notice,13,13);add(notice,new Glyph(this,"shield",BLUE),dp(24),dp(24));gap(notice,9);
+        LinearLayout copy=column();add(copy,txt("Important files stay protected.",14,INK,600),-1,-2);space(copy,5);add(copy,txt("Filename hints are not proof of junk. Review every file before removal.",12,GRAY,400),-1,-2);weight(notice,copy);add(body,notice,-1,-2);space(body,13);
+        LinearLayout host=column();add(body,host,-1,-2);
+        TextView count=txt("",12,GRAY,400),amount=txt("",22,INK,700),review=centered("Review & clean",14,Color.WHITE,600);
+        LinearLayout footer=row();footer.setBackground(round(WHITE,18));pad(footer,13,10);LinearLayout selected=column();add(selected,count,-1,-2);space(selected,4);add(selected,amount,-1,-2);weight(footer,selected);gap(footer,8);tap(review,BLUE,24,this::showDownloadReview);review.setPadding(dp(13),0,dp(13),0);add(footer,review,-2,dp(46));add(root,footer,-1,-2);space(root,7);add(root,centered("Nothing removed without your approval.",12,GRAY,400),-1,-2);
+        renderDownloadList(host,count,amount,review);setContentView(root);
     }
 
     private void cleanPending(String label){
@@ -2579,7 +2616,7 @@ public final class MainActivity extends Activity {
     @Override protected void onActivityResult(int requestCode,int resultCode,android.content.Intent data){
         super.onActivityResult(requestCode,resultCode,data);
         if(requestCode==REQUEST_APP_UNINSTALL){unusedUninstallPending=false;unusedExternal=false;unusedSelected.clear();if(unusedVisible)refreshUnusedApps();folderToast(resultCode==RESULT_OK?"Android uninstall returned success. Refreshing app list.":"Uninstall not confirmed");return;}
-        if(requestCode==PICK_LARGE_FOLDER){downloadsPicking=false;if(resultCode==RESULT_OK&&data!=null&&data.getData()!=null&&largeFilesMode)loadLargeFolder(data.getData());else if(downloadsVisible)showDownloads();return;}
+        if(requestCode==PICK_LARGE_FOLDER){downloadsPicking=false;if(resultCode==RESULT_OK&&data!=null&&data.getData()!=null&&(largeFilesMode||clutterMode))loadLargeFolder(data.getData());else if(downloadsVisible)showDownloads();return;}
         if(requestCode==PICK_DOWNLOAD_FILES){downloadsPicking=false;if(resultCode==RESULT_OK&&data!=null)loadPickedDownloads(data);else if(downloadsVisible)showDownloads();return;}
         if(requestCode==REQUEST_DUP_TRASH||requestCode==REQUEST_SIMILAR_TRASH||requestCode==REQUEST_VIDEO_TRASH||requestCode==REQUEST_SCREENSHOT_TRASH){dupTrashPending=false;scanResult=null;realDupSelected.clear();dupCache.evictAll();showClean();folderToast(resultCode==RESULT_OK?"Android trash request approved. Scan again to refresh.":"Trash request cancelled");return;}
         if(requestCode==EXPORT_ACTIVITY_HISTORY){if(resultCode==RESULT_OK&&data!=null&&data.getData()!=null)writeHistoryExport(data.getData());return;}

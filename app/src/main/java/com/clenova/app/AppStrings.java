@@ -5,6 +5,18 @@ import java.util.Map;
 final class AppStrings {
  private static final Map<String,String[]> TEXT=new HashMap<>();
  static {
+  TEXT.put("Temporary files",new String[]{"अस्थायी फ़ाइलें","Archivos temporales","Fichiers temporaires","Temporäre Dateien"});
+  TEXT.put("Incomplete downloads",new String[]{"अधूरे डाउनलोड","Descargas incompletas","Téléchargements incomplets","Unvollständige Downloads"});
+  TEXT.put("APK installers",new String[]{"APK इंस्टॉलर","Instaladores APK","Installateurs APK","APK-Installationsdateien"});
+  TEXT.put("Diagnostic logs",new String[]{"डायग्नोस्टिक लॉग","Registros de diagnóstico","Journaux de diagnostic","Diagnoseprotokolle"});
+  TEXT.put("Temporary-looking filename",new String[]{"अस्थायी जैसा फ़ाइल नाम","Nombre de archivo temporal","Nom de fichier temporaire","Temporär wirkender Dateiname"});
+  TEXT.put("Incomplete-download extension",new String[]{"अधूरे डाउनलोड का एक्सटेंशन","Extensión de descarga incompleta","Extension de téléchargement incomplet","Endung eines unvollständigen Downloads"});
+  TEXT.put("Downloaded APK package",new String[]{"डाउनलोड किया APK पैकेज","Paquete APK descargado","Paquet APK téléchargé","Heruntergeladenes APK-Paket"});
+  TEXT.put("Log-looking filename",new String[]{"लॉग जैसा फ़ाइल नाम","Nombre de archivo de registro","Nom de fichier journal","Protokollartiger Dateiname"});
+  TEXT.put("Review only",new String[]{"केवल समीक्षा","Solo revisión","Consultation uniquement","Nur prüfen"});
+  TEXT.put("files to review",new String[]{"फ़ाइलें समीक्षा के लिए","archivos para revisar","fichiers à examiner","Dateien zur Prüfung"});
+  TEXT.put("All review files",new String[]{"सभी समीक्षा फ़ाइलें","Todos los archivos para revisar","Tous les fichiers à examiner","Alle zu prüfenden Dateien"});
+  TEXT.put("Only selected files and folders are checked. Folder results, incomplete downloads and logs are read-only.",new String[]{"सिर्फ चुनी फ़ाइलें और फ़ोल्डर जाँचे जाते हैं। फ़ोल्डर परिणाम, अधूरे डाउनलोड और लॉग केवल पढ़ने के लिए हैं।","Solo se revisan archivos y carpetas elegidos. Los resultados de carpetas, descargas incompletas y registros son de solo lectura.","Seuls les fichiers et dossiers choisis sont vérifiés. Les résultats de dossiers, téléchargements incomplets et journaux sont en lecture seule.","Nur ausgewählte Dateien und Ordner werden geprüft. Ordnerergebnisse, unvollständige Downloads und Protokolle sind schreibgeschützt."});
   TEXT.put("Filters use observed use and last update. Apps with unknown usage are excluded.",new String[]{"फ़िल्टर दर्ज उपयोग और अंतिम अपडेट पर आधारित हैं। अज्ञात उपयोग वाले ऐप अलग हैं।","Los filtros usan el uso observado y la última actualización. Se excluyen apps de uso desconocido.","Les filtres utilisent le dernier usage observé et la mise à jour. Les apps à usage inconnu sont exclues.","Filter nutzen beobachtete Nutzung und letztes Update. Apps mit unbekannter Nutzung werden ausgeschlossen."});
   TEXT.put("Usage access",new String[]{"उपयोग की अनुमति","Acceso de uso","Accès à l’utilisation","Nutzungszugriff"});
   TEXT.put("Optional access for Unused apps",new String[]{"कम उपयोग वाले ऐप के लिए वैकल्पिक अनुमति","Acceso opcional para apps poco usadas","Accès facultatif aux apps peu utilisées","Optionaler Zugriff für selten genutzte Apps"});
