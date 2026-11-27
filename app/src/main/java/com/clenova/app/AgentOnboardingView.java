@@ -4,180 +4,279 @@ import android.animation.ValueAnimator;
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.LinearGradient;
 import android.graphics.Paint;
 import android.graphics.Path;
+import android.graphics.RadialGradient;
+import android.graphics.RectF;
+import android.graphics.Shader;
 import android.graphics.Typeface;
 import android.graphics.drawable.GradientDrawable;
 import android.graphics.drawable.RippleDrawable;
+import android.os.Build;
 import android.view.Gravity;
 import android.view.View;
 import android.view.accessibility.AccessibilityManager;
 import android.view.animation.LinearInterpolator;
 import android.widget.Button;
-import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
 
-/** Phase 47: native, illustrative conversation. No actual scan, permission, approval or task runs here. */
+/** Native introduction: an animated welcome and conversation; never a real chat or device operation. */
 final class AgentOnboardingView extends ScrollView {
     static final int BACKGROUND=0xfff5f5f7;
-    private static final int BLUE=0xff007aff, INK=0xff111111, MUTED=0xff777780, GREEN=0xff258b53;
-    private static final long LOOP_MS=14000;
-    private final View[] moments=new View[5];
-    private final View progress;
-    private ValueAnimator timeline;
+    private static final int BLUE=0xff007aff;
+    private final MotionStage stage;
+    private ValueAnimator animator;
     private boolean active;
 
     AgentOnboardingView(Context context,Runnable next){
         super(context);
-        setBackgroundColor(BACKGROUND);setFillViewport(true);
-        setVerticalScrollBarEnabled(false);setOverScrollMode(OVER_SCROLL_NEVER);
-        setLayoutDirection(LAYOUT_DIRECTION_LTR);
+        setBackgroundColor(BACKGROUND);setFillViewport(true);setVerticalScrollBarEnabled(false);
+        setOverScrollMode(OVER_SCROLL_NEVER);setLayoutDirection(LAYOUT_DIRECTION_LTR);
         setFocusableInTouchMode(true);
-        LinearLayout body=column();
-        body.setPadding(dp(24),dp(12),dp(24),dp(28));
-        addView(body,new ScrollView.LayoutParams(-1,-2));
-
-        LinearLayout stage=column();stage.setGravity(Gravity.CENTER_VERTICAL);
-        stage.setMinimumHeight(dp(400));stage.setPadding(0,dp(14),0,dp(10));
-        body.addView(stage,new LinearLayout.LayoutParams(-1,-2,1f));
-
-        LinearLayout intro=row();intro.setGravity(Gravity.TOP);
-        Mark agent=new Mark(context,0);agent.setBackground(shape(BLUE,12));
-        intro.addView(agent,new LinearLayout.LayoutParams(dp(33),dp(33)));
-        TextView introText=label("Hi, I'm your Agent.\nWhat can I take care of?",18,INK,500);
-        introText.setLetterSpacing(-.015f);introText.setLineSpacing(dp(2),1);
-        LinearLayout.LayoutParams introLp=new LinearLayout.LayoutParams(0,-2,1);introLp.leftMargin=dp(11);
-        intro.addView(introText,introLp);append(stage,intro,0);moments[0]=intro;
-
-        LinearLayout request=row();request.setGravity(Gravity.END);
-        TextView requestText=bubble("Take care of my phone.",14);
-        request.addView(requestText,new LinearLayout.LayoutParams(-2,-2));
-        append(stage,request,21);moments[1]=request;
-
-        LinearLayout plan=column();plan.setPadding(dp(44),0,0,0);
-        TextView planText=label("I've prepared a plan.\nShall I get started?",14,INK,500);
-        planText.setLineSpacing(dp(3),1);
-        append(plan,planText,0);
-        LinearLayout access=row();access.setGravity(Gravity.CENTER_VERTICAL);
-        Mark shield=new Mark(context,1);
-        access.addView(shield,new LinearLayout.LayoutParams(dp(17),dp(17)));
-        TextView accessText=label("Within your granted access",11,0xff778392,400);
-        LinearLayout.LayoutParams accessLp=new LinearLayout.LayoutParams(0,-2,1);accessLp.leftMargin=dp(7);
-        access.addView(accessText,accessLp);
-        append(plan,access,12);append(stage,plan,23);moments[2]=plan;
-
-        LinearLayout approval=row();approval.setGravity(Gravity.END);
-        TextView approveText=bubble("Approved ✓",13);
-        approveText.setPadding(dp(17),dp(9),dp(17),dp(9));
-        approval.addView(approveText,new LinearLayout.LayoutParams(-2,-2));
-        append(stage,approval,15);moments[3]=approval;
-
-        LinearLayout result=column();LinearLayout done=row();done.setGravity(Gravity.CENTER_VERTICAL);
-        Mark check=new Mark(context,2);check.setBackground(shape(0xffe0f4e8,20));
-        done.addView(check,new LinearLayout.LayoutParams(dp(30),dp(30)));
-        TextView doneText=label("All taken care of.",14,GREEN,600);
-        LinearLayout.LayoutParams doneLp=new LinearLayout.LayoutParams(0,-2,1);doneLp.leftMargin=dp(10);
-        done.addView(doneText,doneLp);append(result,done,0);
-        FrameLayout track=new FrameLayout(context);track.setBackground(shape(0xffe3e7ee,6));track.setClipToOutline(true);
-        progress=new View(context);progress.setBackground(shape(0xff25aa61,6));progress.setPivotX(0);
-        track.addView(progress,new FrameLayout.LayoutParams(-1,-1));
-        LinearLayout.LayoutParams trackLp=new LinearLayout.LayoutParams(-1,dp(5));trackLp.topMargin=dp(13);
-        result.addView(track,trackLp);append(stage,result,22);moments[4]=result;
-
-        TextView heading=label("Meet your personal\nphone agent.",29,INK,650);
-        heading.setGravity(Gravity.CENTER);heading.setLetterSpacing(-.037f);heading.setLineSpacing(dp(1),1);
-        append(body,heading,20);
-        TextView description=label("More space. Less clutter.\nA smarter phone, always in your control.",13,MUTED,400);
-        description.setGravity(Gravity.CENTER);description.setLineSpacing(dp(3),1);
-        append(body,description,19);
-
-        Button start=new Button(context);
-        start.setText("Get Started");start.setAllCaps(false);start.setTextSize(16);
-        start.setTypeface(android.os.Build.VERSION.SDK_INT>=28?Typeface.create(Typeface.DEFAULT,600,false):Typeface.create("sans-serif-medium",Typeface.NORMAL));start.setTextColor(0xffffffff);
-        start.setLetterSpacing(0);start.setGravity(Gravity.CENTER);start.setMinHeight(dp(54));
-        start.setMinimumHeight(dp(54));start.setMinWidth(0);start.setMinimumWidth(0);
-        start.setPadding(dp(16),dp(15),dp(16),dp(15));start.setStateListAnimator(null);
-        start.setBackground(new RippleDrawable(ColorStateList.valueOf(0x33ffffff),shape(BLUE,100),shape(0xffffffff,100)));
-        start.setOnClickListener(v->{setActive(false);next.run();});
-        append(body,start,30);
-
-        render(0f);
-        if(reducedMotion())render(.90f);
+        LinearLayout root=new LinearLayout(context);root.setOrientation(LinearLayout.VERTICAL);
+        root.setPadding(0,dp(12),0,dp(28));addView(root,new ScrollView.LayoutParams(-1,-2));
+        stage=new MotionStage(context);stage.setMinimumHeight(dp(400));
+        root.addView(stage,new LinearLayout.LayoutParams(-1,dp(408),1f));
+        LinearLayout copy=new LinearLayout(context);copy.setOrientation(LinearLayout.VERTICAL);
+        copy.setPadding(dp(24),0,dp(24),0);root.addView(copy,new LinearLayout.LayoutParams(-1,-2));
+        TextView title=label("Meet your personal\nphone agent.",29,0xff111111,650);
+        title.setLetterSpacing(-.037f);title.setLineSpacing(dp(1),1);append(copy,title,20);
+        TextView description=label("More space. Less clutter.\nA smarter phone, always in your control.",13,0xff777780,400);
+        description.setLineSpacing(dp(3),1);append(copy,description,19);
+        Button button=new Button(context);button.setText("Get Started");button.setAllCaps(false);
+        button.setTextSize(16);button.setTextColor(Color.WHITE);button.setTypeface(font(600));
+        button.setLetterSpacing(0);button.setGravity(Gravity.CENTER);button.setMinimumHeight(dp(54));
+        button.setMinHeight(dp(54));button.setMinimumWidth(0);button.setMinWidth(0);
+        button.setPadding(dp(16),dp(15),dp(16),dp(15));button.setStateListAnimator(null);
+        button.setBackground(new RippleDrawable(ColorStateList.valueOf(0x33ffffff),shape(BLUE,100),shape(Color.WHITE,100)));
+        button.setOnClickListener(v->{setActive(false);next.run();});append(copy,button,30);
+        if(reducedMotion())stage.setTime(.95f);
     }
-    private LinearLayout column(){LinearLayout l=new LinearLayout(getContext());l.setOrientation(LinearLayout.VERTICAL);return l;}
-    private LinearLayout row(){LinearLayout l=new LinearLayout(getContext());l.setOrientation(LinearLayout.HORIZONTAL);return l;}
-    private int dp(float value){return Math.round(value*getResources().getDisplayMetrics().density);}
-    private GradientDrawable shape(int color,float radius){GradientDrawable d=new GradientDrawable();d.setColor(color);d.setCornerRadius(dp(radius));return d;}
+    private int dp(float x){return Math.round(x*getResources().getDisplayMetrics().density);}
+    private static Typeface font(int weight){return Build.VERSION.SDK_INT>=28?Typeface.create(Typeface.DEFAULT,weight,false):Typeface.create(weight>=500?"sans-serif-medium":"sans-serif",Typeface.NORMAL);}
     private TextView label(String value,int sp,int color,int weight){
-        TextView t=new TextView(getContext());t.setText(value);t.setTextSize(sp);t.setTextColor(color);t.setIncludeFontPadding(false);
-        t.setTypeface(android.os.Build.VERSION.SDK_INT>=28?Typeface.create(Typeface.DEFAULT,weight,false):Typeface.create(weight>=500?"sans-serif-medium":"sans-serif",Typeface.NORMAL));
-        return t;
+        TextView t=new TextView(getContext());t.setText(value);t.setTextSize(sp);t.setTextColor(color);
+        t.setTypeface(font(weight));t.setGravity(Gravity.CENTER);t.setIncludeFontPadding(false);return t;
     }
-    private TextView bubble(String value,int sp){
-        TextView t=label(value,sp,0xffffffff,400);
-        GradientDrawable d=shape(BLUE,21);float r=dp(21),s=dp(5);
-        d.setCornerRadii(new float[]{r,r,r,r,s,s,r,r});t.setBackground(d);t.setPadding(dp(17),dp(12),dp(17),dp(12));
-        return t;
-    }
-    private void append(LinearLayout parent,View child,int top){
-        LinearLayout.LayoutParams p=new LinearLayout.LayoutParams(-1,-2);p.topMargin=dp(top);parent.addView(child,p);
-    }
+    private GradientDrawable shape(int color,int radius){GradientDrawable d=new GradientDrawable();d.setColor(color);d.setCornerRadius(dp(radius));return d;}
+    private void append(LinearLayout parent,View v,int top){LinearLayout.LayoutParams p=new LinearLayout.LayoutParams(-1,-2);p.topMargin=dp(top);parent.addView(v,p);}
     private boolean reducedMotion(){
         AccessibilityManager a=(AccessibilityManager)getContext().getSystemService(Context.ACCESSIBILITY_SERVICE);
         return !ValueAnimator.areAnimatorsEnabled()||(a!=null&&a.isTouchExplorationEnabled());
     }
     void setActive(boolean value){
         active=value;
-        if(!value){if(timeline!=null&&timeline.isRunning())timeline.pause();return;}
+        if(!value){if(animator!=null&&animator.isRunning())animator.pause();return;}
         if(!isAttachedToWindow())return;
-        if(reducedMotion()){if(timeline!=null){timeline.cancel();timeline=null;}render(.90f);return;}
-        if(timeline!=null){if(timeline.isPaused())timeline.resume();return;}
-        timeline=ValueAnimator.ofFloat(0f,1f);timeline.setDuration(LOOP_MS);
-        timeline.setInterpolator(new LinearInterpolator());timeline.setRepeatCount(ValueAnimator.INFINITE);
-        timeline.addUpdateListener(a->render((float)a.getAnimatedValue()));
-        timeline.start();
+        if(reducedMotion()){stop();stage.setTime(.95f);return;}
+        if(animator!=null){if(animator.isPaused())animator.resume();return;}
+        animator=ValueAnimator.ofFloat(0f,1f);animator.setDuration(12000L);
+        animator.setInterpolator(new LinearInterpolator());animator.setRepeatCount(ValueAnimator.INFINITE);
+        animator.addUpdateListener(a->stage.setTime((float)a.getAnimatedValue()));animator.start();
     }
+    private void stop(){if(animator!=null){animator.removeAllUpdateListeners();animator.cancel();animator=null;}}
     @Override protected void onAttachedToWindow(){super.onAttachedToWindow();if(active)setActive(true);}
-    @Override protected void onDetachedFromWindow(){if(timeline!=null){timeline.cancel();timeline=null;}super.onDetachedFromWindow();}
-    private float clamp(float f){return Math.max(0f,Math.min(1f,f));}
-    private float smooth(float f){f=clamp(f);return f*f*(3-2*f);}
-    private void render(float t){
-        float[] starts={0f,.16f,.30f,.49f,.60f};
-        float[] ends={.05f,.20f,.36f,.54f,.65f};
-        float out=1f-smooth((t-.94f)/.06f);
-        for(int i=0;i<moments.length;i++){
-            float a=smooth((t-starts[i])/(ends[i]-starts[i]));
-            View v=moments[i];v.setAlpha(a*out);v.setTranslationY(dp(7)*(1-a));
-            int mode=a*out>.7f?IMPORTANT_FOR_ACCESSIBILITY_AUTO:IMPORTANT_FOR_ACCESSIBILITY_NO_HIDE_DESCENDANTS;
-            if(v.getImportantForAccessibility()!=mode)v.setImportantForAccessibility(mode);
-        }
-        progress.setScaleX(smooth((t-.64f)/.18f));
-    }
+    @Override protected void onDetachedFromWindow(){stop();super.onDetachedFromWindow();}
 
-    /** Small, hand-drawn native glyphs matching the approved preview. */
-    private static final class Mark extends View{
-        private final int kind;private final Paint paint=new Paint(Paint.ANTI_ALIAS_FLAG);private final Path path=new Path();
-        Mark(Context context,int kind){super(context);this.kind=kind;setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_NO);}
-        @Override protected void onDraw(Canvas canvas){
-            super.onDraw(canvas);canvas.save();float size=Math.min(getWidth(),getHeight());
-            canvas.translate((getWidth()-size)/2,(getHeight()-size)/2);canvas.scale(size/24f,size/24f);
-            paint.setStrokeCap(Paint.Cap.ROUND);paint.setStrokeJoin(Paint.Join.ROUND);path.reset();
+    private static final class MotionStage extends View{
+        private final Paint p=new Paint(Paint.ANTI_ALIAS_FLAG);
+        private final Path path=new Path(),clip=new Path();
+        private final RectF rect=new RectF();
+        private final Typeface medium=font(500),semibold=font(600),headline=font(650);
+        private final Shader[] gradients=new Shader[4];
+        private final Shader gloss=new LinearGradient(0,0,0,1,new int[]{0x94ffffff,0x10ffffff,0x00ffffff},new float[]{0,.5f,1},Shader.TileMode.CLAMP);
+        private final Shader glow=new RadialGradient(180,112,132,new int[]{0xe6b7d8ff,0x00f5f5f7},null,Shader.TileMode.CLAMP);
+        private final Shader beam=new LinearGradient(-48,0,0,0,new int[]{0x00ffffff,0xccffffff,0x00ffffff},new float[]{0,.5f,1},Shader.TileMode.CLAMP);
+        private final Shader paper=new LinearGradient(0,229,0,359,0xffffffff,0xfff0f5fb,Shader.TileMode.CLAMP);
+        private final Shader brand=new LinearGradient(0,0,1,1,new int[]{0xff83c9ff,0xff218dff,0xff0057ce},new float[]{0,.42f,1},Shader.TileMode.CLAMP);
+        private static final String[] NAMES={"Photos","Videos","Apps","Files"};
+        private static final String COMMAND="Take care of my phone.";
+        private static final int[] TOP={0xff83c9ff,0xffb5d6ff,0xffdbeaff,0xffe7edf5};
+        private static final int[] BOTTOM={0xff0057ce,0xff70a8ef,0xffa5c3ed,0xffc7d5e7};
+        private float t=0f;
+        MotionStage(Context c){
+            super(c);
+            for(int i=0;i<4;i++)gradients[i]=new LinearGradient(0,0,1,1,TOP[i],BOTTOM[i],Shader.TileMode.CLAMP);
+            setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_YES);
+            setContentDescription("Meet your personal phone agent. Ask it to take care of your phone, then review its plan for photos, videos, apps and files. You stay in control.");
+        }
+        void setTime(float value){t=value;invalidate();}
+        private static float smooth(float x){x=Math.max(0,Math.min(1,x));return x*x*(3-2*x);}
+        private float phase(float a,float b){return smooth((t-a)/(b-a));}
+        private static float mix(float a,float b,float f){return a+(b-a)*f;}
+        private void color(int color){p.setShader(null);p.setStyle(Paint.Style.FILL);p.setColor(color);}
+        private void round(Canvas c,float x,float y,float w,float h,float r,int col){color(col);c.drawRoundRect(x,y,x+w,y+h,r,r,p);}
+        private void text(Canvas c,String value,float x,float y,float size,int col,Typeface font,Paint.Align align){
+            color(col);p.setTypeface(font);p.setTextSize(size);p.setTextAlign(align);c.drawText(value,x,y,p);
+        }
+        private void left(Canvas c,String value,float x,float y,float size,int col,Typeface font){text(c,value,x,y,size,col,font,Paint.Align.LEFT);}
+        private void centered(Canvas c,String value,float x,float y,float size,int col,Typeface font){text(c,value,x,y,size,col,font,Paint.Align.CENTER);}
+        private void stroke(int color,float width){color(color);p.setStyle(Paint.Style.STROKE);p.setStrokeWidth(width);p.setStrokeJoin(Paint.Join.ROUND);p.setStrokeCap(Paint.Cap.ROUND);}
+        private void spark(Canvas c,float x,float y,float r,int col){
+            color(col);path.reset();path.moveTo(x,y-r);path.quadTo(x+r*.22f,y-r*.22f,x+r,y);
+            path.quadTo(x+r*.22f,y+r*.22f,x,y+r);path.quadTo(x-r*.22f,y+r*.22f,x-r,y);
+            path.quadTo(x-r*.22f,y-r*.22f,x,y-r);path.close();c.drawPath(path,p);
+        }
+        private void icon(Canvas c,int kind,float x,float y,float size,int col){
+            c.save();c.translate(x-size/2,y-size/2);c.scale(size/24,size/24);
             if(kind==0){
-                paint.setColor(0xffffffff);paint.setStyle(Paint.Style.FILL);
-                path.moveTo(12,4.7f);path.cubicTo(13,9,15,11,19.3f,12);path.cubicTo(15,13,13,15,12,19.3f);
-                path.cubicTo(11,15,9,13,4.7f,12);path.cubicTo(9,11,11,9,12,4.7f);path.close();canvas.drawPath(path,paint);
+                stroke(col,1.7f);c.drawRoundRect(2,3,22,21,5,5,p);c.drawCircle(8,9,2,p);
+                path.reset();path.moveTo(3,18);path.lineTo(9,12);path.lineTo(14,16);path.lineTo(18,11);path.lineTo(21,15);c.drawPath(path,p);
             }else if(kind==1){
-                paint.setColor(BLUE);paint.setStyle(Paint.Style.STROKE);paint.setStrokeWidth(1.7f);
-                path.moveTo(12,3);path.lineTo(20,6);path.lineTo(20,12);path.cubicTo(20,17,12,21,12,21);
-                path.cubicTo(12,21,4,17,4,12);path.lineTo(4,6);path.close();canvas.drawPath(path,paint);
-                path.reset();path.moveTo(8,12);path.lineTo(11,15);path.lineTo(16,9);canvas.drawPath(path,paint);
+                stroke(col,1.7f);c.drawRoundRect(2,4,22,20,5,5,p);color(col);path.reset();path.moveTo(10,8);path.lineTo(16,12);path.lineTo(10,16);path.close();c.drawPath(path,p);
+            }else if(kind==2){
+                for(int j=0;j<4;j++)round(c,2+(j%2)*11,2+(j/2)*11,9,9,2.5f,col);
             }else{
-                paint.setColor(0xff25aa61);paint.setStyle(Paint.Style.STROKE);paint.setStrokeWidth(2f);
-                path.moveTo(6.5f,12);path.lineTo(10.5f,16);path.lineTo(17.5f,8);canvas.drawPath(path,paint);
+                color(col);path.reset();path.moveTo(2,5);path.lineTo(10,5);path.lineTo(13,8);path.lineTo(22,8);path.lineTo(22,20);path.lineTo(2,20);path.close();c.drawPath(path,p);
+            }c.restore();
+        }
+        private void gradient(Canvas c,float x,float y,float w,float h,float radius,Shader shader,boolean glass){
+            if(w<=0||h<=0)return;
+            c.save();c.translate(x,y);c.scale(w,h);
+            color(Color.WHITE);p.setShader(shader);c.drawRoundRect(0,0,1,1,radius/w,radius/h,p);
+            if(glass){p.setShader(gloss);c.drawRoundRect(0,0,1,1,radius/w,radius/h,p);}
+            c.restore();p.setShader(null);
+        }
+        private static final int INK=0xff152638,MUTED=0xff7d8592,GREEN=0xff258553;
+        private void line(Canvas c,float x1,float y1,float x2,float y2,int col,float width){
+            stroke(col,width);c.drawLine(x1,y1,x2,y2,p);
+        }
+        private void shadow(Canvas c,float x,float y,float w,float h,float radius){
+            round(c,x,y+6,w,h,radius,0x092356a0);
+            round(c,x,y+3,w,h,radius,0x0c2356a0);
+        }
+        private void brandMark(Canvas c){
+            float m=phase(.18f,.28f),pulse=phase(.14f,.18f)*(1-m);
+            float size=96*mix(1,.46f,m)*(1+.03f*pulse);
+            float x=mix(132,27,m),y=mix(64,30,m);
+            c.save();c.translate(x,y);c.scale(size/96,size/96);
+            round(c,0,5,96,96,29,0xff075bc5);
+            round(c,-2,8,100,99,30,0x120069ef);
+            gradient(c,0,0,96,96,29,brand,true);
+            stroke(0x90ffffff,1);c.drawRoundRect(1,1,95,95,28,28,p);
+            spark(c,48,48,27,Color.WHITE);spark(c,72,29,12,0xffd9efff);
+            stroke(0x90ffffff,2);path.reset();path.moveTo(17,18);path.quadTo(23,9,39,9);c.drawPath(path,p);
+            c.restore();
+        }
+        private void welcome(Canvas c){
+            float a=1-phase(.15f,.23f);
+            if(a>0){
+                c.saveLayerAlpha(0,0,360,310,Math.round(a*255));c.translate(0,-12*(1-a));
+                centered(c,"Hi, I'm your Agent.",180,215,30,0xff142337,headline);
+                centered(c,"What can I take care of?",180,245,15,MUTED,medium);
+                stroke(BLUE,2.3f);path.reset();path.moveTo(162,284);
+                for(int i=0;i<4;i++){float x=162+i*10;float h=(float)(7+5*Math.sin(t*34+i*.8));
+                    path.quadTo(x+5,284+(i%2==0?-h:h),x+10,284);}
+                c.drawPath(path,p);c.restore();
             }
-            canvas.restore();
+        }
+        private void chatHeader(Canvas c){
+            float a=phase(.23f,.31f);if(a<=0)return;
+            c.saveLayerAlpha(24,24,340,98,Math.round(a*255));c.translate(9*(1-a),0);
+            left(c,"Your Agent",86,48,17,INK,headline);
+            color(0xff2ca86b);p.setAlpha(Math.round(190+65*Math.sin(Math.PI*t*8)*Math.sin(Math.PI*t*8)));
+            c.drawCircle(90,65,3,p);p.setAlpha(255);
+            left(c,"Here to help",100,69,11,MUTED,medium);line(c,28,91,332,91,0xffdfe4ec,1);
+            c.restore();
+        }
+        private void request(Canvas c){
+            float a=phase(.29f,.35f);if(a<=0)return;
+            c.saveLayerAlpha(65,96,342,174,Math.round(a*255));c.translate(0,9*(1-a));
+            c.scale(mix(.98f,1,a),mix(.98f,1,a),202,131);
+            shadow(c,72,105,260,53,23);gradient(c,72,105,260,53,23,brand,true);
+            stroke(0x55ffffff,.8f);c.drawRoundRect(73,106,331,157,22,22,p);
+            float typed=phase(.33f,.43f);
+            int count=Math.min(COMMAND.length(),(int)Math.floor(typed*COMMAND.length()));
+            color(Color.WHITE);p.setTypeface(medium);p.setTextSize(14);p.setTextAlign(Paint.Align.LEFT);
+            c.drawText(COMMAND,0,count,90,137,p);
+            float send=phase(.41f,.44f);
+            if(t>=.33f&&t<.43f&&((int)(t*24)%2==0)){
+                float cursor=90+p.measureText(COMMAND,0,count)+1;
+                line(c,cursor,125,cursor,140,0xccffffff,1.3f);
+            }
+            c.saveLayerAlpha(296,116,324,146,Math.round(255*mix(.45f,1,send)));
+            color(0x36ffffff);c.drawCircle(310,131,12,p);stroke(Color.WHITE,1.7f);
+            path.reset();path.moveTo(306,131);path.lineTo(310,127);path.lineTo(314,131);
+            path.moveTo(310,127);path.lineTo(310,136);c.drawPath(path,p);c.restore();c.restore();
+        }
+        private void thinking(Canvas c){
+            float in=phase(.43f,.47f),a=in*(1-phase(.52f,.55f));
+            if(a<=0)return;
+            c.saveLayerAlpha(20,168,138,228,Math.round(a*255));c.translate(0,5*(1-in));
+            round(c,28,178,100,39,19.5f,Color.WHITE);
+            stroke(0xffe7ecf3,1);c.drawRoundRect(28,178,128,217,19.5f,19.5f,p);
+            for(int i=0;i<3;i++){
+                float wave=(float)(.5+.5*Math.sin((t-.43f)*116-i*1.35f));
+                color(BLUE);p.setAlpha(Math.round(mix(77,255,wave)));
+                c.drawCircle(61+16*i,197.5f-3*wave,3.5f,p);
+            }
+            p.setAlpha(255);c.restore();
+        }
+        private void reply(Canvas c){
+            float a=phase(.53f,.59f);if(a<=0)return;
+            c.saveLayerAlpha(20,166,342,224,Math.round(a*255));c.translate(0,8*(1-a));
+            spark(c,37,187,10,BLUE);left(c,"Of course. I've got you.",58,187,17,0xff162638,semibold);
+            left(c,"Let's make your phone work better.",58,208,12,MUTED,medium);
+            c.restore();
+        }
+        private void plan(Canvas c){
+            float a=phase(.57f,.64f);if(a<=0)return;
+            c.saveLayerAlpha(14,222,346,375,Math.round(a*255));c.translate(0,10*(1-a));
+            shadow(c,25,229,310,130,24);
+            color(Color.WHITE);p.setShader(paper);c.drawRoundRect(25,229,335,359,24,24,p);p.setShader(null);
+            stroke(Color.WHITE,1);c.drawRoundRect(25,229,335,359,24,24,p);
+            left(c,"I'll prepare your plan",41,253,13,0xff182639,semibold);
+            stroke(BLUE,1.7f);path.reset();path.moveTo(306,244);path.lineTo(314,252);path.lineTo(306,260);c.drawPath(path,p);
+            for(int i=0;i<4;i++){
+                float f=phase(.60f+i*.03f,.66f+i*.03f);if(f<=0)continue;
+                float x=41+72*i;
+                c.saveLayerAlpha(x-2,267,x+66,347,Math.round(f*255));c.translate(0,7*(1-f));
+                gradient(c,x,270,64,66,15,gradients[i],true);
+                int glyph=i==3?0xff7495bb:Color.WHITE;
+                icon(c,i,x+32,292,28,glyph);
+                centered(c,NAMES[i],x+32,324,10.5f,i<2?Color.WHITE:0xff45648e,medium);
+                c.restore();
+            }
+            float shine=phase(.70f,.73f)*(1-phase(.82f,.85f));
+            if(shine>0){
+                c.save();clip.reset();for(int i=0;i<4;i++){float x=41+72*i;rect.set(x,270,x+64,336);clip.addRoundRect(rect,15,15,Path.Direction.CW);}
+                c.clipPath(clip);c.translate(13+340*phase(.70f,.82f),270);
+                color(Color.WHITE);p.setShader(beam);p.setAlpha(Math.round(180*shine));c.drawRect(-48,0,0,66,p);p.setShader(null);p.setAlpha(255);c.restore();
+            }
+            c.restore();
+        }
+        private void control(Canvas c){
+            float a=phase(.77f,.85f);if(a<=0)return;
+            c.saveLayerAlpha(57,374,303,431,Math.round(a*255));c.translate(0,9*(1-a));
+            round(c,65,380,230,38,19,0xffe0f1e7);
+            color(0xff269e60);path.reset();path.moveTo(87,388);path.lineTo(97,392);path.lineTo(97,399);
+            path.quadTo(97,406,87,411);path.quadTo(77,406,77,399);path.lineTo(77,392);path.close();c.drawPath(path,p);
+            float f=phase(.80f,.89f);if(f>0){
+                stroke(Color.WHITE,1.9f);path.reset();path.moveTo(82,399);
+                if(f<.4f)path.lineTo(mix(82,86,f/.4f),mix(399,403,f/.4f));
+                else{path.lineTo(86,403);path.lineTo(mix(86,92,(f-.4f)/.6f),mix(403,395,(f-.4f)/.6f));}
+                c.drawPath(path,p);
+            }
+            left(c,"You ask. You're in control.",108,403,12,GREEN,semibold);c.restore();
+        }
+        @Override protected void onDraw(Canvas c){
+            super.onDraw(c);
+            float scale=Math.min(getWidth()/360f,getHeight()/432f);if(scale<=0)return;
+            c.save();c.translate((getWidth()-360*scale)/2,(getHeight()-432*scale)/2);c.scale(scale,scale);
+            c.saveLayerAlpha(0,0,360,432,Math.round((1-phase(.96f,1))*255));
+            float halo=(.65f+.35f*phase(0,.12f))*(1-phase(.21f,.29f));
+            if(halo>0){
+                c.save();float z=mix(.85f,1.08f,phase(0,.12f));c.scale(z,z,180,112);
+                color(Color.WHITE);p.setShader(glow);p.setAlpha(Math.round(255*halo));c.drawCircle(180,112,132,p);p.setShader(null);p.setAlpha(255);c.restore();
+            }
+            welcome(c);brandMark(c);chatHeader(c);request(c);thinking(c);reply(c);plan(c);control(c);
+            float focus=phase(.45f,.50f)*(1-phase(.53f,.57f));
+            if(focus>0){stroke((Math.round(205*focus)<<24)|0x83c5ff,2);c.drawRoundRect(25,27,73,76,15,15,p);}
+            c.restore();c.restore();
         }
     }
 }

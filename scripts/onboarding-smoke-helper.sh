@@ -16,6 +16,8 @@ onboarding_continue() {
 import sys, re, xml.etree.ElementTree as ET
 nodes=list(ET.parse(sys.argv[1]).iter('node'))
 assert any(sys.argv[2] in n.get('text','') for n in nodes), 'Onboarding heading missing'
+if sys.argv[3]=='Get Started':
+    assert any('Ask it to take care of your phone' in n.get('content-desc','') for n in nodes), 'Agent introduction accessibility summary missing'
 for n in nodes:
     for attr in ('text','content-desc'):
         assert not re.search(r'\b(demo|sample|test|illustrative)\b', n.get(attr,''),re.I), 'Development label in onboarding'
