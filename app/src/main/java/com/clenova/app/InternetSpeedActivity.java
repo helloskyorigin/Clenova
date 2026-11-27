@@ -23,6 +23,7 @@ public final class InternetSpeedActivity extends Activity {
     private ConnectivityManager connectivity;private ConnectivityManager.NetworkCallback callback;
     private int phase=HOME,stage=-1,epoch,bg,card,ink,gray,blue,pale,green,red;
     private boolean dark,foreground,destroyed,registered,fromHistory;
+    private InternetSpeedEngine.Connection testConnection;
     private String notice="",connectionName="";
     private double down=-1,up=-1,ping=-1,jitter=-1,speed;
     private long payload;
@@ -82,7 +83,7 @@ public final class InternetSpeedActivity extends Activity {
     private void start(InternetSpeedEngine.Connection approved){
         if(!foreground||destroyed||engine!=null)return;InternetSpeedEngine.Connection current=InternetSpeedEngine.connection(this);
         if(!current.validated||!Objects.equals(current.network,approved.network)||current.metered!=approved.metered){notice="Connection changed. Confirm a new test.";showHome();return;}
-        phase=TEST;stage=-1;speed=0;down=up=ping=jitter=-1;payload=0;samples.clear();notice="";connectionName=approved.label;int token=++epoch;showTesting();
+        testConnection=approved;phase=TEST;stage=-1;speed=0;down=up=ping=jitter=-1;payload=0;samples.clear();notice="";connectionName=approved.label;int token=++epoch;showTesting();
         InternetSpeedEngine task=new InternetSpeedEngine(this,approved,(s,v,p,j,b)->main.post(()->{if(destroyed||token!=epoch||phase!=TEST)return;update(s,v,p,j,b);}));
         engine=task;job=worker.submit(()->{
             try{InternetSpeedEngine.Result measured=task.run();main.post(()->{if(destroyed||token!=epoch||phase!=TEST)return;engine=null;job=null;result=measured;boolean saved=history.add(measured);fromHistory=false;showResult();if(!saved)toast("Result measured, but history could not be saved");});}
@@ -100,11 +101,11 @@ public final class InternetSpeedActivity extends Activity {
     private void update(int s,double v,double p,double j,long bytes){
         if(stage!=s){if(stage==InternetSpeedEngine.DOWNLOAD)down=speed;stage=s;samples.clear();}
         speed=v;ping=p;jitter=j;payload=bytes;if(s==InternetSpeedEngine.DOWNLOAD)down=v;if(s==InternetSpeedEngine.UPLOAD)up=v;
-        if(s!=InternetSpeedEngine.LATENCY){samples.add(v);if(samples.size()>60)samples.remove(0);}
+        if(s!=InternetSpeedEngine.LATENCY&&v>0){samples.add(v);if(samples.size()>60)samples.remove(0);}
         stageText.setText(s==InternetSpeedEngine.LATENCY?"Measuring HTTP latency":s==InternetSpeedEngine.DOWNLOAD?"Testing download speed":"Testing upload speed");
         latencyText.setText(p<0?"Testing…":num(p)+" ms");jitterText.setText(j<0?"—":num(j)+" ms");
-        downText.setText(s==InternetSpeedEngine.DOWNLOAD?num(v)+" Mbps":down<0?"Waiting":num(down)+" Mbps");
-        upText.setText(s==InternetSpeedEngine.UPLOAD?num(v)+" Mbps":up<0?"Waiting":num(up)+" Mbps");
+        downText.setText(s==InternetSpeedEngine.DOWNLOAD?(v>0?num(v)+" Mbps":"Starting…"):down<0?"Waiting":num(down)+" Mbps");
+        upText.setText(s==InternetSpeedEngine.UPLOAD?(v>0?num(v)+" Mbps":"Starting…"):up<0?"Waiting":num(up)+" Mbps");
         bytesText.setText("Test payload: "+mb(bytes));dial.setContentDescription(stageText.getText()+", "+num(v)+" Mbps");dial.invalidate();graph.invalidate();
     }
     private void stop(String reason){epoch++;if(engine!=null){engine.cancel();engine=null;}if(job!=null){job.cancel(true);job=null;}notice=reason;if(!destroyed)showHome();}
@@ -135,7 +136,7 @@ public final class InternetSpeedActivity extends Activity {
             float a=r-dp(4);paint(dark?0xff38383c:0xffe2e5ec,true,dp(10));c.drawArc(x-a,y-a,x+a,y+a,150,240,false,p);
             if(stage>0){float frac=(float)Math.min(1,Math.log1p(Math.max(0,speed))/Math.log1p(1000));paint(blue,true,dp(10));c.drawArc(x-a,y-a,x+a,y+a,150,240*frac,false,p);}
             paint(gray,true,dp(1));for(int i=0;i<=30;i++){double angle=Math.toRadians(150+i*8);float inner=a-dp(i%5==0?17:12),outer=a-dp(8);c.drawLine(x+(float)Math.cos(angle)*inner,y+(float)Math.sin(angle)*inner,x+(float)Math.cos(angle)*outer,y+(float)Math.sin(angle)*outer,p);}
-            label(c,stage==0?"HTTP LATENCY":stage==2?"UPLOAD":"DOWNLOAD",x,y-dp(33),gray,11,true);label(c,stage==0?num(ping):num(speed),x,y+dp(15),ink,42,true);label(c,stage==0?"ms":"Mbps",x,y+dp(37),gray,13,false);
+            label(c,stage==0?"HTTP LATENCY":stage==2?"UPLOAD":"DOWNLOAD",x,y-dp(33),gray,11,true);label(c,stage==0?num(ping):speed>0?num(speed):"—",x,y+dp(15),ink,42,true);label(c,stage==0?"ms":"Mbps",x,y+dp(37),gray,13,false);
         }
     }
     private final class Graph extends View{
@@ -151,7 +152,11 @@ public final class InternetSpeedActivity extends Activity {
         if(connectivity!=null&&!registered){callback=new ConnectivityManager.NetworkCallback(){@Override public void onAvailable(Network n){networkChanged();}@Override public void onLost(Network n){networkChanged();}@Override public void onCapabilitiesChanged(Network n,NetworkCapabilities c){networkChanged();}};
             try{connectivity.registerDefaultNetworkCallback(callback);registered=true;}catch(RuntimeException ignored){}
         }}
-    private void networkChanged(){main.post(()->{if(!destroyed&&foreground&&phase==HOME&&connectionText!=null)connectionText.setText(networkLabel());});}
+    private void networkChanged(){main.post(()->{
+        if(destroyed||!foreground)return;
+        if(phase==HOME&&connectionText!=null)connectionText.setText(networkLabel());
+        if(phase==TEST&&testConnection!=null){InternetSpeedEngine.Connection current=InternetSpeedEngine.connection(this);if(!current.validated||!Objects.equals(current.network,testConnection.network)||(!testConnection.metered&&current.metered))stop("Connection changed. No incomplete result saved.");}
+    });}
     @Override protected void onPause(){foreground=false;if(registered){try{connectivity.unregisterNetworkCallback(callback);}catch(RuntimeException ignored){}registered=false;}if(phase==TEST)stop("Test stopped because the app left the foreground.");super.onPause();}
     @Override protected void onDestroy(){destroyed=true;epoch++;if(engine!=null)engine.cancel();if(job!=null)job.cancel(true);worker.shutdownNow();main.removeCallbacksAndMessages(null);super.onDestroy();}
 }
