@@ -53,8 +53,35 @@ adb shell input keyevent 4
 sleep 1
 tools_dump home_after_storage
 verify_home_primary build/home-evidence/home_after_storage.xml
-tools_tap build/home-evidence/home_after_storage.xml Tools
+# Exercise all four dashboard tabs without invoking scans or deletion.
+verify_nav() {
+  python3 - "$1" "$2" <<'PY'
+import sys, re, xml.etree.ElementTree as ET
+nodes=list(ET.parse(sys.argv[1]).iter('node'))
+tabs=('Home','Clean','Agent','Tools')
+for tab in tabs:
+    expected=tab+(', selected' if tab==sys.argv[2] else '')
+    matches=[n for n in nodes if n.get('content-desc')==expected and n.get('clickable')=='true']
+    assert len(matches)==1, 'Missing or duplicate navigation item: '+expected
+    node=matches[0]
+    assert node.get('selected')==str(tab==sys.argv[2]).lower(), 'Wrong selected state: '+tab
+    a,b,c,d=map(int,re.findall(r'\d+',node.get('bounds')))
+    assert c>a and d>b, 'Invisible navigation item: '+tab
+PY
+}
+verify_nav build/home-evidence/home_after_storage.xml Home
+tools_tap build/home-evidence/home_after_storage.xml Clean
+tools_dump nav_clean
+verify_nav build/home-evidence/nav_clean.xml Clean
+tools_tap build/home-evidence/nav_clean.xml Agent
+tools_dump nav_agent
+verify_nav build/home-evidence/nav_agent.xml Agent
+tools_tap build/home-evidence/nav_agent.xml Home
+tools_dump nav_home
+verify_nav build/home-evidence/nav_home.xml Home
+tools_tap build/home-evidence/nav_home.xml Tools
 tools_dump tools
+verify_nav build/home-evidence/tools.xml Tools
 for label in 'Swipe Photos' 'Video Compressor' 'Photo Compressor' 'Contacts Cleaner' 'App Manager' 'Speaker Cleaner' 'Internet Speed Test' 'Tools, selected'; do
   grep -F "$label" build/home-evidence/tools.xml
 done
@@ -190,5 +217,6 @@ adb exec-out screencap -p > build/home-evidence/home-compact.png
 grep -F 'Agent' build/home-evidence/home-compact.xml
 grep -F 'Tools' build/home-evidence/home-compact.xml
 verify_home_primary build/home-evidence/home-compact.xml
+verify_nav build/home-evidence/home-compact.xml Home
 adb shell wm size reset
 adb shell wm density reset

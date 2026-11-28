@@ -300,7 +300,7 @@ public final class MainActivity extends Activity {
         protectedFiles=new ProtectedFiles(this);
         history=new ActivityHistory(this);
         devicePermissions=new DevicePermissions(this);
-        if(state!=null){toolsVisible=state.getBoolean("tools_visible");toolsScrollY=state.getInt("tools_scroll_y");homeScrollY=NavigationPresentation.scroll(state.getInt("home_scroll_y"));restoreHomeScroll=true;agentVisible=state.getBoolean("agent_visible");agentShortcut=state.getBoolean("agent_shortcut");largeFilesMode=state.getBoolean("large_files_mode");clutterMode=state.getBoolean("clutter_mode");dupTrashPending=state.getBoolean("dup_trash_pending");cleanVisible=state.getBoolean("clean_visible");cleanScrollY=state.getInt("clean_scroll_y");historyFilter=state.getInt("history_filter");historyDetailId=state.getString("history_detail_id");historyScrollY=state.getInt("history_scroll_y");}
+        if(state!=null){toolsVisible=state.getBoolean("tools_visible");toolsScrollY=state.getInt("tools_scroll_y");homeScrollY=NavigationPresentation.scroll(state.getInt("home_scroll_y"));restoreHomeScroll=!state.getBoolean("tools_visible")&&!state.getBoolean("agent_visible")&&!state.getBoolean("clean_visible");agentVisible=state.getBoolean("agent_visible");agentShortcut=state.getBoolean("agent_shortcut");largeFilesMode=state.getBoolean("large_files_mode");clutterMode=state.getBoolean("clutter_mode");dupTrashPending=state.getBoolean("dup_trash_pending");cleanVisible=state.getBoolean("clean_visible");cleanScrollY=state.getInt("clean_scroll_y");historyFilter=state.getInt("history_filter");historyDetailId=state.getString("history_detail_id");historyScrollY=state.getInt("history_scroll_y");}
         applyPalette();
         density = getResources().getDisplayMetrics().density;
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
@@ -677,9 +677,7 @@ public final class MainActivity extends Activity {
         input.addTextChangedListener(new android.text.TextWatcher(){public void beforeTextChanged(CharSequence q,int st,int c,int a){}public void onTextChanged(CharSequence q,int st,int before,int count){boolean enabled=!agentBusy()&&!q.toString().trim().isEmpty();send.setEnabled(enabled);send.setAlpha(enabled?1f:.45f);}public void afterTextChanged(android.text.Editable e){}});
         input.setOnEditorActionListener((v,id,event)->{if(id==android.view.inputmethod.EditorInfo.IME_ACTION_SEND){submitAgentCommand(input.getText().toString());return true;}return false;});add(composer,send,dp(42),dp(42));add(root,composer,-1,-2);
     }
-    private FrameLayout agentHeaderButton(String glyph,String label,Runnable action){
-        FrameLayout frame=new FrameLayout(this);frame.addView(new Glyph(this,glyph,INK),new FrameLayout.LayoutParams(dp(21),dp(21),Gravity.CENTER));frame.setContentDescription(tr(label));tap(frame,WHITE,24,action);return frame;
-    }
+    private FrameLayout agentHeaderButton(String glyph,String label,Runnable action){return headerControl(glyph,tr(label),INK,action);}
     private LinearLayout agentSuggestion(String icon,String title,int task){
         LinearLayout line=row();pad(line,14,8);add(line,new Glyph(this,icon,BLUE),dp(22),dp(22));gap(line,12);TextView label=txt(title,14,INK,500);label.setMaxLines(2);weight(line,label);gap(line,6);add(line,new Glyph(this,"up",GRAY),dp(15),dp(15));tap(line,WHITE,16,()->openAgentTask(task,title));line.setContentDescription(tr(title));return line;
     }
@@ -2962,7 +2960,7 @@ public final class MainActivity extends Activity {
     }
     private LinearLayout protectedFoldersScreen(){
         LinearLayout root=column();root.setBackgroundColor(BG);root.setPadding(dp(UiKit.gutter(this)),v(12),dp(UiKit.gutter(this)),v(12));
-        add(root,pageHeader("Protected folders",tr("Cleanup protection"),this::openProtection,"plus",tr(this::pickProtectedFolder),294325),-1,-2);
+        add(root,pageHeader("Protected folders",tr("Cleanup protection"),this::openProtection,"plus",tr("Add folder"),this::pickProtectedFolder),-1,-2);
         ScrollView scroll=new ScrollView(this);scroll.setVerticalScrollBarEnabled(false);scroll.setOverScrollMode(View.OVER_SCROLL_NEVER);
         LinearLayout body=column();body.setPadding(0,v(18),0,v(12));
         scroll.addView(body,new ScrollView.LayoutParams(-1,-2));root.addView(scroll,new LinearLayout.LayoutParams(-1,0,1f));
@@ -3012,7 +3010,7 @@ public final class MainActivity extends Activity {
     }
     private LinearLayout protectedFilesScreen(){
         LinearLayout root=column();root.setBackgroundColor(BG);root.setPadding(dp(UiKit.gutter(this)),v(12),dp(UiKit.gutter(this)),v(12));
-        add(root,pageHeader("Protected files",tr("Cleanup protection"),this::openProtection,"plus",tr(this::pickProtectedFiles),299309),-1,-2);
+        add(root,pageHeader("Protected files",tr("Cleanup protection"),this::openProtection,"plus",tr("Add files"),this::pickProtectedFiles),-1,-2);
         ScrollView scroll=new ScrollView(this);scroll.setVerticalScrollBarEnabled(false);scroll.setOverScrollMode(View.OVER_SCROLL_NEVER);
         LinearLayout body=column();body.setPadding(0,v(18),0,v(12));
         scroll.addView(body,new ScrollView.LayoutParams(-1,-2));root.addView(scroll,new LinearLayout.LayoutParams(-1,0,1f));
@@ -3350,8 +3348,10 @@ public final class MainActivity extends Activity {
         return NavigationPresentation.motion(ValueAnimator.areAnimatorsEnabled(),a!=null&&a.isTouchExplorationEnabled());
     }
     private void animateDashboardBody(View body){
-        if(!navigationMotion()||body==null)return;
-        body.animate().cancel();body.setAlpha(.94f);body.setTranslationY(dp(3));
+        if(body==null)return;
+        body.animate().cancel();body.setAlpha(1f);body.setTranslationY(0f);
+        if(!navigationMotion())return;
+        body.setAlpha(.94f);body.setTranslationY(dp(3));
         body.animate().alpha(1f).translationY(0f).setDuration(UiPolish.FAST_MOTION_MS).start();
     }
     private void animateTabContent(){
@@ -3395,6 +3395,7 @@ public final class MainActivity extends Activity {
         add(l,new Glyph(this,icon,tint),dp(23),dp(23));add(l,new View(this),1,dp(3));
         TextView name=centered(label,11,tint,active?700:500);name.setMaxLines(2);name.setEllipsize(android.text.TextUtils.TruncateAt.END);name.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_NO);add(l,name,-1,-2);
         tap(l,active?PALE:WHITE,28,()->switchDashboard(target));l.setSelected(active);
+        if(active)l.setOnClickListener(w->{});
         l.setContentDescription(tr(label)+(active?", selected":""));markNavigationRole(l);return l;
     }
 
