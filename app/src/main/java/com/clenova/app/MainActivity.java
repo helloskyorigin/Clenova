@@ -215,8 +215,7 @@ public final class MainActivity extends Activity {
     }
 
     private void showOnboardingAccess(Bundle state){
-        getWindow().setNavigationBarColor(AgentOnboardingView.BACKGROUND);
-        if(android.os.Build.VERSION.SDK_INT>=27)getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR);
+        applyPalette();
         onboardingAccess=new PermissionSetup(this,state,()->{
             if(onboardingAccess==null||isFinishing()||isDestroyed())return;
             onboardingAccess=null;showAgentSetup(false,false);
@@ -226,8 +225,7 @@ public final class MainActivity extends Activity {
 
     private void showAgentSetup(boolean fromTab,boolean confirmed){
         agentSetupFromTab=fromTab;
-        getWindow().setNavigationBarColor(AgentOnboardingView.BACKGROUND);
-        if(android.os.Build.VERSION.SDK_INT>=27)getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR);
+        applyPalette();
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,WindowManager.LayoutParams.FLAG_FULLSCREEN);
         onboardingAgent=new AgentSetupView(this,prefs,confirmed,()->{
             if(onboardingAgent==null||isFinishing()||isDestroyed())return;
@@ -240,9 +238,8 @@ public final class MainActivity extends Activity {
 
     private void showPreparingPhone(){
         cancelOverview();overviewHandler.removeCallbacks(finishPreparation);preparationReady=false;
-        getWindow().setNavigationBarColor(PreparingPhoneView.BG);
-        if(android.os.Build.VERSION.SDK_INT>=27)getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR);
-        preparingPhone=new PreparingPhoneView(this,this::showPreparingPhone);setContentView(preparingPhone);beginOverview(true);
+        applyPalette();
+        preparingPhone=new PreparingPhoneView(this,dark,this::showPreparingPhone);setContentView(preparingPhone);beginOverview(true);
     }
     private void cancelOverview(){if(overviewJob!=null){overviewJob.cancel();overviewJob=null;}}
     private void beginOverview(boolean initial){
@@ -256,7 +253,7 @@ public final class MainActivity extends Activity {
                     if(initial&&preparingPhone!=null){
                         preparationReady=true;preparingPhone.update(DeviceOverview.STAGES,result);
                         // Only the completed visual confirmation has a short presentation delay.
-                        overviewHandler.postDelayed(finishPreparation,ValueAnimator.areAnimatorsEnabled()?850:0);
+                        overviewHandler.postDelayed(finishPreparation,ValueAnimator.areAnimatorsEnabled()?PreparationPolicy.COMPLETE_DWELL_MS:0);
                     }else if(dashboardView!=null&&dashboardView.isAttachedToWindow()){renderOverviewDashboard();if(overviewDirty){overviewDirty=false;queueOverviewRefresh();}}
                 });
             }catch(Exception e){runOnUiThread(()->{if(overviewJob!=job||isDestroyed())return;overviewJob=null;
