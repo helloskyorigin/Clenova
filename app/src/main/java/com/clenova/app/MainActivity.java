@@ -37,6 +37,8 @@ public final class MainActivity extends Activity {
     private boolean toolsVisible;
     private ScrollView toolsScroll;
     private int toolsScrollY;
+    private int homeScrollY;
+    private boolean restoreHomeScroll;
     private boolean cleanVisible,agentVisible,agentTaskVisible,agentTaskOrigin,agentShortcut;
     private String agentCommand="";
     private int agentTask=-1;
@@ -298,7 +300,7 @@ public final class MainActivity extends Activity {
         protectedFiles=new ProtectedFiles(this);
         history=new ActivityHistory(this);
         devicePermissions=new DevicePermissions(this);
-        if(state!=null){toolsVisible=state.getBoolean("tools_visible");toolsScrollY=state.getInt("tools_scroll_y");agentVisible=state.getBoolean("agent_visible");agentShortcut=state.getBoolean("agent_shortcut");largeFilesMode=state.getBoolean("large_files_mode");clutterMode=state.getBoolean("clutter_mode");dupTrashPending=state.getBoolean("dup_trash_pending");cleanVisible=state.getBoolean("clean_visible");cleanScrollY=state.getInt("clean_scroll_y");historyFilter=state.getInt("history_filter");historyDetailId=state.getString("history_detail_id");historyScrollY=state.getInt("history_scroll_y");}
+        if(state!=null){toolsVisible=state.getBoolean("tools_visible");toolsScrollY=state.getInt("tools_scroll_y");homeScrollY=NavigationPresentation.scroll(state.getInt("home_scroll_y"));restoreHomeScroll=true;agentVisible=state.getBoolean("agent_visible");agentShortcut=state.getBoolean("agent_shortcut");largeFilesMode=state.getBoolean("large_files_mode");clutterMode=state.getBoolean("clutter_mode");dupTrashPending=state.getBoolean("dup_trash_pending");cleanVisible=state.getBoolean("clean_visible");cleanScrollY=state.getInt("clean_scroll_y");historyFilter=state.getInt("history_filter");historyDetailId=state.getString("history_detail_id");historyScrollY=state.getInt("history_scroll_y");}
         applyPalette();
         density = getResources().getDisplayMetrics().density;
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
@@ -362,6 +364,7 @@ public final class MainActivity extends Activity {
         state.putBoolean("storage_visible",storageVisible);
         state.putBoolean("tools_visible",toolsVisible);
         state.putInt("tools_scroll_y",toolsScroll==null?toolsScrollY:toolsScroll.getScrollY());
+        state.putInt("home_scroll_y",dashboardView instanceof HomeDashboard?overviewScroll(dashboardView):homeScrollY);
         state.putBoolean("clean_visible",cleanVisible);state.putBoolean("agent_visible",agentVisible);state.putBoolean("agent_shortcut",agentShortcut);
         state.putBoolean("large_files_mode",largeFilesMode);state.putBoolean("clutter_mode",clutterMode);
         state.putBoolean("dup_trash_pending",dupTrashPending);
@@ -491,7 +494,8 @@ public final class MainActivity extends Activity {
         LinearLayout l=column();l.setBackground(UiKit.card(this,dark));pad(l,UiPolish.CARD_PAD_X,UiPolish.CARD_PAD_Y);return l;
     }
     private LinearLayout home() {
-        HomeDashboard root=new HomeDashboard();attachOverviewDashboard(root,false);return root;
+        HomeDashboard root=new HomeDashboard();attachOverviewDashboard(root,false);
+        if(restoreHomeScroll){restoreHomeScroll=false;final int y=homeScrollY;root.post(()->{if(dashboardView==root)restoreOverviewScroll(root,y);});}return root;
     }
     /** Dashboard views stay attached during metadata updates, preserving touch targets and scroll. */
     private final class HomeDashboard extends LinearLayout {
@@ -501,7 +505,7 @@ public final class MainActivity extends Activity {
             super(MainActivity.this);setOrientation(VERTICAL);setBackgroundColor(BG);
             int gutter=dp(UiKit.gutter(MainActivity.this));
             setPadding(gutter,v(10),gutter,v(8));
-            add(this,header(),-1,dp(44));space(this,8);
+            add(this,header(),-1,-2);space(this,8);
             ScrollView scroll=new ScrollView(MainActivity.this);scroll.setFillViewport(false);scroll.setVerticalScrollBarEnabled(false);scroll.setOverScrollMode(View.OVER_SCROLL_NEVER);
             LinearLayout body=column();body.setPadding(0,v(2),0,v(8));scroll.addView(body,new ScrollView.LayoutParams(-1,-2));
             addView(scroll,new LinearLayout.LayoutParams(-1,0,1f));
@@ -549,7 +553,7 @@ public final class MainActivity extends Activity {
             }
             LinearLayout privacy=row();privacy.setGravity(Gravity.CENTER_VERTICAL);add(privacy,new Glyph(MainActivity.this,"shield",GREEN),dp(16),dp(16));gap(privacy,7);
             weight(privacy,txt("Always in your control.",12,GRAY,400));add(body,privacy,-1,-2);
-            space(this,6);add(this,navigation(),-1,dp(64));refresh();
+            space(this,6);add(this,navigation(),-1,navHeight());refresh();
         }
         void refresh(){
             DeviceOverview.Snapshot data=overview();
@@ -588,7 +592,7 @@ public final class MainActivity extends Activity {
         tap(tile,WHITE,UiPolish.CARD_RADIUS,action);tile.setContentDescription(tr(label));return tile;
     }
     private void returnToDashboard(){
-        if(toolsVisible)showTools();else if(agentVisible)showAgent();else if(cleanVisible)showClean();else showHome();
+        if(toolsVisible)showTools();else if(agentVisible)showAgent();else if(cleanVisible)showClean();else{restoreHomeScroll=settingsVisible||storageVisible;showHome();}
     }
     private void restoreAgentWindow(){
         if(agentInput!=null){
@@ -638,14 +642,14 @@ public final class MainActivity extends Activity {
         getWindow().getDecorView().setSystemUiVisibility((dark?0:View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR)|(dark||android.os.Build.VERSION.SDK_INT<27?0:View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR));
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
         LinearLayout root=column();root.setBackgroundColor(BG);root.setPadding(dp(UiKit.gutter(this)),v(10),dp(UiKit.gutter(this)),v(10));
-        LinearLayout header=row();add(header,agentHeaderButton("agent_menu","Agent menu",this::showAgentDrawer),dp(42),dp(42));gap(header,10);weight(header,txt("Agent",21,INK,700));add(header,agentHeaderButton("new_chat","New conversation",this::newAgentChat),dp(42),dp(42));add(root,header,-1,-2);
+        LinearLayout header=row();add(header,agentHeaderButton("agent_menu","Agent menu",this::showAgentDrawer),dp(48),dp(48));gap(header,10);weight(header,txt("Agent",21,INK,700));add(header,agentHeaderButton("new_chat","New conversation",this::newAgentChat),dp(48),dp(48));add(root,header,-1,-2);
         ScrollView scroll=new ScrollView(this);scroll.setFillViewport(true);scroll.setVerticalScrollBarEnabled(false);scroll.setOverScrollMode(View.OVER_SCROLL_NEVER);
         LinearLayout body=column();body.setPadding(0,v(12),0,v(12));scroll.addView(body,new ScrollView.LayoutParams(-1,-1));root.addView(scroll,new LinearLayout.LayoutParams(-1,0,1f));
         if(activeChat==null){body.setGravity(Gravity.CENTER_VERTICAL);showAgentWelcome(body);}else{renderAgentConversation(body);scroll.post(()->scroll.fullScroll(View.FOCUS_DOWN));}
         space(root,8);addAgentComposer(root);
-        if(activeChat==null){space(root,8);add(root,navigation(),-1,dp(64));}
+        if(activeChat==null){space(root,8);add(root,navigation(),-1,navHeight());}
         root.setFocusableInTouchMode(true);root.requestFocus();setContentView(root);
-        if(agentTransition){agentTransition=false;if(ValueAnimator.areAnimatorsEnabled()){body.setAlpha(0);body.animate().alpha(1).setDuration(200).start();}}
+        if(agentTransition){agentTransition=false;animateDashboardBody(body);}
     }
     private void showAgentWelcome(LinearLayout body){
         LinearLayout hero=column();hero.setGravity(Gravity.CENTER_HORIZONTAL);add(hero,new AgentOrb(this),dp(146),dp(124));space(hero,8);
@@ -674,7 +678,7 @@ public final class MainActivity extends Activity {
         input.setOnEditorActionListener((v,id,event)->{if(id==android.view.inputmethod.EditorInfo.IME_ACTION_SEND){submitAgentCommand(input.getText().toString());return true;}return false;});add(composer,send,dp(42),dp(42));add(root,composer,-1,-2);
     }
     private FrameLayout agentHeaderButton(String glyph,String label,Runnable action){
-        FrameLayout frame=new FrameLayout(this);frame.addView(new Glyph(this,glyph,INK),new FrameLayout.LayoutParams(dp(21),dp(21),Gravity.CENTER));frame.setContentDescription(tr(label));tap(frame,WHITE,23,action);return frame;
+        FrameLayout frame=new FrameLayout(this);frame.addView(new Glyph(this,glyph,INK),new FrameLayout.LayoutParams(dp(21),dp(21),Gravity.CENTER));frame.setContentDescription(tr(label));tap(frame,WHITE,24,action);return frame;
     }
     private LinearLayout agentSuggestion(String icon,String title,int task){
         LinearLayout line=row();pad(line,14,8);add(line,new Glyph(this,icon,BLUE),dp(22),dp(22));gap(line,12);TextView label=txt(title,14,INK,500);label.setMaxLines(2);weight(line,label);gap(line,6);add(line,new Glyph(this,"up",GRAY),dp(15),dp(15));tap(line,WHITE,16,()->openAgentTask(task,title));line.setContentDescription(tr(title));return line;
@@ -738,7 +742,7 @@ public final class MainActivity extends Activity {
     private void newAgentChat(){if(agentBusy()){folderToast("Cancel the current task first");return;}clearAgentSession();agentTransition=true;showAgent();}
     private void showAgentDrawer(){
         if(agentDrawer!=null)agentDrawer.dismiss();android.app.Dialog dialog=new android.app.Dialog(this);agentDrawer=dialog;dialog.requestWindowFeature(android.view.Window.FEATURE_NO_TITLE);
-        LinearLayout layout=column();layout.setBackgroundColor(WHITE);pad(layout,16,16);LinearLayout header=row();weight(header,txt("Agent",25,INK,700));add(header,agentHeaderButton("close","Close",dialog::dismiss),dp(40),dp(40));add(layout,header,-1,-2);space(layout,12);
+        LinearLayout layout=column();layout.setBackgroundColor(WHITE);pad(layout,16,16);LinearLayout header=row();weight(header,txt("Agent",25,INK,700));add(header,agentHeaderButton("close","Close",dialog::dismiss),dp(48),dp(48));add(layout,header,-1,-2);space(layout,12);
         scanButton(layout,"New conversation",true,()->{dialog.dismiss();newAgentChat();});space(layout,10);
         scanButton(layout,"Activity history",false,()->{if(agentBusy())return;dialog.dismiss();restoreAgentWindow();agentShortcut=true;historyFilter=0;historyScrollY=0;openHistory();});
         if(!prefs.autopilot())scanButton(layout,"Activate Agent",false,()->{if(agentBusy())return;dialog.dismiss();showAgentSetup(true,false);});
@@ -806,7 +810,7 @@ public final class MainActivity extends Activity {
     private LinearLayout toolsScreen(){
         LinearLayout root=column();root.setBackgroundColor(BG);
         root.setPadding(dp(UiKit.gutter(this)),v(12),dp(UiKit.gutter(this)),v(10));
-        add(root,header(),-1,dp(44));space(root,8);
+        add(root,header(),-1,-2);space(root,8);
 
         ScrollView scroll=new ScrollView(this);toolsScroll=scroll;
         scroll.setVerticalScrollBarEnabled(false);scroll.setOverScrollMode(View.OVER_SCROLL_NEVER);
@@ -834,7 +838,7 @@ public final class MainActivity extends Activity {
         add(footer,new Glyph(this,"shield",GRAY),dp(15),dp(15));gap(footer,5);
         add(footer,txt("Always in your control.",12,GRAY,400),-2,-2);
         add(body,footer,-1,-2);
-        space(root,6);add(root,navigation(),-1,dp(64));return root;
+        space(root,6);add(root,navigation(),-1,navHeight());return root;
     }
     private void toolRow(LinearLayout parent,String title,String subtitle,String glyph,int tint,int iconBg,boolean divider){
         boolean detailed=!subtitle.isEmpty();
@@ -867,9 +871,7 @@ public final class MainActivity extends Activity {
         LinearLayout root=column();root.setBackgroundColor(BG);root.setPadding(dp(UiKit.gutter(this)),v(12),dp(UiKit.gutter(this)),v(10));
         LinearLayout header=row();LinearLayout heading=column();add(heading,txt("Clean",29,INK,700),-1,-2);space(heading,4);
         add(heading,txt("Make room for what matters.",12,GRAY,400),-1,-2);weight(header,heading);gap(header,10);
-        FrameLayout settings=new FrameLayout(this);
-        settings.addView(new Glyph(this,"settings",INK),new FrameLayout.LayoutParams(dp(23),dp(23),Gravity.CENTER));
-        settings.setContentDescription(tr("Settings"));tap(settings,WHITE,24,this::openSettings);add(header,settings,dp(44),dp(44));
+        add(header,headerControl("settings",tr("Settings"),INK,this::openSettings),dp(48),dp(48));
         add(root,header,-1,-2);space(root,14);
         ScrollView scroll=new ScrollView(this);cleanScroll=scroll;scroll.setVerticalScrollBarEnabled(false);scroll.setOverScrollMode(View.OVER_SCROLL_NEVER);
         LinearLayout body=column();body.setPadding(0,0,0,v(10));scroll.addView(body,new ScrollView.LayoutParams(-1,-2));
@@ -917,7 +919,7 @@ public final class MainActivity extends Activity {
         add(body,files,-1,-2);space(body,17);
         LinearLayout footer=row();footer.setGravity(Gravity.CENTER);
         add(footer,new Glyph(this,"shield",GREEN),dp(16),dp(16));gap(footer,6);add(footer,txt("Always protected. Always your choice.",12,GRAY,400),-2,-2);add(body,footer,-1,-2);
-        space(root,6);add(root,navigation(),-1,dp(64));return root;
+        space(root,6);add(root,navigation(),-1,navHeight());return root;
     }
     private String scanBytes(long bytes){
         if(bytes>=1024L*1024*1024)return String.format(java.util.Locale.US,"%.2f GB",bytes/(1024d*1024*1024));
@@ -951,9 +953,7 @@ public final class MainActivity extends Activity {
     }
     private LinearLayout scanShell(String title,Runnable back){
         LinearLayout root=column();root.setBackgroundColor(BG);root.setPadding(dp(UiKit.gutter(this)),v(12),dp(UiKit.gutter(this)),v(12));
-        FrameLayout header=new FrameLayout(this);header.addView(centered(title,17,INK,600),new FrameLayout.LayoutParams(-1,-1));
-        FrameLayout arrow=new FrameLayout(this);arrow.addView(new Glyph(this,"back",INK),new FrameLayout.LayoutParams(dp(24),dp(24),Gravity.CENTER));tap(arrow,WHITE,22,back);arrow.setContentDescription(tr("Back"));
-        header.addView(arrow,new FrameLayout.LayoutParams(dp(44),dp(44),Gravity.START|Gravity.CENTER_VERTICAL));add(root,header,-1,dp(44));return root;
+        add(root,pageHeader(title,tr("Back"),back,null,null,null),-1,-2);return root;
     }
     private LinearLayout scanBody(LinearLayout root){
         ScrollView scroll=new ScrollView(this);scroll.setVerticalScrollBarEnabled(false);scroll.setOverScrollMode(View.OVER_SCROLL_NEVER);
@@ -1859,16 +1859,24 @@ public final class MainActivity extends Activity {
         }
     }
 
+    private FrameLayout headerControl(String glyph,String description,int tint,Runnable action){
+        FrameLayout item=new FrameLayout(this);
+        item.addView(new Glyph(this,glyph,tint),new FrameLayout.LayoutParams(dp(22),dp(22),Gravity.CENTER));
+        item.setContentDescription(description);tap(item,WHITE,24,action);markNavigationRole(item);return item;
+    }
+    private LinearLayout pageHeader(String title,String backDescription,Runnable back,String rightGlyph,String rightDescription,Runnable right){
+        LinearLayout header=row();header.setMinimumHeight(dp(UiPolish.HEADER_HEIGHT));
+        add(header,headerControl("back",backDescription,INK,back),dp(48),dp(48));gap(header,8);
+        TextView text=centered(title,17,INK,600);text.setPadding(0,dp(6),0,dp(6));weight(header,text);gap(header,8);
+        if(right==null)add(header,new View(this),dp(48),dp(48));else add(header,headerControl(rightGlyph,rightDescription,BLUE,right),dp(48),dp(48));
+        return header;
+    }
     private LinearLayout header() {
-        LinearLayout l=row(); add(l,txt("Clenova",29,INK,700),-2,-2); stretch(l);
-        FrameLayout settings=new FrameLayout(this);
-        settings.addView(new Glyph(this,"settings",INK),new FrameLayout.LayoutParams(dp(23),dp(23),Gravity.CENTER));
-        settings.setContentDescription("Settings");
-        tap(settings,WHITE,24,this::openSettings);
-        add(l,settings,dp(44),dp(44)); return l;
+        LinearLayout l=row();l.setMinimumHeight(dp(48));weight(l,txt("Clenova",29,INK,700));gap(l,8);
+        add(l,headerControl("settings",tr("Settings"),INK,this::openSettings),dp(48),dp(48));return l;
     }
     private void openSettings(){
-        restoreAgentWindow();
+        rememberHomeScroll();restoreAgentWindow();
         if(agentVisible&&agentShortcut){agentShortcut=false;scanResult=null;agentLiveResult=null;agentResultChat="";showAgent();return;}
         scanResult=null; // protection rules may change in settings; re-scan before recommending again.
         if(toolsScroll!=null){toolsScrollY=toolsScroll.getScrollY();toolsScroll=null;}
@@ -1879,13 +1887,7 @@ public final class MainActivity extends Activity {
     private LinearLayout settingsScreen(){
         LinearLayout root=column();root.setBackgroundColor(BG);
         root.setPadding(dp(UiKit.gutter(this)),v(12),dp(UiKit.gutter(this)),v(12));
-        FrameLayout header=new FrameLayout(this);
-        header.addView(centered("Settings",17,INK,600),new FrameLayout.LayoutParams(-1,-1));
-        FrameLayout back=new FrameLayout(this);
-        back.addView(new Glyph(this,"back",INK),new FrameLayout.LayoutParams(dp(24),dp(24),Gravity.CENTER));
-        back.setContentDescription(tr(toolsVisible?"Back to Tools":agentVisible?"Back to Agent":cleanVisible?"Back to Clean":"Back to Home"));tap(back,WHITE,22,this::returnToDashboard);
-        header.addView(back,new FrameLayout.LayoutParams(dp(44),dp(44),Gravity.START|Gravity.CENTER_VERTICAL));
-        add(root,header,-1,dp(44));
+        add(root,pageHeader("Settings",tr(toolsVisible?"Back to Tools":agentVisible?"Back to Agent":cleanVisible?"Back to Clean":"Back to Home"),this::returnToDashboard,null,null,null),-1,-2);
         ScrollView scroll=new ScrollView(this);scroll.setVerticalScrollBarEnabled(false);
         scroll.setOverScrollMode(View.OVER_SCROLL_NEVER);
         LinearLayout body=column();body.setPadding(0,v(15),0,v(12));
@@ -2186,12 +2188,7 @@ public final class MainActivity extends Activity {
     }
     private LinearLayout aboutScreen(){
         LinearLayout root=column();root.setBackgroundColor(BG);root.setPadding(dp(UiKit.gutter(this)),v(12),dp(UiKit.gutter(this)),v(12));
-        FrameLayout header=new FrameLayout(this);
-        header.addView(centered("About Clenova",17,INK,600),new FrameLayout.LayoutParams(-1,-1));
-        FrameLayout back=new FrameLayout(this);
-        back.addView(new Glyph(this,"back",INK),new FrameLayout.LayoutParams(dp(24),dp(24),Gravity.CENTER));
-        back.setContentDescription(tr("Back to Settings"));tap(back,WHITE,22,this::openSettings);
-        header.addView(back,new FrameLayout.LayoutParams(dp(44),dp(44),Gravity.START|Gravity.CENTER_VERTICAL));add(root,header,-1,dp(44));
+        add(root,pageHeader("About Clenova",tr("Back to Settings"),this::openSettings,null,null,null),-1,-2);
         ScrollView scroll=new ScrollView(this);aboutScroll=scroll;scroll.setVerticalScrollBarEnabled(false);scroll.setOverScrollMode(View.OVER_SCROLL_NEVER);
         LinearLayout body=column();body.setPadding(0,v(20),0,v(16));scroll.addView(body,new ScrollView.LayoutParams(-1,-2));
         root.addView(scroll,new LinearLayout.LayoutParams(-1,0,1f));
@@ -2269,12 +2266,7 @@ public final class MainActivity extends Activity {
         String title=terms?"Terms of use":"Privacy policy";
         String[][] sections=terms?TermsOfUse.SECTIONS:PrivacyPolicy.SECTIONS;
         LinearLayout root=column();root.setBackgroundColor(BG);root.setPadding(dp(UiKit.gutter(this)),v(12),dp(UiKit.gutter(this)),v(12));
-        FrameLayout header=new FrameLayout(this);
-        header.addView(centered(title,17,INK,600),new FrameLayout.LayoutParams(-1,-1));
-        FrameLayout back=new FrameLayout(this);
-        back.addView(new Glyph(this,"back",INK),new FrameLayout.LayoutParams(dp(24),dp(24),Gravity.CENTER));
-        back.setContentDescription(tr("Back to Settings"));tap(back,WHITE,22,this::openSettings);
-        header.addView(back,new FrameLayout.LayoutParams(dp(44),dp(44),Gravity.START|Gravity.CENTER_VERTICAL));add(root,header,-1,dp(44));
+        add(root,pageHeader(title,tr("Back to Settings"),this::openSettings,null,null,null),-1,-2);
         ScrollView scroll=new ScrollView(this);policyScroll=scroll;scroll.setVerticalScrollBarEnabled(false);scroll.setOverScrollMode(View.OVER_SCROLL_NEVER);
         LinearLayout body=column();body.setPadding(0,v(18),0,v(12));scroll.addView(body,new ScrollView.LayoutParams(-1,-2));
         root.addView(scroll,new LinearLayout.LayoutParams(-1,0,1f));
@@ -2334,12 +2326,7 @@ public final class MainActivity extends Activity {
     }
     private LinearLayout feedbackScreen(){
         LinearLayout root=column();root.setBackgroundColor(BG);root.setPadding(dp(UiKit.gutter(this)),v(12),dp(UiKit.gutter(this)),v(12));root.setFocusableInTouchMode(true);
-        FrameLayout header=new FrameLayout(this);
-        header.addView(centered("Send feedback",17,INK,600),new FrameLayout.LayoutParams(-1,-1));
-        FrameLayout back=new FrameLayout(this);
-        back.addView(new Glyph(this,"back",INK),new FrameLayout.LayoutParams(dp(24),dp(24),Gravity.CENTER));
-        back.setContentDescription(tr("Back to Settings"));tap(back,WHITE,22,this::leaveFeedback);
-        header.addView(back,new FrameLayout.LayoutParams(dp(44),dp(44),Gravity.START|Gravity.CENTER_VERTICAL));add(root,header,-1,dp(44));
+        add(root,pageHeader("Send feedback",tr("Back to Settings"),this::leaveFeedback,null,null,null),-1,-2);
         ScrollView scroll=new ScrollView(this);scroll.setVerticalScrollBarEnabled(false);scroll.setOverScrollMode(View.OVER_SCROLL_NEVER);scroll.setFillViewport(false);
         LinearLayout body=column();body.setPadding(0,v(14),0,v(12));scroll.addView(body,new ScrollView.LayoutParams(-1,-2));
         root.addView(scroll,new LinearLayout.LayoutParams(-1,0,1f));
@@ -2448,12 +2435,7 @@ public final class MainActivity extends Activity {
     private LinearLayout helpSupportScreen(){
         LinearLayout root=column();root.setBackgroundColor(BG);root.setPadding(dp(UiKit.gutter(this)),v(12),dp(UiKit.gutter(this)),v(12));
         root.setFocusableInTouchMode(true);
-        FrameLayout header=new FrameLayout(this);
-        header.addView(centered("Help & support",17,INK,600),new FrameLayout.LayoutParams(-1,-1));
-        FrameLayout back=new FrameLayout(this);
-        back.addView(new Glyph(this,"back",INK),new FrameLayout.LayoutParams(dp(24),dp(24),Gravity.CENTER));
-        back.setContentDescription(tr("Back to Settings"));tap(back,WHITE,22,this::openSettings);
-        header.addView(back,new FrameLayout.LayoutParams(dp(44),dp(44),Gravity.START|Gravity.CENTER_VERTICAL));add(root,header,-1,dp(44));
+        add(root,pageHeader("Help & support",tr("Back to Settings"),this::openSettings,null,null,null),-1,-2);
         ScrollView scroll=new ScrollView(this);scroll.setVerticalScrollBarEnabled(false);scroll.setOverScrollMode(View.OVER_SCROLL_NEVER);
         LinearLayout body=column();body.setPadding(0,v(18),0,v(12));scroll.addView(body,new ScrollView.LayoutParams(-1,-2));
         root.addView(scroll,new LinearLayout.LayoutParams(-1,0,1f));
@@ -2561,12 +2543,7 @@ public final class MainActivity extends Activity {
     }
     private LinearLayout privacyDataScreen(){
         LinearLayout root=column();root.setBackgroundColor(BG);root.setPadding(dp(UiKit.gutter(this)),v(12),dp(UiKit.gutter(this)),v(12));
-        FrameLayout header=new FrameLayout(this);
-        header.addView(centered("Privacy & data",17,INK,600),new FrameLayout.LayoutParams(-1,-1));
-        FrameLayout back=new FrameLayout(this);
-        back.addView(new Glyph(this,"back",INK),new FrameLayout.LayoutParams(dp(24),dp(24),Gravity.CENTER));
-        back.setContentDescription(tr("Back to Settings"));tap(back,WHITE,22,this::openSettings);
-        header.addView(back,new FrameLayout.LayoutParams(dp(44),dp(44),Gravity.START|Gravity.CENTER_VERTICAL));add(root,header,-1,dp(44));
+        add(root,pageHeader("Privacy & data",tr("Back to Settings"),this::openSettings,null,null,null),-1,-2);
         ScrollView scroll=new ScrollView(this);scroll.setVerticalScrollBarEnabled(false);scroll.setOverScrollMode(View.OVER_SCROLL_NEVER);
         LinearLayout body=column();body.setPadding(0,v(18),0,v(12));scroll.addView(body,new ScrollView.LayoutParams(-1,-2));
         root.addView(scroll,new LinearLayout.LayoutParams(-1,0,1f));
@@ -2661,12 +2638,7 @@ public final class MainActivity extends Activity {
     }
     private LinearLayout appPermissionsScreen(){
         LinearLayout root=column();root.setBackgroundColor(BG);root.setPadding(dp(UiKit.gutter(this)),v(12),dp(UiKit.gutter(this)),v(12));
-        FrameLayout header=new FrameLayout(this);
-        header.addView(centered("App permissions",17,INK,600),new FrameLayout.LayoutParams(-1,-1));
-        FrameLayout back=new FrameLayout(this);
-        back.addView(new Glyph(this,"back",INK),new FrameLayout.LayoutParams(dp(24),dp(24),Gravity.CENTER));
-        back.setContentDescription(tr("Back to Settings"));tap(back,WHITE,22,this::openSettings);
-        header.addView(back,new FrameLayout.LayoutParams(dp(44),dp(44),Gravity.START|Gravity.CENTER_VERTICAL));add(root,header,-1,dp(44));
+        add(root,pageHeader("App permissions",tr("Back to Settings"),this::openSettings,null,null,null),-1,-2);
         ScrollView scroll=new ScrollView(this);scroll.setVerticalScrollBarEnabled(false);scroll.setOverScrollMode(View.OVER_SCROLL_NEVER);
         LinearLayout body=column();body.setPadding(0,v(18),0,v(12));
         scroll.addView(body,new ScrollView.LayoutParams(-1,-2));root.addView(scroll,new LinearLayout.LayoutParams(-1,0,1f));
@@ -2764,12 +2736,7 @@ public final class MainActivity extends Activity {
     private static final String[] HISTORY_CATEGORIES={"","scan","cleanup","protection","tools"};
     private LinearLayout historyScreen(){
         LinearLayout root=column();root.setBackgroundColor(BG);root.setPadding(dp(UiKit.gutter(this)),v(12),dp(UiKit.gutter(this)),v(12));
-        FrameLayout header=new FrameLayout(this);
-        header.addView(centered("Activity history",17,INK,600),new FrameLayout.LayoutParams(-1,-1));
-        FrameLayout back=new FrameLayout(this);
-        back.addView(new Glyph(this,"back",INK),new FrameLayout.LayoutParams(dp(24),dp(24),Gravity.CENTER));
-        back.setContentDescription(tr("Back to Settings"));tap(back,WHITE,22,this::openSettings);
-        header.addView(back,new FrameLayout.LayoutParams(dp(44),dp(44),Gravity.START|Gravity.CENTER_VERTICAL));add(root,header,-1,dp(44));
+        add(root,pageHeader("Activity history",tr("Back to Settings"),this::openSettings,null,null,null),-1,-2);
         ScrollView scroll=new ScrollView(this);historyScroll=scroll;scroll.setVerticalScrollBarEnabled(false);scroll.setOverScrollMode(View.OVER_SCROLL_NEVER);
         LinearLayout body=column();body.setPadding(0,v(18),0,v(12));
         scroll.addView(body,new ScrollView.LayoutParams(-1,-2));root.addView(scroll,new LinearLayout.LayoutParams(-1,0,1f));
@@ -2852,13 +2819,7 @@ public final class MainActivity extends Activity {
     }
     private LinearLayout historyDetailsScreen(ActivityHistory.Entry entry){
         LinearLayout root=column();root.setBackgroundColor(BG);root.setPadding(dp(UiKit.gutter(this)),v(12),dp(UiKit.gutter(this)),v(12));
-        FrameLayout header=new FrameLayout(this);
-        header.addView(centered("Activity details",17,INK,600),new FrameLayout.LayoutParams(-1,-1));
-        FrameLayout back=new FrameLayout(this);
-        back.addView(new Glyph(this,"back",INK),new FrameLayout.LayoutParams(dp(24),dp(24),Gravity.CENTER));
-        back.setContentDescription(tr("Activity history"));tap(back,WHITE,22,this::openHistory);
-        header.addView(back,new FrameLayout.LayoutParams(dp(44),dp(44),Gravity.START|Gravity.CENTER_VERTICAL));
-        add(root,header,-1,dp(44));
+        add(root,pageHeader("Activity details",tr("Activity history"),this::openHistory,null,null,null),-1,-2);
         ScrollView scroll=new ScrollView(this);scroll.setVerticalScrollBarEnabled(false);scroll.setOverScrollMode(View.OVER_SCROLL_NEVER);
         LinearLayout body=column();body.setPadding(0,v(20),0,v(12));scroll.addView(body,new ScrollView.LayoutParams(-1,-2));
         root.addView(scroll,new LinearLayout.LayoutParams(-1,0,1f));
@@ -2949,13 +2910,7 @@ public final class MainActivity extends Activity {
     }
     private LinearLayout protectionScreen(){
         LinearLayout root=column();root.setBackgroundColor(BG);root.setPadding(dp(UiKit.gutter(this)),v(12),dp(UiKit.gutter(this)),v(12));
-        FrameLayout header=new FrameLayout(this);
-        header.addView(centered("Cleanup protection",17,INK,600),new FrameLayout.LayoutParams(-1,-1));
-        FrameLayout back=new FrameLayout(this);
-        back.addView(new Glyph(this,"back",INK),new FrameLayout.LayoutParams(dp(24),dp(24),Gravity.CENTER));
-        back.setContentDescription(tr("Back to Settings"));tap(back,WHITE,22,this::openSettings);
-        header.addView(back,new FrameLayout.LayoutParams(dp(44),dp(44),Gravity.START|Gravity.CENTER_VERTICAL));
-        add(root,header,-1,dp(44));
+        add(root,pageHeader("Cleanup protection",tr("Back to Settings"),this::openSettings,null,null,null),-1,-2);
         ScrollView scroll=new ScrollView(this);scroll.setVerticalScrollBarEnabled(false);scroll.setOverScrollMode(View.OVER_SCROLL_NEVER);
         LinearLayout body=column();body.setPadding(0,v(18),0,v(12));
         scroll.addView(body,new ScrollView.LayoutParams(-1,-2));root.addView(scroll,new LinearLayout.LayoutParams(-1,0,1f));
@@ -3007,17 +2962,7 @@ public final class MainActivity extends Activity {
     }
     private LinearLayout protectedFoldersScreen(){
         LinearLayout root=column();root.setBackgroundColor(BG);root.setPadding(dp(UiKit.gutter(this)),v(12),dp(UiKit.gutter(this)),v(12));
-        FrameLayout header=new FrameLayout(this);
-        TextView title=centered("Protected folders",17,INK,600);title.setPadding(dp(46),0,dp(46),0);
-        header.addView(title,new FrameLayout.LayoutParams(-1,-1));
-        FrameLayout back=new FrameLayout(this),plus=new FrameLayout(this);
-        back.addView(new Glyph(this,"back",INK),new FrameLayout.LayoutParams(dp(24),dp(24),Gravity.CENTER));
-        back.setContentDescription(tr("Cleanup protection"));tap(back,WHITE,22,this::openProtection);
-        header.addView(back,new FrameLayout.LayoutParams(dp(44),dp(44),Gravity.START|Gravity.CENTER_VERTICAL));
-        plus.addView(new Glyph(this,"plus",BLUE),new FrameLayout.LayoutParams(dp(24),dp(24),Gravity.CENTER));
-        plus.setContentDescription(tr("Add folder"));tap(plus,WHITE,22,this::pickProtectedFolder);
-        header.addView(plus,new FrameLayout.LayoutParams(dp(44),dp(44),Gravity.END|Gravity.CENTER_VERTICAL));
-        add(root,header,-1,dp(44));
+        add(root,pageHeader("Protected folders",tr("Cleanup protection"),this::openProtection,"plus",tr(this::pickProtectedFolder),294325),-1,-2);
         ScrollView scroll=new ScrollView(this);scroll.setVerticalScrollBarEnabled(false);scroll.setOverScrollMode(View.OVER_SCROLL_NEVER);
         LinearLayout body=column();body.setPadding(0,v(18),0,v(12));
         scroll.addView(body,new ScrollView.LayoutParams(-1,-2));root.addView(scroll,new LinearLayout.LayoutParams(-1,0,1f));
@@ -3067,17 +3012,7 @@ public final class MainActivity extends Activity {
     }
     private LinearLayout protectedFilesScreen(){
         LinearLayout root=column();root.setBackgroundColor(BG);root.setPadding(dp(UiKit.gutter(this)),v(12),dp(UiKit.gutter(this)),v(12));
-        FrameLayout header=new FrameLayout(this);
-        TextView title=centered("Protected files",17,INK,600);title.setPadding(dp(46),0,dp(46),0);
-        header.addView(title,new FrameLayout.LayoutParams(-1,-1));
-        FrameLayout back=new FrameLayout(this),plus=new FrameLayout(this);
-        back.addView(new Glyph(this,"back",INK),new FrameLayout.LayoutParams(dp(24),dp(24),Gravity.CENTER));
-        back.setContentDescription(tr("Cleanup protection"));tap(back,WHITE,22,this::openProtection);
-        header.addView(back,new FrameLayout.LayoutParams(dp(44),dp(44),Gravity.START|Gravity.CENTER_VERTICAL));
-        plus.addView(new Glyph(this,"plus",BLUE),new FrameLayout.LayoutParams(dp(24),dp(24),Gravity.CENTER));
-        plus.setContentDescription(tr("Add files"));tap(plus,WHITE,22,this::pickProtectedFiles);
-        header.addView(plus,new FrameLayout.LayoutParams(dp(44),dp(44),Gravity.END|Gravity.CENTER_VERTICAL));
-        add(root,header,-1,dp(44));
+        add(root,pageHeader("Protected files",tr("Cleanup protection"),this::openProtection,"plus",tr(this::pickProtectedFiles),299309),-1,-2);
         ScrollView scroll=new ScrollView(this);scroll.setVerticalScrollBarEnabled(false);scroll.setOverScrollMode(View.OVER_SCROLL_NEVER);
         LinearLayout body=column();body.setPadding(0,v(18),0,v(12));
         scroll.addView(body,new ScrollView.LayoutParams(-1,-2));root.addView(scroll,new LinearLayout.LayoutParams(-1,0,1f));
@@ -3213,13 +3148,7 @@ public final class MainActivity extends Activity {
 
     private LinearLayout agentPreferencesScreen(){
         LinearLayout root=column();root.setBackgroundColor(BG);root.setPadding(dp(UiKit.gutter(this)),v(12),dp(UiKit.gutter(this)),v(12));
-        FrameLayout header=new FrameLayout(this);
-        header.addView(centered("Agent preferences",17,INK,600),new FrameLayout.LayoutParams(-1,-1));
-        FrameLayout back=new FrameLayout(this);
-        back.addView(new Glyph(this,"back",INK),new FrameLayout.LayoutParams(dp(24),dp(24),Gravity.CENTER));
-        back.setContentDescription("Back to Settings");tap(back,WHITE,22,this::openSettings);
-        header.addView(back,new FrameLayout.LayoutParams(dp(44),dp(44),Gravity.START|Gravity.CENTER_VERTICAL));
-        add(root,header,-1,dp(44));
+        add(root,pageHeader("Agent preferences","Back to Settings",this::openSettings,null,null,null),-1,-2);
         ScrollView scroll=new ScrollView(this);scroll.setVerticalScrollBarEnabled(false);scroll.setOverScrollMode(View.OVER_SCROLL_NEVER);
         LinearLayout body=column();body.setPadding(0,v(18),0,v(12));
         scroll.addView(body,new ScrollView.LayoutParams(-1,-2));root.addView(scroll,new LinearLayout.LayoutParams(-1,0,1f));
@@ -3290,9 +3219,9 @@ public final class MainActivity extends Activity {
         animatePreferenceMenu(menu);
     }
 
-    private void openStorage(){storageVisible=true;setContentView(storageScreen());}
+    private void openStorage(){rememberHomeScroll();storageVisible=true;setContentView(storageScreen());}
     private LinearLayout storageScreen(){
-        DeviceOverview.Snapshot data=overview();LinearLayout root=scanShell("Storage",this::showHome),body=scanBody(root);
+        DeviceOverview.Snapshot data=overview();LinearLayout root=scanShell("Storage",this::returnToDashboard),body=scanBody(root);
         add(body,txt("Available storage",14,GRAY,400),-1,-2);space(body,6);
         add(body,txt(data.storageKnown()?DeviceOverview.format(data.free):data.finished?"Unavailable":"Checking…",38,INK,700),-1,-2);space(body,14);
         LinearLayout captions=row();weight(captions,txt(data.storageKnown()?DeviceOverview.format(data.used())+" used":data.finished?"Storage unavailable":"Reading storage",13,GRAY,400));
@@ -3352,6 +3281,7 @@ public final class MainActivity extends Activity {
     }
     private void leaveCleanupOutcome(){completionVisible=false;if(agentTaskOrigin)showAgent();else showClean();}
     private void showHome() {
+        if(!restoreHomeScroll)homeScrollY=0;
         toolsVisible=false;toolsScroll=null;toolsScrollY=0;
         if(agentBusy())cancelAgentWork();agentVisible=false;agentTaskVisible=false;agentTaskOrigin=false;agentShortcut=false;restoreAgentWindow();
         scanResult=null;scanVisible=false;scanReviewVisible=false;
@@ -3412,30 +3342,60 @@ public final class MainActivity extends Activity {
         View rule=new View(this);rule.setBackgroundColor(UiPolish.palette(dark).divider);add(parent,rule,-1,dp(1));
     }
 
-    private LinearLayout navigation() {
-        LinearLayout outer=row(); LinearLayout pill=row(); pill.setBackground(round(WHITE,34));
-        pad(pill,4,4); outer.addView(pill,new LinearLayout.LayoutParams(0,dp(64),1f));
-        String[] labels={"Home","Clean","Agent"}; String[] icons={"home","sparkles","bot"};
-        for(int i=0;i<labels.length;i++){
-            final String label=labels[i]; LinearLayout item=navItem(label,icons[i],!toolsVisible&&(agentVisible?i==2:cleanVisible?i==1:i==0));
-            pill.addView(item,new LinearLayout.LayoutParams(0,-1,1f));
-        }
-        gap(outer,8); LinearLayout tools=navItem("Tools","tools",toolsVisible);
-        add(outer,tools,dp(64),dp(64)); return outer;
+    private void rememberHomeScroll(){if(dashboardView instanceof HomeDashboard&&dashboardView.isAttachedToWindow())homeScrollY=overviewScroll(dashboardView);}
+    private int currentDashboard(){return NavigationPresentation.selected(toolsVisible,agentVisible,cleanVisible);}
+    private int navHeight(){return dp(NavigationPresentation.height(getResources().getConfiguration().fontScale));}
+    private boolean navigationMotion(){
+        android.view.accessibility.AccessibilityManager a=getSystemService(android.view.accessibility.AccessibilityManager.class);
+        return NavigationPresentation.motion(ValueAnimator.areAnimatorsEnabled(),a!=null&&a.isTouchExplorationEnabled());
     }
-    private LinearLayout navItem(String label,String icon,boolean active) {
-        LinearLayout l=column(); l.setGravity(Gravity.CENTER);
-        int tint=active?BLUE:GRAY;
-        add(l,new Glyph(this,icon,tint),dp(24),dp(24)); space(l,4);
-        add(l,centered(label,11,tint,600),-1,-2);
-        tap(l,active?PALE:WHITE,32,()->{
-            if(active)return;
-            if(label.equals("Home"))showHome();
-            else if(label.equals("Clean")){agentTaskOrigin=false;showClean();}
-            else if(label.equals("Agent"))showAgent();
-            else if(label.equals("Tools"))showTools();
+    private void animateDashboardBody(View body){
+        if(!navigationMotion()||body==null)return;
+        body.animate().cancel();body.setAlpha(.94f);body.setTranslationY(dp(3));
+        body.animate().alpha(1f).translationY(0f).setDuration(UiPolish.FAST_MOTION_MS).start();
+    }
+    private void animateTabContent(){
+        android.view.ViewGroup content=findViewById(android.R.id.content);
+        if(content==null||content.getChildCount()==0)return;
+        View root=content.getChildAt(0);
+        if(root instanceof android.view.ViewGroup){
+            android.view.ViewGroup group=(android.view.ViewGroup)root;
+            for(int i=0;i<group.getChildCount();i++)if(group.getChildAt(i) instanceof ScrollView){animateDashboardBody(group.getChildAt(i));break;}
+        }
+    }
+    private void switchDashboard(int target){
+        if(target==currentDashboard()||requestingScan||agentPermissionPending||downloadsBusy||unusedUninstallPending||dupTrashPending||verifyingCleanup)return;
+        // Do not silently cancel an active Agent request when selecting another tab.
+        if(agentBusy()){folderToast("Cancel the current task first");return;}
+        if(target==NavigationPresentation.HOME)showHome();
+        else if(target==NavigationPresentation.CLEAN){agentTaskOrigin=false;showClean();}
+        else if(target==NavigationPresentation.AGENT)showAgent();
+        else if(target==NavigationPresentation.TOOLS)showTools();
+        animateTabContent();
+    }
+    private void markNavigationRole(View view){
+        view.setAccessibilityDelegate(new View.AccessibilityDelegate(){
+            @Override public void onInitializeAccessibilityNodeInfo(View host,android.view.accessibility.AccessibilityNodeInfo info){
+                super.onInitializeAccessibilityNodeInfo(host,info);info.setClassName(android.widget.Button.class.getName());info.setSelected(host.isSelected());
+            }
         });
-        l.setSelected(active);l.setContentDescription(tr(label)+(active?", selected":"")); return l;
+    }
+    private LinearLayout navigation() {
+        LinearLayout outer=row();LinearLayout pill=row();int height=navHeight();
+        GradientDrawable shell=round(WHITE,32);shell.setStroke(dp(1),UiPolish.palette(dark).border);pill.setBackground(shell);
+        pill.setPadding(dp(4),dp(4),dp(4),dp(4));outer.addView(pill,new LinearLayout.LayoutParams(0,height,1f));
+        String[] labels={"Home","Clean","Agent"};String[] icons={"home","sparkles","bot"};int selected=currentDashboard();
+        for(int i=0;i<labels.length;i++)pill.addView(navItem(labels[i],icons[i],i,selected==i),new LinearLayout.LayoutParams(0,-1,1f));
+        gap(outer,8);LinearLayout tools=navItem("Tools","tools",NavigationPresentation.TOOLS,selected==NavigationPresentation.TOOLS);
+        add(outer,tools,dp(NavigationPresentation.toolsWidth(getResources().getConfiguration().screenWidthDp)),height);return outer;
+    }
+    private LinearLayout navItem(String label,String icon,int target,boolean active) {
+        LinearLayout l=column();l.setGravity(Gravity.CENTER);l.setMinimumHeight(dp(NavigationPresentation.TOUCH_TARGET));
+        int tint=active?BLUE:GRAY;
+        add(l,new Glyph(this,icon,tint),dp(23),dp(23));add(l,new View(this),1,dp(3));
+        TextView name=centered(label,11,tint,active?700:500);name.setMaxLines(2);name.setEllipsize(android.text.TextUtils.TruncateAt.END);name.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_NO);add(l,name,-1,-2);
+        tap(l,active?PALE:WHITE,28,()->switchDashboard(target));l.setSelected(active);
+        l.setContentDescription(tr(label)+(active?", selected":""));markNavigationRole(l);return l;
     }
 
     private static final class Glyph extends View {
