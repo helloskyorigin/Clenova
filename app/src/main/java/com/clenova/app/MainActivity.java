@@ -497,7 +497,7 @@ public final class MainActivity extends Activity {
     }
     private LinearLayout home() {
         LinearLayout root=column(); root.setBackgroundColor(BG);
-        root.setPadding(dp(18),v(12),dp(18),v(10));
+        root.setPadding(dp(UiKit.gutter(this)),v(12),dp(UiKit.gutter(this)),v(10));
         add(root,header(),-1,dp(44)); space(root,8);
 
         ScrollView scroller=new ScrollView(this);
@@ -571,7 +571,7 @@ public final class MainActivity extends Activity {
         restoreAgentWindow();getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);getWindow().setStatusBarColor(BG);
         getWindow().getDecorView().setSystemUiVisibility((dark?0:View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR)|(dark||android.os.Build.VERSION.SDK_INT<27?0:View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR));
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
-        LinearLayout root=column();root.setBackgroundColor(BG);root.setPadding(dp(18),v(10),dp(18),v(10));
+        LinearLayout root=column();root.setBackgroundColor(BG);root.setPadding(dp(UiKit.gutter(this)),v(10),dp(UiKit.gutter(this)),v(10));
         LinearLayout header=row();add(header,agentHeaderButton("agent_menu","Agent menu",this::showAgentDrawer),dp(42),dp(42));gap(header,10);weight(header,txt("Agent",21,INK,700));add(header,agentHeaderButton("new_chat","New conversation",this::newAgentChat),dp(42),dp(42));add(root,header,-1,-2);
         ScrollView scroll=new ScrollView(this);scroll.setFillViewport(true);scroll.setVerticalScrollBarEnabled(false);scroll.setOverScrollMode(View.OVER_SCROLL_NEVER);
         LinearLayout body=column();body.setPadding(0,v(12),0,v(12));scroll.addView(body,new ScrollView.LayoutParams(-1,-1));root.addView(scroll,new LinearLayout.LayoutParams(-1,0,1f));
@@ -739,7 +739,7 @@ public final class MainActivity extends Activity {
     }
     private LinearLayout toolsScreen(){
         LinearLayout root=column();root.setBackgroundColor(BG);
-        root.setPadding(dp(18),v(12),dp(18),v(10));
+        root.setPadding(dp(UiKit.gutter(this)),v(12),dp(UiKit.gutter(this)),v(10));
         add(root,header(),-1,dp(44));space(root,8);
 
         ScrollView scroll=new ScrollView(this);toolsScroll=scroll;
@@ -798,7 +798,7 @@ public final class MainActivity extends Activity {
     }
 
     private LinearLayout cleanScreen(){
-        LinearLayout root=column();root.setBackgroundColor(BG);root.setPadding(dp(18),v(12),dp(18),v(10));
+        LinearLayout root=column();root.setBackgroundColor(BG);root.setPadding(dp(UiKit.gutter(this)),v(12),dp(UiKit.gutter(this)),v(10));
         LinearLayout header=row();LinearLayout heading=column();add(heading,txt("Clean",29,INK,700),-1,-2);space(heading,4);
         add(heading,txt("Make room for what matters.",12,GRAY,400),-1,-2);weight(header,heading);gap(header,10);
         FrameLayout settings=new FrameLayout(this);
@@ -884,7 +884,7 @@ public final class MainActivity extends Activity {
         }return false;
     }
     private LinearLayout scanShell(String title,Runnable back){
-        LinearLayout root=column();root.setBackgroundColor(BG);root.setPadding(dp(18),v(12),dp(18),v(12));
+        LinearLayout root=column();root.setBackgroundColor(BG);root.setPadding(dp(UiKit.gutter(this)),v(12),dp(UiKit.gutter(this)),v(12));
         FrameLayout header=new FrameLayout(this);header.addView(centered(title,17,INK,600),new FrameLayout.LayoutParams(-1,-1));
         FrameLayout arrow=new FrameLayout(this);arrow.addView(new Glyph(this,"back",INK),new FrameLayout.LayoutParams(dp(24),dp(24),Gravity.CENTER));tap(arrow,WHITE,22,back);arrow.setContentDescription(tr("Back"));
         header.addView(arrow,new FrameLayout.LayoutParams(dp(44),dp(44),Gravity.START|Gravity.CENTER_VERTICAL));add(root,header,-1,dp(44));return root;
@@ -1812,7 +1812,7 @@ public final class MainActivity extends Activity {
     }
     private LinearLayout settingsScreen(){
         LinearLayout root=column();root.setBackgroundColor(BG);
-        root.setPadding(dp(18),v(12),dp(18),v(12));
+        root.setPadding(dp(UiKit.gutter(this)),v(12),dp(UiKit.gutter(this)),v(12));
         FrameLayout header=new FrameLayout(this);
         header.addView(centered("Settings",17,INK,600),new FrameLayout.LayoutParams(-1,-1));
         FrameLayout back=new FrameLayout(this);
@@ -1940,7 +1940,7 @@ public final class MainActivity extends Activity {
         popup.showAsDropDown(anchor,0,-anchor.getHeight(),Gravity.END);
         animatePreferenceMenu(menu);
     }
-    private void animatePreferenceMenu(View menu){if(!ValueAnimator.areAnimatorsEnabled())return;menu.setAlpha(0f);menu.setScaleX(.97f);menu.setScaleY(.97f);menu.animate().alpha(1f).scaleX(1f).scaleY(1f).setDuration(140).start();}
+    private void animatePreferenceMenu(View menu){if(!ValueAnimator.areAnimatorsEnabled())return;menu.setAlpha(0f);menu.setScaleX(.97f);menu.setScaleY(.97f);menu.animate().alpha(1f).scaleX(1f).scaleY(1f).setDuration(UiPolish.FAST_MOTION_MS).start();}
     private LinearLayout preferenceOption(String icon,String value,boolean selected){
         LinearLayout line=row();line.setPadding(dp(9),0,dp(9),0);
         if(icon!=null){add(line,new Glyph(this,icon,INK),dp(20),dp(20));gap(line,10);}
@@ -2119,7 +2119,7 @@ public final class MainActivity extends Activity {
         if(scroll!=null)scroll.post(()->scroll.scrollTo(0,aboutScrollY));
     }
     private LinearLayout aboutScreen(){
-        LinearLayout root=column();root.setBackgroundColor(BG);root.setPadding(dp(18),v(12),dp(18),v(12));
+        LinearLayout root=column();root.setBackgroundColor(BG);root.setPadding(dp(UiKit.gutter(this)),v(12),dp(UiKit.gutter(this)),v(12));
         FrameLayout header=new FrameLayout(this);
         header.addView(centered("About Clenova",17,INK,600),new FrameLayout.LayoutParams(-1,-1));
         FrameLayout back=new FrameLayout(this);
@@ -2202,7 +2202,7 @@ public final class MainActivity extends Activity {
     private LinearLayout legalScreen(boolean terms){
         String title=terms?"Terms of use":"Privacy policy";
         String[][] sections=terms?TermsOfUse.SECTIONS:PrivacyPolicy.SECTIONS;
-        LinearLayout root=column();root.setBackgroundColor(BG);root.setPadding(dp(18),v(12),dp(18),v(12));
+        LinearLayout root=column();root.setBackgroundColor(BG);root.setPadding(dp(UiKit.gutter(this)),v(12),dp(UiKit.gutter(this)),v(12));
         FrameLayout header=new FrameLayout(this);
         header.addView(centered(title,17,INK,600),new FrameLayout.LayoutParams(-1,-1));
         FrameLayout back=new FrameLayout(this);
@@ -2267,7 +2267,7 @@ public final class MainActivity extends Activity {
         hideHelpKeyboard();openSettings();
     }
     private LinearLayout feedbackScreen(){
-        LinearLayout root=column();root.setBackgroundColor(BG);root.setPadding(dp(18),v(12),dp(18),v(12));root.setFocusableInTouchMode(true);
+        LinearLayout root=column();root.setBackgroundColor(BG);root.setPadding(dp(UiKit.gutter(this)),v(12),dp(UiKit.gutter(this)),v(12));root.setFocusableInTouchMode(true);
         FrameLayout header=new FrameLayout(this);
         header.addView(centered("Send feedback",17,INK,600),new FrameLayout.LayoutParams(-1,-1));
         FrameLayout back=new FrameLayout(this);
@@ -2380,7 +2380,7 @@ public final class MainActivity extends Activity {
         helpVisible=true;settingsVisible=true;setContentView(helpSupportScreen());
     }
     private LinearLayout helpSupportScreen(){
-        LinearLayout root=column();root.setBackgroundColor(BG);root.setPadding(dp(18),v(12),dp(18),v(12));
+        LinearLayout root=column();root.setBackgroundColor(BG);root.setPadding(dp(UiKit.gutter(this)),v(12),dp(UiKit.gutter(this)),v(12));
         root.setFocusableInTouchMode(true);
         FrameLayout header=new FrameLayout(this);
         header.addView(centered("Help & support",17,INK,600),new FrameLayout.LayoutParams(-1,-1));
@@ -2494,7 +2494,7 @@ public final class MainActivity extends Activity {
         privacyVisible=true;permissionsVisible=false;settingsVisible=true;setContentView(privacyDataScreen());
     }
     private LinearLayout privacyDataScreen(){
-        LinearLayout root=column();root.setBackgroundColor(BG);root.setPadding(dp(18),v(12),dp(18),v(12));
+        LinearLayout root=column();root.setBackgroundColor(BG);root.setPadding(dp(UiKit.gutter(this)),v(12),dp(UiKit.gutter(this)),v(12));
         FrameLayout header=new FrameLayout(this);
         header.addView(centered("Privacy & data",17,INK,600),new FrameLayout.LayoutParams(-1,-1));
         FrameLayout back=new FrameLayout(this);
@@ -2594,7 +2594,7 @@ public final class MainActivity extends Activity {
         permissionsVisible=true;settingsVisible=true;setContentView(appPermissionsScreen());
     }
     private LinearLayout appPermissionsScreen(){
-        LinearLayout root=column();root.setBackgroundColor(BG);root.setPadding(dp(18),v(12),dp(18),v(12));
+        LinearLayout root=column();root.setBackgroundColor(BG);root.setPadding(dp(UiKit.gutter(this)),v(12),dp(UiKit.gutter(this)),v(12));
         FrameLayout header=new FrameLayout(this);
         header.addView(centered("App permissions",17,INK,600),new FrameLayout.LayoutParams(-1,-1));
         FrameLayout back=new FrameLayout(this);
@@ -2697,7 +2697,7 @@ public final class MainActivity extends Activity {
     private static final String[] HISTORY_FILTERS={"All activity","Scans","Cleanups","Protection","Tools"};
     private static final String[] HISTORY_CATEGORIES={"","scan","cleanup","protection","tools"};
     private LinearLayout historyScreen(){
-        LinearLayout root=column();root.setBackgroundColor(BG);root.setPadding(dp(18),v(12),dp(18),v(12));
+        LinearLayout root=column();root.setBackgroundColor(BG);root.setPadding(dp(UiKit.gutter(this)),v(12),dp(UiKit.gutter(this)),v(12));
         FrameLayout header=new FrameLayout(this);
         header.addView(centered("Activity history",17,INK,600),new FrameLayout.LayoutParams(-1,-1));
         FrameLayout back=new FrameLayout(this);
@@ -2785,7 +2785,7 @@ public final class MainActivity extends Activity {
         setContentView(historyDetailsScreen(entry));
     }
     private LinearLayout historyDetailsScreen(ActivityHistory.Entry entry){
-        LinearLayout root=column();root.setBackgroundColor(BG);root.setPadding(dp(18),v(12),dp(18),v(12));
+        LinearLayout root=column();root.setBackgroundColor(BG);root.setPadding(dp(UiKit.gutter(this)),v(12),dp(UiKit.gutter(this)),v(12));
         FrameLayout header=new FrameLayout(this);
         header.addView(centered("Activity details",17,INK,600),new FrameLayout.LayoutParams(-1,-1));
         FrameLayout back=new FrameLayout(this);
@@ -2882,7 +2882,7 @@ public final class MainActivity extends Activity {
         filesVisible=false;foldersVisible=false;settingsVisible=true;agentPrefsVisible=false;protectionVisible=true;setContentView(protectionScreen());
     }
     private LinearLayout protectionScreen(){
-        LinearLayout root=column();root.setBackgroundColor(BG);root.setPadding(dp(18),v(12),dp(18),v(12));
+        LinearLayout root=column();root.setBackgroundColor(BG);root.setPadding(dp(UiKit.gutter(this)),v(12),dp(UiKit.gutter(this)),v(12));
         FrameLayout header=new FrameLayout(this);
         header.addView(centered("Cleanup protection",17,INK,600),new FrameLayout.LayoutParams(-1,-1));
         FrameLayout back=new FrameLayout(this);
@@ -2940,7 +2940,7 @@ public final class MainActivity extends Activity {
         setContentView(protectedFoldersScreen());
     }
     private LinearLayout protectedFoldersScreen(){
-        LinearLayout root=column();root.setBackgroundColor(BG);root.setPadding(dp(18),v(12),dp(18),v(12));
+        LinearLayout root=column();root.setBackgroundColor(BG);root.setPadding(dp(UiKit.gutter(this)),v(12),dp(UiKit.gutter(this)),v(12));
         FrameLayout header=new FrameLayout(this);
         TextView title=centered("Protected folders",17,INK,600);title.setPadding(dp(46),0,dp(46),0);
         header.addView(title,new FrameLayout.LayoutParams(-1,-1));
@@ -3000,7 +3000,7 @@ public final class MainActivity extends Activity {
         setContentView(protectedFilesScreen());
     }
     private LinearLayout protectedFilesScreen(){
-        LinearLayout root=column();root.setBackgroundColor(BG);root.setPadding(dp(18),v(12),dp(18),v(12));
+        LinearLayout root=column();root.setBackgroundColor(BG);root.setPadding(dp(UiKit.gutter(this)),v(12),dp(UiKit.gutter(this)),v(12));
         FrameLayout header=new FrameLayout(this);
         TextView title=centered("Protected files",17,INK,600);title.setPadding(dp(46),0,dp(46),0);
         header.addView(title,new FrameLayout.LayoutParams(-1,-1));
@@ -3146,7 +3146,7 @@ public final class MainActivity extends Activity {
     }
 
     private LinearLayout agentPreferencesScreen(){
-        LinearLayout root=column();root.setBackgroundColor(BG);root.setPadding(dp(18),v(12),dp(18),v(12));
+        LinearLayout root=column();root.setBackgroundColor(BG);root.setPadding(dp(UiKit.gutter(this)),v(12),dp(UiKit.gutter(this)),v(12));
         FrameLayout header=new FrameLayout(this);
         header.addView(centered("Agent preferences",17,INK,600),new FrameLayout.LayoutParams(-1,-1));
         FrameLayout back=new FrameLayout(this);

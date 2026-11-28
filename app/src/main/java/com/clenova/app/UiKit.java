@@ -13,7 +13,6 @@ import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
 import android.graphics.drawable.RippleDrawable;
 import android.os.Build;
-import android.view.View;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
@@ -63,7 +62,7 @@ final class UiKit {
             switch(kind){
                 case "back":line(c,14.5f,5.5f,8,12,14.5f,18.5f);break;
                 case "history":c.drawCircle(12,12,8.5f,paint);line(c,12,7,12,12,15.5f,14);break;
-                case "refresh":c.drawArc(4,4,20,20,-65,285,false,paint);line(c,20,4,20,10,14,10);break;
+                case "refresh":c.drawArc(4,4,20,20,0,310,false,paint);line(c,20,4,20,12,12,12);break;
                 case "undo":line(c,8,4,3.5f,9,8,14);c.drawArc(4,9,21,21,-90,180,false,paint);break;
                 default:c.drawCircle(12,12,8.5f,paint);line(c,12,11,12,16.5f);c.drawPoint(12,7.5f,paint);break;
             }c.restore();

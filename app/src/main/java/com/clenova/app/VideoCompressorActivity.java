@@ -86,10 +86,10 @@ public final class VideoCompressorActivity extends Activity {
     private LinearLayout root(){LinearLayout l=col();l.setBackgroundColor(bg);l.setPadding(dp(UiKit.gutter(this)),dp(10),dp(UiKit.gutter(this)),dp(10));return l;}
     private LinearLayout body(LinearLayout root){ScrollView scroll=new ScrollView(this);scroll.setVerticalScrollBarEnabled(false);scroll.setOverScrollMode(View.OVER_SCROLL_NEVER);LinearLayout b=col();scroll.addView(b,new ScrollView.LayoutParams(-1,-2));root.addView(scroll,new LinearLayout.LayoutParams(-1,0,1));return b;}
     private void header(LinearLayout root,String title,boolean historyButton){
-        LinearLayout h=row();TextView backAction=button("‹",ink,card,this::onBackPressed);android.widget.ImageButton back=UiKit.headerIcon(this,"back",tr("Back"),ink,dark,()->backAction.performClick());add(h,back,dp(UiPolish.ICON_TARGET),dp(UiPolish.ICON_TARGET));gap(h,8);
+        LinearLayout h=row();android.widget.ImageButton back=UiKit.headerIcon(this,"back",tr("Back"),ink,dark,() -> {if(!destroyed)onBackPressed();});add(h,back,dp(UiPolish.ICON_TARGET),dp(UiPolish.ICON_TARGET));gap(h,8);
         weight(h,centered(title,19,ink,true));gap(h,8);
-        if(historyButton){TextView past=button("◷",ink,card,this::showHistory);past.setTextSize(25);past.setContentDescription("Compression history");add(h,past,dp(UiPolish.ICON_TARGET),dp(UiPolish.ICON_TARGET));}else add(h,new View(this),dp(UiPolish.ICON_TARGET),dp(UiPolish.ICON_TARGET));
-        add(root,h,-1,dp(52));gap(root,12);
+        if(historyButton){android.widget.ImageButton past=UiKit.headerIcon(this,"history",tr("Compression history"),ink,dark,() -> {if(!destroyed)showHistory();});add(h,past,dp(UiPolish.ICON_TARGET),dp(UiPolish.ICON_TARGET));}else add(h,new View(this),dp(UiPolish.ICON_TARGET),dp(UiPolish.ICON_TARGET));
+        add(root,h,-1,dp(UiPolish.HEADER_HEIGHT));gap(root,12);
     }
     private void foot(LinearLayout l,String s){gap(l,9);add(l,centered(s,11,gray,false),-1,-2);}
     private void primary(LinearLayout l,String title,Runnable action){gap(l,10);add(l,button(title,0xffffffff,blue,action),-1,dp(52));}

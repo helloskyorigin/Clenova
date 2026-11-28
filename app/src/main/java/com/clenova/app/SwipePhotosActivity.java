@@ -72,11 +72,11 @@ public final class SwipePhotosActivity extends Activity {
     }
     private LinearLayout root(){LinearLayout l=col();l.setBackgroundColor(bg);l.setPadding(dp(UiKit.gutter(this)),dp(10),dp(UiKit.gutter(this)),dp(10));return l;}
     private void header(LinearLayout root,String title,String detail,boolean canUndo){
-        LinearLayout h=row();TextView backAction=button("‹",ink,card,this::onBackPressed);android.widget.ImageButton back=UiKit.headerIcon(this,"back",tr("Back"),ink,dark,()->backAction.performClick());add(h,back,dp(UiPolish.ICON_TARGET),dp(UiPolish.ICON_TARGET));gap(h,8);
+        LinearLayout h=row();android.widget.ImageButton back=UiKit.headerIcon(this,"back",tr("Back"),ink,dark,this::onBackPressed);add(h,back,dp(UiPolish.ICON_TARGET),dp(UiPolish.ICON_TARGET));gap(h,8);
         LinearLayout center=col();center.setGravity(Gravity.CENTER);TextView heading=label(title,20,ink,true);heading.setGravity(Gravity.CENTER);add(center,heading,-1,-2);
         if(!detail.isEmpty()){gap(center,3);TextView sub=label(detail,12,muted,false);sub.setGravity(Gravity.CENTER);add(center,sub,-1,-2);}weight(h,center);gap(h,8);
-        if(canUndo){TextView b=button("↶",ink,card,this::undoLast);b.setTextSize(24);b.setContentDescription("Undo last swipe");b.setEnabled(!undo.isEmpty());b.setAlpha(undo.isEmpty()?.35f:1f);add(h,b,dp(UiPolish.ICON_TARGET),dp(UiPolish.ICON_TARGET));}else add(h,new View(this),dp(UiPolish.ICON_TARGET),dp(UiPolish.ICON_TARGET));
-        add(root,h,-1,dp(52));gap(root,8);
+        if(canUndo){android.widget.ImageButton b=UiKit.headerIcon(this,"undo",tr("Undo last swipe"),ink,dark,this::undoLast);b.setEnabled(!undo.isEmpty());b.setAlpha(undo.isEmpty()?.35f:1f);add(h,b,dp(UiPolish.ICON_TARGET),dp(UiPolish.ICON_TARGET));}else add(h,new View(this),dp(UiPolish.ICON_TARGET),dp(UiPolish.ICON_TARGET));
+        add(root,h,-1,dp(UiPolish.HEADER_HEIGHT));gap(root,8);
     }
     private void status(String text,Runnable retry){
         LinearLayout l=root();header(l,"Swipe Photos","",false);LinearLayout body=col();body.setGravity(Gravity.CENTER);
