@@ -46,9 +46,9 @@ public final class SwipePhotosActivity extends Activity {
     @Override public void onCreate(Bundle state){
         super.onCreate(state);
         prefs=new AppPreferences(this);
-        dark=prefs.appearance().equals("Dark")||(prefs.appearance().equals("System")&&(getResources().getConfiguration().uiMode&Configuration.UI_MODE_NIGHT_MASK)==Configuration.UI_MODE_NIGHT_YES);
-        bg=dark?0xff141416:0xfff5f5f7;card=dark?0xff242426:0xffffffff;ink=dark?0xfff4f4f6:0xff111111;
-        muted=dark?0xffa2a2aa:UiPolish.LIGHT_MUTED;blue=dark?0xff409cff:0xff007aff;pale=dark?0xff19334c:0xffe6f0ff;red=dark?0xffff6961:0xffff453a;green=dark?0xff61d883:0xff249d42;
+        dark=UiKit.dark(this,prefs.appearance());
+        UiPolish.Palette palette=UiPolish.palette(dark);bg=palette.background;card=palette.card;ink=palette.ink;muted=palette.muted;
+        blue=palette.accent;pale=palette.tint;green=palette.success;red=palette.danger;
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,WindowManager.LayoutParams.FLAG_FULLSCREEN);
         getWindow().setNavigationBarColor(bg);
         if(Build.VERSION.SDK_INT>=27)getWindow().getDecorView().setSystemUiVisibility(dark?0:View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR);
@@ -59,23 +59,23 @@ public final class SwipePhotosActivity extends Activity {
     @Override protected void onSaveInstanceState(Bundle state){super.onSaveInstanceState(state);state.putBoolean("trash_pending",approvedPending);if(cleanupReceipt!=null)state.putBundle("cleanup_receipt",cleanupReceipt.save());}
     private void open(){if(SmartMediaScan.hasPhotoAccess(this))load();else accessScreen();}
     private String tr(String s){return AppStrings.translate(prefs.language(),s);}
-    private GradientDrawable rounded(int c,int radius){GradientDrawable d=new GradientDrawable();d.setColor(c);d.setCornerRadius(dp(radius));return d;}
+    private GradientDrawable rounded(int c,int radius){return UiKit.shape(this,c,radius);}
     private LinearLayout col(){LinearLayout l=new LinearLayout(this);l.setOrientation(LinearLayout.VERTICAL);return l;}
     private LinearLayout row(){LinearLayout l=new LinearLayout(this);l.setGravity(Gravity.CENTER_VERTICAL);return l;}
     private void add(LinearLayout p,View v,int w,int h){p.addView(v,new LinearLayout.LayoutParams(w,h));}
     private void weight(LinearLayout p,View v){p.addView(v,new LinearLayout.LayoutParams(0,-2,1));}
     private void gap(LinearLayout p,int n){add(p,new View(this),dp(n),dp(n));}
-    private TextView label(String s,int size,int color,boolean bold){TextView t=new TextView(this);t.setText(tr(s));t.setTextSize(size);t.setTextColor(color);t.setIncludeFontPadding(false);t.setTypeface(Typeface.create("sans-serif",bold?Typeface.BOLD:Typeface.NORMAL));return t;}
+    private TextView label(String s,int size,int color,boolean bold){TextView t=new TextView(this);t.setText(tr(s));UiKit.typography(t,size,color,bold?600:400);return t;}
     private TextView button(String s,int color,int fill,Runnable action){
-        TextView t=label(s,15,color,true);t.setGravity(Gravity.CENTER);t.setBackground(rounded(UiPolish.buttonFill(fill,color),26));t.setPadding(dp(12),dp(8),dp(12),dp(8));
+        TextView t=label(s,15,color,true);t.setGravity(Gravity.CENTER);UiKit.buttonSurface(t,fill,color,dark);t.setPadding(dp(12),dp(8),dp(12),dp(8));
         t.setClickable(true);t.setFocusable(true);t.setOnClickListener(v->action.run());return t;
     }
-    private LinearLayout root(){LinearLayout l=col();l.setBackgroundColor(bg);l.setPadding(dp(16),dp(10),dp(16),dp(10));return l;}
+    private LinearLayout root(){LinearLayout l=col();l.setBackgroundColor(bg);l.setPadding(dp(UiKit.gutter(this)),dp(10),dp(UiKit.gutter(this)),dp(10));return l;}
     private void header(LinearLayout root,String title,String detail,boolean canUndo){
-        LinearLayout h=row();TextView back=button("‹",ink,card,this::onBackPressed);back.setTextSize(27);back.setContentDescription("Back");add(h,back,dp(44),dp(44));gap(h,8);
+        LinearLayout h=row();TextView backAction=button("‹",ink,card,this::onBackPressed);android.widget.ImageButton back=UiKit.headerIcon(this,"back",tr("Back"),ink,dark,()->backAction.performClick());add(h,back,dp(UiPolish.ICON_TARGET),dp(UiPolish.ICON_TARGET));gap(h,8);
         LinearLayout center=col();center.setGravity(Gravity.CENTER);TextView heading=label(title,20,ink,true);heading.setGravity(Gravity.CENTER);add(center,heading,-1,-2);
         if(!detail.isEmpty()){gap(center,3);TextView sub=label(detail,12,muted,false);sub.setGravity(Gravity.CENTER);add(center,sub,-1,-2);}weight(h,center);gap(h,8);
-        if(canUndo){TextView b=button("↶",ink,card,this::undoLast);b.setTextSize(24);b.setContentDescription("Undo last swipe");b.setEnabled(!undo.isEmpty());b.setAlpha(undo.isEmpty()?.35f:1f);add(h,b,dp(44),dp(44));}else add(h,new View(this),dp(44),dp(44));
+        if(canUndo){TextView b=button("↶",ink,card,this::undoLast);b.setTextSize(24);b.setContentDescription("Undo last swipe");b.setEnabled(!undo.isEmpty());b.setAlpha(undo.isEmpty()?.35f:1f);add(h,b,dp(UiPolish.ICON_TARGET),dp(UiPolish.ICON_TARGET));}else add(h,new View(this),dp(UiPolish.ICON_TARGET),dp(UiPolish.ICON_TARGET));
         add(root,h,-1,dp(52));gap(root,8);
     }
     private void status(String text,Runnable retry){

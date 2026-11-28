@@ -45,8 +45,9 @@ public final class PhotoCompressorActivity extends Activity {
     private Ring ring;
     @Override public void onCreate(Bundle state){
         super.onCreate(state);prefs=new AppPreferences(this);history=new ActivityHistory(this);
-        dark=prefs.appearance().equals("Dark")||(prefs.appearance().equals("System")&&(getResources().getConfiguration().uiMode&Configuration.UI_MODE_NIGHT_MASK)==Configuration.UI_MODE_NIGHT_YES);
-        bg=dark?0xff141416:0xfff5f5f7;card=dark?0xff242426:0xffffffff;ink=dark?0xfff4f4f6:0xff111111;gray=dark?0xffa2a2aa:UiPolish.LIGHT_MUTED;blue=dark?0xff409cff:0xff007aff;pale=dark?0xff19334c:0xffe6f0ff;green=dark?0xff61d883:0xff249d42;red=dark?0xffff6961:0xffe43e35;
+        dark=UiKit.dark(this,prefs.appearance());
+        UiPolish.Palette palette=UiPolish.palette(dark);bg=palette.background;card=palette.card;ink=palette.ink;gray=palette.muted;
+        blue=palette.accent;pale=palette.tint;green=palette.success;red=palette.danger;
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,WindowManager.LayoutParams.FLAG_FULLSCREEN);getWindow().setNavigationBarColor(bg);
         if(Build.VERSION.SDK_INT>=27)getWindow().getDecorView().setSystemUiVisibility(dark?0:View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR);
         File[] stale=getCacheDir().listFiles((d,n)->n.startsWith("clenova-photo-"));
@@ -57,20 +58,20 @@ public final class PhotoCompressorActivity extends Activity {
     @Override protected void onSaveInstanceState(Bundle b){super.onSaveInstanceState(b);b.putBoolean("trash_pending",trashPending);if(cleanupReceipt!=null)b.putBundle("cleanup_receipt",cleanupReceipt.save());}
     private int dp(float n){return Math.round(n*getResources().getDisplayMetrics().density);}
     private String tr(String s){return AppStrings.translate(prefs.language(),s);}
-    private GradientDrawable shape(int color,int radius){GradientDrawable d=new GradientDrawable();d.setColor(color);d.setCornerRadius(dp(radius));return d;}
+    private GradientDrawable shape(int color,int radius){return UiKit.shape(this,color,radius);}
     private LinearLayout col(){LinearLayout l=new LinearLayout(this);l.setOrientation(LinearLayout.VERTICAL);return l;}
     private LinearLayout row(){LinearLayout l=new LinearLayout(this);l.setGravity(Gravity.CENTER_VERTICAL);return l;}
     private void add(LinearLayout p,View v,int w,int h){p.addView(v,new LinearLayout.LayoutParams(w,h));}
     private void weight(LinearLayout p,View v){p.addView(v,new LinearLayout.LayoutParams(0,-2,1));}
     private void gap(LinearLayout p,int n){add(p,new View(this),dp(n),dp(n));}
-    private TextView text(String s,int size,int tint,boolean bold){TextView t=new TextView(this);t.setText(tr(s));t.setTextSize(size);t.setTextColor(tint);t.setIncludeFontPadding(false);t.setTypeface(Typeface.create("sans-serif",bold?Typeface.BOLD:Typeface.NORMAL));return t;}
+    private TextView text(String s,int size,int tint,boolean bold){TextView t=new TextView(this);t.setText(tr(s));UiKit.typography(t,size,tint,bold?600:400);return t;}
     private TextView center(String s,int size,int tint,boolean bold){TextView t=text(s,size,tint,bold);t.setGravity(Gravity.CENTER);return t;}
-    private TextView button(String s,int tint,int fill,Runnable action){TextView t=center(s,14,tint,true);t.setBackground(shape(UiPolish.buttonFill(fill,tint),26));t.setPadding(dp(10),dp(7),dp(10),dp(7));t.setFocusable(true);t.setClickable(true);t.setOnClickListener(v->{if(!destroyed)action.run();});return t;}
-    private LinearLayout block(){LinearLayout l=col();l.setBackground(shape(card,21));l.setPadding(dp(14),dp(13),dp(14),dp(13));return l;}
-    private LinearLayout root(){LinearLayout l=col();l.setBackgroundColor(bg);l.setPadding(dp(16),dp(10),dp(16),dp(10));return l;}
+    private TextView button(String s,int tint,int fill,Runnable action){TextView t=center(s,14,tint,true);UiKit.buttonSurface(t,fill,tint,dark);t.setPadding(dp(10),dp(7),dp(10),dp(7));t.setFocusable(true);t.setClickable(true);t.setOnClickListener(v->{if(!destroyed)action.run();});return t;}
+    private LinearLayout block(){LinearLayout l=col();l.setBackground(UiKit.card(this,dark));l.setPadding(dp(UiPolish.CARD_PAD_X),dp(UiPolish.CARD_PAD_Y),dp(UiPolish.CARD_PAD_X),dp(UiPolish.CARD_PAD_Y));return l;}
+    private LinearLayout root(){LinearLayout l=col();l.setBackgroundColor(bg);l.setPadding(dp(UiKit.gutter(this)),dp(10),dp(UiKit.gutter(this)),dp(10));return l;}
     private LinearLayout body(LinearLayout l){ScrollView scroll=new ScrollView(this);scroll.setVerticalScrollBarEnabled(false);scroll.setOverScrollMode(View.OVER_SCROLL_NEVER);LinearLayout b=col();scroll.addView(b,new ScrollView.LayoutParams(-1,-2));l.addView(scroll,new LinearLayout.LayoutParams(-1,0,1));return b;}
-    private void header(LinearLayout l,String title,boolean past){LinearLayout h=row();TextView back=button("‹",ink,card,this::onBackPressed);back.setTextSize(27);back.setContentDescription("Back");add(h,back,dp(44),dp(44));gap(h,8);weight(h,center(title,19,ink,true));gap(h,8);
-        if(past){TextView b=button("◷",ink,card,this::showHistory);b.setTextSize(24);b.setContentDescription("Photo compression history");add(h,b,dp(44),dp(44));}else add(h,new View(this),dp(44),dp(44));add(l,h,-1,dp(52));gap(l,10);}
+    private void header(LinearLayout l,String title,boolean past){LinearLayout h=row();TextView backAction=button("‹",ink,card,this::onBackPressed);android.widget.ImageButton back=UiKit.headerIcon(this,"back",tr("Back"),ink,dark,()->backAction.performClick());add(h,back,dp(UiPolish.ICON_TARGET),dp(UiPolish.ICON_TARGET));gap(h,8);weight(h,center(title,19,ink,true));gap(h,8);
+        if(past){TextView b=button("◷",ink,card,this::showHistory);b.setTextSize(24);b.setContentDescription("Photo compression history");add(h,b,dp(UiPolish.ICON_TARGET),dp(UiPolish.ICON_TARGET));}else add(h,new View(this),dp(UiPolish.ICON_TARGET),dp(UiPolish.ICON_TARGET));add(l,h,-1,dp(52));gap(l,10);}
     private void primary(LinearLayout l,String s,Runnable r){gap(l,10);add(l,button(s,0xffffffff,blue,r),-1,dp(51));}
     private void foot(LinearLayout l,String s){gap(l,8);add(l,center(s,11,gray,false),-1,-2);}
     private AlertDialog.Builder dialog(){return new AlertDialog.Builder(this,dark?android.R.style.Theme_Material_Dialog_Alert:android.R.style.Theme_Material_Light_Dialog_Alert);}

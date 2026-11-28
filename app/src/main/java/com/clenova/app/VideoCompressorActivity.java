@@ -58,9 +58,9 @@ public final class VideoCompressorActivity extends Activity {
     }};
     @Override public void onCreate(Bundle state){
         super.onCreate(state);prefs=new AppPreferences(this);history=new ActivityHistory(this);
-        dark=prefs.appearance().equals("Dark")||(prefs.appearance().equals("System")&&(getResources().getConfiguration().uiMode&Configuration.UI_MODE_NIGHT_MASK)==Configuration.UI_MODE_NIGHT_YES);
-        bg=dark?0xff141416:0xfff5f5f7;card=dark?0xff242426:0xffffffff;ink=dark?0xfff4f4f6:0xff111111;gray=dark?0xffa2a2aa:UiPolish.LIGHT_MUTED;
-        blue=dark?0xff409cff:0xff007aff;pale=dark?0xff19334c:0xffe6f0ff;green=dark?0xff61d883:0xff249d42;red=dark?0xffff6961:0xffe43e35;
+        dark=UiKit.dark(this,prefs.appearance());
+        UiPolish.Palette palette=UiPolish.palette(dark);bg=palette.background;card=palette.card;ink=palette.ink;gray=palette.muted;
+        blue=palette.accent;pale=palette.tint;green=palette.success;red=palette.danger;
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,WindowManager.LayoutParams.FLAG_FULLSCREEN);getWindow().setNavigationBarColor(bg);
         if(Build.VERSION.SDK_INT>=27)getWindow().getDecorView().setSystemUiVisibility(dark?0:View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR);
         trashPending=state!=null&&state.getBoolean("trash_pending");cleanupReceipt=CleanupReceipt.restore(state==null?null:state.getBundle("cleanup_receipt"));
@@ -73,27 +73,27 @@ public final class VideoCompressorActivity extends Activity {
     @Override protected void onSaveInstanceState(Bundle b){super.onSaveInstanceState(b);b.putBoolean("trash_pending",trashPending);if(cleanupReceipt!=null)b.putBundle("cleanup_receipt",cleanupReceipt.save());}
     private int dp(float n){return Math.round(n*getResources().getDisplayMetrics().density);}
     private String tr(String s){return AppStrings.translate(prefs.language(),s);}
-    private GradientDrawable shape(int color,int radius){GradientDrawable d=new GradientDrawable();d.setColor(color);d.setCornerRadius(dp(radius));return d;}
+    private GradientDrawable shape(int color,int radius){return UiKit.shape(this,color,radius);}
     private LinearLayout col(){LinearLayout l=new LinearLayout(this);l.setOrientation(LinearLayout.VERTICAL);return l;}
     private LinearLayout row(){LinearLayout l=new LinearLayout(this);l.setGravity(Gravity.CENTER_VERTICAL);return l;}
     private void add(LinearLayout p,View v,int w,int h){p.addView(v,new LinearLayout.LayoutParams(w,h));}
     private void weight(LinearLayout p,View v){p.addView(v,new LinearLayout.LayoutParams(0,-2,1));}
     private void gap(LinearLayout p,int n){add(p,new View(this),dp(n),dp(n));}
-    private TextView text(String s,int size,int color,boolean bold){TextView t=new TextView(this);t.setText(tr(s));t.setTextSize(size);t.setTextColor(color);t.setIncludeFontPadding(false);t.setTypeface(Typeface.create("sans-serif",bold?Typeface.BOLD:Typeface.NORMAL));return t;}
+    private TextView text(String s,int size,int color,boolean bold){TextView t=new TextView(this);t.setText(tr(s));UiKit.typography(t,size,color,bold?600:400);return t;}
     private TextView centered(String s,int size,int color,boolean bold){TextView t=text(s,size,color,bold);t.setGravity(Gravity.CENTER);return t;}
-    private TextView button(String s,int color,int fill,Runnable r){TextView t=centered(s,15,color,true);t.setBackground(shape(UiPolish.buttonFill(fill,color),26));t.setPadding(dp(12),dp(6),dp(12),dp(6));t.setFocusable(true);t.setClickable(true);t.setOnClickListener(v->{if(!destroyed)r.run();});return t;}
-    private LinearLayout block(){LinearLayout l=col();l.setBackground(shape(card,22));l.setPadding(dp(15),dp(14),dp(15),dp(14));return l;}
-    private LinearLayout root(){LinearLayout l=col();l.setBackgroundColor(bg);l.setPadding(dp(18),dp(10),dp(18),dp(10));return l;}
+    private TextView button(String s,int color,int fill,Runnable r){TextView t=centered(s,15,color,true);UiKit.buttonSurface(t,fill,color,dark);t.setPadding(dp(12),dp(6),dp(12),dp(6));t.setFocusable(true);t.setClickable(true);t.setOnClickListener(v->{if(!destroyed)r.run();});return t;}
+    private LinearLayout block(){LinearLayout l=col();l.setBackground(UiKit.card(this,dark));l.setPadding(dp(UiPolish.CARD_PAD_X),dp(UiPolish.CARD_PAD_Y),dp(UiPolish.CARD_PAD_X),dp(UiPolish.CARD_PAD_Y));return l;}
+    private LinearLayout root(){LinearLayout l=col();l.setBackgroundColor(bg);l.setPadding(dp(UiKit.gutter(this)),dp(10),dp(UiKit.gutter(this)),dp(10));return l;}
     private LinearLayout body(LinearLayout root){ScrollView scroll=new ScrollView(this);scroll.setVerticalScrollBarEnabled(false);scroll.setOverScrollMode(View.OVER_SCROLL_NEVER);LinearLayout b=col();scroll.addView(b,new ScrollView.LayoutParams(-1,-2));root.addView(scroll,new LinearLayout.LayoutParams(-1,0,1));return b;}
     private void header(LinearLayout root,String title,boolean historyButton){
-        LinearLayout h=row();TextView back=button("‹",ink,card,this::onBackPressed);back.setTextSize(26);back.setContentDescription("Back");add(h,back,dp(44),dp(44));gap(h,8);
+        LinearLayout h=row();TextView backAction=button("‹",ink,card,this::onBackPressed);android.widget.ImageButton back=UiKit.headerIcon(this,"back",tr("Back"),ink,dark,()->backAction.performClick());add(h,back,dp(UiPolish.ICON_TARGET),dp(UiPolish.ICON_TARGET));gap(h,8);
         weight(h,centered(title,19,ink,true));gap(h,8);
-        if(historyButton){TextView past=button("◷",ink,card,this::showHistory);past.setTextSize(25);past.setContentDescription("Compression history");add(h,past,dp(44),dp(44));}else add(h,new View(this),dp(44),dp(44));
+        if(historyButton){TextView past=button("◷",ink,card,this::showHistory);past.setTextSize(25);past.setContentDescription("Compression history");add(h,past,dp(UiPolish.ICON_TARGET),dp(UiPolish.ICON_TARGET));}else add(h,new View(this),dp(UiPolish.ICON_TARGET),dp(UiPolish.ICON_TARGET));
         add(root,h,-1,dp(52));gap(root,12);
     }
     private void foot(LinearLayout l,String s){gap(l,9);add(l,centered(s,11,gray,false),-1,-2);}
     private void primary(LinearLayout l,String title,Runnable action){gap(l,10);add(l,button(title,0xffffffff,blue,action),-1,dp(52));}
-    private void rule(LinearLayout l){View line=new View(this);line.setBackgroundColor(dark?0xff38383c:0xffeaeaec);add(l,line,-1,dp(1));}
+    private void rule(LinearLayout l){View line=new View(this);line.setBackgroundColor(UiPolish.palette(dark).divider);add(l,line,-1,dp(1));}
     private int theme(){return dark?android.R.style.Theme_Material_Dialog_Alert:android.R.style.Theme_Material_Light_Dialog_Alert;}
     private AlertDialog.Builder dialog(){return new AlertDialog.Builder(this,theme());}
     private void toast(String s){Toast.makeText(this,tr(s),Toast.LENGTH_SHORT).show();}

@@ -1,15 +1,25 @@
 package com.clenova.app;
 public final class UiPolishTest {
-    private static void check(boolean b){if(!b)throw new AssertionError();}
+    static int count;
+    private static void check(boolean b){count++;if(!b)throw new AssertionError("Assertion "+count);}
     public static void main(String[] args){
-        check(UiPolish.contrast(UiPolish.LIGHT_MUTED,0xfff5f5f7)>=4.5);
-        check(UiPolish.contrast(UiPolish.LIGHT_MUTED,0xffffffff)>=4.5);
+        for(boolean dark:new boolean[]{false,true}){
+            UiPolish.Palette p=UiPolish.palette(dark);
+            for(int surface:new int[]{p.background,p.card})for(int color:new int[]{p.ink,p.muted,p.accent,p.success,p.danger})check(UiPolish.contrast(color,surface)>=4.5);
+            check(UiPolish.contrast(p.accent,p.tint)>=4.5);
+        }
         check(UiPolish.contrast(UiPolish.CTA_BLUE,0xffffffff)>=4.5);
-        check(UiPolish.contrast(0xffa2a2aa,0xff242426)>=4.5);
-        check(UiPolish.actionFill(0xff007aff)==UiPolish.CTA_BLUE);
-        check(UiPolish.actionFill(0xff409cff)==UiPolish.CTA_BLUE);
-        check(UiPolish.buttonFill(0xff409cff,0xff111111)==0xff409cff);
-        check(UiPolish.actionFill(0xff19334c)==0xff19334c);
-        System.out.println("UI palette: 8 assertions passed");
+        check(UiPolish.contrast(UiPolish.LIGHT.danger,0xffffffff)>=4.5);
+        check(UiPolish.actionFill(UiPolish.BRAND_BLUE)==UiPolish.CTA_BLUE);
+        check(UiPolish.actionFill(UiPolish.LIGHT.accent)==UiPolish.CTA_BLUE);
+        check(UiPolish.actionFill(UiPolish.DARK.accent)==UiPolish.CTA_BLUE);
+        check(UiPolish.actionFill(UiPolish.DARK.danger)==UiPolish.LIGHT.danger);
+        check(UiPolish.buttonFill(UiPolish.DARK.accent,0xff111111)==UiPolish.DARK.accent);
+        check(UiPolish.actionFill(UiPolish.DARK.tint)==UiPolish.DARK.tint);
+        check(UiPolish.dark("Dark",false));check(!UiPolish.dark("Light",true));check(UiPolish.dark("System",true));check(!UiPolish.dark("System",false));
+        check(UiPolish.gutter(320)==16);check(UiPolish.gutter(393)==18);check(UiPolish.gutter(600)==24);
+        check(UiPolish.fontWeight(500)==500);check(UiPolish.fontWeight(650)==700);check(UiPolish.fontWeight(100)==400);
+        check(UiPolish.ICON_TARGET>=48);check(UiPolish.FAST_MOTION_MS<UiPolish.STANDARD_MOTION_MS);
+        System.out.println("UI foundation: "+count+" assertions passed");
     }
 }

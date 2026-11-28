@@ -434,15 +434,10 @@ public final class MainActivity extends Activity {
         super.onDestroy();
     }
     private void applyPalette(){
-        dark=prefs.appearance().equals("Dark") || (prefs.appearance().equals("System") &&
-            (getResources().getConfiguration().uiMode & android.content.res.Configuration.UI_MODE_NIGHT_MASK)==android.content.res.Configuration.UI_MODE_NIGHT_YES);
-        BG=dark?0xff141416:0xfff5f5f7;
-        WHITE=dark?0xff242426:Color.WHITE;
-        INK=dark?0xfff4f4f6:0xff111111;
-        GRAY=dark?0xffa2a2aa:UiPolish.LIGHT_MUTED;
-        BLUE=dark?0xff409cff:0xff007aff;
-        PALE=dark?0xff19334c:0xffe6f0ff;
-        GREEN=dark?0xff61d883:0xff27984d;
+        dark=UiKit.dark(this,prefs.appearance());
+        UiPolish.Palette palette=UiPolish.palette(dark);
+        BG=palette.background;WHITE=palette.card;INK=palette.ink;GRAY=palette.muted;
+        BLUE=palette.accent;PALE=palette.tint;GREEN=palette.success;
         getWindow().setNavigationBarColor(BG);
         getWindow().getDecorView().setSystemUiVisibility(dark||android.os.Build.VERSION.SDK_INT<27?0:View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR);
     }
@@ -463,12 +458,10 @@ public final class MainActivity extends Activity {
     private int dp(float n) { return Math.round(n * density); }
     private int v(float n) { return dp(n * compact); }
     private GradientDrawable round(int color, float radius) {
-        GradientDrawable shape = new GradientDrawable();
-        shape.setColor(surface(color)); shape.setCornerRadius(dp(radius)); return shape;
+        return UiKit.shape(this,surface(color),radius);
     }
     private void tap(View view, int color, float radius, Runnable action) {
-        view.setBackground(new RippleDrawable(ColorStateList.valueOf(dark?0x26ffffff:0x19000000),
-                round(UiPolish.actionFill(color),radius), round(WHITE,radius)));
+        view.setBackground(UiKit.ripple(this,surface(UiPolish.actionFill(color)),radius,dark));
         view.setClickable(true); view.setFocusable(true);
         view.setOnClickListener(w -> {
             w.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP);
@@ -477,10 +470,7 @@ public final class MainActivity extends Activity {
     }
     private TextView txt(String s, float size, int color, int weight) {
         TextView t = new TextView(this);
-        t.setText(tr(s)); t.setTextSize(size); t.setTextColor(color);
-        t.setTypeface(Typeface.create(weight >= 600 ? "sans-serif-medium" :
-                "sans-serif", weight >= 700 ? Typeface.BOLD : Typeface.NORMAL));
-        t.setIncludeFontPadding(false); return t;
+        t.setText(tr(s));UiKit.typography(t,size,color,weight);return t;
     }
     private TextView centered(String s, float size, int color, int weight) {
         TextView t = txt(s,size,color,weight); t.setGravity(Gravity.CENTER); return t;
@@ -503,7 +493,7 @@ public final class MainActivity extends Activity {
     private void stretch(LinearLayout l) { l.addView(new View(this),new LinearLayout.LayoutParams(0,1,1f)); }
     private void pad(View w,int h,int vert) { w.setPadding(dp(h),v(vert),dp(h),v(vert)); }
     private LinearLayout card() {
-        LinearLayout l=column(); l.setBackground(round(WHITE,22)); pad(l,16,14); return l;
+        LinearLayout l=column();l.setBackground(UiKit.card(this,dark));pad(l,UiPolish.CARD_PAD_X,UiPolish.CARD_PAD_Y);return l;
     }
     private LinearLayout home() {
         LinearLayout root=column(); root.setBackgroundColor(BG);
@@ -3409,7 +3399,7 @@ public final class MainActivity extends Activity {
         super.onBackPressed();
     }
     private void thinRule(LinearLayout parent) {
-        View rule=new View(this);rule.setBackgroundColor(surface(0xffe5e5ea));add(parent,rule,-1,dp(1));
+        View rule=new View(this);rule.setBackgroundColor(UiPolish.palette(dark).divider);add(parent,rule,-1,dp(1));
     }
 
     private LinearLayout navigation() {

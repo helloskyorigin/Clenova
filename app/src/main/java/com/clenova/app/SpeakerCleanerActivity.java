@@ -24,8 +24,9 @@ public final class SpeakerCleanerActivity extends Activity implements SpeakerPla
     private TextView progressStatus,progressDetail,levelLabel;
     @Override public void onCreate(Bundle saved){
         super.onCreate(saved);prefs=new AppPreferences(this);
-        dark=prefs.appearance().equals("Dark")||(prefs.appearance().equals("System")&&(getResources().getConfiguration().uiMode&Configuration.UI_MODE_NIGHT_MASK)==Configuration.UI_MODE_NIGHT_YES);
-        bg=dark?0xff141416:0xfff5f5f7;card=dark?0xff242426:0xffffffff;ink=dark?0xfff4f4f6:0xff111111;gray=dark?0xffa2a2aa:UiPolish.LIGHT_MUTED;blue=dark?0xff409cff:0xff007aff;pale=dark?0xff19334c:0xffe6f0ff;green=dark?0xff61d883:0xff249d42;red=dark?0xffff6961:0xffe43e35;
+        dark=UiKit.dark(this,prefs.appearance());
+        UiPolish.Palette palette=UiPolish.palette(dark);bg=palette.background;card=palette.card;ink=palette.ink;gray=palette.muted;
+        blue=palette.accent;pale=palette.tint;green=palette.success;red=palette.danger;
         if(saved!=null){selected=saved.getBoolean("deep")?SpeakerTone.Mode.DEEP:SpeakerTone.Mode.QUICK;gain=Math.max(.15f,Math.min(.85f,saved.getFloat("gain",.55f)));}
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,WindowManager.LayoutParams.FLAG_FULLSCREEN);getWindow().setNavigationBarColor(bg);
         if(Build.VERSION.SDK_INT>=27)getWindow().getDecorView().setSystemUiVisibility(dark?0:View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR);
@@ -34,22 +35,22 @@ public final class SpeakerCleanerActivity extends Activity implements SpeakerPla
     @Override protected void onSaveInstanceState(Bundle out){super.onSaveInstanceState(out);out.putBoolean("deep",selected==SpeakerTone.Mode.DEEP);out.putFloat("gain",gain);}
     private int dp(float n){return Math.round(n*getResources().getDisplayMetrics().density);}
     private String tr(String s){return AppStrings.translate(prefs.language(),s);}
-    private GradientDrawable shape(int c,int r){GradientDrawable d=new GradientDrawable();d.setColor(c);d.setCornerRadius(dp(r));return d;}
+    private GradientDrawable shape(int c,int r){return UiKit.shape(this,c,r);}
     private LinearLayout col(){LinearLayout l=new LinearLayout(this);l.setOrientation(LinearLayout.VERTICAL);return l;}
     private LinearLayout row(){LinearLayout l=new LinearLayout(this);l.setGravity(Gravity.CENTER_VERTICAL);return l;}
     private void add(LinearLayout p,View v,int w,int h){p.addView(v,new LinearLayout.LayoutParams(w,h));}
     private void weight(LinearLayout p,View v){p.addView(v,new LinearLayout.LayoutParams(0,-2,1));}
     private void gap(LinearLayout p,int n){add(p,new View(this),dp(n),dp(n));}
-    private TextView text(String s,int size,int tint,boolean bold){TextView t=new TextView(this);t.setText(tr(s));t.setTextSize(size);t.setTextColor(tint);t.setIncludeFontPadding(false);t.setTypeface(Typeface.create("sans-serif",bold?Typeface.BOLD:Typeface.NORMAL));return t;}
+    private TextView text(String s,int size,int tint,boolean bold){TextView t=new TextView(this);t.setText(tr(s));UiKit.typography(t,size,tint,bold?600:400);return t;}
     private TextView center(String s,int size,int tint,boolean bold){TextView t=text(s,size,tint,bold);t.setGravity(Gravity.CENTER);return t;}
-    private TextView button(String s,int tint,int fill,Runnable action){TextView t=center(s,15,tint,true);t.setBackground(shape(UiPolish.buttonFill(fill,tint),26));t.setPadding(dp(10),dp(8),dp(10),dp(8));t.setClickable(true);t.setFocusable(true);t.setOnClickListener(v->{if(!destroyed&&foreground)action.run();});return t;}
-    private LinearLayout block(){LinearLayout l=col();l.setBackground(shape(card,22));l.setPadding(dp(14),dp(12),dp(14),dp(12));return l;}
-    private LinearLayout root(){LinearLayout l=col();l.setBackgroundColor(bg);l.setPadding(dp(18),dp(10),dp(18),dp(12));return l;}
+    private TextView button(String s,int tint,int fill,Runnable action){TextView t=center(s,15,tint,true);UiKit.buttonSurface(t,fill,tint,dark);t.setPadding(dp(10),dp(8),dp(10),dp(8));t.setClickable(true);t.setFocusable(true);t.setOnClickListener(v->{if(!destroyed&&foreground)action.run();});return t;}
+    private LinearLayout block(){LinearLayout l=col();l.setBackground(UiKit.card(this,dark));l.setPadding(dp(UiPolish.CARD_PAD_X),dp(UiPolish.CARD_PAD_Y),dp(UiPolish.CARD_PAD_X),dp(UiPolish.CARD_PAD_Y));return l;}
+    private LinearLayout root(){LinearLayout l=col();l.setBackgroundColor(bg);l.setPadding(dp(UiKit.gutter(this)),dp(10),dp(UiKit.gutter(this)),dp(12));return l;}
     private LinearLayout body(LinearLayout l){ScrollView s=new ScrollView(this);s.setVerticalScrollBarEnabled(false);s.setOverScrollMode(View.OVER_SCROLL_NEVER);LinearLayout b=col();s.addView(b,new ScrollView.LayoutParams(-1,-2));l.addView(s,new LinearLayout.LayoutParams(-1,0,1));return b;}
-    private void header(LinearLayout l,boolean info){LinearLayout h=row();TextView back=button("‹",ink,card,this::onBackPressed);back.setTextSize(27);back.setContentDescription("Back");add(h,back,dp(44),dp(44));gap(h,8);weight(h,center("Speaker Cleaner",19,ink,true));gap(h,8);if(info){TextView b=button("ⓘ",ink,card,this::showInfo);b.setTextSize(23);b.setContentDescription("Speaker cleaner information");add(h,b,dp(44),dp(44));}else add(h,new View(this),dp(44),dp(44));add(l,h,-1,dp(52));gap(l,8);}
+    private void header(LinearLayout l,boolean info){LinearLayout h=row();TextView backAction=button("‹",ink,card,this::onBackPressed);android.widget.ImageButton back=UiKit.headerIcon(this,"back",tr("Back"),ink,dark,()->backAction.performClick());add(h,back,dp(UiPolish.ICON_TARGET),dp(UiPolish.ICON_TARGET));gap(h,8);weight(h,center("Speaker Cleaner",19,ink,true));gap(h,8);if(info){TextView b=button("ⓘ",ink,card,this::showInfo);b.setTextSize(23);b.setContentDescription("Speaker cleaner information");add(h,b,dp(UiPolish.ICON_TARGET),dp(UiPolish.ICON_TARGET));}else add(h,new View(this),dp(UiPolish.ICON_TARGET),dp(UiPolish.ICON_TARGET));add(l,h,-1,dp(52));gap(l,8);}
     private void primary(LinearLayout l,String s,Runnable r){gap(l,9);add(l,button(s,0xffffffff,blue,r),-1,dp(52));}
     private void foot(LinearLayout l,String s){gap(l,8);add(l,center(s,11,gray,false),-1,-2);}
-    private void rule(LinearLayout l){View v=new View(this);v.setBackgroundColor(dark?0xff38383c:0xffededf0);add(l,v,-1,dp(1));}
+    private void rule(LinearLayout l){View v=new View(this);v.setBackgroundColor(UiPolish.palette(dark).divider);add(l,v,-1,dp(1));}
     private AlertDialog.Builder dialog(){return new AlertDialog.Builder(this,dark?android.R.style.Theme_Material_Dialog_Alert:android.R.style.Theme_Material_Light_Dialog_Alert);}
     private void showInfo(){dialog().setTitle("About speaker cleaning").setMessage("Low-frequency tones may help move small droplets near the speaker opening. Results vary by device; the app cannot detect water, dust or speaker damage. Keep the speaker pointing down, away from your ears. Disconnect external audio devices, use a low comfortable volume, and stop if uncomfortable. Do not use a damaged or submerged phone; follow the manufacturer’s drying guidance.").setPositiveButton("Done",null).show();}
     private void showHome(){
