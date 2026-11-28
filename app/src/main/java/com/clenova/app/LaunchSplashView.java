@@ -35,16 +35,19 @@ final class LaunchSplashView extends FrameLayout {
         LinearLayout.LayoutParams nameLp=new LinearLayout.LayoutParams(-1,dp(43));nameLp.topMargin=dp(3);identity.addView(name,nameLp);
         TextView tagline=label("Your phone. On autopilot.",15,0xff566174,Typeface.create("sans-serif",Typeface.NORMAL));
         tagline.setMaxLines(2);LinearLayout.LayoutParams taglineLp=new LinearLayout.LayoutParams(-1,-2);taglineLp.topMargin=dp(5);identity.addView(tagline,taglineLp);
-        FrameLayout.LayoutParams center=new FrameLayout.LayoutParams(-1,-2,Gravity.CENTER);
-        center.bottomMargin=dp(height<460?28:18);addView(identity,center);
+        LinearLayout layout=new LinearLayout(c);layout.setOrientation(LinearLayout.VERTICAL);
+        layout.setPadding(0,dp(8),0,dp(height<460?8:24));
+        addView(layout,new FrameLayout.LayoutParams(-1,-1));
+        FrameLayout center=new FrameLayout(c);
+        center.addView(identity,new FrameLayout.LayoutParams(-1,-2,Gravity.CENTER));
+        layout.addView(center,new LinearLayout.LayoutParams(-1,0,1f));
 
         credit=new LinearLayout(c);credit.setGravity(Gravity.CENTER);credit.setOrientation(LinearLayout.HORIZONTAL);
         TextView by=label("by",12,0xff818895,Typeface.create("sans-serif-light",Typeface.NORMAL));
         credit.addView(by,new LinearLayout.LayoutParams(-2,-2));
         TextView sky=label("Skyorigin",18,0xff17253d,Typeface.create("sans-serif-medium",Typeface.NORMAL));
         sky.setLetterSpacing(.07f);LinearLayout.LayoutParams skyLp=new LinearLayout.LayoutParams(-2,-2);skyLp.leftMargin=dp(5);credit.addView(sky,skyLp);
-        FrameLayout.LayoutParams footer=new FrameLayout.LayoutParams(-1,dp(40),Gravity.BOTTOM|Gravity.CENTER_HORIZONTAL);
-        footer.bottomMargin=dp(height<460?8:24);addView(credit,footer);
+        layout.addView(credit,new LinearLayout.LayoutParams(-1,dp(36)));
     }
     private int dp(float n){return Math.round(n*getResources().getDisplayMetrics().density);}
     private TextView label(String value,int sp,int color,Typeface face){

@@ -12,12 +12,10 @@ import android.widget.TextView;
 /** Native, fully readable story examples. Animation highlights steps; it never represents a scan. */
 final class OnboardingPanel extends LinearLayout {
     private final UiPolish.Palette colors;
-    private final boolean compact,dark;
     private final LinearLayout[] rows;
-    private final String[] steps;
     private int current=-1;
     OnboardingPanel(Context c,int page,boolean dark,boolean compact){
-        super(c);this.dark=dark;this.compact=compact;colors=UiPolish.palette(dark);
+        super(c);colors=UiPolish.palette(dark);
         setOrientation(VERTICAL);setPadding(dp(14),dp(compact?12:16),dp(14),dp(compact?12:16));
         setBackground(UiKit.card(c,dark));
         String[] headers={"A conversation, not a chore","A plan for your phone","You make the final call"};
@@ -32,7 +30,7 @@ final class OnboardingPanel extends LinearLayout {
             LayoutParams up=new LayoutParams(-2,-2);up.gravity=Gravity.END;up.topMargin=dp(12);addView(user,up);
             TextView reply=label("I can help you find what to review.",13,colors.ink,500);reply.setPadding(dp(12),dp(10),dp(12),dp(10));reply.setBackground(UiKit.shape(c,colors.tint,16));append(this,reply,7);
         }
-        steps=titles[page];rows=new LinearLayout[steps.length];
+        String[] steps=titles[page];rows=new LinearLayout[steps.length];
         for(int i=0;i<steps.length;i++){
             LinearLayout row=new LinearLayout(c);row.setOrientation(HORIZONTAL);row.setGravity(Gravity.CENTER_VERTICAL);row.setPadding(dp(9),dp(compact?7:9),dp(9),dp(compact?7:9));
             View icon=new StoryIcon(c,kinds[page][i],colors.accent);

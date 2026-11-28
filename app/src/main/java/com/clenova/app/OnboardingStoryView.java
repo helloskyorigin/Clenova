@@ -18,9 +18,11 @@ import android.view.Gravity;
 import android.widget.ScrollView;
 
 /** One foreground-only clock for the progress line and the approved animation. */
-abstract class OnboardingStoryView extends ScrollView {
+abstract class OnboardingStoryView extends LinearLayout {
     interface Frame { void render(float fraction); }
     private StoryProgress progress;
+    private ScrollView storyScroll;
+    private LinearLayout storyBody;
     private Frame frame;
     private Runnable next;
     private ValueAnimator clock;
@@ -33,23 +35,25 @@ abstract class OnboardingStoryView extends ScrollView {
         Context c=getContext();UiPolish.Palette palette=UiPolish.palette(dark);
         android.content.res.Configuration config=getResources().getConfiguration();
         boolean compact=OnboardingPolicy.compact(config.screenWidthDp,config.screenHeightDp);
-        setBackgroundColor(palette.background);setFillViewport(true);setVerticalScrollBarEnabled(false);setOverScrollMode(OVER_SCROLL_NEVER);
-        LinearLayout root=new LinearLayout(c);root.setOrientation(LinearLayout.VERTICAL);
-        int gutter=px(UiKit.gutter(c));root.setPadding(gutter,px(12),gutter,px(16));addView(root,new ScrollView.LayoutParams(-1,-2));
-        addStoryProgress(root,index,dark);
-        TextView step=storyLabel("CLENOVA  /  "+(index+1)+" OF 3",11,palette.accent,600);step.setLetterSpacing(.08f);append(root,step,compact?8:18);
-        TextView title=storyLabel(heading,compact?27:30,palette.ink,700);title.setLetterSpacing(-.025f);append(root,title,8);
-        TextView desc=storyLabel(detail,14,palette.muted,400);desc.setLineSpacing(px(3),1f);append(root,desc,8);
-        OnboardingPanel panel=new OnboardingPanel(c,index,dark,compact);append(root,panel,compact?14:22);
-        View spacer=new View(c);root.addView(spacer,new LinearLayout.LayoutParams(1,0,1f));
+        setOrientation(VERTICAL);setBackgroundColor(palette.background);
+        int gutter=px(UiKit.gutter(c));setPadding(gutter,px(12),gutter,px(16));
+        addStoryProgress(this,index,dark);
+        storyScroll=new ScrollView(c);storyScroll.setFillViewport(false);storyScroll.setVerticalScrollBarEnabled(true);storyScroll.setOverScrollMode(OVER_SCROLL_NEVER);
+        storyBody=new LinearLayout(c);storyBody.setOrientation(VERTICAL);storyBody.setPadding(0,0,0,px(4));
+        storyScroll.addView(storyBody,new ScrollView.LayoutParams(-1,-2));
+        addView(storyScroll,new LinearLayout.LayoutParams(-1,0,1f));
+        TextView step=storyLabel("CLENOVA  /  "+(index+1)+" OF 3",11,palette.accent,600);step.setLetterSpacing(.08f);append(storyBody,step,compact?8:18);
+        TextView title=storyLabel(heading,compact?27:30,palette.ink,700);title.setLetterSpacing(-.025f);append(storyBody,title,8);
+        TextView desc=storyLabel(detail,14,palette.muted,400);desc.setLineSpacing(px(3),1f);append(storyBody,desc,8);
+        OnboardingPanel panel=new OnboardingPanel(c,index,dark,compact);append(storyBody,panel,compact?14:22);
         Button button=new Button(c);button.setText(action);button.setAllCaps(false);button.setLetterSpacing(0);button.setStateListAnimator(null);
         UiKit.typography(button,16,0xffffffff,600);button.setMinHeight(px(52));button.setMinimumHeight(px(52));button.setPadding(px(16),px(12),px(16),px(12));
-        button.setBackground(UiKit.ripple(c,UiPolish.CTA_BLUE,UiPolish.BUTTON_RADIUS,dark));button.setOnClickListener(v->advanceStory());append(root,button,compact?14:20);
+        button.setBackground(UiKit.ripple(c,UiPolish.CTA_BLUE,UiPolish.BUTTON_RADIUS,dark));button.setOnClickListener(v->advanceStory());append(this,button,compact?10:14);
         configureStory(OnboardingPolicy.duration(index),1f,true,panel::setFraction,callback);
     }
     private TextView storyLabel(String value,int size,int color,int weight){TextView t=new TextView(getContext());t.setText(value);UiKit.typography(t,size,color,weight);t.setGravity(Gravity.START);return t;}
     private void append(LinearLayout root,View view,int margin){LinearLayout.LayoutParams lp=new LinearLayout.LayoutParams(-1,-2);lp.topMargin=px(margin);root.addView(view,lp);}
-    private boolean mayAutoAdvance(){return OnboardingPolicy.automatic(reducedMotion(),getResources().getConfiguration().fontScale,getChildCount()>0&&getHeight()>0&&getChildAt(0).getHeight()<=getHeight()+px(2));}
+    private boolean mayAutoAdvance(){return OnboardingPolicy.automatic(reducedMotion(),getResources().getConfiguration().fontScale,storyScroll!=null&&storyBody!=null&&storyScroll.getHeight()>0&&storyBody.getHeight()<=storyScroll.getHeight()+px(2));}
 
     private int px(float dp){return Math.round(dp*getResources().getDisplayMetrics().density);}
     final void addStoryProgress(LinearLayout root,int index,boolean dark){
