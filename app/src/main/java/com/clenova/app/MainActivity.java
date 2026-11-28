@@ -188,9 +188,8 @@ public final class MainActivity extends Activity {
     private final Runnable finishSplash=()->{if(launchSplash==null||isFinishing()||isDestroyed())return;launchSplash=null;if(prefs.onboardingComplete())showHome();else showOnboardingIntro();};
 
     private void showOnboardingIntro(){
-        getWindow().setNavigationBarColor(AgentOnboardingView.BACKGROUND);
-        if(android.os.Build.VERSION.SDK_INT>=27)getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR);
-        onboardingIntro=new AgentOnboardingView(this,()->{
+        applyPalette();
+        onboardingIntro=new AgentOnboardingView(this,dark,()->{
             if(onboardingIntro==null||isFinishing()||isDestroyed())return;
             onboardingIntro.setActive(false);onboardingIntro=null;showOnboardingUnified();
         });
@@ -198,9 +197,8 @@ public final class MainActivity extends Activity {
     }
 
     private void showOnboardingUnified(){
-        getWindow().setNavigationBarColor(AgentOnboardingView.BACKGROUND);
-        if(android.os.Build.VERSION.SDK_INT>=27)getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR);
-        onboardingUnified=new UnifiedOnboardingView(this,()->{
+        applyPalette();
+        onboardingUnified=new UnifiedOnboardingView(this,dark,()->{
             if(onboardingUnified==null||isFinishing()||isDestroyed())return;
             onboardingUnified.setActive(false);onboardingUnified=null;showOnboardingAutopilot();
         });
@@ -208,9 +206,8 @@ public final class MainActivity extends Activity {
     }
 
     private void showOnboardingAutopilot(){
-        getWindow().setNavigationBarColor(AgentOnboardingView.BACKGROUND);
-        if(android.os.Build.VERSION.SDK_INT>=27)getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR);
-        onboardingAutopilot=new AutopilotOnboardingView(this,()->{
+        applyPalette();
+        onboardingAutopilot=new AutopilotOnboardingView(this,dark,()->{
             if(onboardingAutopilot==null||isFinishing()||isDestroyed())return;
             onboardingAutopilot.setActive(false);onboardingAutopilot=null;showOnboardingAccess(null);
         });
@@ -353,7 +350,7 @@ public final class MainActivity extends Activity {
     }
     @Override protected void onSaveInstanceState(Bundle state){
         super.onSaveInstanceState(state);
-        state.putBoolean("onboarding_intro_visible",onboardingIntro!=null||launchSplash!=null);
+        state.putBoolean("onboarding_intro_visible",onboardingIntro!=null||(launchSplash!=null&&!prefs.onboardingComplete()));
         state.putBoolean("onboarding_unified_visible",onboardingUnified!=null);
         state.putBoolean("onboarding_autopilot_visible",onboardingAutopilot!=null);
         state.putBoolean("preparing_phone_visible",preparingPhone!=null);
@@ -1975,7 +1972,7 @@ public final class MainActivity extends Activity {
         if(preparingPhone!=null&&!preparationReady&&overviewJob==null)showPreparingPhone();
         else if(dashboardView!=null&&dashboardView.isAttachedToWindow()&&deviceOverview==null){renderOverviewDashboard();beginOverview(false);}
         if(launchSplash!=null){
-            if(splashDeadline==0){splashDeadline=android.os.SystemClock.elapsedRealtime()+(android.animation.ValueAnimator.areAnimatorsEnabled()?700:0);launchSplash.reveal();}
+            if(splashDeadline==0){splashDeadline=android.os.SystemClock.elapsedRealtime()+(android.animation.ValueAnimator.areAnimatorsEnabled()?OnboardingPolicy.SPLASH_MS:0);launchSplash.reveal();}
             splashHandler.removeCallbacks(finishSplash);splashHandler.postDelayed(finishSplash,Math.max(0,splashDeadline-android.os.SystemClock.elapsedRealtime()));
         }
         agentForeground=true;boolean expired=expireAgentSession();scheduleAgentExpiry();if(agentVisible&&!settingsVisible&&!agentPermissionPending&&!agentTaskOrigin&&!verifyingCleanup&&!completionVisible&&(expired||activeChat!=null)&&!agentCloudBusy&&agentScan==null)showAgent();

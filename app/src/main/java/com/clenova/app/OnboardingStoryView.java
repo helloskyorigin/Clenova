@@ -12,6 +12,9 @@ import android.view.accessibility.AccessibilityManager;
 import android.view.animation.DecelerateInterpolator;
 import android.view.animation.LinearInterpolator;
 import android.widget.LinearLayout;
+import android.widget.Button;
+import android.widget.TextView;
+import android.view.Gravity;
 import android.widget.ScrollView;
 
 /** One foreground-only clock for the progress line and the approved animation. */
@@ -26,11 +29,33 @@ abstract class OnboardingStoryView extends ScrollView {
     private boolean automatic,active,advanced,touching;
 
     OnboardingStoryView(Context context){super(context);}
+    final void buildStory(int index,boolean dark,String heading,String detail,String action,Runnable callback){
+        Context c=getContext();UiPolish.Palette palette=UiPolish.palette(dark);
+        android.content.res.Configuration config=getResources().getConfiguration();
+        boolean compact=OnboardingPolicy.compact(config.screenWidthDp,config.screenHeightDp);
+        setBackgroundColor(palette.background);setFillViewport(true);setVerticalScrollBarEnabled(false);setOverScrollMode(OVER_SCROLL_NEVER);
+        LinearLayout root=new LinearLayout(c);root.setOrientation(LinearLayout.VERTICAL);
+        int gutter=px(UiKit.gutter(c));root.setPadding(gutter,px(12),gutter,px(16));addView(root,new ScrollView.LayoutParams(-1,-2));
+        addStoryProgress(root,index,dark);
+        TextView step=storyLabel("CLENOVA  /  "+(index+1)+" OF 3",11,palette.accent,600);step.setLetterSpacing(.08f);append(root,step,compact?8:18);
+        TextView title=storyLabel(heading,compact?27:30,palette.ink,700);title.setLetterSpacing(-.025f);append(root,title,8);
+        TextView desc=storyLabel(detail,14,palette.muted,400);desc.setLineSpacing(px(3),1f);append(root,desc,8);
+        OnboardingPanel panel=new OnboardingPanel(c,index,dark,compact);append(root,panel,compact?14:22);
+        View spacer=new View(c);root.addView(spacer,new LinearLayout.LayoutParams(1,0,1f));
+        Button button=new Button(c);button.setText(action);button.setAllCaps(false);button.setLetterSpacing(0);button.setStateListAnimator(null);
+        UiKit.typography(button,16,0xffffffff,600);button.setMinHeight(px(52));button.setMinimumHeight(px(52));button.setPadding(px(16),px(12),px(16),px(12));
+        button.setBackground(UiKit.ripple(c,UiPolish.CTA_BLUE,UiPolish.BUTTON_RADIUS,dark));button.setOnClickListener(v->advanceStory());append(root,button,compact?14:20);
+        configureStory(OnboardingPolicy.duration(index),1f,true,panel::setFraction,callback);
+    }
+    private TextView storyLabel(String value,int size,int color,int weight){TextView t=new TextView(getContext());t.setText(value);UiKit.typography(t,size,color,weight);t.setGravity(Gravity.START);return t;}
+    private void append(LinearLayout root,View view,int margin){LinearLayout.LayoutParams lp=new LinearLayout.LayoutParams(-1,-2);lp.topMargin=px(margin);root.addView(view,lp);}
+    private boolean mayAutoAdvance(){return OnboardingPolicy.automatic(reducedMotion(),getResources().getConfiguration().fontScale,getChildCount()>0&&getHeight()>0&&getChildAt(0).getHeight()<=getHeight()+px(2));}
+
     private int px(float dp){return Math.round(dp*getResources().getDisplayMetrics().density);}
-    final void addStoryProgress(LinearLayout root,int index){
-        progress=new StoryProgress(getContext(),index);
+    final void addStoryProgress(LinearLayout root,int index,boolean dark){
+        progress=new StoryProgress(getContext(),index,dark);
         LinearLayout.LayoutParams lp=new LinearLayout.LayoutParams(-1,px(3));
-        lp.leftMargin=px(24);lp.rightMargin=px(24);lp.bottomMargin=px(8);
+        lp.bottomMargin=px(4);
         root.addView(progress,lp);
     }
     final void configureStory(long millis,float lastFrame,boolean auto,Frame draw,Runnable callback){
@@ -43,7 +68,7 @@ abstract class OnboardingStoryView extends ScrollView {
     }
     private boolean foreground(){return active&&isAttachedToWindow()&&hasWindowFocus()&&!touching&&!advanced;}
     private void render(float value){
-        position=Math.max(0f,Math.min(1f,value));
+        position=OnboardingPolicy.position(value);
         if(progress!=null)progress.setFraction(position);
         // Hold the final meaningful frame rather than showing the former loop's fade-out.
         if(frame!=null)frame.render(Math.min(position,finalFrame));
@@ -67,7 +92,7 @@ abstract class OnboardingStoryView extends ScrollView {
     private void syncClock(){
         if(frame==null||advanced)return;
         if(!foreground()){if(clock!=null&&!clock.isPaused())clock.pause();return;}
-        if(reducedMotion()){stopClock();render(1f);return;}
+        if(reducedMotion()||getResources().getConfiguration().fontScale>1.15f){stopClock();render(1f);return;}
         if(position>=1f)return;
         if(clock!=null){if(clock.isPaused())clock.resume();return;}
         ValueAnimator run=ValueAnimator.ofFloat(position,1f);
@@ -80,7 +105,7 @@ abstract class OnboardingStoryView extends ScrollView {
             @Override public void onAnimationEnd(Animator a){
                 if(clock!=a)return;
                 clock=null;render(1f);
-                if(automatic&&foreground()&&!reducedMotion())advanceStory();
+                if(automatic&&foreground()&&mayAutoAdvance())advanceStory();
             }
         });
         run.start();
@@ -92,8 +117,8 @@ abstract class OnboardingStoryView extends ScrollView {
     final void playEntrance(){
         animate().cancel();setAlpha(1f);setTranslationX(0f);
         if(reducedMotion())return;
-        setAlpha(0f);setTranslationX(px(14));
-        animate().alpha(1f).translationX(0f).setDuration(260L)
+        setAlpha(.9f);setTranslationX(px(6));
+        animate().alpha(1f).translationX(0f).setDuration(OnboardingPolicy.ENTER_MS)
             .setInterpolator(new DecelerateInterpolator(1.6f)).start();
     }
     @Override public boolean dispatchTouchEvent(MotionEvent event){
@@ -114,9 +139,10 @@ abstract class OnboardingStoryView extends ScrollView {
     private static final class StoryProgress extends View{
         private final Paint paint=new Paint(Paint.ANTI_ALIAS_FLAG);
         private final int index;
+        private final UiPolish.Palette colors;
         private float fraction;
-        StoryProgress(Context context,int index){
-            super(context);this.index=index;
+        StoryProgress(Context context,int index,boolean dark){
+            super(context);this.index=index;colors=UiPolish.palette(dark);
             setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_YES);
             setContentDescription("Introduction "+(index+1)+" of 3");
         }
@@ -127,10 +153,10 @@ abstract class OnboardingStoryView extends ScrollView {
             if(w<=0||h<=0)return;
             for(int i=0;i<3;i++){
                 float x=i*(w+gap);
-                paint.setColor(0xffdce3ed);c.drawRoundRect(x,0,x+w,h,h/2,h/2,paint);
+                paint.setColor(colors.divider);c.drawRoundRect(x,0,x+w,h,h/2,h/2,paint);
                 float fill=i<index?1f:i==index?fraction:0f;
                 if(fill>0){
-                    paint.setColor(0xff007aff);
+                    paint.setColor(colors.accent);
                     float end=x+w*fill,r=Math.min(h/2,(end-x)/2);
                     c.drawRoundRect(x,0,end,h,r,r,paint);
                 }

@@ -25,14 +25,14 @@ final class LaunchSplashView extends FrameLayout {
         identity.setPadding(dp(20),0,dp(20),0);
         int width=c.getResources().getConfiguration().screenWidthDp;
         int height=c.getResources().getConfiguration().screenHeightDp;
-        int logoSize=Math.max(100,Math.min(220,Math.min((int)(width*.53f),(int)(height*.40f))));
+        int logoSize=Math.max(64,Math.min(156,Math.min((int)(width*.40f),(int)(height*.32f))));
         logo=new ImageView(c);logo.setImageResource(R.drawable.clenova_logo);logo.setScaleType(ImageView.ScaleType.FIT_CENTER);
         logo.setContentDescription("Clenova app logo");
         identity.addView(logo,new LinearLayout.LayoutParams(dp(logoSize),dp(logoSize)));
-        TextView name=label("CLENOVA",width<330?29:34,0xff0b1935,Typeface.create("sans-serif",Typeface.BOLD));
+        TextView name=label("CLENOVA",width<330?27:32,0xff0b1935,UiKit.font(700));
         name.setLetterSpacing(.055f);name.setMaxLines(1);
         name.setAutoSizeTextTypeUniformWithConfiguration(18,34,1,android.util.TypedValue.COMPLEX_UNIT_SP);
-        LinearLayout.LayoutParams nameLp=new LinearLayout.LayoutParams(-1,dp(49));nameLp.topMargin=dp(3);identity.addView(name,nameLp);
+        LinearLayout.LayoutParams nameLp=new LinearLayout.LayoutParams(-1,dp(43));nameLp.topMargin=dp(3);identity.addView(name,nameLp);
         TextView tagline=label("Your phone. On autopilot.",15,0xff566174,Typeface.create("sans-serif",Typeface.NORMAL));
         tagline.setMaxLines(2);LinearLayout.LayoutParams taglineLp=new LinearLayout.LayoutParams(-1,-2);taglineLp.topMargin=dp(5);identity.addView(tagline,taglineLp);
         FrameLayout.LayoutParams center=new FrameLayout.LayoutParams(-1,-2,Gravity.CENTER);
@@ -54,9 +54,9 @@ final class LaunchSplashView extends FrameLayout {
     void reveal(){
         if(revealed)return;revealed=true;
         if(!ValueAnimator.areAnimatorsEnabled())return;
-        logo.setScaleX(.96f);logo.setScaleY(.96f);logo.animate().scaleX(1).scaleY(1).setDuration(330).setInterpolator(new DecelerateInterpolator()).start();
-        identity.setAlpha(.82f);identity.animate().alpha(1).setDuration(230).start();
-        credit.setAlpha(.65f);credit.animate().alpha(1).setDuration(260).start();
+        logo.setScaleX(.985f);logo.setScaleY(.985f);logo.animate().scaleX(1).scaleY(1).setDuration(180).setInterpolator(new DecelerateInterpolator()).start();
+        identity.setAlpha(.94f);identity.animate().alpha(1).setDuration(160).start();
+        credit.setAlpha(.9f);credit.animate().alpha(1).setDuration(160).start();
     }
     @Override protected void onDetachedFromWindow(){logo.animate().cancel();identity.animate().cancel();credit.animate().cancel();super.onDetachedFromWindow();}
 }

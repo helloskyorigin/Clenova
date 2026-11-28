@@ -35,6 +35,10 @@ jobs:
         run: |
           javac -d /tmp/clenova-tests app/src/main/java/com/clenova/app/AgentActions.java tests/AgentActionsTest.java
           java -cp /tmp/clenova-tests com.clenova.app.AgentActionsTest
+      - name: Verify onboarding presentation policy
+        run: |
+          javac -d /tmp/clenova-tests app/src/main/java/com/clenova/app/OnboardingPolicy.java tests/OnboardingPolicyTest.java
+          java -cp /tmp/clenova-tests com.clenova.app.OnboardingPolicyTest
       - name: Verify UI palette contrast
         run: |
           javac -d /tmp/clenova-tests app/src/main/java/com/clenova/app/UiPolish.java tests/UiPolishTest.java

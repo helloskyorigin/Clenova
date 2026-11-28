@@ -39,8 +39,11 @@ import sys, re, xml.etree.ElementTree as ET
 nodes=list(ET.parse(sys.argv[1]).iter('node'))
 assert any(sys.argv[2] in n.get('text','') for n in nodes), 'Onboarding heading missing'
 assert any(n.get('content-desc') == 'Introduction '+str(int(sys.argv[4]))+' of 3' for n in nodes), 'Story progress missing'
-if sys.argv[3]=='Get Started':
-    assert any('Ask it to take care of your phone' in n.get('content-desc','') for n in nodes), 'Agent introduction accessibility summary missing'
+expected={'01':['Take care of my phone.','Photos & videos','Apps & files'],
+          '02':['Photos','Videos','Unused apps','Files & downloads'],
+          '03':['Discover','Review','Approve','No automatic deletion.']}[sys.argv[4]]
+for text in expected:
+    assert any(n.get('text')==text for n in nodes), 'Missing native story content: '+text
 for n in nodes:
     for attr in ('text','content-desc'):
         assert not re.search(r'\b(demo|sample|test|illustrative)\b', n.get(attr,''),re.I), 'Development label in onboarding'
