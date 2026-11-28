@@ -258,7 +258,7 @@ public final class MainActivity extends Activity {
                 });
             }catch(Exception e){runOnUiThread(()->{if(overviewJob!=job||isDestroyed())return;overviewJob=null;
                 if(initial&&preparingPhone!=null)preparingPhone.error("Please try again. No files were changed.");
-                else if(dashboardView!=null&&dashboardView.isAttachedToWindow()){deviceOverview=new DeviceOverview.Snapshot();renderOverviewDashboard();if(overviewDirty){overviewDirty=false;queueOverviewRefresh();}}
+                else if(dashboardView!=null&&dashboardView.isAttachedToWindow()){deviceOverview=new DeviceOverview.Snapshot();deviceOverview.finished=true;renderOverviewDashboard();if(overviewDirty){overviewDirty=false;queueOverviewRefresh();}}
             });}
         },"Clenova-device-overview").start();
     }
@@ -275,6 +275,7 @@ public final class MainActivity extends Activity {
     }
     private void renderOverviewDashboard(){
         if(dashboardView==null||!dashboardView.isAttachedToWindow())return;
+        if(!dashboardStorage&&dashboardView instanceof HomeDashboard){((HomeDashboard)dashboardView).refresh();return;}
         int y=overviewScroll(dashboardView);boolean storage=dashboardStorage;
         renderingOverview=true;try{setContentView(storage?storageScreen():home());}finally{renderingOverview=false;}
         final View next=dashboardView;if(next!=null)next.post(()->{if(dashboardView==next)restoreOverviewScroll(next,y);});
@@ -490,30 +491,90 @@ public final class MainActivity extends Activity {
         LinearLayout l=column();l.setBackground(UiKit.card(this,dark));pad(l,UiPolish.CARD_PAD_X,UiPolish.CARD_PAD_Y);return l;
     }
     private LinearLayout home() {
-        LinearLayout root=column(); root.setBackgroundColor(BG);
-        root.setPadding(dp(UiKit.gutter(this)),v(12),dp(UiKit.gutter(this)),v(10));
-        add(root,header(),-1,dp(44)); space(root,8);
-
-        ScrollView scroller=new ScrollView(this);
-        scroller.setFillViewport(false); scroller.setVerticalScrollBarEnabled(false);
-        scroller.setClipToPadding(false); scroller.setOverScrollMode(View.OVER_SCROLL_NEVER);
-        LinearLayout body=column();
-        body.setPadding(0,v(4),0,v(8));
-        scroller.addView(body,new ScrollView.LayoutParams(-1,-2));
-        root.addView(scroller,new LinearLayout.LayoutParams(-1,0,1f));
-        add(body,hero(),-1,-2); space(body,16);
-        add(body,storage(),-1,-2); space(body,17);
-        LinearLayout section=row();
-        add(section,txt("Agent update",23,INK,700),-2,-2);
-        stretch(section); add(section,txt("On demand",12,GRAY,400),-2,-2);
-        add(body,section,-1,-2); space(body,10);
-        add(body,agentCard(),-1,-2); space(body,12);
-        LinearLayout privacy=row(); privacy.setGravity(Gravity.CENTER);
-        add(privacy,new Glyph(this,"shield",GRAY),dp(15),dp(15)); gap(privacy,5);
-        add(privacy,txt("Always in your control.",12,GRAY,400),-2,-2);
-        add(body,privacy,-1,-2);
-        space(root,6); add(root,navigation(),-1,dp(64));
-        attachOverviewDashboard(root,false);return root;
+        HomeDashboard root=new HomeDashboard();attachOverviewDashboard(root,false);return root;
+    }
+    /** Dashboard views stay attached during metadata updates, preserving touch targets and scroll. */
+    private final class HomeDashboard extends LinearLayout {
+        private final TextView available,used,total,storageStatus,agentMode,agentStatus,mediaSummary,agentAction;
+        private final android.widget.ProgressBar usage;
+        HomeDashboard(){
+            super(MainActivity.this);setOrientation(VERTICAL);setBackgroundColor(BG);
+            int gutter=dp(UiKit.gutter(MainActivity.this));
+            setPadding(gutter,v(10),gutter,v(8));
+            add(this,header(),-1,dp(44));space(this,8);
+            ScrollView scroll=new ScrollView(MainActivity.this);scroll.setFillViewport(false);scroll.setVerticalScrollBarEnabled(false);scroll.setOverScrollMode(View.OVER_SCROLL_NEVER);
+            LinearLayout body=column();body.setPadding(0,v(2),0,v(8));scroll.addView(body,new ScrollView.LayoutParams(-1,-2));
+            addView(scroll,new LinearLayout.LayoutParams(-1,0,1f));
+            add(body,txt("Your storage, at a glance.",22,INK,700),-1,-2);space(body,9);
+            LinearLayout storageCard=card();
+            LinearLayout top=row();weight(top,txt("Available storage",13,GRAY,500));
+            LinearLayout details=row();details.setGravity(Gravity.CENTER_VERTICAL);details.setMinimumHeight(dp(48));details.setPadding(dp(8),0,dp(2),0);
+            add(details,txt("Storage details",13,BLUE,600),-2,-2);gap(details,4);add(details,new Glyph(MainActivity.this,"chevron",BLUE),dp(14),dp(14));
+            tap(details,WHITE,12,MainActivity.this::openStorage);details.setContentDescription(tr("Storage details"));add(top,details,-2,-2);add(storageCard,top,-1,-2);
+            available=txt("Checking…",32,INK,700);add(storageCard,available,-1,-2);space(storageCard,12);
+            usage=storageProgress();add(storageCard,usage,-1,dp(10));space(storageCard,7);
+            LinearLayout figures=row();used=txt("",13,INK,600);total=txt("",12,GRAY,400);weight(figures,used);gap(figures,6);total.setGravity(Gravity.END);weight(figures,total);add(storageCard,figures,-1,-2);
+            storageStatus=txt("",12,GRAY,400);space(storageCard,8);add(storageCard,storageStatus,-1,-2);add(body,storageCard,-1,-2);space(body,10);
+            homeAction(body,"Smart Scan","sparkles",true,()->{showClean();requestSmartScan();});space(body,16);
+            add(body,txt("Agent update",20,INK,700),-1,-2);space(body,8);
+            LinearLayout agent=card(),line=row();
+            FrameLayout icon=new FrameLayout(MainActivity.this);icon.setBackground(round(PALE,12));icon.addView(new Glyph(MainActivity.this,"bot",BLUE),new FrameLayout.LayoutParams(dp(23),dp(23),Gravity.CENTER));
+            add(line,icon,dp(40),dp(40));gap(line,11);
+            LinearLayout copy=column();agentMode=txt("",16,INK,600);add(copy,agentMode,-1,-2);space(copy,4);agentStatus=txt("",13,GRAY,400);add(copy,agentStatus,-1,-2);weight(line,copy);add(agent,line,-1,-2);
+            mediaSummary=txt("",12,GRAY,400);space(agent,8);add(agent,mediaSummary,-1,-2);space(agent,10);
+            agentAction=homeAction(agent,"Open Agent","bot",false,()->{if(prefs.autopilot())showAgent();else showAgentSetup(true,false);});
+            add(body,agent,-1,-2);space(body,16);
+            add(body,txt("Quick actions",20,INK,700),-1,-2);space(body,8);
+            String[] labels={"Duplicate photos","Large videos","Large files","Unused apps"};
+            String[] icons={"images","video","folder","apps"};
+            Runnable[] actions={()->{showClean();openRealDuplicates(false);},()->{showClean();openRealVideos(false);},()->{showClean();openLargeFiles();},()->{showClean();openUnusedApps();}};
+            int columns=HomePresentation.columns(getResources().getConfiguration().screenWidthDp,getResources().getConfiguration().fontScale);
+            for(int i=0;i<labels.length;i+=columns){
+                LinearLayout group=row();group.setGravity(Gravity.TOP);
+                for(int j=i;j<Math.min(i+columns,labels.length);j++){
+                    if(j>i)gap(group,8);
+                    LinearLayout tile=homeShortcut(labels[j],icons[j],actions[j]);
+                    group.addView(tile,new LinearLayout.LayoutParams(0,-2,1f));
+                }
+                add(body,group,-1,-2);space(body,8);
+            }
+            LinearLayout privacy=row();privacy.setGravity(Gravity.CENTER_VERTICAL);add(privacy,new Glyph(MainActivity.this,"shield",GREEN),dp(16),dp(16));gap(privacy,7);
+            weight(privacy,txt("Always in your control.",12,GRAY,400));add(body,privacy,-1,-2);
+            space(this,6);add(this,navigation(),-1,dp(64));refresh();
+        }
+        void refresh(){
+            DeviceOverview.Snapshot data=overview();
+            boolean known=data.storageKnown();
+            available.setText(known?DeviceOverview.format(data.free):tr(data.finished?"Unavailable":"Checking…"));
+            usage.setVisibility(known?VISIBLE:GONE);
+            if(known)usage.setProgress(HomePresentation.progress(data.total,data.free));
+            used.setText(known?tr(data.usedPercent()+"% used"):"");
+            total.setText(known?tr(DeviceOverview.format(data.total)+" total"):"");
+            used.setVisibility(known?VISIBLE:GONE);total.setVisibility(known?VISIBLE:GONE);
+            storageStatus.setText(tr(HomePresentation.status(known,data.finished,data.partial())));
+            boolean configured=prefs.autopilot();
+            agentMode.setText(tr(configured?"Agent configured":"Manual mode"));
+            agentStatus.setText(tr(configured?AutopilotScheduler.status(MainActivity.this,prefs):"Review your phone when you choose."));
+            mediaSummary.setText(tr(!data.finished?"Reading available media…":(data.photos.available?(data.photos.partial?"At least ":"")+data.photos.count+" photos":"Photos unavailable")+" · "+(data.videos.available?(data.videos.partial?"At least ":"")+data.videos.count+" videos":"Videos unavailable")));
+            agentAction.setText(tr(configured?"Open Agent":"Activate Agent"));
+            agentAction.setContentDescription(tr(configured?"Open Agent":"Activate Agent"));
+        }
+    }
+    private android.widget.ProgressBar storageProgress(){
+        android.widget.ProgressBar bar=new android.widget.ProgressBar(this,null,android.R.attr.progressBarStyleHorizontal);
+        bar.setMax(HomePresentation.BAR_MAX);bar.setProgressTintList(ColorStateList.valueOf(BLUE));
+        bar.setProgressBackgroundTintList(ColorStateList.valueOf(UiPolish.palette(dark).divider));
+        bar.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_NO);return bar;
+    }
+    private TextView homeAction(LinearLayout parent,String label,String glyph,boolean primary,Runnable action){
+        TextView button=centered(label,15,primary?Color.WHITE:BLUE,600);button.setMinHeight(dp(primary?52:48));button.setPadding(dp(14),dp(10),dp(14),dp(10));
+        tap(button,primary?BLUE:PALE,UiPolish.BUTTON_RADIUS,action);add(parent,button,-1,-2);return button;
+    }
+    private LinearLayout homeShortcut(String label,String glyph,Runnable action){
+        LinearLayout tile=row();tile.setMinimumHeight(dp(66));tile.setPadding(dp(10),dp(10),dp(10),dp(10));
+        FrameLayout icon=new FrameLayout(this);icon.setBackground(round(PALE,10));icon.addView(new Glyph(this,glyph,BLUE),new FrameLayout.LayoutParams(dp(21),dp(21),Gravity.CENTER));
+        add(tile,icon,dp(32),dp(32));gap(tile,8);weight(tile,txt(label,13,INK,600));
+        tap(tile,WHITE,UiPolish.CARD_RADIUS,action);tile.setContentDescription(tr(label));return tile;
     }
     private void returnToDashboard(){
         if(toolsVisible)showTools();else if(agentVisible)showAgent();else if(cleanVisible)showClean();else showHome();
@@ -3218,41 +3279,14 @@ public final class MainActivity extends Activity {
         animatePreferenceMenu(menu);
     }
 
-    private LinearLayout hero() {
-        LinearLayout l=column(); l.setGravity(Gravity.CENTER_HORIZONTAL);
-        LinearLayout state=row(); state.setGravity(Gravity.CENTER);
-        View dot=new View(this); dot.setBackground(round(prefs.autopilot()?0xff34c759:GRAY,8));
-        add(state,dot,dp(7),dp(7)); gap(state,6);
-        add(state,txt(prefs.autopilot()?"Agent configured":"Manual mode",15,prefs.autopilot()?GREEN:GRAY,600),-2,-2); add(l,state,-1,-2);
-        space(l,5);
-        Gauge gauge=new Gauge(this);
-        add(l,gauge,-1,v(207));
-        space(l,4);
-        add(l,centered("Your storage, at a glance.",25,INK,700),-1,-2);
-        space(l,5);
-        add(l,centered(prefs.autopilot()?"Your Agent is ready for your requests.":"Clean at your own pace.",14,GRAY,400),-1,-2);
-        return l;
-    }
-    private static final int[] STORAGE_COLORS={0xff007aff,0xff7caff1,0xffa8bfdc,0xffe5e5ea};
-    private LinearLayout storage() {
-        DeviceOverview.Snapshot data=overview();LinearLayout card=card(),metrics=row();
-        weight(metrics,storageMetric("Available storage",data.free));
-        View rule=new View(this);rule.setBackgroundColor(surface(0xffe6e6eb));add(metrics,rule,dp(1),v(42));gap(metrics,15);
-        weight(metrics,storageMetric("Used storage",data.used()));add(card,metrics,-1,-2);space(card,12);
-        add(card,new OverviewBar(this,data),-1,dp(10));space(card,9);
-        LinearLayout labels=row();add(labels,txt(data.storageKnown()?DeviceOverview.format(data.used())+" used":"Storage unavailable",12,GRAY,400),-2,-2);
-        stretch(labels);add(labels,txt(data.storageKnown()?DeviceOverview.format(data.total)+" total":"Checking storage",12,GRAY,400),-2,-2);add(card,labels,-1,-2);
-        card.setContentDescription("Storage details. "+DeviceOverview.format(data.free)+" available.");tap(card,WHITE,22,this::openStorage);return card;
-    }
-    private LinearLayout storageMetric(String label,long bytes){LinearLayout l=column();add(l,txt(label,12,GRAY,400),-1,-2);space(l,5);add(l,txt(bytes<0?"—":DeviceOverview.format(bytes),23,INK,700),-1,-2);return l;}
     private void openStorage(){storageVisible=true;setContentView(storageScreen());}
     private LinearLayout storageScreen(){
         DeviceOverview.Snapshot data=overview();LinearLayout root=scanShell("Storage",this::showHome),body=scanBody(root);
         add(body,txt("Available storage",14,GRAY,400),-1,-2);space(body,6);
-        add(body,txt(data.storageKnown()?DeviceOverview.format(data.free):"Unavailable",38,INK,700),-1,-2);space(body,14);
-        LinearLayout captions=row();weight(captions,txt(data.storageKnown()?DeviceOverview.format(data.used())+" used":"Reading storage",13,GRAY,400));
+        add(body,txt(data.storageKnown()?DeviceOverview.format(data.free):data.finished?"Unavailable":"Checking…",38,INK,700),-1,-2);space(body,14);
+        LinearLayout captions=row();weight(captions,txt(data.storageKnown()?DeviceOverview.format(data.used())+" used":data.finished?"Storage unavailable":"Reading storage",13,GRAY,400));
         add(captions,txt(data.storageKnown()?DeviceOverview.format(data.total)+" total":"",13,GRAY,400),-2,-2);add(body,captions,-1,-2);space(body,9);
-        add(body,new OverviewBar(this,data),-1,dp(13));space(body,20);
+        if(data.storageKnown()){android.widget.ProgressBar bar=storageProgress();bar.setProgress(HomePresentation.progress(data.total,data.free));add(body,bar,-1,dp(10));space(body,8);add(body,txt(data.usedPercent()+"% used",13,GRAY,500),-1,-2);}space(body,20);
         add(body,txt("Storage overview",18,INK,600),-1,-2);space(body,10);
         LinearLayout breakdown=card();pad(breakdown,14,4);
         overviewRow(breakdown,"images","Photos",data.photos.size(),data.photos.items(),()->{showClean();openRealDuplicates(false);});
@@ -3269,35 +3303,6 @@ public final class MainActivity extends Activity {
         LinearLayout row=row();row.setMinimumHeight(dp(64));pad(row,0,9);add(row,new Glyph(this,glyph,BLUE),dp(24),dp(24));gap(row,11);
         LinearLayout copy=column();add(copy,txt(name,14,INK,600),-1,-2);space(copy,4);add(copy,txt(detail,11,GRAY,400),-1,-2);weight(row,copy);gap(row,8);add(row,txt(value,13,INK,500),-2,-2);
         if(action!=null){gap(row,5);add(row,new Glyph(this,"chevron",GRAY),dp(14),dp(14));tap(row,WHITE,10,action);}add(parent,row,-1,-2);
-    }
-    private final class OverviewBar extends View{
-        private final Paint paint=new Paint(Paint.ANTI_ALIAS_FLAG);private final DeviceOverview.Snapshot data;
-        OverviewBar(Context c,DeviceOverview.Snapshot s){super(c);data=s;setContentDescription(s.storageKnown()?DeviceOverview.format(s.used())+" used, "+DeviceOverview.format(s.free)+" available":"Storage unavailable");}
-        @Override protected void onDraw(Canvas c){super.onDraw(c);float h=getHeight();paint.setColor(surface(0xffe5e5ea));c.drawRoundRect(new RectF(0,0,getWidth(),h),h/2,h/2,paint);if(!data.storageKnown())return;
-            long[] parts=data.segments();float x=0;Path clip=new Path();clip.addRoundRect(0,0,getWidth(),h,h/2,h/2,Path.Direction.CW);c.save();c.clipPath(clip);
-            for(int i=0;i<4;i++){float w=(float)(getWidth()*(double)parts[i]/data.total);if(w>0){paint.setColor(surface(STORAGE_COLORS[i]));c.drawRect(x,0,x+w,h,paint);}x+=w;}c.restore();
-        }
-    }
-
-    private LinearLayout metric(String label,String number,boolean arrow) {
-        LinearLayout l=column(); add(l,txt(label,12,GRAY,400),-1,-2); space(l,5);
-        LinearLayout value=row(); value.setBaselineAligned(true);
-        add(value,txt(number,27,INK,700),-2,-2); gap(value,4);
-        if(arrow) add(value,new Glyph(this,"up",GREEN),dp(13),dp(13));
-        add(l,value,-1,-2); space(l,1); add(l,txt("GB",14,GRAY,400),-2,-2); return l;
-    }
-    private LinearLayout agentCard() {
-        // Never turn stored Agent preferences into fabricated recommendations.
-        LinearLayout c=card(),top=row();
-        add(top,new Glyph(this,"sparkles",BLUE),dp(30),dp(30));gap(top,12);
-        LinearLayout copy=column();
-        add(copy,txt(prefs.autopilot()?"Your Agent is ready":"Make your Agent yours",16,INK,600),-1,-2);space(copy,5);
-        DeviceOverview.Snapshot data=overview();
-        String info=data.finished?(data.photos.available?(data.photos.partial?"At least ":"")+data.photos.count+" photos": "Photos unavailable")+" · "+(data.videos.available?(data.videos.partial?"At least ":"")+data.videos.count+" videos":"Videos unavailable"):"Preparing your device overview";
-        add(copy,txt(info,13,GRAY,400),-1,-2);if(prefs.autopilot()){space(copy,5);add(copy,txt(AutopilotScheduler.status(this,prefs),12,GRAY,400),-1,-2);}weight(top,copy);add(c,top,-1,-2);space(c,13);
-        scanButton(c,"Smart Scan",true,()->{showClean();requestSmartScan();});space(c,8);
-        scanButton(c,prefs.autopilot()?"Open Agent":"Activate Agent",false,()->{if(prefs.autopilot())showAgent();else showAgentSetup(true,false);});
-        return c;
     }
     private void finishUnusedUninstall(boolean approved){
         final String pkg=pendingUninstallPackage,name=pendingUninstallName,id=pendingUninstallId;pendingUninstallPackage="";pendingUninstallName="";pendingUninstallId="";
@@ -3422,24 +3427,6 @@ public final class MainActivity extends Activity {
         l.setSelected(active);l.setContentDescription(tr(label)+(active?", selected":"")); return l;
     }
 
-    private final class Gauge extends View {
-        private final Paint p=new Paint(Paint.ANTI_ALIAS_FLAG);private final DeviceOverview.Snapshot data;private float progress;private ValueAnimator animation;
-        Gauge(Context c){super(c);data=overview();setContentDescription(data.storageKnown()?data.usedPercent()+" percent storage used":"Storage not available");}
-        @Override protected void onAttachedToWindow(){super.onAttachedToWindow();float target=data.storageKnown()?data.usedPercent()/100f:0f;
-            if(renderingOverview||!ValueAnimator.areAnimatorsEnabled()){progress=target;invalidate();return;}
-            animation=ValueAnimator.ofFloat(0f,target);animation.setDuration(450);animation.setInterpolator(new DecelerateInterpolator());animation.addUpdateListener(a->{progress=(float)a.getAnimatedValue();invalidate();});animation.start();}
-        @Override protected void onDetachedFromWindow(){if(animation!=null)animation.cancel();super.onDetachedFromWindow();}
-        @Override protected void onDraw(Canvas c){
-            super.onDraw(c);float scale=Math.min(getWidth()/280f,getHeight()/218f);c.save();c.translate((getWidth()-280*scale)/2,(getHeight()-218*scale)/2);c.scale(scale,scale);
-            p.setStrokeWidth(3.6f);p.setStrokeCap(Paint.Cap.ROUND);
-            for(int i=0;i<81;i++){double a=Math.toRadians(130+i*3.5);p.setColor(i<Math.round(progress*81)?BLUE:surface(0xffdfe2e8));c.drawLine(140+89*(float)Math.cos(a),111+89*(float)Math.sin(a),140+102*(float)Math.cos(a),111+102*(float)Math.sin(a),p);}
-            label(c,"Storage used",140,77,12,GRAY,false);
-            label(c,data.storageKnown()?data.usedPercent()+"%":"—",140,138,60,INK,true);
-            label(c,data.storageKnown()?DeviceOverview.format(data.free)+" free":"Unavailable",140,159,14,GRAY,true);
-            label(c,data.finished?(data.partial()?"Limited overview":"Device overview"):"Reading device data",140,211,10,GRAY,false);c.restore();
-        }
-        private void label(Canvas c,String value,float x,float y,float size,int color,boolean strong){p.setColor(color);p.setStyle(Paint.Style.FILL);p.setTextAlign(Paint.Align.CENTER);p.setTypeface(Typeface.create(strong?"sans-serif-medium":"sans-serif",strong?Typeface.BOLD:Typeface.NORMAL));p.setTextSize(size);c.drawText(tr(value),x,y,p);}
-    }
     private static final class Glyph extends View {
         private final Paint p=new Paint(Paint.ANTI_ALIAS_FLAG);
         private final String type; private final int tint;

@@ -43,6 +43,10 @@ jobs:
         run: |
           javac -d /tmp/clenova-tests app/src/main/java/com/clenova/app/PreparationPolicy.java tests/PreparationPolicyTest.java
           java -cp /tmp/clenova-tests com.clenova.app.PreparationPolicyTest
+      - name: Verify Home presentation policy
+        run: |
+          javac -d /tmp/clenova-tests app/src/main/java/com/clenova/app/HomePresentation.java tests/HomePresentationTest.java
+          java -cp /tmp/clenova-tests com.clenova.app.HomePresentationTest
       - name: Verify UI palette contrast
         run: |
           javac -d /tmp/clenova-tests app/src/main/java/com/clenova/app/UiPolish.java tests/UiPolishTest.java
