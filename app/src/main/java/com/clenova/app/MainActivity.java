@@ -507,22 +507,31 @@ public final class MainActivity extends Activity {
             addView(scroll,new LinearLayout.LayoutParams(-1,0,1f));
             add(body,txt("Your storage, at a glance.",22,INK,700),-1,-2);space(body,9);
             LinearLayout storageCard=card();
-            LinearLayout top=row();weight(top,txt("Available storage",13,GRAY,500));
-            LinearLayout details=row();details.setGravity(Gravity.CENTER_VERTICAL);details.setMinimumHeight(dp(48));details.setPadding(dp(8),0,dp(2),0);
-            add(details,txt("Storage details",13,BLUE,600),-2,-2);gap(details,4);add(details,new Glyph(MainActivity.this,"chevron",BLUE),dp(14),dp(14));
-            tap(details,WHITE,12,MainActivity.this::openStorage);details.setContentDescription(tr("Storage details"));add(top,details,-2,-2);add(storageCard,top,-1,-2);
+            boolean wide=HomePresentation.columns(getResources().getConfiguration().screenWidthDp,getResources().getConfiguration().fontScale)==2;
+            LinearLayout details=row();details.setGravity(Gravity.CENTER_VERTICAL);details.setMinimumHeight(dp(48));details.setPadding(dp(4),0,dp(2),0);
+            weight(details,txt("Storage details",13,BLUE,600));gap(details,4);add(details,new Glyph(MainActivity.this,"chevron",BLUE),dp(14),dp(14));
+            tap(details,WHITE,12,MainActivity.this::openStorage);details.setContentDescription(tr("Storage details"));
+            if(wide){
+                LinearLayout top=row();weight(top,txt("Available storage",13,GRAY,500));gap(top,6);
+                details.setLayoutParams(new LinearLayout.LayoutParams(-2,-2));
+                // Wrap the link without an internal weighted child in a wrap-content parent.
+                details.getChildAt(0).setLayoutParams(new LinearLayout.LayoutParams(-2,-2));
+                add(top,details,-2,-2);add(storageCard,top,-1,-2);
+            }else add(storageCard,txt("Available storage",13,GRAY,500),-1,-2);
             available=txt("Checking…",32,INK,700);add(storageCard,available,-1,-2);space(storageCard,12);
             usage=storageProgress();add(storageCard,usage,-1,dp(10));space(storageCard,7);
             LinearLayout figures=row();used=txt("",13,INK,600);total=txt("",12,GRAY,400);weight(figures,used);gap(figures,6);total.setGravity(Gravity.END);weight(figures,total);add(storageCard,figures,-1,-2);
-            storageStatus=txt("",12,GRAY,400);space(storageCard,8);add(storageCard,storageStatus,-1,-2);add(body,storageCard,-1,-2);space(body,10);
-            homeAction(body,"Smart Scan","sparkles",true,()->{showClean();requestSmartScan();});space(body,16);
+            storageStatus=txt("",12,GRAY,400);space(storageCard,8);add(storageCard,storageStatus,-1,-2);
+            if(!wide){space(storageCard,4);add(storageCard,details,-1,-2);}
+            add(body,storageCard,-1,-2);space(body,10);
+            homeAction(body,"Smart Scan",true,()->{showClean();requestSmartScan();});space(body,16);
             add(body,txt("Agent update",20,INK,700),-1,-2);space(body,8);
             LinearLayout agent=card(),line=row();
             FrameLayout icon=new FrameLayout(MainActivity.this);icon.setBackground(round(PALE,12));icon.addView(new Glyph(MainActivity.this,"bot",BLUE),new FrameLayout.LayoutParams(dp(23),dp(23),Gravity.CENTER));
             add(line,icon,dp(40),dp(40));gap(line,11);
             LinearLayout copy=column();agentMode=txt("",16,INK,600);add(copy,agentMode,-1,-2);space(copy,4);agentStatus=txt("",13,GRAY,400);add(copy,agentStatus,-1,-2);weight(line,copy);add(agent,line,-1,-2);
             mediaSummary=txt("",12,GRAY,400);space(agent,8);add(agent,mediaSummary,-1,-2);space(agent,10);
-            agentAction=homeAction(agent,"Open Agent","bot",false,()->{if(prefs.autopilot())showAgent();else showAgentSetup(true,false);});
+            agentAction=homeAction(agent,"Open Agent",false,()->{if(prefs.autopilot())showAgent();else showAgentSetup(true,false);});
             add(body,agent,-1,-2);space(body,16);
             add(body,txt("Quick actions",20,INK,700),-1,-2);space(body,8);
             String[] labels={"Duplicate photos","Large videos","Large files","Unused apps"};
@@ -548,7 +557,7 @@ public final class MainActivity extends Activity {
             available.setText(known?DeviceOverview.format(data.free):tr(data.finished?"Unavailable":"Checking…"));
             usage.setVisibility(known?VISIBLE:GONE);
             if(known)usage.setProgress(HomePresentation.progress(data.total,data.free));
-            used.setText(known?tr(data.usedPercent()+"% used"):"");
+            used.setText(known?tr(DeviceOverview.format(data.used())+" used · "+data.usedPercent()+"%"):"");
             total.setText(known?tr(DeviceOverview.format(data.total)+" total"):"");
             used.setVisibility(known?VISIBLE:GONE);total.setVisibility(known?VISIBLE:GONE);
             storageStatus.setText(tr(HomePresentation.status(known,data.finished,data.partial())));
@@ -566,8 +575,10 @@ public final class MainActivity extends Activity {
         bar.setProgressBackgroundTintList(ColorStateList.valueOf(UiPolish.palette(dark).divider));
         bar.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_NO);return bar;
     }
-    private TextView homeAction(LinearLayout parent,String label,String glyph,boolean primary,Runnable action){
-        TextView button=centered(label,15,primary?Color.WHITE:BLUE,600);button.setMinHeight(dp(primary?52:48));button.setPadding(dp(14),dp(10),dp(14),dp(10));
+    private TextView homeAction(LinearLayout parent,String label,boolean primary,Runnable action){
+        android.widget.Button button=new android.widget.Button(this);button.setText(tr(label));button.setAllCaps(false);button.setLetterSpacing(0);button.setStateListAnimator(null);
+        UiKit.typography(button,15,primary?Color.WHITE:BLUE,600);button.setGravity(Gravity.CENTER);
+        button.setMinHeight(dp(primary?52:48));button.setMinimumHeight(dp(primary?52:48));button.setMinWidth(0);button.setMinimumWidth(0);button.setPadding(dp(14),dp(10),dp(14),dp(10));
         tap(button,primary?BLUE:PALE,UiPolish.BUTTON_RADIUS,action);add(parent,button,-1,-2);return button;
     }
     private LinearLayout homeShortcut(String label,String glyph,Runnable action){

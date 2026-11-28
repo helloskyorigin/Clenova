@@ -34,7 +34,26 @@ PY
   adb shell input tap $xy
   sleep 1
 }
-tools_tap build/home-evidence/home.xml Tools
+verify_home_primary() {
+  python3 - "$1" <<'PY'
+import sys, re, xml.etree.ElementTree as ET
+nodes=list(ET.parse(sys.argv[1]).iter('node'))
+for label in ('Storage details','Smart Scan'):
+    matches=[n for n in nodes if (n.get('text')==label or n.get('content-desc')==label) and n.get('clickable')=='true' and n.get('enabled')=='true']
+    assert matches, 'Missing accessible Home action: '+label
+    assert any((lambda a,b,c,d:c>a and d>b)(*map(int,re.findall(r'\d+',n.get('bounds')))) for n in matches), 'Hidden Home action: '+label
+assert any(n.get('content-desc')=='Home, selected' for n in nodes), 'Home selection missing'
+PY
+}
+verify_home_primary build/home-evidence/home.xml
+tools_tap build/home-evidence/home.xml 'Storage details'
+tools_dump home_storage_details
+grep -F 'Storage overview' build/home-evidence/home_storage_details.xml
+adb shell input keyevent 4
+sleep 1
+tools_dump home_after_storage
+verify_home_primary build/home-evidence/home_after_storage.xml
+tools_tap build/home-evidence/home_after_storage.xml Tools
 tools_dump tools
 for label in 'Swipe Photos' 'Video Compressor' 'Photo Compressor' 'Contacts Cleaner' 'App Manager' 'Speaker Cleaner' 'Internet Speed Test' 'Tools, selected'; do
   grep -F "$label" build/home-evidence/tools.xml
@@ -170,5 +189,6 @@ adb pull /sdcard/home-compact.xml build/home-evidence/home-compact.xml
 adb exec-out screencap -p > build/home-evidence/home-compact.png
 grep -F 'Agent' build/home-evidence/home-compact.xml
 grep -F 'Tools' build/home-evidence/home-compact.xml
+verify_home_primary build/home-evidence/home-compact.xml
 adb shell wm size reset
 adb shell wm density reset
