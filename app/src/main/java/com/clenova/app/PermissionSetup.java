@@ -19,10 +19,10 @@ final class PermissionSetup {
     private int step,pending;
     private boolean mediaDenied;
     private String previous="",message="";
-    PermissionSetup(Activity activity,Bundle state,Runnable done){
+    PermissionSetup(Activity activity,Bundle state,boolean dark,Runnable done){
         host=activity;permissions=new DevicePermissions(host);folders=new SetupFolderAccess(host);finished=done;
         if(state!=null){step=Math.max(0,Math.min(4,state.getInt("access_step")));pending=state.getInt("access_pending");mediaDenied=state.getBoolean("access_media_denied");previous=state.getString("access_previous","");message=state.getString("access_message","");}
-        view=new PermissionSetupView(host,UiKit.dark(host,new AppPreferences(host).appearance()),this::allow,this::skip);render();
+        view=new PermissionSetupView(host,dark,this::allow,this::skip);render();
     }
     PermissionSetupView view(){return view;}
     boolean busy(){return pending!=0;}

@@ -72,6 +72,13 @@ nodes=list(ET.parse(sys.argv[1]).iter('node'))
 texts=[n.get('text','') for n in nodes]
 if 'Your storage, at a glance.' in texts:
     print('DONE'); raise SystemExit
+# Verify visible native setup content, not just navigation.
+if 'DEVICE ACCESS' in texts:
+    assert any(t.startswith('STEP ') or t=='ACCESS REVIEW COMPLETE' for t in texts), 'Access progress missing'
+    assert any(t in texts for t in ('Photos & videos','Notifications','App usage','File access','All set')), 'Access card missing'
+if 'Ready to activate' in texts or 'Agent activated' in texts:
+    assert 'Nothing changes without your approval.' in texts, 'Agent approval disclosure missing'
+    assert any(n.get('text') in ('Activate Agent','Continue') and n.get('clickable')=='true' and n.get('enabled')=='true' for n in nodes), 'Agent primary CTA missing'
 def choose(predicate):
     for n in nodes:
         if predicate(n) and n.get('enabled')=='true' and n.get('clickable')=='true':

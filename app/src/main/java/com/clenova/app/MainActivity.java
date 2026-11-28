@@ -216,7 +216,7 @@ public final class MainActivity extends Activity {
 
     private void showOnboardingAccess(Bundle state){
         applyPalette();
-        onboardingAccess=new PermissionSetup(this,state,()->{
+        onboardingAccess=new PermissionSetup(this,state,dark,()->{
             if(onboardingAccess==null||isFinishing()||isDestroyed())return;
             onboardingAccess=null;showAgentSetup(false,false);
         });

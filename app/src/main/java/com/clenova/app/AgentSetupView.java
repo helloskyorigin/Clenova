@@ -13,7 +13,7 @@ final class AgentSetupView extends SetupLayout {
     private final TextView status,heading,description,notice;
     private final TextView[] details=new TextView[3],markers=new TextView[3];
     private final Button primary,skip;
-    private boolean confirmed,leaving;
+    private boolean confirmed,leaving,active;
     AgentSetupView(Context c,AppPreferences preferences,boolean restoredConfirmation,Runnable next){
         super(c,UiKit.dark(c,preferences.appearance()));prefs=preferences;finished=next;
         status=label("Ready to activate",12,colors.accent,600);status.setAccessibilityLiveRegion(ACCESSIBILITY_LIVE_REGION_POLITE);append(body,status,compact?4:10);
@@ -37,17 +37,16 @@ final class AgentSetupView extends SetupLayout {
         if(restoredConfirmation&&prefs.agentConfigured()&&prefs.autopilot())showConfirmed(false);
     }
     boolean confirmed(){return confirmed;}
-    // Kept for the host's lifecycle contract; no perpetual decorative animation.
-    void setActive(boolean value){}
+    void setActive(boolean value){active=value;if(!value){heading.animate().cancel();heading.setAlpha(1f);}}
     private void lock(boolean locked){enabled(primary,!locked);enabled(skip,!locked&&!confirmed);}
     private void activateOrContinue(){
-        if(leaving)return;if(confirmed){leave();return;}
+        if(leaving||!active)return;if(confirmed){leave();return;}
         lock(true);
         if(!prefs.saveAgentSetup(true)){notice.setText("Couldn't save your preferences. Please try again.");lock(false);return;}
         showConfirmed(true);
     }
     private void selectManual(){
-        if(leaving||confirmed)return;lock(true);
+        if(leaving||confirmed||!active)return;lock(true);
         if(!prefs.saveAgentSetup(false)){notice.setText("Couldn't save your preferences. Please try again.");lock(false);return;}
         leave();
     }

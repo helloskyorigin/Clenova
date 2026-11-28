@@ -45,9 +45,12 @@ final class PreparingPhoneView extends SetupLayout {
         completed=PreparationPolicy.stage(stage);last=snapshot;
         retry.setVisibility(GONE);render(false);
     }
+    private boolean dataAvailable(int i){
+        switch(i){case 0:return "Allowed".equals(last.mediaAccess);case 1:return last.storageKnown();case 2:return last.photos.available&&!last.photos.partial;case 3:return last.videos.available&&!last.videos.partial;default:return last.apps>=0;}
+    }
     private String observed(int i){
         switch(i){
-            case 0:return last.mediaAccess.equals("Not checked")?"Access checked":last.mediaAccess+" media access";
+            case 0:return "Media access: "+last.mediaAccess;
             case 1:return last.storageKnown()?DeviceOverview.format(last.free)+" available":"Storage unavailable";
             case 2:return last.photos.available?last.photos.items():"Access unavailable";
             case 3:return last.videos.available?last.videos.items():"Access unavailable";
@@ -62,9 +65,11 @@ final class PreparingPhoneView extends SetupLayout {
         storage.setText(last.storageKnown()?DeviceOverview.format(last.free)+" available of "+DeviceOverview.format(last.total):completed>=2?"Storage unavailable":"Storage details will appear when available.");
         for(int i=0;i<TITLES.length;i++){
             int state=PreparationPolicy.rowState(completed,i,failed);
-            markers[i].setText(state==2?"✓":Integer.toString(i+1));markers[i].setTextColor(state==2?colors.success:state==1?colors.accent:colors.muted);
+            boolean available=state==2&&dataAvailable(i);
+            markers[i].setText(state==2?(available?"✓":"–"):Integer.toString(i+1));markers[i].setTextColor(available?colors.success:state==1?colors.accent:colors.muted);
             details[i].setText(state==2?observed(i):state==1?PENDING[i]:"Waiting");
         }
+        if(failed){heading.setText("Setup needs attention.");description.setText("Your files have not been changed. You can retry.");}
         if(done){heading.setText("You're all set.\nWelcome to CLENOVA.");description.setText(last.partial()?"Your available data is ready. Manage more access anytime.":"Your local overview is ready.");feedback.setText("Opening Home · No files were changed.");}
     }
     void error(String message){render(true);feedback.setText(message);feedback.setTextColor(colors.danger);retry.setVisibility(VISIBLE);enabled(retry,true);}
